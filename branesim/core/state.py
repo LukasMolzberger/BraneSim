@@ -84,6 +84,12 @@ class BraneState:
         # Grid coordinates [N, D] for topology lookups
         self.grid_coords = self._create_grid_coords()
 
+        # Fixed boundary mask [N] - True for points that should not move
+        self.fixed_mask = torch.zeros(self.num_points, device=self.device, dtype=torch.bool)
+
+        # Store initial positions for fixed points
+        self.fixed_positions = torch.zeros((self.num_points, 4), device=self.device, dtype=dtype)
+
     def _create_grid_coords(self) -> torch.Tensor:
         """
         Create grid coordinate tensor [N, D].
@@ -133,6 +139,8 @@ class BraneState:
         self.accelerations = self.accelerations.to(device)
         self.new_accelerations = self.new_accelerations.to(device)
         self.grid_coords = self.grid_coords.to(device)
+        self.fixed_mask = self.fixed_mask.to(device)
+        self.fixed_positions = self.fixed_positions.to(device)
         return self
 
     def clone(self) -> 'BraneState':
@@ -153,6 +161,8 @@ class BraneState:
         new_state.accelerations = self.accelerations.clone()
         new_state.new_accelerations = self.new_accelerations.clone()
         new_state.grid_coords = self.grid_coords.clone()
+        new_state.fixed_mask = self.fixed_mask.clone()
+        new_state.fixed_positions = self.fixed_positions.clone()
         return new_state
 
     def get_field_component(self, component_idx: int) -> torch.Tensor:
@@ -215,6 +225,53 @@ class BraneState:
             self.positions[:, 1] = spatial_positions[:, 1]
             self.positions[:, 2] = spatial_positions[:, 2]
             # X^3 remains zero
+
+    def set_fixed_boundaries(self):
+        """
+        Set boundary points as fixed (immovable).
+
+        For 1D: fixes the first and last points
+        For 2D: fixes all edge points
+        For 3D: fixes all face points
+
+        Stores current positions as the fixed positions.
+        """
+        if self.dimension == Dimensionality.ONE_D:
+            # Fix first and last points
+            self.fixed_mask[0] = True
+            self.fixed_mask[-1] = True
+
+        elif self.dimension == Dimensionality.TWO_D:
+            # Fix all edge points
+            nx, ny = self.grid_shape
+            for i in range(self.num_points):
+                x, y = self.grid_coords[i]
+                if x == 0 or x == nx - 1 or y == 0 or y == ny - 1:
+                    self.fixed_mask[i] = True
+
+        else:  # THREE_D
+            # Fix all face points
+            nx, ny, nz = self.grid_shape
+            for i in range(self.num_points):
+                x, y, z = self.grid_coords[i]
+                if x == 0 or x == nx - 1 or y == 0 or y == ny - 1 or z == 0 or z == nz - 1:
+                    self.fixed_mask[i] = True
+
+        # Store initial positions for fixed points
+        self.fixed_positions[self.fixed_mask] = self.positions[self.fixed_mask].clone()
+
+    def apply_fixed_boundaries(self):
+        """
+        Enforce fixed boundary conditions by zeroing velocities/accelerations
+        and restoring positions for fixed points.
+        """
+        if self.fixed_mask.any():
+            # Zero out dynamics for fixed points
+            self.velocities[self.fixed_mask] = 0.0
+            self.accelerations[self.fixed_mask] = 0.0
+            self.new_accelerations[self.fixed_mask] = 0.0
+            # Restore fixed positions
+            self.positions[self.fixed_mask] = self.fixed_positions[self.fixed_mask]
 
     def __repr__(self) -> str:
         """String representation."""

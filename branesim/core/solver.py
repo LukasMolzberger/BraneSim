@@ -89,15 +89,24 @@ class VelocityVerletSolver:
             0.5 * state.accelerations * self.dt ** 2
         )
 
+        # Apply fixed boundary conditions (restore fixed positions)
+        state.apply_fixed_boundaries()
+
         # Phase 2: Compute new accelerations at new positions
         # F_new = compute_forces(R_new)
         # a_new = F_new / m_point
         forces = self.physics.compute_forces(state, self.grid)
         state.new_accelerations = forces / self.mass_per_point
 
+        # Apply fixed boundary conditions (zero accelerations for fixed points)
+        state.apply_fixed_boundaries()
+
         # Phase 3: Update velocities using average of old and new accelerations
         # v_new = v + 0.5 * (a + a_new) * dt
         state.velocities += 0.5 * (state.accelerations + state.new_accelerations) * self.dt
+
+        # Apply fixed boundary conditions (zero velocities for fixed points)
+        state.apply_fixed_boundaries()
 
         # Swap accelerations: a = a_new for next step
         state.accelerations = state.new_accelerations.clone()
