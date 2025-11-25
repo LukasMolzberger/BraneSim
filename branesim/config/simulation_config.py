@@ -45,9 +45,6 @@ class SimulationConfig:
         rest_length: float (L_0) [m]
         critical_strain: float or None (ε_cr) for saturation
 
-    Boundary Conditions:
-        apply_boundary_tension: bool
-
     Computational:
         device: str ('cpu' or 'cuda')
         dtype: str ('float32' or 'float64')
@@ -71,9 +68,6 @@ class SimulationConfig:
     spring_constant: float
     rest_length: float
     critical_strain: Optional[float] = None
-
-    # Boundary conditions
-    apply_boundary_tension: bool = False
 
     # Computational
     device: str = 'cpu'
