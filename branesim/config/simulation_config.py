@@ -145,12 +145,22 @@ class SimulationConfig:
 
     def compute_wave_speed(self) -> float:
         """
-        Compute wave speed c = √(T/ρ_m).
+        Compute wave speed based on dimensionality.
+
+        1D: c = √(T₀/μ) where T₀ = k·(h - L₀), μ = mass_density [kg/m]
+        2D/3D: c = √(T/ρ) where T is tension, ρ is mass density
 
         Returns:
             Wave speed in m/s
         """
-        return np.sqrt(self.tension / self.mass_density)
+        if self.dimension == Dimensionality.ONE_D:
+            # For 1D: use pre-tension formula
+            T_0 = self.spring_constant * (self.grid_spacing - self.rest_length)
+            mu = self.mass_density  # Linear density [kg/m]
+            return np.sqrt(T_0 / mu)
+        else:
+            # For 2D/3D: use standard formula
+            return np.sqrt(self.tension / self.mass_density)
 
     def compute_cfl_number(self) -> float:
         """
@@ -229,6 +239,14 @@ class SimulationConfig:
         """
         Create simple 1D test configuration.
 
+        For a 1D pre-tensioned string, the wave speed is:
+            c = √(T₀/μ) where μ = ρ_m·h is mass per unit length
+
+        The pre-tension T₀ comes from pre-stretching the springs:
+            T₀ = k·(h - L₀)
+
+        This gives: c = √(k·(h - L₀)/(ρ_m·h))
+
         Args:
             nx: Number of grid points
             wave_speed: Desired wave speed [m/s]
@@ -241,10 +259,37 @@ class SimulationConfig:
         """
         # Compute parameters
         dt = cfl_factor * spacing / wave_speed
-        T = 1.0  # Arbitrary tension
-        rho_m = T / wave_speed**2  # Mass density
-        L_0 = spacing
-        k = T / L_0
+
+        # For 1D: mass per unit length μ [kg/m]
+        # Set μ = ρ_m where ρ_m is treated as linear mass density
+        # (NOT volumetric density - units are kg/m, not kg/m³)
+        mu = 1.0  # kg/m (mass per unit length)
+        rho_m = mu  # For 1D, store as mass_density for consistency
+
+        # Required tension for desired wave speed: T₀ = c²·μ
+        T_0 = wave_speed**2 * mu
+
+        # Target a reasonable pre-strain (e.g., 1%)
+        target_prestrain = 0.01
+        L_0_target = spacing / (1 + target_prestrain)
+
+        # Required spring constant: k = T₀/(h - L₀)
+        k = T_0 / (spacing - L_0_target)
+
+        # Rest length from T₀ = k·(h - L₀)
+        L_0 = spacing - T_0 / k
+
+        # Validate that we have pre-stretch (L₀ < h)
+        if L_0 >= spacing:
+            raise ValueError(
+                f"Cannot achieve wave speed {wave_speed} m/s with k={k} N/m. "
+                f"Need larger k or smaller wave speed."
+            )
+
+        pre_strain = (spacing - L_0) / L_0
+
+        # Tension parameter (not directly used in 1D, but keep for consistency)
+        T = k * L_0
 
         config_dict = {
             'tension': T,
@@ -259,7 +304,21 @@ class SimulationConfig:
 
         config_dict.update(kwargs)
 
-        return cls(**config_dict)
+        config = cls(**config_dict)
+
+        # Print diagnostic info about pre-tension
+        mass_per_point = mu * spacing
+        print(f"\n1D Configuration with Pre-Tension:")
+        print(f"  Grid spacing h = {spacing:.6f} m")
+        print(f"  Rest length L₀ = {L_0:.6f} m")
+        print(f"  Pre-strain ε₀ = {pre_strain:.6f} ({pre_strain*100:.2f}%)")
+        print(f"  Spring constant k = {k:.2f} N/m")
+        print(f"  Pre-tension T₀ = k·(h-L₀) = {T_0:.6f} N")
+        print(f"  Linear mass density μ = {mu:.6f} kg/m")
+        print(f"  Mass per point m = μ·h = {mass_per_point:.6f} kg")
+        print(f"  Expected wave speed c = √(T₀/μ) = {np.sqrt(T_0/mu):.6f} m/s\n")
+
+        return config
 
     def __repr__(self) -> str:
         """String representation."""

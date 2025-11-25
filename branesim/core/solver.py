@@ -48,7 +48,7 @@ class VelocityVerletSolver:
 
         Args:
             dt: Time step [s]
-            mass_density: Mass per unit volume ρ_m [kg/m³]
+            mass_density: Mass per unit volume ρ_m [kg/m³] (or per unit length in 1D, per unit area in 2D)
             physics: Force computer (e.g., SpringForceComputer)
             grid: BraneGrid with topology
         """
@@ -58,6 +58,17 @@ class VelocityVerletSolver:
         self.grid = grid
         self.time = 0.0
         self.step_count = 0
+
+        # Compute actual mass per point based on dimensionality
+        # 1D: m = ρ * h
+        # 2D: m = ρ * h²
+        # 3D: m = ρ * h³
+        if grid.dimension.value == 1:
+            self.mass_per_point = mass_density * grid.spacing
+        elif grid.dimension.value == 2:
+            self.mass_per_point = mass_density * grid.spacing ** 2
+        else:  # 3D
+            self.mass_per_point = mass_density * grid.spacing ** 3
 
     def step(self, state: BraneState) -> BraneState:
         """
@@ -80,9 +91,9 @@ class VelocityVerletSolver:
 
         # Phase 2: Compute new accelerations at new positions
         # F_new = compute_forces(R_new)
-        # a_new = F_new / m
+        # a_new = F_new / m_point
         forces = self.physics.compute_forces(state, self.grid)
-        state.new_accelerations = forces / self.mass_density
+        state.new_accelerations = forces / self.mass_per_point
 
         # Phase 3: Update velocities using average of old and new accelerations
         # v_new = v + 0.5 * (a + a_new) * dt
@@ -108,15 +119,15 @@ class VelocityVerletSolver:
             state: BraneState to initialize
         """
         forces = self.physics.compute_forces(state, self.grid)
-        state.accelerations = forces / self.mass_density
+        state.accelerations = forces / self.mass_per_point
         state.new_accelerations = state.accelerations.clone()
 
     def compute_energy(self, state: BraneState) -> Dict[str, float]:
         """
         Compute kinetic, potential, and total energy.
 
-        Energy per unit volume:
-            KE = 0.5 * ρ_m * Σ |v_p|²
+        Energy:
+            KE = 0.5 * Σ m_point * |v_p|²
             PE = Σ φ(ε_link)
             E_total = KE + PE
 
@@ -126,8 +137,8 @@ class VelocityVerletSolver:
         Returns:
             Dictionary with keys: 'kinetic', 'potential', 'total'
         """
-        # Kinetic energy: KE = 0.5 * ρ_m * Σ |v_p|²
-        kinetic = 0.5 * self.mass_density * torch.sum(state.velocities ** 2)
+        # Kinetic energy: KE = 0.5 * m_point * Σ |v_p|²
+        kinetic = 0.5 * self.mass_per_point * torch.sum(state.velocities ** 2)
 
         # Potential energy: PE = Σ φ(ε)
         potential = self.physics.compute_potential_energy(state, self.grid)
@@ -140,16 +151,30 @@ class VelocityVerletSolver:
 
     def compute_wave_speed(self) -> float:
         """
-        Compute theoretical wave speed c = √(T/ρ_m).
+        Compute theoretical wave speed based on dimensionality.
 
-        Uses spring constant k and rest length L_0 to get tension T = k * L_0.
+        1D: c = √(T₀/μ) where T₀ = k·(h - L₀) is pre-tension,
+                              μ = ρ_m·h is mass per unit length
+
+        2D/3D: c = √(T/ρ_m) where T is surface tension
 
         Returns:
             Wave speed in m/s
         """
-        # Tension T ≈ k * L_0 (for small strain)
-        tension = self.physics.spring_constant * self.physics.rest_length
-        return (tension / self.mass_density) ** 0.5
+        k = self.physics.spring_constant
+        L_0 = self.physics.rest_length
+        h = self.grid.spacing
+
+        if self.grid.dimension.value == 1:
+            # For 1D: pre-tension from stretched springs
+            T_0 = k * (h - L_0)  # Pre-tension [N]
+            # Note: For 1D, mass_density is LINEAR density μ [kg/m], not volumetric
+            mu = self.mass_density  # [kg/m]
+            return (T_0 / mu) ** 0.5
+        else:
+            # For 2D/3D: use tension/mass_density
+            tension = k * L_0
+            return (tension / self.mass_density) ** 0.5
 
     def reset_time(self):
         """Reset simulation time and step count to zero."""
