@@ -1,0 +1,356 @@
+\section{Experimental setting}\label{experimental-setting}
+
+\textbf{Note:} The following describes a proposed simulation architecture for testing the brane model. Implementation is ongoing and numerical results will be presented in future work. This section serves as a design specification outlining the computational framework, numerical methods, and falsifiable predictions that the model generates.
+
+\subsection{Implementation Philosophy: Emergent vs. Explicit}\label{implementation-philosophy}
+
+\textbf{Core principle:} The simulation integrates \emph{only} the microscopic
+brane degrees of freedom (node positions and velocities). All emergent quantities
+— effective metric, electromagnetic fields, particle identities, measurement
+outcomes, etc. — are computed diagnostically from $\mathbf X(x,t)$ and
+$\dot{\mathbf X}(x,t)$ and are \emph{never} fed back into the equations of motion
+as independent sources, forces, or constraints.
+
+\paragraph{What is implemented (explicit in code):}
+\begin{itemize}
+\item The 4D embedding map $\mathbf{X}(x,t) \in \mathbb{R}^4$ discretized as node positions $\mathbf{R}_p(t)$
+\item Elastic energy functionals: stretching $U_\text{str}$ (with saturation) and bending $U_\text{bend}$
+\item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m_p \ddot{\mathbf{R}}_p = \mathbf{F}_p$
+\item Boundary conditions (periodic, free, or clamped)
+\item Initial conditions: Gaussian pulses, toroidal configurations, amplitude patterns
+\end{itemize}
+
+\paragraph{What must emerge (detected via measurement, \emph{not} coded):}
+\begin{itemize}
+\item \textbf{Lorentz invariance:} Isotropic dispersion $\omega(|\mathbf{k}|)$ measured from wave propagation tests (Section~\ref{calibration-dispersion-isotropy})
+\item \textbf{Gravity:} Induced metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ computed post-hoc from node positions; geodesic deflection ray-traced through $g$ (E4, E6)
+\item \textbf{Electromagnetism:} Coulomb-like $1/r^2$ field measured from time-averaged amplitude $\bar{X}^4(\mathbf{x})$ around stable toroidal solitons (E7)
+\item \textbf{Nonlinear threshold:} Emergent energy density threshold for soliton nucleation (E1); \emph{not} imposed as a hard cutoff on amplitude or strain
+\item \textbf{Particle stability:} Toroidal solitons that self-confine via nonlinear elasticity (E2); no explicit "particle glue" or confinement potential added
+\item \textbf{Spinor behavior:} $4\pi$ holonomy measured from phase transport around rotated configurations (E3)
+\end{itemize}
+
+\paragraph{No back-reaction from emergent fields.}
+Even when we visualise or analyse effective quantities such as $g_{ij}$,
+Coulomb-like fields, or reconstructed wavefunctions, these objects remain purely
+diagnostic. In the implementation they are read out from the brane state for
+measurement and comparison with continuum theories; they never act back on the
+brane as additional forces or constraints. This ensures that any agreement with
+relativity, electromagnetism or quantum statistics is genuinely \emph{emergent}
+from the substrate dynamics.
+
+\paragraph{Photon field initialization (clarification):}
+When we refer to "implementing a photon field component" for the electron model (e.g., E2, E7), this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution $\bar{X}^4(\mathbf{x})$.
+
+\paragraph{Experimental workflow:}
+\begin{enumerate}
+\item Set initial conditions $\{\mathbf{R}_p(0), \mathbf{v}_p(0)\}$ representing a physical scenario (e.g., localized pulse, toroidal electron, point mass)
+\item Evolve forward using only elastic forces from $U_\text{str} + U_\text{bend}$
+\item \textbf{Measure} emergent quantities: dispersion $\omega(\mathbf{k})$, induced metric $g_{ij}$, energy localization, field profiles $\bar{X}^4(\mathbf{x})$, geodesic deflection angles, etc.
+\item Compare measured behavior against known physics (Lorentz cones, $1/r$ potentials, $1/r^2$ fields) to assess whether the substrate dynamics reproduce standard results
+\end{enumerate}
+
+This approach ensures that the simulation tests the \emph{sufficiency} of geometric elasticity to reproduce observed physics, rather than presupposing the structure of electromagnetism, gravity, or quantum thresholds.
+
+\paragraph{No feedback from emergent fields (architectural constraint).}
+For clarity, we emphasize a strict one-way flow of information in the
+implementation. The microscopic solver evolves only the brane embedding
+$\mathbf{X}(x,t)$ under the elastic energy functionals described in
+Sec.~\ref{discrete-energies-and-forces}, using a fixed integration scheme and
+boundary conditions. All effective fields --- electromagnetic
+potentials and fields, induced metrics, gravitational potentials, and
+Lorentz-force-like terms --- are defined purely as \emph{diagnostic
+functionals} of $\mathbf{X}$ and its derivatives, evaluated on
+snapshots of the simulation. They are never fed back into the
+microscopic equations of motion as additional forces, constraints, or
+dimension-specific damping terms. In particular, the fourth (normal)
+component $X^4$ enters the dynamics only through the mechanical
+Lagrangian; any identification of $X^4$ with an effective charge or
+scalar potential is an interpretational step applied \emph{after} the
+fact. This architectural separation ensures that the numerical
+experiments genuinely test whether the simple brane dynamics are
+\emph{sufficient} to reproduce the observed structures of relativity,
+electromagnetism, and gravity.
+
+\subsection{Measurement Procedures for Emergent Fields}\label{measurement-procedures}
+
+A key feature of this framework is that electromagnetic and gravitational fields are not fundamental inputs but emerge from the geometric configuration of the brane. This raises a methodological question: how do we operationally measure these fields in the simulation?
+
+\subsubsection{Measuring the electromagnetic field}
+
+In the brane picture, the effective electrostatic potential $\Phi_{\text{EM}}(\mathbf{x})$ is defined in terms of the coarse-grained amplitude displacement $\bar{X}^4(\mathbf{x})$ (see Sec.~\ref{sec:charge-amplitude}),
+\begin{equation}
+  \Phi_{\text{EM}}(\mathbf{x}) \;=\; \kappa_{\Phi} \,\bar{X}^4(\mathbf{x}),
+  \label{eq:Phi-EM-measurement}
+\end{equation}
+where $\kappa_{\Phi}$ is a phenomenological coupling constant. The measurement procedure is:
+\begin{enumerate}
+  \item \textbf{Extract fourth component:} From the node positions $\mathbf{R}_p(t)$, extract the fourth (normal) component $X^4_p(t) \equiv [\mathbf{R}_p(t)]_4$.
+  \item \textbf{Time-average:} Compute the time-averaged amplitude displacement over a window $\Delta t_{\text{avg}}$ that is long compared to the internal Compton oscillation period $2\pi/\omega_C$ but short compared to the timescale of macroscopic changes,
+    \[
+      \bar{X}^4_p \;=\; \frac{1}{\Delta t_{\text{avg}}} \int_{t_0}^{t_0 + \Delta t_{\text{avg}}} X^4_p(t')\, dt'.
+    \]
+    This procedure filters out bound, oscillatory contributions and isolates the net monopole component of the amplitude deformation.
+  \item \textbf{Spatial interpolation:} Interpolate the discrete values $\{\bar{X}^4_p\}$ onto a regular spatial grid using a smooth kernel (e.g., cubic spline) to obtain the continuous field $\bar{X}^4(\mathbf{x})$.
+  \item \textbf{Compute potential and field:} Define the effective electrostatic potential via Eq.~\eqref{eq:Phi-EM-measurement} and compute the electric field as
+    \[
+      \mathbf{E}(\mathbf{x}) \;=\; -\nabla \Phi_{\text{EM}}(\mathbf{x}) \;=\; -\kappa_{\Phi} \nabla \bar{X}^4(\mathbf{x}),
+    \]
+    using numerical differentiation (e.g., central differences) on the interpolated grid.
+\end{enumerate}
+
+\paragraph{Epistemic status.}
+The coupling constant $\kappa_{\Phi}$ is not derived from first principles in the current work but is treated as a phenomenological parameter that sets the scale of the electrostatic interaction. In a complete microscopic theory it would be determined by the brane's elastic response to amplitude deformations. For the purposes of the numerical experiments, $\kappa_{\Phi}$ is chosen such that the measured far-field $\mathbf{E}$-field of a toroidal electron soliton reproduces the known Coulomb magnitude $e/(4\pi\varepsilon_0 r^2)$ at distances $r \gg \lambda_C$.
+
+\subsubsection{Measuring the gravitational field}
+
+In the brane picture, gravitational effects arise from the curvature of the induced metric $g_{ij}(\mathbf{x})$ on the brane (see Sec.~\ref{subsec:weak_field_gravity}). The measurement procedure is:
+\begin{enumerate}
+  \item \textbf{Compute tangent vectors:} At each material point $x_p$ in the simulation domain, estimate the tangent vectors $\partial_i \mathbf{X}$ using finite differences in material coordinates,
+    \[
+      \partial_i \mathbf{X}|_{x_p} \;\approx\; \frac{\mathbf{R}_{p+\hat{i}} - \mathbf{R}_{p-\hat{i}}}{2h},
+      \qquad i=1,2,3,
+    \]
+    where $\hat{i}$ denotes a unit step in the $i$-th material direction and $h$ is the lattice spacing.
+  \item \textbf{Build induced metric:} Compute the spatial components of the induced metric as
+    \[
+      g_{ij}(\mathbf{x}_p) \;=\; \partial_i \mathbf{X}|_{x_p} \cdot \partial_j \mathbf{X}|_{x_p},
+      \qquad i,j=1,2,3.
+    \]
+    In the weak-field regime this reduces to $g_{ij} \approx \delta_{ij} + h_{ij}$, where $h_{ij}$ is a small perturbation related to the amplitude gradients (Eq.~\eqref{eq:PhiG_from_gradX4}).
+  \item \textbf{Extract effective potential:} In the static, weak-field limit the effective gravitational potential $\Phi_{\text{grav}}(\mathbf{x})$ can be extracted from the time-time component of the effective spacetime metric,
+    \[
+      g_{00}(\mathbf{x}) \;\approx\; -\left(1 + \frac{2\Phi_{\text{grav}}(\mathbf{x})}{c^2}\right),
+    \]
+    which in the present framework is built from the quadratic combination of amplitude gradients postulated in Sec.~\ref{subsec:weak_field_gravity}. For spherically symmetric configurations, $\Phi_{\text{grav}}(r)$ can also be computed from the spatial metric components by solving the weak-field Einstein equations or by matching to the Newtonian limit.
+  \item \textbf{Ray-trace geodesics:} To measure gravitational light bending, initialize a null geodesic (probe photon trajectory) with initial position $\mathbf{x}_0$ and direction $\hat{\mathbf{k}}_0$ and numerically integrate the geodesic equation
+    \[
+      \frac{d^2 x^\mu}{d\lambda^2} + \Gamma^\mu_{\nu\rho} \frac{dx^\nu}{d\lambda} \frac{dx^\rho}{d\lambda} = 0,
+    \]
+    where $\Gamma^\mu_{\nu\rho}$ are the Christoffel symbols computed from $g_{\mu\nu}$ and $\lambda$ is an affine parameter along the geodesic. The deflection angle $\delta\theta$ is the angular difference between the initial and final asymptotic directions of the ray.
+\end{enumerate}
+
+\paragraph{Epistemic status.}
+The metric ansatz $g_{\mu\nu}[\mathbf{X}]$ introduced in Sec.~\ref{subsec:weak_field_gravity} is phenomenological rather than derived from a systematic expansion of the brane Lagrangian. The measurement procedure described here tests whether this ansatz, when applied to the simulated brane configurations, reproduces the known weak-field predictions of general relativity (e.g., $\Phi_{\text{grav}}(r) \propto -G M/r$ and the Newtonian deflection angle $\delta\theta \approx 2GM/(c^2 b)$). Discrepancies would indicate either that the metric ansatz must be refined or that additional terms in the brane Lagrangian are needed.
+
+\paragraph{Summary: measurement as coarse-graining.}
+In both cases—electromagnetic and gravitational—the measurement procedures are coarse-graining operations that map the microscopic brane configuration $\{\mathbf{R}_p(t)\}$ to effective fields $\Phi_{\text{EM}}(\mathbf{x})$, $\mathbf{E}(\mathbf{x})$, $g_{\mu\nu}(\mathbf{x})$ living on the emergent spacetime. These procedures are not arbitrary: they implement the constitutive relations postulated in the theoretical sections (Sec.~\ref{sec:charge-amplitude} and Sec.~\ref{subsec:weak_field_gravity}). The experiments test whether these constitutive relations, when applied to self-consistent brane configurations (toroidal solitons, localized bulges), yield the correct large-distance behavior ($1/r^2$ Coulomb field, $1/r$ Newtonian potential) without fine-tuning of the microscopic parameters beyond the basic matching conditions of Sec.~\ref{sec:param-matching}.
+
+\subsection{Discrete Simulation Framework}\label{discrete-simulation-framework}
+
+We discretize the material domain $\Omega$ by nodes $x_p\in\Omega$ and store
+\begin{equation}\label{eq:discrete-embedding}
+  \mathbf R_p(t) \approx \mathbf X(x_p,t)\in\mathbb R^4,
+\end{equation}
+so that the discrete configuration $\{\mathbf R_p\}$ is a sampling of the continuum embedding
+$\mathbf X(x,t)$ introduced in Section~\ref{sec:conceptual-model}.
+The fourth component of $\mathbf R_p$ encodes the out-of-brane displacement; there is no separate amplitude field.
+
+
+\subsubsection{Lattice and neighborhoods}\label{lattice-and-neighborhoods}
+
+\begin{itemize}
+\item Use an \textbf{FCC lattice} in material space (spacing $h$), giving 12 equal-length nearest neighbors $\mathcal N(p)$ for good isotropy.
+\item If FCC is impractical, a cubic 26-stencil with \textbf{isotropic weights} (4th-order Laplacian fit) can be used; document the weights.
+\end{itemize}
+
+\subsubsection{Discrete energies and forces}\label{discrete-energies-and-forces}
+
+We approximate the continuum energy in terms of \textbf{edge stretches} (intrinsic strain) and \textbf{bending} between neighboring edge directions.
+
+\begin{itemize}
+\item \textbf{Stretching energy (saturation built-in):}
+  \[
+  U_\text{str}=\sum_{(p,q)\in\mathcal E}
+  \phi\left(\frac{|\mathbf R_q-\mathbf R_p|-h}{h}\right),
+  \]
+  with a smooth, convex-near-zero, saturating $\phi$. Recommended:
+  \[
+  \phi(\epsilon)=\tfrac12 k\epsilon_\text{cr}^2\ln\big(1+(\epsilon/\epsilon_\text{cr})^2\big),
+  \]
+  so $\phi\approx\tfrac12 k\epsilon^2$ for small strain and saturates for $|\epsilon|\gg\epsilon_\text{cr}$.
+  Here $k$ is a phenomenological in-brane stiffness parameter (energy scale per unit
+  squared strain) and $\epsilon_\text{cr}$ is the strain scale at which the elastic response
+  becomes significantly nonlinear.
+
+  In the small-strain limit the model reduces locally to a Hooke-like
+  response, while for $|\epsilon|\gg\epsilon_\text{cr}$ the growth soft-saturates and
+  prevents arbitrarily large tensions. In this work $\epsilon_\text{cr}$ is treated as a
+  generic material nonlinearity scale; any strong-field breakdown threshold must emerge
+  from the dynamics of localized excitations, rather than being imposed directly via $\phi$.
+
+  We deliberately avoid additional hard cutoffs or piecewise ``clamps'' on
+  amplitude or strain; all nonlinearity enters through the elastic energy
+  functional $U_\text{str}+U_\text{bend}$.
+
+\paragraph{Nonlinearity mode (implementation note).}
+
+In code we distinguish multiple nonlinearity modes via a
+\texttt{BraneNonlinearityMode} enumeration:
+\begin{itemize}
+  \item \texttt{NONE}: Linearized small-displacement approximation;
+        edge stiffness computed using $\epsilon \approx
+        (\partial_i\xi_j)/h$ rather than the full 4D Euclidean
+        distance.
+  \item \texttt{PURE\_GEOMETRY}: Default. Each edge stiffness is
+        computed from the exact 4D Euclidean distance
+        $\ell=|\mathbf R_q-\mathbf R_p|$, so lateral contraction from
+        normal displacements arises purely from metric changes. This is
+        the primary mode for all emergent-field experiments.
+  \item \texttt{SCHWINGER\_LIMIT}, \texttt{HUYGENS\_ELASTIC},
+        \texttt{HIGGS\_MEXICAN\_HAT}, \texttt{CUSTOM}: Optional
+        exploratory extensions that introduce additional strong-field
+        or material-nonlinearity potentials beyond the purely geometric
+        effect. These are not required for the core model and should be
+        viewed as experimental overlays for probing robustness and
+        strong-field regimes.
+\end{itemize}
+Unless otherwise stated, all experiments use
+\texttt{PURE\_GEOMETRY}. The mathematical model in
+Section~\ref{conceptual-model} corresponds exactly to this mode (with
+$W_\text{sat}=0$ or quadratic saturation).
+
+  The derivative (useful for force implementation) is
+  \[
+  \phi'(\epsilon) = \frac{k\epsilon}{1+(\epsilon/\epsilon_\text{cr})^2}.
+  \]
+
+\item \textbf{Bending/curvature energy (optional but stabilizing):}
+  For each node $p$, penalize changes of edge directions:
+  \[
+  U_\text{bend}=\frac{\kappa}{2}\sum_{p}\sum_{q<r\in\mathcal N(p)}
+  \big(1-\hat e_{pq}\cdot\hat e_{pr}\big),
+  \quad \hat e_{pq}=\frac{\mathbf R_q-\mathbf R_p}{|\mathbf R_q-\mathbf R_p|}.
+  \]
+  For small angles between neighboring edges, $1-\hat e_{pq}\cdot\hat e_{pr}\approx \tfrac12\theta^2$.
+  Thus $U_\text{bend}$ acts as a discrete approximation to the squared mean curvature $|b|^2$ of the
+  embedding, consistent with the continuum brane picture. This helps maintain coherent toroidal shapes.
+
+\item \textbf{Total energy:} $U=U_\text{str}+U_\text{bend}$.
+\end{itemize}
+
+Forces are $\mathbf F_p=-\partial U/\partial \mathbf R_p$. Because $|\mathbf R_q-\mathbf R_p|$ is a \textbf{4D norm}, any deformation in the 4th direction automatically couples to in-brane edge lengths, producing the desired \textbf{geometric lateral contraction}.
+
+\paragraph{Discrete-to-continuum parameter mapping}\label{discrete-continuum-mapping}
+
+The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate. The effective \textbf{isotropic tension} $T$ in the continuum is encoded in the discrete spring stiffness parameter $k$ appearing in $\phi(\epsilon)$; in the small-strain limit, dimensional analysis and dispersion measurements yield $T \sim k/h$. The \textbf{critical strain scale} $\epsilon_\text{cr}$ in the saturation potential directly corresponds to the discrete threshold parameter with the same symbol, setting the amplitude at which nonlinear confinement begins. The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
+
+\subsubsection{Time integration and stability}\label{time-integration-and-stability}
+
+\begin{itemize}
+\item \textbf{Integrator:} velocity-Verlet (leapfrog), symplectic \& time-reversible:
+  \begin{align*}
+  \mathbf v^{n+1/2}&=\mathbf v^n+\tfrac{\Delta t}{2}\mathbf a^n,\\
+  \mathbf R^{n+1}&=\mathbf R^n+\Delta t\mathbf v^{n+1/2},\\
+  \mathbf v^{n+1}&=\mathbf v^{n+1/2}+\tfrac{\Delta t}{2}\mathbf a^{n+1}.
+  \end{align*}
+\item \textbf{CFL guideline (linear regime):} $\Delta t<\eta h/c$ with empirical $\eta\approx0.33$ for FCC. Here $c$ is measured from dispersion tests (Section~\ref{calibration-dispersion-isotropy}) rather than assumed from continuum $c=\sqrt{T/\rho}$. Document the chosen $\eta$ and measured $c$.
+\item \textbf{Energy tracking:} $E_\text{tot}=K+U$ with $K=\tfrac12\sum_p \rho h^3|\dot{\mathbf R}_p|^2$.
+  Here $\rho$ is the continuum mass density and $h^3$ is the material volume represented by a node,
+  so that each node effectively carries mass $m_p=\rho h^3$.
+  Report drift (target $<10^{-5}$ over long runs, periodic BCs).
+\item \textbf{Implementation note:} No explicit amplitude or strain clamps are applied during time integration. All nonlinear confinement and saturation effects enter exclusively through the smooth saturation potential $\phi(\epsilon)$ defined in the stretching energy. The integrator advances $\mathbf R_p$ and $\mathbf v_p$ based solely on forces $\mathbf F_p = -\partial U/\partial \mathbf R_p$ computed from $U_\text{str} + U_\text{bend}$, ensuring that any emergent localization or threshold behavior arises from the elastic dynamics rather than from artificial hard cutoffs.
+\end{itemize}
+
+\subsubsection{Boundary conditions}\label{boundary-conditions}
+
+In the discrete simulations we must close the brane patch by choosing
+boundary conditions that specify how the medium interacts with the
+“outside world”. In practice we use:
+
+\begin{itemize}
+\item \textbf{Periodic} (default numerics): the simulation domain is
+  wrapped onto a torus so that waves leaving one side re-enter on the
+  opposite side. This mimics a locally homogeneous, effectively infinite
+  brane patch.
+\item \textbf{Free} ($\partial_n \mathbf X$ traction-free in the in-brane
+  sense): the brane is not anchored at the boundary, allowing transverse
+  motion without external forces; this approximates an isolated finite
+  membrane embedded in a larger medium.
+\item \textbf{Clamped} ($\mathbf X=\mathbf X_0$ on $\partial\Omega$):
+  the boundary is rigidly fixed, representing attachment to an external
+  structure and suppressing fluctuations at the edge.
+\end{itemize}
+
+\subsubsection{Induced metric and geodesics (from data)}\label{induced-metric-and-geodesics}
+
+Given positions $\mathbf R_p$, estimate discrete tangents $\partial_i\mathbf X$ via central differences in material space, build $g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$, and ray-trace probe signals using $ds^2=-c^2dt^2+g_{ij}dx^i dx^j$. This quantifies "gravitational" deflection due to 4D bulges.
+
+\subsubsection{Calibration: dispersion \& isotropy (emergent relativity test)}\label{calibration-dispersion-isotropy}
+
+Initialize small-amplitude plane waves $\mathbf R_p=\mathbf R^0_p+\boldsymbol\xi\cos(\mathbf k\cdot x_p)$ in three non-collinear $\hat k$ and \emph{numerically measure} $\omega(\mathbf k)$ from the time evolution. Verify that the measured dispersion follows
+\[
+\omega \approx c|\mathbf k|,\qquad
+\text{relative error } \le 1\% \text{ up to } kh\approx0.5.
+\]
+This demonstrates isotropic cones for internal observers in the linear regime.
+
+\subsubsection{Experiments}\label{experiments}
+
+\begin{itemize}
+\item \textbf{E1 — Nonlinear localization near the elastic threshold:}
+  Launch a Gaussian disturbance with compact support and varying peak
+  strain, scanning across the onset of the nonlinear regime
+  $|\epsilon|\sim\epsilon_\text{cr}$. Track the time evolution of the
+  energy density, center-of-energy position, and localization
+  functionals as a function of total energy and peak strain.
+
+  The goal is \emph{not} to impose a microscopic strong-field limit, but to
+  determine whether the nonlinear elastic response alone admits long-lived,
+  self-localized lumps and whether there exists an emergent threshold in
+  energy density for such localization.
+  Diagnostics: peak strain vs. $\epsilon_\text{cr}$, energy localization, lifetime.
+
+\item \textbf{E2 — Toroidal soliton (electron topology):} Seed a torus in 4D—i.e., initialize $\mathbf X$ so that the set of nodes with elevated normal offset forms a looped tube (major radius $R$, minor $r$). Add a compatible tangential phase pattern (as initial velocities) around the loop. Track confinement ratio, torus symmetry, robustness to perturbations.
+
+  The experiment probes whether the geometric nonlinearity of the
+  medium and the toroidal topology are sufficient to yield an emergent,
+  dynamically maintained soliton, without imposing any additional
+  strong-field cutoff or pair-creation rule.
+
+\item \textbf{E3 — Spinor holonomy ($4\pi$ test):} Rigidly rotate the toroidal configuration in 4D by $\Delta\theta$ while adiabatically transporting its internal phase marker (defined from a local orthonormal frame along the loop). Expect sign flip after $2\pi$, recovery after $4\pi$.
+
+\item \textbf{E4 — Geodesic bending:} Place a weak probe packet far from a localized bulge and ray-trace through $g$. Measure deflection vs. curvature intensity.
+
+\item \textbf{E5 — Emergent kinematics:} Propagate compact, small-amplitude packets; verify constant group speed $c$ and angular isotropy; quantify deviations as strain approaches $\epsilon_\text{cr}$.
+ Here $\epsilon_\text{cr}$ enters only through the elastic nonlinearity; any breakdown of effective
+  Lorentz invariance is treated as an emergent phenomenon of the medium.
+
+\item \textbf{E6 — Newtonian gravity recovery:} Place a localized, spherically symmetric amplitude bulge (representing a mass concentration) at rest in the brane. Initialize it with total energy $E_{\text{bulge}} \approx m_{\text{bulge}} c^2$ distributed over a compact volume $V_{\text{bulge}} \sim \lambda_{\text{bulge}}^3$. Compute the induced metric $g_{ij}$ by measuring local tangent vectors $\partial_i \mathbf{X}$ on a spherical shell at various radii $r$ from the bulge center. Extract the effective gravitational potential $\Phi_{\text{grav}}(\mathbf{x})$ from the effective emergent metric component $g_{00} \approx -(1 + 2\Phi_{\text{grav}}/c^2)$ and verify:
+\begin{itemize}
+\item At distances $r \gg \lambda_{\text{bulge}}$, the potential should approach $\Phi_{\text{grav}}(r) \propto -G m_{\text{bulge}}/r$ (inverse-square law).
+\item The effective gravitational constant $G_{\text{eff}}$ should be consistent across different bulge masses and probe distances.
+\item Ray-trace null geodesics past the bulge to measure light deflection and compare with the Newtonian prediction $\delta\theta \approx 2G m_{\text{bulge}}/(c^2 b)$ for impact parameter $b$.
+\end{itemize}
+\emph{Success criterion:} If the simulation reproduces $\Phi \propto -1/r$ with deviation $< 5\%$ over the range $2\lambda_{\text{bulge}} < r < 10\lambda_{\text{bulge}}$, this constitutes evidence that the brane framework can recover Newtonian gravity in the weak-field, static limit. Further tests with rotating or highly concentrated bulges would be needed to approach the Schwarzschild or Kerr solutions of general relativity.
+
+\item \textbf{E7 — Charge field of toroidal electron:} Initialize a stable toroidal soliton (as in E2) representing an electron with internal circulation defining chirality $\chi = +1$. Measure the coarse-grained amplitude displacement $\bar{X}^4(\mathbf{x})$ on a spherical shell of radius $r$ around the torus center by time-averaging $X^4(\mathbf{x}, t)$ over multiple internal oscillation periods (timescale $\sim 1/\omega_{\text{Compton}}$). Compute the effective scalar potential $\Phi(\mathbf{x}) = \kappa \bar{X}^4(\mathbf{x})$ and the resulting electric field $\mathbf{E}(\mathbf{x}) = -\nabla\Phi(\mathbf{x})$. Verify:
+\begin{itemize}
+\item Spherical symmetry: $|\mathbf{E}(r)|$ should depend only on radial distance $r$ for $r \gg \lambda_C$.
+\item Coulomb behavior: At large distances, $|\mathbf{E}(r)| \propto 1/r^2$ with relative deviation $< 10\%$ over $2\lambda_C < r < 10\lambda_C$.
+\item Sign reversal: Repeat with $\chi = -1$ (positron); verify $\Phi$ and $\mathbf{E}$ flip sign while $|\mathbf{E}(r)|$ remains unchanged.
+\item Near-field structure: Close to the torus ($r \lesssim \lambda_C$), document deviations from Coulomb law due to finite soliton size and internal structure.
+\end{itemize}
+\emph{Success criterion:} If the far-field $\mathbf{E}$-field reproduces $1/r^2$ scaling and reverses sign with chirality, this confirms that charge emerges as a signed amplitude deformation, as postulated in Sec.~\ref{sec:charge-amplitude}. Deviations in the near field would reveal the extended structure of the electron and provide testable predictions distinct from point-particle QED.
+\end{itemize}
+
+\subsubsection{Falsifiable criteria}\label{falsifiable-criteria}
+
+\begin{enumerate}
+\item \textbf{Relativistic cones:} dispersion isotropy $\le 1\%$ up to $kh\approx0.5$.
+\item \textbf{Holonomy:} internal phase shows $4\pi$ periodicity under $2\pi$ rigid rotation.
+\item \textbf{Emergent threshold:} persistent localization appears only when the integrated energy density satisfies $\langle\mathcal E\rangle_{V_c}V_c\ge m_ec^2$. This threshold arises from the nonlinear elastic dynamics of the medium, not from an imposed strong-field cutoff or amplitude clamp.
+\item \textbf{Metric bending:} ray deflection scales with curvature extracted from $g$.
+\item \textbf{Newtonian gravity:} spherically symmetric mass produces potential $\Phi_{\text{grav}}(r) \propto -1/r$ with deviation $< 5\%$ over range $2\lambda_{\text{bulge}} < r < 10\lambda_{\text{bulge}}$.
+\item \textbf{Coulomb charge field:} toroidal soliton produces spherically symmetric electric field $|\mathbf{E}(r)| \propto 1/r^2$ with deviation $< 10\%$ over range $2\lambda_C < r < 10\lambda_C$; field reverses sign with chirality $\chi$.
+\end{enumerate}
+
+\subsection{Interpretation layers (clarity note)}\label{interpretation-layers}
+
+\begin{itemize}
+\item \textbf{Substrate:} a single geometric object $\mathbf X(x,t)\in\mathbb R^4$ with dynamics from $\mathcal L(\mathbf X,\partial\mathbf X)$.
+\item \textbf{Effective physics for internal observers:} built from the induced metric $g_{ij}$ and wave kinematics on the brane; no extra fields are postulated. The familiar EM interpretation can be treated phenomenologically elsewhere; it is not required here.
+\item \textbf{Threshold phenomena:} The localization thresholds and confinement scales discussed in this work (e.g., the energy density criterion $\langle\mathcal E\rangle_{V_c}V_c \ge m_e c^2$ and the strain scale $\epsilon_\text{cr}$) are not imposed as external cutoffs or quantum rules, but emerge dynamically from the nonlinear elastic response of the medium. The simulations test whether this purely geometric-tensional framework is sufficient to produce soliton stability and pair confinement without additional ad-hoc mechanisms.
+\end{itemize}
+
+\textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice, saturation potentials, and velocity-Verlet integration, providing better isotropy and numerical stability.

@@ -1,0 +1,3305 @@
+\section{Reconstructing Physics as an Emergent Brane
+Phenomenon}\label{reconstructing-physics-as-an-emergent-brane-phenomenon}
+
+The following sections develop the physical consequences of the brane model introduced above. We show how relativistic and quantum phenomena emerge from wave propagation and nonlinear soliton dynamics within the tensioned medium, without invoking fundamental probabilistic axioms or independent field theories.
+
+\subsection{Emergent Relativity and Lorentz
+Invariance}\label{emergent-relativity-and-lorentz-invariance}\label{sec:emergent-relativity}
+
+In this model, relativistic behavior --- such as the constancy of the
+speed of light and Lorentz transformations --- is not taken as a
+fundamental axiom, but emerges naturally from the \textbf{isotropic wave
+propagation} within the brane medium. That is, even though the model
+operates with absolute space and time, the \textbf{internal physics
+experienced by wave-like excitations} on the brane exhibits the same
+symmetries and invariance properties as special relativity.
+
+\paragraph{Isotropy of the Brane and Wave Speed
+Invariance}\label{isotropy-of-the-brane-and-wave-speed-invariance}
+
+The key ingredient is \textbf{isotropy}: the medium's spring-like
+coupling rules apply equally in all spatial directions. Because each
+point on the brane interacts symmetrically with its neighbours,
+\textbf{waves travel at the same speed in all directions}.
+
+In the simplest approximation, we can think of the brane as a continuous
+three-dimensional medium with intrinsic coordinates
+$x=(x^1,x^2,x^3)$ and a displacement vector field
+$\boldsymbol{\xi}(x,t)$ attached to each point. Each component
+$\xi^a(x,t)$ describes how the medium is displaced in one of the four
+embedding directions ($a=1,\dots,4$). The detailed embedding map
+$\mathbf{X}(x,t)$ and the induced metric $g_{ij}(x,t)$ were defined
+in Section~\ref{conceptual-model}; here we only need their
+linearised behaviour around a flat, unstressed reference configuration.
+In particular, for small deformations around a flat reference state $\mathbf{X}_0(x)=(x^1,x^2,x^3,0)$, we have $\mathbf{X}(x,t)=\mathbf{X}_0(x)+\boldsymbol{\xi}(x,t)$, so $\boldsymbol{\xi}$ is simply the linearized displacement from equilibrium.
+
+Mathematically, in this linear small-strain regime, each component of
+the displacement field $\boldsymbol{\xi}(x,t)\in\mathbb{R}^4$
+satisfies a standard wave equation,
+\[
+\partial_{tt}\,\xi^{a}(x,t) \;=\; c^2\,\Delta\,\xi^{a}(x,t),
+\qquad a=1,\dots,4,
+\]
+where
+\begin{itemize}
+  \item $x^i$ $(i=1,2,3)$ are intrinsic coordinates on the brane,
+  \item $\Delta$ is the Laplacian with respect to the internal metric
+        $g_{ij}$ (reducing to the usual Euclidean Laplacian when
+        $g_{ij}\approx\delta_{ij}$),
+  \item and $c=\sqrt{T/\rho_m}$ is the intrinsic wave speed set by
+        tension $T$ and mass density $\rho_m$ of the substrate.
+\end{itemize}
+
+In this flat, linear limit the dynamics can be written in manifestly
+Lorentz-invariant form,
+\[
+\left(-\frac{1}{c^2}\,\partial_t^2 + \delta^{ij}\partial_i\partial_j\right)
+\xi^{a}(x,t) = 0,
+\]
+which is invariant under Lorentz transformations of the coordinates
+$(t,x^i)$ that preserve the interval
+\[
+ds^2 = -c^2\,dt^2 + \delta_{ij}\,dx^i dx^j.
+\]
+\textbf{Notation and conventions:} Throughout this paper we use
+spacetime coordinates $x^\mu = (ct,x^i)$ with $\mu=0,1,2,3$ and
+$i=1,2,3$, and adopt the mostly-plus Minkowski metric signature
+$\eta_{\mu\nu} = \mathrm{diag}(-1,+1,+1,+1)$. Latin indices
+$(i,j,k)$ refer to spatial coordinates only, while Greek indices
+$(\mu,\nu,\rho,\sigma)$ include time.
+
+Hence, when internal observers operationally define rulers and clocks
+using these waves, the ``light speed'' $c$ is direction-independent
+and invariant: \textbf{light speed invariance becomes a property of the
+medium's wave dynamics}, not a postulate about spacetime itself.
+
+\paragraph{Emergence of Minkowski
+Geometry}\label{emergence-of-minkowski-geometry}
+
+From the perspective of an observer made of soliton-like excitations
+(i.e., embedded in the medium), the natural way to measure distance and
+time is through the propagation of signals --- that is, through wave
+fronts. Because wave speed is fixed and isotropic, any such observer
+will reconstruct a \textbf{Minkowski-like spacetime}, where the interval
+between infinitesimally separated events is
+\[
+ds^2 = -c^2\,dt^2 + \delta_{ij}\,dx^i dx^j.
+\]
+\textbf{Bridging assumption:} For internal observers, the evolution parameter $t$ is operationally indistinguishable from a time coordinate reconstructed from signal propagation. We therefore identify the emergent time coordinate with the external parameter $t$, recognizing that this identification is valid only when internal clocks (built from wave oscillations) remain synchronized with the substrate's evolution.
+In a local Cartesian chart we may identify $(x^1,x^2,x^3)=(x,y,z)$, so
+this reduces to the familiar textbook form (up to an overall sign
+convention)
+\[
+ds^2 = -c^2\,dt^2 + dx^2 + dy^2 + dz^2,
+\]
+which is equivalent to writing $s^2 = c^2 t^2 - x^2 - y^2 - z^2$.
+
+Concretely, for motion along a single spatial direction $x^1$, a
+Lorentz boost with velocity $v$ between two inertial frames
+$(t,x^1)$ and $(t',x'^1)$ is given by
+\[
+t' = \gamma\left(t - \frac{v}{c^2}x^1\right), \qquad
+x'^1 = \gamma(x^1 - vt), \qquad
+\gamma = \frac{1}{\sqrt{1-v^2/c^2}}.
+\]
+One directly verifies that
+\[
+-c^2\,dt'^2 + (dx'^1)^2 = -c^2\,dt^2 + (dx^1)^2,
+\]
+so the null cone $ds^2=0$ associated with wave propagation at speed $c$
+has the same form in both frames. In other words, the symmetry group of
+the small-amplitude wave equation is precisely the Lorentz group, and
+its invariant quadratic form is the Minkowski interval reconstructed
+above.
+
+This reconstruction happens automatically: the effective spacetime seen
+by internal observers reflects the \textbf{causal structure imposed by
+wave propagation}. Even though the model has an external, absolute time
+$t$, the \textbf{internal physics obeys relativistic constraints},
+including time dilation, length contraction, and simultaneity breakdown
+--- all as emergent phenomena.
+
+\paragraph{Analogy: Emergent Relativity in Physical
+Media}\label{analogy-emergent-relativity-in-physical-media}
+
+Similar behaviour appears in \textbf{analog gravity models}, such as:
+\begin{itemize}
+\item \textbf{Bose--Einstein condensates (BECs)}, where phonons propagate
+      in an effective curved metric determined by the condensate flow;
+\item \textbf{Acoustic metrics} in fluids, where sound waves experience an
+      effective Lorentzian geometry emergent from the background flow;
+\item \textbf{Electromagnetic waves in metamaterials}, where engineered
+      permittivity and permeability mimic curved spacetime for light.
+\end{itemize}
+In each case, a fundamentally Newtonian or absolute-time microscopic
+model gives rise to an \emph{effective} relativistic geometry for the
+excitations. Our brane model follows the same pattern, but elevates this
+idea to an ontological postulate: there is only the medium and its
+waves, and relativity is the emergent effective symmetry of their
+dynamics.
+
+\paragraph{Summary}\label{emergent-lorentz-summary}
+
+\textbf{Caveat on the regime of validity:} All derivations in this section assume the \emph{homogeneous, small-strain, linear regime} in which nonlinear terms and curvature contributions are negligible. In the presence of strong solitons, finite strains, or regions near the saturation threshold, the brane dynamics will generically produce small Lorentz-violating corrections. We quantify these deviations numerically via dispersion and isotropy diagnostics in Sec.~\ref{calibration-dispersion-isotropy}.
+
+From this perspective:
+\begin{itemize}
+\item The brane is an \textbf{isotropic wave medium} with a fixed
+      characteristic speed $c=\sqrt{T/\rho_m}$.
+\item In the small-strain, flat-brane regime, the linearised dynamics
+      of its displacement field are \textbf{exactly Lorentz invariant},
+      with invariant interval
+      $ds^2 = -c^2\,dt^2 + \delta_{ij}dx^i dx^j$.
+\item For observers built from or interacting with wave excitations,
+      \textbf{Minkowski geometry is reconstructed} as the natural causal
+      structure, while the underlying ontology remains a tensioned
+      medium in absolute time.
+\end{itemize}
+
+\begin{quote}
+The result is a compelling reinterpretation of special relativity: not
+as a fundamental property of spacetime, but as a \textbf{macroscopic
+symmetry of wave-based physics} within a tensioned medium.
+\end{quote}
+
+\subsection{Wave Mechanics and Quantum
+Behavior}\label{wave-mechanics-and-quantum-behavior}\label{sec:wave-mechanics}
+
+In the brane picture, the objects that quantum theory calls
+``particles'' are modeled as \textbf{localized wave packets} or soliton-like
+excitations of the medium. Quantum-mechanical features such as the
+Heisenberg uncertainty relations then arise as \emph{secondary} properties
+of these localized wave states, rather than as fundamental stochastic
+postulates.
+
+\paragraph{Uncertainty as a Fourier-localization
+trade-off}\label{uncertainty-as-fourier}
+
+The Heisenberg uncertainty principle is interpreted here as a direct
+consequence of the Fourier representation of localized wave packets in
+the medium.\footnote{For general treatments of Fourier-based uncertainty
+principles, see for example
+Folland~\cite{FollandUncertaintyPrinciple,FollandSitaram1997} and the
+pedagogical discussion by Millette~\cite{Millette2013HUPNyquist}. A
+visual introduction focused on the general (non-quantum) uncertainty
+principle is given by Sanderson~\cite{ThreeBlueoneBrownUncertainty}.}
+According to classical Fourier analysis, a function and its Fourier
+transform cannot both be sharply localized.\cite{FollandUncertaintyPrinciple}
+Applied to wave packets, this implies:
+
+\begin{itemize}
+\tightlist
+\item
+  The more localized a particle-like wave packet is in
+  \textbf{position}, the less well-defined its \textbf{wave number} (and
+  thus momentum) becomes.
+\item
+  Conversely, a sharply defined \textbf{wave number / momentum} implies
+  that the packet must be spread out in \textbf{space}.
+\end{itemize}
+
+This duality is therefore a generic property of wave phenomena, not
+something uniquely quantum.
+
+\paragraph{Standard Fourier derivation}\label{standard-fourier-derivation}
+
+For definiteness, consider a one-dimensional wave function
+$\psi(x)$ on the brane (e.g.\ one component of a soliton's internal
+profile) and its spatial Fourier transform $\tilde\psi(k)$, with the
+usual normalization
+\[
+\tilde{\psi}(k)
+  = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\infty}
+      e^{-ikx}\,\psi(x)\,dx, \qquad
+\psi(x)
+  = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{\infty}
+      e^{ikx}\,\tilde{\psi}(k)\,dk.
+\]
+
+Assuming $\psi$ is normalized, $\int |\psi(x)|^2 dx = 1$, we define the
+position and wave-number variances in the usual way
+\[
+(\Delta x)^2 = \int (x-\langle x\rangle)^2 |\psi(x)|^2\,dx, \qquad
+(\Delta k)^2 = \int (k-\langle k\rangle)^2 |\tilde{\psi}(k)|^2\,dk,
+\]
+with expectation values
+$\langle x\rangle = \int x\,|\psi(x)|^2 dx$ and
+$\langle k\rangle = \int k\,|\tilde{\psi}(k)|^2 dk$.
+
+A standard argument using the Cauchy–Schwarz inequality then yields the
+\emph{Fourier uncertainty relation}
+\[
+\Delta x\,\Delta k \;\geq\; \frac{1}{2}.
+\]
+This inequality is purely a statement of harmonic analysis: it holds for
+any square-integrable function and its Fourier transform, independent of
+any measurement-theoretic assumptions.\cite{FollandUncertaintyPrinciple,FollandSitaram1997}
+
+In quantum mechanics, momentum is related to wave number by the de
+Broglie relation $p = \hbar k$. Translating the above inequality to
+momentum gives the familiar Heisenberg form
+\[
+\Delta x\,\Delta p \;\geq\; \frac{\hbar}{2}.
+\]
+Thus, in this model, the Heisenberg relation expresses the \textbf{wave
+nature of localized excitations in the brane}: trying to sharpen the
+packet in position space necessarily broadens its spectrum in $k$ and
+therefore in $p$.
+
+\paragraph{Classical optics analogy}\label{classical-optics-analogy}
+
+The same mathematical structure appears in classical wave systems,
+particularly in optics. A light beam that is tightly focused in the
+transverse spatial coordinate must have a broad distribution of
+transverse wave numbers (or angles of propagation). Conversely, a beam
+with a very narrow angular spread cannot be focused to an arbitrarily
+small spot.\cite{FollandSitaram1997,UncertaintyClassicalOptics}
+
+This is precisely an uncertainty relation between transverse position
+and transverse wave number, entirely within \emph{classical} wave
+theory. The quantum position–momentum uncertainty relation is then seen
+as a special case of a broader Fourier-localization trade-off that
+applies to any wave field.
+
+\paragraph{Interpretation within the brane
+model}\label{uncertainty-interpretation-brane}
+
+Within the brane framework, a ``particle'' corresponds to a localized
+wave packet (often with additional nonlinear self-confinement in the
+amplitude dimension). The uncertainty relations do not express a limit
+on what ``really exists'', but rather a structural constraint on which
+\emph{wave configurations} are possible:
+
+\begin{itemize}
+\tightlist
+\item
+  A configuration that is sharply localized in the brane coordinates
+  $x^i$ must, by Fourier analysis, involve a broad superposition of wave
+  numbers and thus of momenta.
+\item
+  A configuration with sharply defined momentum corresponds to an
+  extended plane-wave-like state, delocalized over large regions of the
+  brane.
+\end{itemize}
+
+In this view, the Heisenberg uncertainty principle is a
+\textbf{kinematic property of wave packets in the medium}, not a
+fundamental statement about randomness or the impossibility of
+underlying ontic states. The probabilistic aspects of quantum mechanics
+then arise at a later stage, when these wave configurations interact
+with threshold-like detection mechanisms and macroscopic measurement
+apparatus, rather than from the uncertainty relation itself.
+
+\paragraph{De Broglie wavelength as a beat pattern}\label{de-broglie-beat-pattern}
+
+The preceding Fourier-based derivation establishes the uncertainty
+relation $\Delta x\,\Delta k \geq \tfrac{1}{2}$ as a general mathematical
+property of wave packets. However, it does not yet explain \emph{why}
+a localized soliton in motion acquires a specific de~Broglie wavelength
+$\lambda_B = h/p$. The brane framework provides a concrete microphysical
+mechanism for this relation through what de~Broglie originally called the
+\textbf{``harmony of phases''}.
+
+In the brane picture, a solitonic excitation at rest corresponds to a
+localized oscillation with a dominant internal frequency $\omega_C$ set by
+the Compton energy: $\omega_C \sim m_e c^2/\hbar$. This internal
+oscillation defines the soliton's ``internal clock''. When the soliton
+moves through the emergent Minkowski geometry (Sec.~\ref{sec:emergent-relativity})
+with velocity $v$, the internal oscillatory modes experience
+\textbf{Doppler shifts} that depend on their orientation relative to the
+direction of motion.\cite{Williamson1997,HuygensOptics2025}
+
+In this sense, the ``rest mass'' of a soliton is not the mass of
+something literally static at the microscopic level. Rather, it is the
+invariant mass of a \emph{closed, internally dynamical system} whose
+center of mass frame is at rest. This matches the point emphasized by
+van der Mark and 't~Hooft~\cite{vanderMark2000LightHeavy}: weighing a
+gas or a radiation-filled cavity on a balance always measures the total
+internal energy content---kinetic, vibrational, rotational, and
+radiative---packaged as an effective gravitational mass $M = E/c^2$.
+The brane model simply instantiates this idea for solitons: the electron
+is a confined, spinning pattern of brane waves whose inertial and
+gravitational mass reflect its internal energy, not any primitive point
+particle.
+
+Specifically, modes aligned with the direction of motion are blue-shifted
+to frequency $\omega_+ = \gamma(\omega_C + v k_c)$, while modes oriented
+oppositely are red-shifted to $\omega_- = \gamma(\omega_C - v k_c)$, where
+$\gamma = 1/\sqrt{1 - v^2/c^2}$ and $k_c = \omega_C/c$ is the internal
+wave number. These Doppler-broadened components interfere to produce a
+\textbf{beat pattern} in the soliton's spatial envelope. The spatial
+period of this beat is precisely the de~Broglie wavelength:
+\[
+  \lambda_B = \frac{2\pi}{\Delta k} = \frac{h}{p}\,,
+\]
+where $\Delta k$ is the spread in wave number induced by the Doppler shifts
+and $p = \gamma m v$ is the relativistic momentum of the moving soliton.
+
+This beat-pattern interpretation provides a direct physical realization of
+the Fourier-based uncertainty analysis given above: increasing the
+soliton's velocity $v$ broadens the internal momentum distribution
+(larger $\Delta p$), which in turn shortens the envelope scale
+$\lambda_B$ and improves the spatial resolving power of the wave packet.
+In this view, the de~Broglie relation is not an independent postulate but
+a \textbf{kinematic consequence} of how a moving soliton's internal
+oscillations decompose in the emergent Lorentzian geometry. The broader
+Fourier uncertainty $\Delta x\,\Delta p \geq \hbar/2$ then reflects the
+fact that the beat envelope is necessarily a superposition of
+Doppler-shifted modes, whose spectral width $\Delta p$ determines the
+spatial extent $\Delta x$ of the packet.
+
+\paragraph{Toy envelope dynamics and Schrödinger-like behavior}
+\label{sec:toy-envelope-schroedinger}
+
+The Fourier-based derivation of uncertainty and the de~Broglie
+beat-pattern picture already show how wave-packet kinematics in the
+brane medium mirrors familiar quantum relations. To make this link more
+concrete, it is useful to exhibit at least a simple \emph{toy
+derivation} in which the slowly varying envelope of a soliton's internal
+mode obeys a Schrödinger-like equation.
+
+Consider a single, stable solitonic excitation of the brane. In the
+rest frame of this soliton, its internal oscillation is dominated by a
+characteristic frequency $\omega_C$, which we identify with the Compton
+frequency associated with its effective mass (cf. the discussion of
+de~Broglie's ``harmony of phases'' above). Small perturbations of this
+internal mode can be described by a scalar field
+$\eta(\mathbf x,t)$ on the brane, representing deviations of the
+soliton's internal profile from its stationary ground state. Linearizing
+the full, nonlinear brane equations of motion around the soliton
+configuration generically produces a \emph{gapped} normal mode:
+to leading order one may model $\eta$ by a Klein--Gordon--like equation
+of the form
+\begin{equation}
+  \partial_{tt}\,\eta(\mathbf x,t)
+  - c^2 \Delta \eta(\mathbf x,t)
+  + \omega_C^2\,\eta(\mathbf x,t) \;=\; 0,
+  \label{eq:toy-KG}
+\end{equation}
+where $\Delta = \delta^{ij}\partial_i\partial_j$ is the Laplacian on the
+(flat) brane coordinates and $\omega_C$ sets the gap. In a more
+systematic treatment, the precise value of $\omega_C$ and the structure
+of the gapped mode would follow from the spectrum of the linearized
+operator around the soliton; here we only need the existence of such a
+mode.
+
+To extract an effective equation for the \emph{slow} evolution of the
+soliton's envelope, we factor out the rapid carrier oscillation at
+frequency $\omega_C$ and write
+\begin{equation}
+  \eta(\mathbf x,t)
+  \;=\;
+  \Re\!\big\{e^{-i\omega_C t}\,\psi(\mathbf x,t)\big\},
+  \label{eq:carrier-envelope-ansatz}
+\end{equation}
+where $\psi(\mathbf x,t)$ is a complex-valued envelope that varies only
+on timescales much longer than $1/\omega_C$. Substituting
+\eqref{eq:carrier-envelope-ansatz} into \eqref{eq:toy-KG} and using
+\[
+  \partial_{tt}\big(e^{-i\omega_C t}\psi\big)
+  =
+  e^{-i\omega_C t}\big(
+    -\omega_C^2\psi
+    -2i\omega_C\,\partial_t\psi
+    +\partial_{tt}\psi
+  \big),
+\]
+we obtain (after factoring out $e^{-i\omega_C t}$ and dropping the
+irrelevant real part symbol)
+\begin{equation}
+  -\omega_C^2\psi
+  -2i\omega_C\,\partial_t\psi
+  +\partial_{tt}\psi
+  -c^2\Delta\psi
+  +\omega_C^2\psi
+  \;=\; 0.
+\end{equation}
+The mass-gap terms $-\omega_C^2\psi$ and $+\omega_C^2\psi$ cancel. For
+a slowly varying envelope we have
+$|\partial_t\psi|\ll \omega_C|\psi|$ and
+$|\partial_{tt}\psi|\ll \omega_C|\partial_t\psi|$, so the
+$\partial_{tt}\psi$ term can be neglected at leading order. The
+remaining terms yield
+\begin{equation}
+  -2i\omega_C\,\partial_t\psi(\mathbf x,t)
+  -c^2\Delta\psi(\mathbf x,t)
+  \;\approx\; 0,
+\end{equation}
+or equivalently
+\begin{equation}
+  i\,\partial_t\psi(\mathbf x,t)
+  \;\approx\;
+  -\,\frac{c^2}{2\omega_C}\,\Delta\psi(\mathbf x,t).
+  \label{eq:envelope-schroedinger}
+\end{equation}
+Equation~\eqref{eq:envelope-schroedinger} is formally identical to the
+free Schrödinger equation for a nonrelativistic particle if we identify
+the Compton frequency $\omega_C$ with an effective mass via
+\begin{equation}
+  \omega_C = \frac{m c^2}{\hbar_\text{eff}},
+\end{equation}
+which gives
+\begin{equation}
+  i\,\hbar_\text{eff}\,\partial_t\psi
+  \;\approx\;
+  -\,\frac{\hbar_\text{eff}^2}{2m}\,\Delta\psi.
+  \label{eq:schroedinger-from-envelope}
+\end{equation}
+Within the brane picture, $\psi(\mathbf x,t)$ can thus be interpreted as
+a coarse-grained ``wave function'' for the soliton's center-of-mass
+degree of freedom: it is simply the slowly varying envelope of a gapped
+internal mode of the brane, whose carrier oscillates at the Compton
+frequency $\omega_C$.
+
+This toy derivation is intentionally minimal: it assumes only (i) the
+existence of a localized, gapped soliton mode with frequency
+$\omega_C$, (ii) the emergent Lorentzian wave operator
+$\partial_{tt} - c^2\Delta$ from Sec.~\ref{sec:emergent-relativity}, and
+(iii) a standard slowly varying envelope approximation. Nevertheless, it
+shows how a Schrödinger-like evolution law for an effective wave
+function $\psi$ naturally arises from the brane's internal dynamics,
+without postulating $\psi$ as a fundamental, purely probabilistic
+object.
+
+\subsection{Charge as Amplitude Deformation}
+\label{sec:charge-amplitude}
+
+\paragraph{Dictionary for amplitude-based effective fields.}
+For later reference we summarize the different levels of description related to the fourth embedding component:
+\begin{itemize}
+  \item \textbf{Microscopic amplitude:}
+    $X^4(x,t)$ denotes the fourth component of the embedding $\mathbf X(x,t)$ at microscopic resolution, defined for each material point $x \in \Omega$ and microscopic time $t$.
+  \item \textbf{Coarse-grained amplitude:}
+    $\bar X^4(\mathbf x)$ denotes a coarse-grained or time-averaged amplitude field obtained from $X^4(x,t)$ by averaging over microscopic oscillations and small spatial scales. It lives on the emergent spatial coordinates $\mathbf x \in \mathbb{R}^3$.
+  \item \textbf{Effective electrostatic potential:}
+    We define the electrostatic scalar potential as
+    \[
+      \Phi_{\text{EM}}(\mathbf x) \;=\; \kappa_{\text{EM}} \,\bar X^4(\mathbf x),
+    \]
+    with a phenomenological constant $\kappa_{\text{EM}}$.
+  \item \textbf{Effective gravitational potential:}
+    In the weak-field regime we define a gravitational potential
+    \[
+      \Phi_G(\mathbf x) \;=\; \kappa_G \,|\nabla X^4(\mathbf x)|^2 ,
+    \]
+    which enters the effective spacetime metric in the usual Newtonian limit.
+\end{itemize}
+Unless stated otherwise, $\Phi$ refers to the effective electrostatic potential $\Phi_{\text{EM}}$.
+
+In the conceptual picture developed so far, the brane is described by the
+embedding map $\mathbf{X}(x,t)$ with components $X^a(x,t)$, $a=1,\dots,4$, where three components
+parameterize the spatial position within the observable three-dimensional
+space and the fourth component $X^4$ encodes amplitude displacements into the
+embedding space. As discussed in the brane geometry section, tensional
+rigidity couples these amplitude deformations back into the intrinsic
+metric of the brane, such that localized amplitude enhancements act as
+sources of curvature and effective ``potential'' energy.
+
+In the present subsection we make this identification more explicit and
+interpret what is \emph{measured as electric charge} as a specific,
+quasi-static pattern of amplitude deformation induced by a localized
+soliton: persistent \emph{peaks and troughs} of the brane surface in the
+fourth (amplitude) dimension.
+
+It is useful to distinguish between the \emph{total charge content} of a
+region of the brane and the \emph{net free charge} that sources the
+long-range Coulomb field. In the present picture the total charge
+content is encoded directly in the displacement $X^4(x,t)$: strong
+oscillations of the internal photon mode correspond to large amounts of
+charge bound in rapidly varying, dipole-like patterns of the medium.
+The net free charge, by contrast, is associated with the slowly varying,
+monopole component of the amplitude deformation that remains after such
+bound patterns are taken into account.
+
+To make this more precise, we define from the embedding $\mathbf{X}(x,t)$
+an effective amplitude field $\bar{X}^4(\mathbf{x})$ that encodes this
+net free charge component. Operationally one may obtain $\bar{X}^4$ by
+averaging over timescales long compared to the internal Compton
+oscillation of the soliton and, if desired, over small spatial regions;
+however, conceptually it is best thought of as the part of the
+deformation that survives after bound, oscillatory contributions have
+cancelled:
+\begin{equation}
+  \bar{X}^4(\mathbf{x})
+  \;\equiv\;
+  \big\langle X^4(\mathbf{x},t) \big\rangle_{\text{fast}}.
+\end{equation}
+The scalar potential experienced by external probes is then
+taken to be
+\begin{equation}
+  \Phi(\mathbf{x})
+  \;=\;
+  \kappa\,\bar{X}^4(\mathbf{x}),
+  \label{eq:phi-from-xi4}
+\end{equation}
+with $\kappa$ a phenomenological stiffness parameter encoding how
+displacement along the fourth direction modifies the local tension of
+the brane. The parameter $\kappa$ and the effective permittivity
+$\varepsilon_{\mathrm{eff}}$ introduced below are chosen such that
+$\Phi$ has dimensions of electric potential (volts) and $\rho_{\text{free}}$
+has dimensions of charge density (C/m$^3$), ensuring dimensional consistency
+with standard electromagnetic equations. In this sense, $\Phi(\mathbf{x})$
+is nothing but the macroscopic imprint of the soliton's internal structure
+on the amplitude degree of freedom.
+
+For the electron we adopt a toroidal configuration, drawing conceptual
+guidance from Williamson and van der Mark~\cite{Williamson1997} and the
+pedagogical exposition in Huygens Optics~\cite{HuygensOptics2025}\footnote{%
+We are particularly indebted to the clear visual explanation of the
+Williamson--van der Mark model given by Huygens Optics~\cite{HuygensOptics2025},
+which strongly informed the qualitative picture adopted here. A closely
+related perspective on inertial and gravitational mass is articulated
+by van der Mark and 't~Hooft in ``Light is Heavy''~\cite{vanderMark2000LightHeavy},
+where the electron is described as electromagnetic energy ``quivering at
+light speed'' whose mass is entirely due to its internal field energy.}, in which
+the electromagnetic field is confined to nested toroidal surfaces of
+characteristic size on the order of the Compton wavelength. On each
+surface the field follows closed geodesics of Compton length, with the
+energy and momentum circulating at (essentially) the speed of light in
+a double-loop pattern. The internal oscillation frequency is therefore
+of order twice the Compton frequency, and from the viewpoint of any
+probe that cannot resolve such timescales the detailed field pattern is
+seen only through its time-averaged effect on the surrounding medium.
+
+In the brane picture, this localized, circulating electromagnetic energy
+density produces a quasi-static amplitude deformation $\bar{X}^4$ in
+its vicinity. At the coarse-grained level we can thus treat the
+effective charge density $\rho(\mathbf{x})$ as a functional of the
+time-averaged internal energy distribution,
+\begin{equation}
+  \rho(\mathbf{x})
+  \;\propto\;
+  \chi\,\big\langle u_{\text{EM}}(\mathbf{x},t)\big\rangle_{\text{fast}},
+  \label{eq:rho-from-u}
+\end{equation}
+where $u_{\text{EM}}$ denotes the electromagnetic energy density of the
+confined toroidal mode and $\chi=\pm 1$ encodes the orientation
+(chirality) of the internal field configuration. The sign of $\chi$
+distinguishes electron and positron: reversing the direction of the
+internal circulation flips the sign of the induced amplitude deformation
+and hence of $\Phi(\mathbf{x})$, while leaving the absolute charge
+magnitude and magnetic dipole moment unchanged, in agreement with
+experiment.
+
+Far outside the Compton-scale core, the rapid internal precession of
+the toroidal configuration renders the time-averaged deformation
+$\bar{X}^4(\mathbf{x})$ effectively spherically symmetric. In this
+regime the scalar potential defined in Eq.~\eqref{eq:phi-from-xi4}
+obeys a Poisson-type equation on the brane,
+\begin{equation}
+  \nabla^2 \Phi(\mathbf{x})
+  \;=\;
+  -\,\frac{\rho_{\text{free}}(\mathbf{x})}{\varepsilon_{\mathrm{eff}}},
+  \label{eq:poisson-from-brane}
+\end{equation}
+with an effective permittivity $\varepsilon_{\mathrm{eff}}$ determined
+by the elastic response of the medium. Here $\rho_{\text{free}}$ denotes
+the net (monopole) free charge density: bound, polarization-like
+patterns of $X^4$ that cancel on scales larger than the Compton
+wavelength do not contribute to this source term.
+
+\paragraph{Effective Poisson closure.}
+Equation~\eqref{eq:poisson-from-brane} is, at this stage, an \emph{effective closure}: we impose a phenomenological constitutive law that links the coarse-grained amplitude $\bar X^4$ to an electrostatic potential $\Phi_{\text{EM}}$ satisfying a Poisson equation. This closure is chosen such that localized brane deformations give rise to Coulomb-like fields at large distances, in agreement with observed electrostatic behavior. A microscopic derivation of \eqref{eq:poisson-from-brane} directly from the brane Lagrangian $L[\mathbf X]$---for instance via a systematic multipole analysis of static solutions---is left as future work.
+
+Combining Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}
+yields the local geometric relation
+\begin{equation}
+  \rho_{\text{free}}(\mathbf{x})
+  = -\,\varepsilon_{\mathrm{eff}}\kappa\,\nabla^2 \bar{X}^4(\mathbf{x}),
+\end{equation}
+so that net charge is associated not with the absolute value of the
+amplitude displacement, but with its curvature pattern on the brane.
+
+The resulting field
+\[
+  \mathbf{E}(\mathbf{x}) = -\nabla\Phi(\mathbf{x})
+  = -\,\kappa\,\nabla \bar{X}^4(\mathbf{x})
+\]
+reproduces the familiar Coulomb behavior of a point charge at large
+distances, even though microscopically the source is an extended,
+toroidal soliton of finite size. In the static rest frame of the
+soliton, and for this effective free charge component, the electric
+field is literally proportional to the gradient of the brane surface in
+the fourth (amplitude) dimension. From this perspective, regions of
+positive and negative free charge correspond to peaks and troughs of the
+brane surface in the amplitude direction, with the sign of the gradient
+fixing the sign of the observed electric field.
+
+It is important to emphasize that the same amplitude deformation that
+encodes electric charge also participates in the emergent gravitational
+response of the brane. However, these are distinct effects arising from
+different aspects of the deformation field $X^4$:
+
+\begin{itemize}
+\item \textbf{Gravitational sector:} responds to the induced metric
+  $g_{ij}[\mathbf{X}]$, which is roughly quadratic in gradients of $X^4$.
+  The isotropic component of the induced strain pattern---set by the total
+  internal energy of the toroidal mode---contributes to curvature and
+  inertial mass.
+
+\item \textbf{Electromagnetic sector:} couples directly to the time-averaged
+  amplitude $\bar{X}^4$ and its Laplacian via
+  Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}. The signed
+  component associated with the orientation $\chi$ encodes the electric
+  interaction in the rest frame.
+\end{itemize}
+
+Thus, the same underlying amplitude deformation yields two distinct
+effective fields. In this way, a single localized brane deformation
+unifies mass, charge, and the external electromagnetic potential as
+different macroscopic manifestations of the same microscopic structure,
+without double-counting: gravity depends on metric curvature (quadratic
+in $\nabla X^4$), while electrostatics depends linearly on the Laplacian
+of $\bar{X}^4$.
+
+\subsubsection{Weak-field gravity and Newtonian limit}
+\label{subsec:weak_field_gravity}
+
+In our model the brane is embedded into a $4$-dimensional ambient space via
+\begin{equation}
+  X^A(x^\mu) = \bigl( ct,\; x^1,x^2,x^3,\; X^4(x^\mu) \bigr),
+  \qquad
+  A = 0,\dots,4,\;\; \mu = 0,\dots,3,
+\end{equation}
+where the transverse coordinate $X^4$ (or $\xi_\perp$) encodes the amplitude direction of the brane.
+
+At a coarse-grained, quasi-static level we distinguish two long-range sectors:
+\begin{itemize}
+  \item \emph{Electrostatics:} The free charge density is taken to be proportional to the Laplacian of a coarse-grained displacement $\bar X^4$,
+  \begin{equation}
+    \rho_{\mathrm{free}}(\mathbf x)
+    \;\propto\;
+    - \nabla^2 \bar X^4(\mathbf x),
+  \end{equation}
+  so that the Coulomb potential satisfies
+  \begin{equation}
+    \nabla^2 \Phi_{\mathrm{EM}}(\mathbf x)
+    = - \frac{1}{\varepsilon_0}\,\rho_{\mathrm{free}}(\mathbf x)
+    \;\propto\;
+    \nabla^2 \bar X^4(\mathbf x).
+  \end{equation}
+  This coupling is \emph{linear} and therefore sensitive to the sign of $\bar X^4$.
+  \item \emph{Gravity:} The gravitational sector couples to the energy density stored in the deformation of the brane, which is \emph{quadratic} in the derivatives of $X^4$ and hence insensitive to the sign of $X^4$.
+\end{itemize}
+
+\paragraph{Metric ansatz from the brane}
+
+We start from the ambient metric
+\begin{equation}
+  \eta_{AB} = \mathrm{diag}(-1,1,1,1,1)
+\end{equation}
+and consider the induced worldvolume metric
+\begin{equation}
+  G_{\mu\nu} = \eta_{AB}\,\partial_\mu X^A\,\partial_\nu X^B.
+\end{equation}
+For slowly varying, static configurations
+\begin{equation}
+  X^4 = X^4(\mathbf x),
+  \qquad
+  \partial_0 X^4 = 0,
+\end{equation}
+we obtain
+\begin{equation}
+  G_{00} = -1,
+  \qquad
+  G_{0i} = 0,
+  \qquad
+  G_{ij} = \delta_{ij} + \partial_i X^4\,\partial_j X^4.
+\end{equation}
+This already exhibits a purely spatial curvature which is quadratic in the gradients $\nabla X^4$.
+
+To describe both time dilation and light bending in a weak-field limit, we introduce an effective $3+1$-metric $g_{\mu\nu}$ on the brane that depends on a scalar constructed from the transverse gradients,
+\begin{equation}
+  u(\mathbf x) := \bigl|\nabla X^4(\mathbf x)\bigr|^2,
+\end{equation}
+and define
+\begin{equation}
+  g_{\mu\nu} = \eta_{\mu\nu} + h_{\mu\nu}\bigl(u(\mathbf x)\bigr)
+\end{equation}
+with
+\begin{equation}
+  h_{00} = \alpha\,u(\mathbf x),
+  \qquad
+  h_{0i} = 0,
+  \qquad
+  h_{ij} = \beta\,u(\mathbf x)\,\delta_{ij}.
+\end{equation}
+Here $\alpha$ and $\beta$ are phenomenological parameters to be fixed by matching to the usual weak-field form of general relativity.
+
+We emphasize that this metric ansatz is \emph{phenomenological} rather than derived: it is \emph{not} obtained from an Einstein--Hilbert action or a systematic expansion of the brane Lagrangian. Instead, we postulate a constitutive relation that encodes an effective coupling between amplitude gradients $|\nabla X^4|^2$ and spacetime curvature, chosen such that the resulting geodesic motion reproduces the observed weak-field behavior of general relativity. A microscopic derivation from first principles---for instance by computing how localized energy concentrations affect the geometry of wave propagation on the brane---remains an open problem.
+
+In the Newtonian / weak-field limit of GR the metric can be written as
+\begin{equation}
+  ds^2 = -\left(1 + \frac{2\Phi_G}{c^2}\right)c^2 dt^2
+         + \left(1 - \frac{2\Phi_G}{c^2}\right)\delta_{ij}\,dx^i dx^j,
+  \label{eq:weak_field_GR_metric}
+\end{equation}
+where $\Phi_G$ is the Newtonian gravitational potential. Matching this to our ansatz yields
+\begin{equation}
+  h_{00} = -\frac{2\Phi_G}{c^2},
+  \qquad
+  h_{ij} = -\frac{2\Phi_G}{c^2}\,\delta_{ij}.
+\end{equation}
+This implies
+\begin{equation}
+  \alpha\,u(\mathbf x) = -\frac{2\Phi_G(\mathbf x)}{c^2},
+  \qquad
+  \beta\,u(\mathbf x) = -\frac{2\Phi_G(\mathbf x)}{c^2},
+\end{equation}
+so that $\alpha = \beta$ and
+\begin{equation}
+  \Phi_G(\mathbf x) = -\frac{\alpha c^2}{2}\,u(\mathbf x).
+\end{equation}
+Choosing $\alpha < 0$ we parametrize
+\begin{equation}
+  \Phi_G(\mathbf x) = \kappa_G\,\bigl|\nabla X^4(\mathbf x)\bigr|^2,
+  \qquad
+  \kappa_G := -\frac{\alpha c^2}{2} > 0.
+  \label{eq:PhiG_from_gradX4}
+\end{equation}
+In this way the effective gravitational potential is manifestly \emph{quadratic} in the brane gradients and therefore invariant under $X^4 \to -X^4$.
+
+\paragraph{Geodesic equation and Newtonian limit}
+
+In the weak-field metric \eqref{eq:weak_field_GR_metric} the spatial part of the geodesic equation for a slow test particle ($|\mathbf v| \ll c$) reduces to
+\begin{equation}
+  \frac{d^2 x^i}{dt^2} \approx -\,\partial_i \Phi_G(\mathbf x),
+\end{equation}
+or in vector form
+\begin{equation}
+  \mathbf a = - \nabla \Phi_G.
+\end{equation}
+Thus, massive test bodies follow the standard Newtonian equations of motion in the potential $\Phi_G$ defined by \eqref{eq:PhiG_from_gradX4}.
+
+Light rays follow null geodesics of the same metric. In the weak-field approximation this reproduces the usual GR bending of light around a localized mass. In particular, if the deformation of the brane sourced by a localized soliton produces an effective potential $\Phi_G \approx -G M / r$ at large distances, then test particles and light rays will be deflected in the same way as in linearized GR.
+
+\paragraph{Poisson equation with brane energy as source}
+
+To relate the potential $\Phi_G$ to the \emph{energy density} stored in the brane, we start from the effective Lagrangian density for the transverse mode,
+\begin{equation}
+  \mathcal L_\perp
+  = \frac{\rho_m}{2} (\partial_t X^4)^2
+    - \frac{T}{2} \bigl|\nabla X^4\bigr|^2
+    - U_{\mathrm{nl}}(X^4),
+\end{equation}
+with effective mass density $\rho_m$, tension $T$ and nonlinear potential $U_{\mathrm{nl}}$. The corresponding energy density is
+\begin{equation}
+  \varepsilon(x) = T_{00}(x)
+  = \frac{\rho_m}{2} (\partial_t X^4)^2
+    + \frac{T}{2} \bigl|\nabla X^4\bigr|^2
+    + U_{\mathrm{nl}}(X^4).
+\end{equation}
+In the static, weak-field regime of interest here we can neglect time derivatives and strong nonlinearities away from the soliton core and approximate
+\begin{equation}
+  \varepsilon(\mathbf x) \;\simeq\; \frac{T}{2} \bigl|\nabla X^4(\mathbf x)\bigr|^2.
+\end{equation}
+
+At the coarse-grained level we define the gravitational potential via the usual Newtonian convolution
+\begin{equation}
+  \Phi_G(\mathbf x)
+  = - G \int d^3 x'\, \frac{\varepsilon(\mathbf x')/c^2}{|\mathbf x - \mathbf x'|},
+\end{equation}
+which implies the Poisson-type equation
+\begin{equation}
+  \nabla^2 \Phi_G(\mathbf x)
+  = 4\pi G \frac{\varepsilon(\mathbf x)}{c^2}.
+  \label{eq:Poisson_from_energy}
+\end{equation}
+Substituting the brane expression for $\varepsilon$ yields
+\begin{equation}
+  \nabla^2 \Phi_G(\mathbf x)
+  = 4\pi G \frac{1}{c^2}
+  \left[
+    \frac{\rho_m}{2} (\partial_t X^4)^2
+    + \frac{T}{2} \bigl|\nabla X^4\bigr|^2
+    + U_{\mathrm{nl}}(X^4)
+  \right],
+\end{equation}
+and in the static weak-field limit
+\begin{equation}
+  \nabla^2 \Phi_G(\mathbf x)
+  \;\simeq\;
+  2\pi G \frac{T}{c^2} \bigl|\nabla X^4(\mathbf x)\bigr|^2.
+\end{equation}
+At distances much larger than the soliton size (e.g.\ the electron Compton wavelength) each localized soliton can be approximated by a point mass
+\begin{equation}
+  M_n = \frac{1}{c^2} \int d^3x\, \varepsilon_n(\mathbf x),
+\end{equation}
+which leads to the standard multi-body Newtonian potential
+\begin{equation}
+  \Phi_G(\mathbf x) \approx -\sum_{n} \frac{G M_n}{|\mathbf x - \mathbf x_n|}.
+\end{equation}
+
+\subsection{Towards an Einstein-like Field Equation from Brane Dynamics}
+\label{sec:einstein-from-brane}
+
+The previous subsection treated gravity in a deliberately modest way:
+we postulated that the effective Newtonian potential $\Phi_G$ is
+determined by the brane energy density via a Poisson equation on the
+brane, and we \emph{then} chose an effective spacetime metric
+$g_{\mu\nu}$ such that the standard weak-field limit is reproduced.
+In this subsection we outline how an \emph{Einstein-like} field equation
+for $g_{\mu\nu}$ can emerge directly from the microscopic brane
+dynamics.
+
+The key point is that, in this model, gravity is not an independent
+field added on top of the brane. Instead, it arises from the same
+\emph{lateral motion and deformation} that already appear in the elastic
+energy, encoded in the induced metric $g_{ij}$ and the extrinsic
+curvature $b_{ij}$. At long wavelengths, the dynamics of these geometric
+quantities can be re-expressed as an effective gravitational action
+whose leading term is of Einstein--Hilbert form.
+
+\paragraph{Microscopic action for the brane.}
+
+Recall from Sec.~\ref{continuous-formulation} that the brane is
+described by the embedding
+\begin{equation}
+\mathbf{X}(x,t) = (X^1,X^2,X^3,X^4),
+\qquad
+x \in \Omega\subset\mathbb{R}^3,
+\label{eq:embedding-map-recall}
+\end{equation}
+with induced spatial metric and extrinsic curvature
+\begin{equation}
+g_{ij}(x,t) = \partial_i\mathbf{X}\cdot\partial_j\mathbf{X},
+\qquad
+b_{ij}(x,t) = \partial_i\partial_j \mathbf{X}\cdot\mathbf{n},
+\label{eq:metric-and-bij-recall}
+\end{equation}
+where $\mathbf{n}$ is the unit normal in the embedding space.
+The local energy density of the brane was written as
+\begin{equation}
+\mathcal{E}(x,t)
+= \frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
++ \frac{T}{2}\mathrm{tr}(E)
++ \mu|E|^2
++ \frac{\kappa}{2}|b|^2
++ W_\text{sat}(E),
+\label{eq:energy-density-recall}
+\end{equation}
+with strain tensor $E_{ij}$ defined from $g_{ij}$, tension $T$,
+shear modulus $\mu$, bending stiffness $\kappa$, and a saturation
+potential $W_\text{sat}(E)$ that limits large strains, see
+Eq.~\eqref{eq:saturation-potential}. The microscopic action is then
+schematically
+\begin{equation}
+S_\text{brane}[\mathbf{X}]
+= \int dt \int_\Omega d^3x\,\mathcal{L}_\text{brane}
+= \int dt \int_\Omega d^3x\,
+\bigl(
+\tfrac{\rho_m}{2}|\partial_t\mathbf{X}|^2
+- \mathcal{V}[g_{ij},b_{ij}]
+\bigr),
+\label{eq:brane-action}
+\end{equation}
+where the potential energy density $\mathcal{V}$ contains the
+elastic and saturation terms,
+\begin{equation}
+\mathcal{V}[g_{ij},b_{ij}]
+= \frac{T}{2}\mathrm{tr}(E)
++ \mu|E|^2
++ \frac{\kappa}{2}|b|^2
++ W_\text{sat}(E).
+\label{eq:elastic-potential}
+\end{equation}
+
+In other words, the full dynamics of the brane --- including both
+amplitude deformations $X^4$ and lateral motion $X^{1,2,3}$ --- is
+already encoded in an action functional of the embedding, or
+equivalently of the induced metric and the extrinsic curvature.
+
+\paragraph{Geometric reparametrization: from bending energy to curvature.}
+
+The elastic potential~\eqref{eq:elastic-potential} is a local functional
+of $g_{ij}$ and $b_{ij}$. For a thin, nearly homogeneous hypersurface
+embedded in a higher-dimensional flat space, the Gauss--Codazzi relations
+connect intrinsic curvature invariants derived from $g_{ij}$ to
+quadratic combinations of the extrinsic curvature $b_{ij}$. For a
+3-dimensional brane in 4 dimensions this has the schematic form
+\begin{equation}
+R(g)
+\;\sim\;
+b^2 - b_{ij} b^{ij}
+\;+\;
+\text{(total derivatives and higher-order terms)},
+\label{eq:gauss-codazzi-schematic}
+\end{equation}
+where $R(g)$ is the scalar curvature of the induced metric and
+$b^2 = (g^{ij} b_{ij})^2$.
+This means that, in an expansion around a gently curved background,
+the bending energy contribution
+$\tfrac{\kappa}{2}|b|^2$ can be reorganized into an intrinsic curvature
+term plus additional, higher-derivative corrections.
+
+At the same time, the strain tensor $E_{ij}$ is related to the deviation
+of $g_{ij}$ from the reference metric,
+\begin{equation}
+g_{ij} = \delta_{ij} + 2E_{ij} + \mathcal{O}(E^2).
+\end{equation}
+Thus the tension and shear terms in $\mathcal{V}[g_{ij},b_{ij}]$ can be
+re-expressed as a local functional of $g_{ij}$ and its first derivatives.
+
+Putting these pieces together, one can view the elastic energy of the
+brane as an effective \emph{geometric} functional of the induced metric:
+\begin{equation}
+\int_\Omega d^3x\,\mathcal{V}[g_{ij},b_{ij}]
+\;\simeq\;
+\int_\Omega d^3x\,\sqrt{\gamma}
+\Bigl(
+\Lambda_\text{eff}
++ \frac{M_\text{P,eff}^2}{2}\,R(g)
++ \text{higher-derivative terms}
+\Bigr),
+\label{eq:effective-geom-action-3d}
+\end{equation}
+where $\gamma = \det(g_{ij})$, $\Lambda_\text{eff}$ is an effective
+brane tension and $M_\text{P,eff}$ is an emergent ``Planck mass'' set by
+the microscopic moduli $(T,\mu,\kappa,\epsilon_\text{cr})$.
+The higher-derivative terms encode short-distance corrections beyond the
+Einstein--Hilbert form.
+
+\paragraph{Emergent 3+1 covariance and effective gravitational action.}
+
+Internal observers do not see the material coordinates $x^i$ and the
+external time $t$ directly. Instead, they reconstruct an effective
+spacetime metric $g_{\mu\nu}$ from the propagation of small-amplitude
+waves, as discussed in Sec.~\ref{sec:emergent-relativity}. To leading
+order these waves satisfy a covariant wave equation of the form
+\begin{equation}
+\square_g \psi
+\;=\;
+\frac{1}{\sqrt{-g}}
+\partial_\mu\bigl( \sqrt{-g}\,g^{\mu\nu}\partial_\nu \psi\bigr)
+\;=\; 0,
+\end{equation}
+where $g_{\mu\nu}$ encodes both the effective light cones and the
+spatial distances on the brane. The Lorentz symmetry of the small-amplitude
+wave equation thus promotes the purely spatial geometric functional
+in~\eqref{eq:effective-geom-action-3d} to a 3+1-dimensional effective
+action of the generic form
+\begin{equation}
+S_\text{grav}[g]
+\;\simeq\;
+\frac{c^3}{16\pi G_\text{eff}}
+\int d^4x\,\sqrt{-g}
+\bigl(
+R(g) - 2\Lambda_\text{eff}
+\bigr)
+\;+\;
+S_\text{higher}[g],
+\label{eq:einstein-hilbert-emergent}
+\end{equation}
+where $G_\text{eff}$ is an emergent Newton constant determined by the
+same lateral stiffness parameters that enter the elastic energy, and
+$S_\text{higher}[g]$ collects higher-derivative and nonlocal corrections.
+
+The important conceptual step is that \emph{no new degree of freedom is
+introduced}: the metric $g_{\mu\nu}$ is a coarse-grained description of
+the lateral motion and strain of the brane. Equation
+\eqref{eq:einstein-hilbert-emergent} is simply a convenient, covariant
+way of encoding how costly it is (in brane energy) to bend and stretch
+the medium on large scales.
+
+\paragraph{Einstein-like field equation and lateral motion as source of gravity.}
+
+Matter fields and solitonic excitations on the brane are described by
+additional terms in the microscopic action $S_\text{brane}[\mathbf{X}]$.
+At the coarse-grained level these contribute an effective matter action
+$S_\text{matter}[g,\Psi]$, whose variation with respect to the emergent
+metric defines an effective stress--energy tensor
+\begin{equation}
+T_{\mu\nu}^\text{(eff)}
+= -\frac{2}{\sqrt{-g}}
+\frac{\delta S_\text{matter}}{\delta g^{\mu\nu}}.
+\end{equation}
+Varying the total effective action
+$S_\text{eff} = S_\text{grav}[g] + S_\text{matter}[g,\Psi]$
+with respect to $g^{\mu\nu}$ then yields, at leading order in the
+derivative expansion,
+\begin{equation}
+G_{\mu\nu}[g] + \Lambda_\text{eff} g_{\mu\nu}
+= \frac{8\pi G_\text{eff}}{c^4}\,T_{\mu\nu}^\text{(eff)}
+\;+\;
+\text{(higher-derivative corrections)},
+\label{eq:einstein-like-from-brane}
+\end{equation}
+where $G_{\mu\nu}[g]$ is the Einstein tensor of the emergent metric.
+
+In this picture, what appears as ``spacetime curvature'' to internal
+observers is nothing but the accumulated lateral response of the brane,
+encoded in $g_{\mu\nu}[X]$:
+\begin{itemize}
+  \item Localized amplitude bulges $X^4$ create lateral strain $E_{ij}$
+        and extrinsic curvature $b_{ij}$;
+  \item The elastic cost of these deformations, dominated by the
+        lateral stiffness $(T,\mu,\kappa)$, induces an effective action
+        $S_\text{grav}[g]$ of the Einstein--Hilbert form;
+  \item The corresponding field equation \eqref{eq:einstein-like-from-brane}
+        states that the \emph{lateral geometry} of the brane (through
+        $G_{\mu\nu}[g]$) is controlled by the effective stress--energy
+        of all excitations propagating within it.
+\end{itemize}
+Thus the original intuition of ``gravity as a lateral effect'' becomes
+precise: gravitational dynamics is nothing but the large-scale, covariant
+re-expression of the brane's tendency to resist lateral motion and
+bending.
+
+\paragraph{Static weak-field limit and consistency with the Poisson picture.}
+
+In the static, weak-field regime with $|h_{\mu\nu}|\ll 1$ and slow
+motions, the $00$-component of
+Eq.~\eqref{eq:einstein-like-from-brane} reduces to
+\begin{equation}
+\nabla^2 \Phi_G(\mathbf{x})
+\;\approx\;
+4\pi G_\text{eff}\,\frac{\varepsilon(\mathbf{x})}{c^2},
+\end{equation}
+with $\varepsilon(\mathbf{x})$ the brane energy density defined in
+Eq.~\eqref{eq:energy-density-recall}. This reproduces the Poisson
+equation used in the previous subsection, including the identification
+of the gravitational source with the energy stored in lateral gradients
+and internal oscillations, and it explains why both matter and radiation
+gravitate via their energy content.
+
+A complete microscopic derivation of the coefficients
+$\Lambda_\text{eff}$ and $G_\text{eff}$ in terms of $(T,\mu,\kappa,
+\rho_m,\epsilon_\text{cr},\dots)$ would require a full multi-scale
+analysis of the brane dynamics and lies beyond the scope of this work.
+However, the structural result~\eqref{eq:einstein-like-from-brane}
+already shows how an Einstein-like field equation can be understood as
+the \emph{coarse-grained equation of motion} for the lateral geometry of
+the brane, induced by its microscopic elastic Lagrangian.
+
+\paragraph{Consistency with the EM sector and the sign issue}
+
+In the electrostatic sector we model the free charge density as
+\begin{equation}
+  \rho_{\mathrm{free}}(\mathbf x)
+  = q_0\bigl(-\nabla^2 \bar X^4(\mathbf x)\bigr)
+\end{equation}
+for some constant $q_0$. Flipping the sign of $\bar X^4$ in the core of a toroidal soliton,
+\begin{equation}
+  \bar X^4 \to -\bar X^4,
+\end{equation}
+reverses the sign of $\rho_{\mathrm{free}}$ and hence of the Coulomb field:
+electron $\leftrightarrow$ positron.
+
+By contrast, the gravitational source depends on the energy density
+\begin{equation}
+  \varepsilon(\mathbf x)
+  \sim
+  \frac{T}{2}\bigl|\nabla X^4(\mathbf x)\bigr|^2
+\end{equation}
+and thus on the \emph{quadratic} quantity $|\nabla X^4|^2$, which is invariant under $X^4 \to -X^4$. Consequently, the effective gravitational mass
+\begin{equation}
+  M = \frac{1}{c^2} \int d^3x\,\varepsilon(\mathbf x)
+\end{equation}
+is the same for an electron and its positron counterpart (up to the details of their internal structure), even though their electrostatic charges and fields differ by a sign.
+
+This expression is just the standard mass--energy equivalence in a new
+guise: the effective gravitational mass of any localized brane excitation
+is the total energy of its deformation pattern divided by $c^2$. The
+fact that $M$ depends only on the energy density $\varepsilon$ and not
+on the sign of $X^4$ mirrors the textbook result that both matter and
+radiation gravitate via their energy content. Van der Mark and
+'t~Hooft~\cite{vanderMark2000LightHeavy} make this very explicit by
+considering a perfectly reflecting box filled with light: when placed on
+a balance, the box weighs an amount $M = E/c^2$ more than when it is
+empty, even though the individual photons have zero rest mass. In our
+brane picture the same reasoning applies mechanically: whether the
+energy is stored in a delocalized photon wave packet or in a tightly
+confined toroidal soliton, the gravitational source is always the
+integrated energy density of the brane configuration in the
+center-of-mass frame.
+
+One might object that if the Compton energy stored in the electron is
+really due to a photon circulating at speed $c$, why don't we see an
+electron's mass drop to zero if we somehow ``stop the internal
+circulation''? The answer is that, within the confinement picture
+outlined here, there is no such thing as ``stopping the spin'' without
+destroying the soliton altogether. The nonlinear threshold required to
+confine the photon mode into a stable torus demands that the circulating
+energy remain above a critical density; attempting to extract or slow
+that circulation would simply cause the soliton to dissipate back into
+free radiation. In other words, the electron's mass is tied to the
+existence of the confined structure: no circulation means no soliton,
+and hence no localized mass. This is fully consistent with mass being
+stored energy, as long as one recognizes that ``rest mass'' refers to a
+bound, dynamically maintained system rather than a static lump of
+substance.
+
+In this way a single brane medium supports two long-range interactions:
+\begin{itemize}
+  \item a \emph{linear}, sign-sensitive electrostatic sector based on the Laplacian of $\bar X^4$, and
+  \item a \emph{quadratic}, sign-blind gravitational sector based on the energy density stored in gradients of $X^4$ and encoded in the effective metric $g_{\mu\nu}$.
+\end{itemize}
+Both light rays and matter geodesics respond to the same metric and thus experience gravity in the same way, while the sign of the electrostatic interaction remains sensitive to the microscopic sign of the brane deformation.
+
+\subsubsection{Static Far Field and Emergent Coulomb Law}
+\label{sec:static-coulomb-from-brane}
+
+In the paragraph leading to Eq.~\eqref{eq:poisson-from-brane} we
+introduced the Poisson relation as an effective closure: the
+time-averaged amplitude deformation $\bar X^4$ was assumed to source a
+Coulomb-like potential at large distances. In this subsection we sketch
+how such a Poisson behavior can in fact be understood as the static,
+linear far-field limit of the brane equations of motion derived from
+the microscopic Lagrangian in Eq.~\eqref{eq:brane-lagrangian}.
+
+We start from the Euler--Lagrange equation
+\begin{equation}
+  \rho_m\,\partial_{tt}\mathbf{X}
+  = \nabla_i\!\left(\sigma^{ij}\partial_j\mathbf{X}\right)
+  - \kappa\,\Delta_g^2\mathbf{X}_\perp,
+  \label{eq:brane-eom-static-start}
+\end{equation}
+with stress tensor $\sigma^{ij}$ given by the linear stress--strain
+relation~\eqref{eq:linear-stress-strain} in the small-slope regime and
+$\Delta_g$ the Laplace--Beltrami operator on the brane. For the static
+far field of a localized soliton we can make three simplifying
+assumptions:
+
+\begin{enumerate}
+  \item \textbf{Static limit}: we are interested in time-independent
+    configurations, so $\partial_t\mathbf X \approx 0$ and
+    $\partial_{tt}\mathbf X \approx 0$.
+
+  \item \textbf{Small-slope, nearly flat regime}: far outside the
+    Compton-scale core of the torus, the induced strains are small and
+    the brane is close to its flat reference state. In this regime
+    $g_{ij} \approx \delta_{ij}$, $\Delta_g \approx \Delta$ is the flat
+    Laplacian, and the saturation potential $W_\text{sat}$ is negligible.
+
+  \item \textbf{Isotropic far-field response}: in the same regime the
+    stress tensor is approximately isotropic,
+    $\sigma^{ij} \approx T_{\mathrm{eff}}\,\delta^{ij}$, where
+    $T_{\mathrm{eff}}$ is an effective tension that includes small linear
+    corrections from $\mu$ and $W_\text{sat}$.
+\end{enumerate}
+
+Under these assumptions the static equation for the embedding simplifies
+to
+\begin{equation}
+  0
+  \approx
+  \nabla_i\!\left(T_{\mathrm{eff}}\delta^{ij}\partial_j \mathbf X\right)
+  - \kappa\,\Delta^2\mathbf X_\perp
+  =
+  T_{\mathrm{eff}}\,\Delta \mathbf X
+  - \kappa\,\Delta^2\mathbf X_\perp.
+  \label{eq:static-linearized-eom}
+\end{equation}
+We now focus on the normal component $X^4$, which in this model encodes
+amplitude displacements of the brane into the embedding direction. In
+the far field, where the background embedding is $\mathbf X_0(x) =
+(x^1,x^2,x^3,0)$ and only small static deformations remain, we can write
+\[
+  X^4(\mathbf x) = \delta X^4(\mathbf x),
+\]
+and Eq.~\eqref{eq:static-linearized-eom} reduces to a scalar equation
+for $\delta X^4$:
+\begin{equation}
+  T_{\mathrm{eff}}\,\Delta \,\delta X^4(\mathbf x)
+  - \kappa\,\Delta^2 \delta X^4(\mathbf x)
+  = 0
+  \qquad\text{for } |\mathbf x| \gg R_{\mathrm{core}},
+  \label{eq:biharmonic-X4}
+\end{equation}
+where $R_{\mathrm{core}}$ is the characteristic size of the soliton.
+This can be written more transparently as
+\begin{equation}
+  -\kappa\,\Delta\bigl(\Delta - m^2\bigr)\delta X^4 = 0,
+  \qquad
+  m^2 \equiv \frac{T_\mathrm{eff}}{\kappa}.
+  \label{eq:factorized-X4}
+\end{equation}
+
+Equation~\eqref{eq:factorized-X4} shows that the static normal
+deformation consists of two sectors:
+\begin{align}
+  \Delta \delta X^4_\mathrm{harm} &= 0,
+  \label{eq:harmonic-sector}
+  \\
+  (\Delta - m^2)\,\delta X^4_\mathrm{Yuk} &= 0,
+  \label{eq:yukawa-sector}
+\end{align}
+so that $\delta X^4 = \delta X^4_\mathrm{harm} + \delta X^4_\mathrm{Yuk}$.
+The second equation describes a Yukawa-like screened contribution with
+characteristic length scale $m^{-1} = \sqrt{\kappa/T_{\mathrm{eff}}}$.
+For a localized source whose deformation decays at infinity, the
+solution of Eq.~\eqref{eq:yukawa-sector} behaves as
+$\delta X^4_\mathrm{Yuk} \sim e^{-mr}/r$ and is exponentially suppressed
+at large distances. The dominant far-field contribution therefore comes
+from the harmonic sector~\eqref{eq:harmonic-sector}.
+
+In three spatial dimensions, any localized solution of
+$\Delta \delta X^4_\mathrm{harm} = 0$ admits a multipole expansion of the
+form
+\begin{equation}
+  \delta X^4_\mathrm{harm}(\mathbf x)
+  =
+  \frac{A_0}{r}
+  + \sum_{\ell\ge 1}\frac{1}{r^{\ell+1}}
+    \sum_{m=-\ell}^{\ell} A_{\ell m} Y_{\ell m}(\theta,\phi),
+  \qquad r = |\mathbf x|,
+  \label{eq:X4-multipole}
+\end{equation}
+where $Y_{\ell m}$ are spherical harmonics and the coefficients
+$A_{\ell m}$ are determined by the soliton's internal structure. Thus,
+as long as the monopole coefficient $A_0$ does not vanish, the leading
+far-field behavior is
+\begin{equation}
+  \delta X^4(\mathbf x)
+  \sim
+  \frac{A_0}{r}
+  + \mathcal O\!\left(\frac{1}{r^2},\frac{e^{-mr}}{r}\right),
+  \qquad r\to\infty.
+  \label{eq:X4-far-field}
+\end{equation}
+
+Recalling the geometric identification of the scalar potential from
+Eq.~\eqref{eq:phi-from-xi4},
+\begin{equation}
+  \Phi(\mathbf x) = \kappa\,\bar X^4(\mathbf x),
+\end{equation}
+and noting that in the static far-field regime
+$\bar X^4 \approx \delta X^4$, we obtain
+\begin{equation}
+  \Phi(\mathbf x)
+  \sim \frac{\kappa A_0}{r},
+  \qquad r\to\infty,
+\end{equation}
+up to higher multipoles and exponentially small Yukawa corrections.
+In this sense, the usual $1/r$ Coulomb behavior is not postulated but
+emerges directly from the microscopic brane dynamics in the static,
+linear far-field limit.
+
+This also suggests a natural geometric definition of the effective
+charge associated with a localized soliton. For any sphere $S_R$ of
+radius $R$ enclosing the torus, we define
+\begin{equation}
+  Q_{\mathrm{geom}}
+  \;\equiv\;
+  -\,\varepsilon_{\mathrm{eff}}
+  \int_{S_R} \nabla\Phi\cdot d\mathbf S
+  =
+  -\,\varepsilon_{\mathrm{eff}}\kappa
+  \int_{S_R} \nabla\bar X^4\cdot d\mathbf S.
+  \label{eq:Q-geometric}
+\end{equation}
+Outside the core $\Phi$ is harmonic, $\Delta\Phi = 0$, so by the
+divergence theorem the flux integral in Eq.~\eqref{eq:Q-geometric} is
+independent of $R$ as long as $S_R$ encloses the soliton. For the
+spherically symmetric leading term $\Phi \sim C/r$ one finds
+\begin{equation}
+  \int_{S_R} \nabla\Phi\cdot d\mathbf S
+  = 4\pi C,
+  \qquad
+  Q_{\mathrm{geom}} = 4\pi\varepsilon_{\mathrm{eff}} C
+  = 4\pi\varepsilon_{\mathrm{eff}}\kappa A_0.
+  \label{eq:Q-from-monopole}
+\end{equation}
+Identifying $Q \equiv Q_{\mathrm{geom}}$ then reproduces the usual
+Coulomb potential
+\begin{equation}
+  \Phi(\mathbf x)
+  \approx
+  \frac{Q}{4\pi\varepsilon_{\mathrm{eff}}}\,\frac{1}{r}
+\end{equation}
+in the far field. In this way, the Poisson equation
+\eqref{eq:poisson-from-brane} can be viewed as a coarse-grained
+description that summarizes the static, linearized response of the brane
+to a localized soliton: the detailed internal structure of the toroidal
+mode determines the monopole coefficient $A_0$ and hence $Q$, while the
+operator $\nabla^2$ governing $\Phi$ at large scales is inherited
+directly from the microscopic brane dynamics.
+
+\subsubsection{Charge Magnitude from Internal Energy Density}
+\label{sec:charge-magnitude}
+
+In the preceding discussion we have treated the magnitude of the elementary
+charge $|e|$ as an empirical input. However, the toroidal soliton picture
+suggests a deeper connection: if the electron's rest mass and its charge
+both arise from the same localized energy configuration, then the observed
+value of $|e|$ should be derivable from the internal energy density and
+geometry of the soliton, rather than being an independent fundamental
+constant.
+
+This idea was pursued quantitatively by Williamson and van der
+Mark~\cite{Williamson1997} and further elaborated in the pedagogical
+treatment by Huygens Optics~\cite{HuygensOptics2025}. Their approach
+proceeds as follows:
+\begin{itemize}
+\tightlist
+\item
+  Assume a toroidal structure of characteristic size $R$ related to the
+  Compton wavelength $\lambda_C = h/(m_e c)$.
+\item
+  The internal energy is stored equally in what one would call
+  ``electric'' and ``magnetic'' field components (i.e., in two orthogonal
+  oscillatory modes of the brane). The electric energy density thus accounts
+  for half the total internal energy $m_e c^2$.
+\item
+  Use the known total energy $m_e c^2$ to compute an average field strength
+  $E_{\mathrm{avg}}(R)$ inside the torus.
+\item
+  Equate this to the classical Coulomb field at radius $r \sim R$:
+  \[
+    E_{\mathrm{Coul}}(r) = \frac{1}{4\pi\varepsilon_0}\frac{q}{r^2}.
+  \]
+\item
+  Solve for $q$. Remarkably, when the relation between $R$ and
+  $\lambda_C$ is used consistently, $R$ and $\lambda_C$ cancel out, leaving
+  a prediction $q \approx 1.47 \times 10^{-19}\,\mathrm{C}$, which is
+  within $\sim 9\%$ of the observed elementary charge $|e| = 1.60 \times
+  10^{-19}\,\mathrm{C}$.
+\end{itemize}
+
+In the brane framework, this derivation is reinterpreted as follows.
+Instead of electromagnetic fields in vacuum, we have amplitude deformations
+of the brane with an associated energy density $\mathcal{E}(\xi,\partial\xi)$.
+The threshold confinement condition (Sec.~\ref{threshold-localization})
+requires that this energy density integrated over a Compton-scale volume
+$V_c \sim R^3$ reproduces the rest mass $m_e c^2$. The far-field
+effective Coulomb behavior, as argued in Sec.~\ref{sec:charge-amplitude}, is
+then determined by the gradient of the time-averaged amplitude deformation.
+Combining these, one obtains a relation of the form
+\[
+  q \;\sim\;
+  f\bigl(\text{brane parameters},\, \mathcal{E}_{\mathrm{crit}},\,
+  \lambda_C\bigr),
+\]
+where the dimensionless combination is of order unity. The fact that the
+Williamson--van der Mark calculation yields $1.47 / 1.60 \approx 0.92$
+with very simple assumptions suggests that a geometric-tensional origin
+for the charge magnitude is at least numerically plausible.
+
+\textbf{Interpretation in the brane model.}
+Unlike the original Williamson--van der Mark model, where the ratio
+$R/\lambda_C$ is a somewhat adjustable geometric parameter, in the present
+brane picture this relation is fixed by the threshold and dispersion
+properties of the medium. Thus, $|e|$ becomes a \emph{derived constant},
+determined by:
+\begin{itemize}
+\tightlist
+\item
+  the critical amplitude (or tension) at which soliton confinement occurs,
+\item
+  the Compton-scale geometry of the toroidal mode,
+\item
+  and the effective permittivity $\varepsilon_{\mathrm{eff}}$ governing
+  the brane's response to amplitude deformations.
+\end{itemize}
+In this sense, the magnitude of the elementary charge is not a free
+parameter but rather a prediction (up to order-unity factors) of the
+underlying brane dynamics. A full quantitative derivation that reproduces
+$|e|$ to better than $10\%$ accuracy would require detailed modeling of
+the toroidal soliton's internal structure, including the photon
+double-loop confinement mechanism, and remains a target for future work.
+
+\subsection{Electromagnetism from Motion}
+\label{sec:em-from-motion}
+
+In the previous sections we have (i) introduced the three-dimensional
+brane embedded in a four-dimensional space with a global evolution
+parameter $t$ and an approximately Minkowskian emergent spacetime
+structure, and (ii) argued that localized, approximately solitonic
+wave packets behave as particle-like excitations whose internal
+oscillation defines a phase field with de~Broglie-like properties.
+In this subsection we show how, once such a Lorentzian spacetime
+structure is in place, a single ``Coulomb-like'' interaction in the
+rest frame of a solitonic excitation is sufficient to generate the
+full electromagnetic field---including magnetic effects---in arbitrary
+frames. In this sense \emph{magnetism is purely a consequence of
+motion} in the emergent relativistic geometry.
+
+\subsubsection{Effective scalar interaction on the brane}
+
+Consider a localized solitonic excitation on the brane with worldline
+$x^\mu(\tau)$ in the emergent spacetime with coordinates
+$x^\mu = (ct,\mathbf{x})$ and Minkowski metric $\eta_{\mu\nu}$ as
+constructed in Sec.~\ref{sec:emergent-relativity}. From the viewpoint
+of another soliton at rest with respect to this source, the simplest
+interaction we can admit is a quasi-static modification of the local
+brane tension which we describe by an effective scalar potential
+$\Phi(\mathbf{x})$. As discussed in Sec.~\ref{sec:charge-amplitude},
+physically $\Phi(\mathbf{x})$ represents the coarse-grained displacement
+of the brane in the fourth embedding direction, averaged over the fast
+internal oscillations of the soliton. In particular, for the toroidal
+electron configuration of Williamson and van der
+Mark~\cite{Williamson1997}, the confined photon energy density and its
+nontrivial topology induce a static amplitude deformation --- a toroidal
+peak or trough in $X^4$ --- whose sign and magnitude correspond to the
+observed electric charge via Eqs.~\eqref{eq:phi-from-xi4}
+and~\eqref{eq:poisson-from-brane}.
+
+At the level of the coarse-grained continuum description this scalar
+potential is assumed to satisfy a Poisson-type equation on the brane,
+\begin{equation}
+  \nabla^2 \Phi(\mathbf{x})
+  \;=\;
+  -\,\frac{\rho_{\text{free}}(\mathbf{x})}{\varepsilon_{\mathrm{eff}}}\,,
+  \label{eq:poisson-brane}
+\end{equation}
+where $\rho_{\text{free}}(\mathbf{x})$ is the net free charge density
+associated with the soliton (e.g.\ the coarse-grained monopole component
+of its internal oscillation pattern after bound contributions cancel) and
+$\varepsilon_{\mathrm{eff}}$ is an effective permittivity determined by
+the elastic response of the medium.
+In the rest frame of an isolated soliton the corresponding field
+is purely ``electric'' in the usual sense,
+\begin{equation}
+  \mathbf{E}(\mathbf{x})
+  \;:=\;
+  -\nabla \Phi(\mathbf{x})\,,
+  \qquad
+  \mathbf{B}(\mathbf{x}) = \mathbf{0}\,.
+  \label{eq:rest-electric}
+\end{equation}
+Up to the specific identification of $\varepsilon_{\mathrm{eff}}$ with
+microscopic parameters of the brane, this reproduces the familiar
+Coulomb field of a static charge.
+
+\subsubsection{4-potential and the brane d'Alembertian}
+
+The key step is to make this scalar interaction compatible with the
+emergent Lorentz invariance established in
+Sec.~\ref{sec:emergent-relativity}. In that section we effectively
+constructed a d'Alembertian operator
+\begin{equation}
+  \Box
+  \;:=\;
+  \eta^{\mu\nu}\,\partial_\mu\partial_\nu
+  \;=\;
+  -\frac{1}{c^2}\,\partial_{tt} + \nabla^2\,,
+  \label{eq:brane-dalembert}
+\end{equation}
+which governs the propagation of small disturbances of the embedding
+field $\xi^a(x,t)$ through the medium.
+It is natural to postulate that the same operator dictates the
+propagation of the effective interaction field sourced by moving
+solitons.
+
+We therefore promote the scalar potential $\Phi$ to the time component
+of a four-potential $A_\mu = (\Phi, -\mathbf{A})$ and demand that
+it obeys a Lorentz-covariant wave equation on the emergent spacetime
+(in Lorenz gauge $\partial_\mu A^\mu = 0$),
+\begin{equation}
+  \Box A_\mu(x)
+  \;=\;
+  \mu_{\mathrm{eff}}\,J_\mu(x)\,,
+  \label{eq:maxwell-wave}
+\end{equation}
+where $J_\mu = (c\rho_{\text{free}},\mathbf{j})$ is the conserved
+effective four-current of solitons. At this stage only the time
+component $A_0=\Phi$ is explicitly tied to the brane geometry via
+Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}; the
+spatial components $\mathbf{A}$ and the detailed form of $J_\mu$ are
+introduced phenomenologically as part of an effective continuum
+description, with the expectation that a more microscopic relation
+$A_\mu[\mathbf{X}]$ can be derived from the brane Lagrangian in future
+work. The effective coupling constant $\mu_{\mathrm{eff}}$ characterizes
+the medium's response to current distributions.
+The conservation law
+$\partial_\mu J^\mu = 0$ follows from the fact that the soliton number
+is conserved and their worldlines are continuous in the emergent
+spacetime.
+
+The parameters $\varepsilon_{\mathrm{eff}}$ and $\mu_{\mathrm{eff}}$
+characterize the brane's response to charge and current distributions.
+In a full microscopic derivation from the embedding dynamics, these
+would not be independent but would be related through the underlying
+elastic and geometric properties of the brane. Here we treat them as
+phenomenological parameters, but we can establish one key constraint
+by demanding internal consistency.
+
+Consider the static limit of Eq.~\eqref{eq:maxwell-wave} with
+$A_i=0$ and $\partial_t A_0 = 0$. Then $\Box A_0 = \nabla^2 \Phi$
+and $J_0 = c\rho_{\text{free}}$, so Eq.~\eqref{eq:maxwell-wave} reduces to
+\begin{equation}
+  \nabla^2 \Phi \;=\; \mu_{\mathrm{eff}}\,c\,\rho_{\text{free}}\,.
+  \label{eq:poisson-from-wave-eq}
+\end{equation}
+For this to be consistent with the Poisson equation
+\eqref{eq:poisson-from-brane}, which states
+$\nabla^2 \Phi = -\rho_{\text{free}}/\varepsilon_{\mathrm{eff}}$,
+we must have
+\begin{equation}
+  \mu_{\mathrm{eff}}\,c \;=\; -\,\frac{1}{\varepsilon_{\mathrm{eff}}}\,,
+  \label{eq:mu-eps-relation}
+\end{equation}
+or equivalently (up to sign conventions in the definition of $A_\mu$)
+\begin{equation}
+  c^2 \;=\; \frac{1}{\varepsilon_{\mathrm{eff}}\mu_{\mathrm{eff}}}\,.
+  \label{eq:c-squared-relation}
+\end{equation}
+This is precisely the usual Maxwell relation between the wave speed
+and the medium parameters. Thus, demanding consistency between the
+static Poisson equation and the covariant wave equation
+\eqref{eq:maxwell-wave} fixes one relation among the three parameters
+$c$, $\varepsilon_{\mathrm{eff}}$, and $\mu_{\mathrm{eff}}$, leaving
+two independent phenomenological constants to be determined from the
+microscopic brane dynamics.
+
+\paragraph{Phenomenological status:} At this stage we do not derive $A_\mu$ from the embedding field $\mathbf{X}$ or its derivatives; instead we introduce an effective four-potential on the emergent spacetime that is constrained by the brane's Lorentzian geometry. A full microscopic derivation linking $A_\mu$ to brane deformations remains an open problem (see Section~\ref{discussion}).
+
+Given the four-potential, we define the antisymmetric field tensor
+\begin{equation}
+  F_{\mu\nu}
+  \;:=\;
+  \partial_\mu A_\nu - \partial_\nu A_\mu\,,
+  \label{eq:Fmunu-def}
+\end{equation}
+whose spatial components encode the familiar electric and magnetic
+fields,
+\begin{equation}
+  E_i = F_{0i}\,,\qquad
+  B_i = -\frac{1}{2}\,\varepsilon_{ijk} F_{jk}\,.
+  \label{eq:EB-from-F}
+\end{equation}
+By construction $F_{\mu\nu}$ transforms as a rank-2 tensor under the
+local Lorentz transformations that arise from the isotropic wave speed
+of the medium. The crucial point is that once the dynamics is written
+in the covariant form \eqref{eq:maxwell-wave}, the separation into
+$\mathbf{E}$ and $\mathbf{B}$ becomes frame-dependent bookkeeping:
+it is the single tensor $F_{\mu\nu}$ that is fundamental.
+
+\subsubsection{Magnetic fields as kinematic effects}
+
+To see explicitly how magnetism arises purely from motion, consider an
+isolated soliton that is static in some rest frame $\mathcal{F}$.
+In that frame we may choose a gauge in which
+\begin{equation}
+  A_\mu = (\Phi, \mathbf{0})\,,
+  \label{eq:rest-potential}
+\end{equation}
+so that Eqs.~\eqref{eq:EB-from-F} reproduce
+\eqref{eq:rest-electric} and $\mathbf{B} = \mathbf{0}$.
+
+Now consider another frame $\mathcal{F}'$ in which the same soliton
+moves with constant velocity $\mathbf{v}$.
+The coordinates in the two frames are related by a Lorentz
+transformation $\Lambda^\mu{}_\nu$ constructed in
+Sec.~\ref{sec:emergent-relativity},
+\begin{equation}
+  x'^\mu = \Lambda^\mu{}_\nu x^\nu\,.
+\end{equation}
+Because $A_\mu$ is a four-vector by assumption, it transforms as
+\begin{equation}
+  A'_\mu(x')
+  \;=\;
+  \Lambda_\mu{}^\nu\,A_\nu(x)\,.
+\end{equation}
+Using \eqref{eq:rest-potential} for a boost with velocity $\mathbf{v}$
+along, say, the $x$-direction one finds
+\begin{equation}
+  A'_0 = \gamma\Phi\,,\qquad
+  A'_x = -\gamma\frac{v}{c}\Phi\,,\qquad
+  A'_y = A'_z = 0\,,
+  \label{eq:Aprime-boost}
+\end{equation}
+where $\gamma = 1/\sqrt{1-v^2/c^2}$.
+Applying the definition \eqref{eq:Fmunu-def} in the primed frame one
+obtains
+\begin{equation}
+  \mathbf{E}'
+  \;=\;
+  \mathbf{E}_\parallel + \gamma\mathbf{E}_\perp\,,
+  \qquad
+  \mathbf{B}'
+  \;=\;
+  -\gamma\,\frac{\mathbf{v}\times\mathbf{E}}{c^2}\,,
+  \label{eq:field-transform}
+\end{equation}
+where $\mathbf{E}$ is the purely electric field from
+\eqref{eq:rest-electric}, and the subscripts denote components
+parallel and perpendicular to $\mathbf{v}$.
+Even though $\mathbf{B}=\mathbf{0}$ in the rest frame, a
+\emph{non-zero magnetic field} $\mathbf{B}'$ appears automatically in
+any frame in which the source moves.
+In other words, once the interaction is encoded in a Lorentz-covariant
+four-potential $A_\mu$ supported by the brane dynamics, magnetic
+fields are nothing but the relativistic ``shadow'' of the same electric
+interaction seen from a moving frame.
+
+\subsubsection{Effective Lorentz force on solitons}
+
+Within the present framework, solitons follow worldlines that extremize
+an effective action consisting of a free (geodesic) part determined by
+the brane geometry and an interaction part that couples their internal
+phase to the four-potential $A_\mu$.
+A minimal coupling ansatz consistent with the de~Broglie-like phase
+structure of Sec.~\ref{sec:wave-mechanics} is
+\begin{equation}
+  S_{\mathrm{int}}
+  \;=\;
+  q \int A_\mu\bigl(x(\tau)\bigr)\,
+  \frac{dx^\mu}{d\tau}\,d\tau\,,
+  \label{eq:interaction-action}
+\end{equation}
+where $q$ is an effective charge parameter characterizing how strongly
+the soliton's internal oscillation pattern is twisted by the local
+interaction field. The parameter $q$ in Eq.~\eqref{eq:interaction-action}
+is the same effective charge that appears in the Williamson--van der Mark
+estimate of Sec.~\ref{sec:charge-magnitude}; in particular, for
+electron-like solitons it should reproduce (up to order-unity factors)
+the elementary charge magnitude $|e|$ discussed there. Thus, the same
+microscopic property---the internal photon content and toroidal
+topology---sets both the Coulomb field strength in the rest frame and
+the coupling constant to the four-potential $A_\mu$ in the interaction
+action.
+
+Varying the total action with respect to the worldline yields, in the
+non-relativistic limit and for slowly varying fields, the familiar
+Lorentz force law in the emergent spacetime,
+\begin{equation}
+  m\,\frac{d^2\mathbf{x}}{dt^2}
+  \;=\;
+  q\left(
+    \mathbf{E} + \mathbf{v}\times\mathbf{B}
+  \right)
+  + \mathcal{O}\!\left(\frac{v^2}{c^2}\right),
+  \label{eq:lorentz-force}
+\end{equation}
+with $m$ the inertial mass of the soliton as determined in
+Sec.~\ref{sec:wave-mechanics}.
+Thus, the effective electromagnetism experienced by solitonic
+excitations on the brane emerges from two ingredients:
+\begin{enumerate}
+  \item a single scalar interaction in the soliton rest frame,
+        encoded in a four-potential $A_\mu$ governed by the same
+        d'Alembertian $\Box$ that controls small-amplitude brane
+        waves, and
+  \item the Lorentzian spacetime structure that the brane itself
+        generates through its isotropic wave propagation.
+\end{enumerate}
+Magnetic fields and the velocity dependence of the Lorentz force are
+then not additional postulates but necessary kinematic consequences of
+the underlying brane dynamics and the emergent relativity discussed in
+Secs.~\ref{sec:emergent-relativity} and~\ref{sec:wave-mechanics}.
+```
+
+\subsection{Particles as Solitons}\label{particles-as-solitons}
+
+In this framework, particles are not treated as fundamental point-like
+entities but as \textbf{soliton-like, self-stabilizing wave packets} ---
+emergent structures within a unified, tensioned medium. Each particle
+corresponds to a localized \textbf{resonant excitation} of the
+underlying field, maintained by a nonlinear balance between dispersion
+and restoring forces. These stable modes behave as \textbf{quantized
+energy packets}, not due to external imposition, but through their
+\textbf{intrinsic oscillatory character}.
+
+While each soliton maintains a closed internal energy cycle without
+dissipation, interactions between multiple solitons can exhibit
+deterministic chaos---tiny variations in initial conditions yield widely
+divergent outcomes---though total energy remains conserved.
+
+The field medium supports a discrete spectrum of such solitons, much
+like standing waves on a vibrating membrane. Each excitation possesses
+its own characteristic \textbf{vibrational frequency}, inversely related
+to its size $(\omega_\text{min} \sim 1/R)$. This internal frequency
+determines the particle's \textbf{rest mass} via the relation
+$E = \hbar \omega$ --- offering a natural explanation of mass without
+invoking a universal scalar field (e.g., the Higgs field).
+
+\paragraph{Localized Mass through Internal
+Dynamics}\label{localized-mass-through-internal-dynamics}
+
+The traditional Higgs mechanism posits a scalar background field
+permeating space, from which particles acquire mass via interaction.
+This introduces conceptual weight, requiring every particle to couple to
+a global vacuum expectation value (VEV). By contrast, the solitonic view
+sees \textbf{mass as intrinsic}, arising from \textbf{localized
+vibrational energy}. There is no need for a universal mass-generating
+field; each particle ``carries'' its own origin of inertia in its stable
+configuration.
+
+\paragraph{A Unified Medium and Solitonic
+Diversity}\label{a-unified-medium-and-solitonic-diversity}
+
+Rather than postulating dozens of fields (one per particle species),
+this model starts from \textbf{a single underlying brane medium
+embedded in four-dimensional space}. Localized solitonic excitations of
+this medium play the role of particles, while differences between
+particle species and their quantum properties arise from the internal
+oscillation patterns and phases of these solitons, not from additional
+fundamental fields.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2093}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2791}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.5116}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Feature
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Standard Model
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Soliton-Based
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Fields & Dozens, one per particle & \textbf{One} (single elastic brane medium in 4D; diversity from solitons and their internal oscillations) \\
+Particle identity & Postulated & Emergent from field configuration \\
+Interactions & Put in by hand & Natural result of overlapping field
+dynamics \\
+Coupling constants & Arbitrary inputs & Emergent from overlap geometry
+or topology \\
+Ontology & Fragmented & Unified and geometric \\
+\end{longtable}
+
+\paragraph{Ring Solitons in a Medium without
+Flow}\label{ring-solitons-in-a-medium-without-flow}
+
+Unlike classical vortex rings in fluids, which maintain stability
+through actual flow and circulation, the \textbf{brane medium does not
+support directional flow or rupture} --- it consists of points that only
+oscillate locally. Nevertheless, \textbf{stable soliton-like ring
+structures} can form through \textbf{localized oscillatory deformation
+patterns}.
+
+These structures resemble \textbf{ring vortices}, but are driven by
+\textbf{periodic amplitude oscillations} rather than fluid dynamics. A
+\textbf{central axis of oscillation} alternately ``pushes'' and
+``pulls'' in the amplitude direction, creating a standing radial wave
+that sustains a \textbf{rotational phase shift} along a surrounding
+ring.
+
+\subparagraph{Structure Summary:}\label{structure-summary}
+
+\begin{itemize}
+\item
+  \textbf{Center Axis}: Amplitude oscillates as $A_0 \sin(\omega t)$
+  No net displacement --- only oscillatory motion
+\item
+  \textbf{Circumferential Ring}: Twisting phase pattern:
+  $A(r,\theta,t) = f(r) \sin(\omega t - k r) \sin(m\theta)$ Mimics
+  angular momentum through helical phase alignment
+\item
+  \textbf{Energy Balance and Localization}: Stability is maintained
+  \textbf{not through dissipation}, but via \textbf{internal
+  phase-locking and energy conservation}. The oscillatory energy
+  introduced through central amplitude modes is \textbf{fully retained}
+  within the solitonic structure through continual exchange between
+  radial and circumferential wave components. Rather than radiating
+  energy away, the soliton forms a \textbf{closed energy cycle}: central
+  amplitude oscillations induce radial waves, which in turn sustain the
+  rotating twist around the ring. The two components remain in mutual
+  resonance, forming a self-stabilizing, \textbf{non-dispersive standing
+  structure}. The outer field does not leak energy but simply reflects
+  the \textbf{decay of structure}, not decay of total energy.
+\end{itemize}
+
+\begin{quote}
+Unlike dissipative photonic solitons (e.g., those modeled by the complex
+Ginzburg--Landau equation), these brane solitons exhibit
+\textbf{undamped periodicity} --- all internal energy remains confined
+and circulates within the localized excitation, making them viable
+candidates for real particle analogues.
+\end{quote}
+
+% Condensed: removed extensive enumeration of alternative topologies
+\paragraph{Topological Stability}\label{topological-stability}
+
+The ring-based soliton model resonates with topological soliton frameworks such as
+Skyrmions and Hopfions~\cite{Sugic2021,HopfSolitonVideo}, where stability arises from topological invariants and
+field line structure. Our model can be understood as a non-dissipative generalization
+where stability arises purely from elastic tension and oscillatory feedback in the
+brane medium, rather than from dissipative dynamics or external Lagrangian constraints.
+
+\paragraph{Spin, Charge, and Gauge
+Structure}\label{spin-charge-and-gauge-structure}
+
+Internal degrees of freedom such as \textbf{spin} and \textbf{charge}
+arise from the \textbf{geometry and symmetry} of the soliton's
+oscillatory structure. For example, rotational or helical modes within
+the waveform can give rise to spinor-like behavior, while
+\textbf{oscillatory phase symmetries} may manifest as effective gauge
+symmetries. Rather than being fundamental inputs, these properties
+become natural features of the soliton's internal mode structure.
+
+This perspective reinterprets the \textbf{Dirac equation} not as a
+fundamental quantum law, but as a \textbf{phenomenological description}
+of how certain localized wave packets behave and evolve in space-time
+--- effectively an emergent dynamics of stable internal vibration. In
+Sec.~\ref{sec:emergent-dirac-from-torus} we outline how such an
+effective Dirac description arises for toroidal solitons in the present
+brane model.
+
+\paragraph{Measurement and Apparent Quantum
+Randomness}\label{measurement-and-apparent-quantum-randomness}
+
+Collapse-like phenomena in this model are explained through
+\textbf{resonance-based selection mechanisms}. When multiple solitons
+interact, their waveforms may interfere or resonate destructively,
+leading to spontaneous selection of a dominant mode. This gives the
+appearance of wavefunction collapse, yet remains fully
+\textbf{deterministic} in principle. The observed quantum randomness is
+thus attributed to \textbf{deterministic chaos}: tiny differences in
+field configuration at interaction time yield divergent outcomes,
+mimicking probabilistic distributions.
+
+\subsection{Collapse and Born weights from deterministic thresholds}
+\label{sec:born-thresholds}
+
+In the present framework, quantization and collapse are not postulated as fundamental stochastic jumps of an abstract wave function, but arise from the deterministic evolution of the brane--plus--apparatus system in the presence of strong nonlinear thresholds.
+So far, this has been argued qualitatively: a continuous wave medium with hard nonlinearities admits only a few stable soliton modes, and measurement is modelled as an interaction in which one such excitation triggers a macroscopic response.
+What is still missing is a link to the \emph{Born weights}, i.e.\ an explanation why outcome frequencies track $|\psi|^2$ rather than some other functional of the coarse-grained envelope or internal phase.
+
+In this subsection we outline a concrete research programme that connects:
+(i) a phase-space measure over microscopic brane configurations;
+(ii) threshold dynamics that carve this phase space into basins of attraction for different outcomes; and
+(iii) numerical experiments on the discrete brane.
+The goal is to show---or falsify---that the relative phase-space volumes of these basins scale as $|\psi|^2$.
+
+\subsubsection{Microscopic state space and coarse graining}
+
+The full microscopic state of the brane plus apparatus can be viewed as a point
+\begin{equation}
+  \lambda \in \Gamma
+\end{equation}
+in phase space $\Gamma$, containing the embedding coordinates $X^A(x)$ and their conjugate momenta $\Pi_A(x)$ at each lattice site $x$, together with any additional apparatus degrees of freedom (pointer variables, internal springs, etc.).
+The microscopic Lagrangian (and its Hamiltonian form) induces a natural Liouville measure
+\begin{equation}
+  \mathrm{d}\mu_{\mathrm{L}} \;=\;
+  \prod_{x,A} \mathrm{d}X^A(x)\, \mathrm{d}\Pi_A(x) \times
+  (\text{apparatus factors}),
+\end{equation}
+which is invariant under the microscopic time evolution.
+On the discrete simulator this is simply the flat product measure over all lattice positions and velocities.
+
+From this microscopic description we define a coarse-grained complex envelope $\psi$ by projecting the brane displacement (and possibly its velocity) onto a small set of slow internal modes of a solitonic excitation.
+For a single effective ``particle'' degree of freedom we can write
+\begin{equation}
+  \psi(\mathbf r)
+  \;\equiv\;
+  \sum_{(\chi,s)} \psi_{\chi,s}(\mathbf r)\, e_{(\chi,s)},
+\end{equation}
+where the coefficients $\psi_{\chi,s}(\mathbf r)$ are slowly varying envelopes obtained by projecting $X^4$ (and its conjugate momentum) onto internal eigenmodes $\phi_{(\chi,s)}(u,v)$ on the torus, and $e_{(\chi,s)}$ is a fixed basis in this internal space (cf.\ Sec.~\ref{sec:dirac-reduction}).
+
+For a discrete set of alternative outcomes $\{i\}$ (for instance the spatial channels of a Stern--Gerlach-type splitter or separated detector regions), the relevant coarse data reduces to a finite-dimensional complex vector
+\begin{equation}
+  \Psi = (\alpha_1, \dots, \alpha_N),
+  \qquad
+  \sum_i |\alpha_i|^2 = 1,
+\end{equation}
+where $|\alpha_i|^2$ is proportional to the coarse-grained energy content of the soliton envelope in the spatial region and internal mode that couples to outcome $i$.
+
+Formally, the mapping
+\begin{equation}
+  C : \Gamma \to \mathcal{H}_{\mathrm{eff}},
+  \qquad
+  \lambda \mapsto \Psi(\lambda)
+\end{equation}
+defines a coarse-graining from the full phase space to an effective Hilbert space $\mathcal{H}_{\mathrm{eff}}$ spanned by the measurement channels.
+For a fixed coarse state $\Psi$ we consider the fibre
+\begin{equation}
+  \Gamma_\Psi := C^{-1}(\Psi) \subset \Gamma,
+\end{equation}
+i.e.\ the set of all microscopic brane configurations that share the same coarse amplitudes $\alpha_i$.
+
+The Liouville measure then induces a conditional measure on this fibre,
+\begin{equation}
+  \mathrm{d}\mu_\Psi(\lambda)
+  :=
+  \frac{\mathrm{d}\mu_{\mathrm{L}}(\lambda)}{\displaystyle\int_{\Gamma_\Psi} \mathrm{d}\mu_{\mathrm{L}}},
+  \qquad
+  \lambda \in \Gamma_\Psi,
+\end{equation}
+which encodes the ``ensemble of microscopic realizations'' compatible with the same effective state $\Psi$.
+
+\begin{quote}
+\textbf{Working hypothesis (phase-space typicality).}
+For physically prepared states (solitons emerging from sources, thermalized apparatus, etc.), the conditional measure $\mu_\Psi$ is the relevant ensemble measure controlling outcome frequencies.
+The only source of ``randomness'' is ignorance of the precise $\lambda$ within $\Gamma_\Psi$.
+\end{quote}
+
+This mirrors typicality ideas in deterministic hidden-variable theories, but is now anchored in the concrete field degrees of freedom of the brane.
+
+\subsubsection{Phase-space volume and Born weights}
+
+We can now relate the phase-space volume of the basins of attraction for different outcomes to the coarse amplitudes $|\alpha_i|^2$.
+
+\paragraph{Local energy density and envelopes.}
+
+In the linear regime (before thresholds fire), the brane displacement in the amplitude dimension in the interaction region can be decomposed into spatial mode profiles $\phi_i(x)$ that feed different detectors:
+\begin{equation}
+  X^4(x,t)
+  \;\approx\;
+  \sum_i \Bigl( \alpha_i \,\phi_i(x)\, \mathrm{e}^{-i\omega t} + \text{c.c.}\Bigr)
+  + \text{fast internal modes}.
+\end{equation}
+The local energy density of these modes is quadratic in the displacement and its time derivative, and after coarse-graining over times large compared to the internal oscillation period (but smaller than the detector response time), cross terms average out.
+This yields an effective energy density
+\begin{equation}
+  \bar\varepsilon(x) \;\simeq\; \sum_i |\alpha_i|^2 |\phi_i(x)|^2.
+\end{equation}
+Integrating over the spatial region $\mathcal{R}_i$ that couples to detector $i$ gives
+\begin{equation}
+  E_i \;\equiv\; \int_{\mathcal{R}_i} \bar\varepsilon(x)\, \mathrm{d}^3x
+  \;\propto\; |\alpha_i|^2,
+\end{equation}
+so that $|\alpha_i|^2$ is proportional to the \emph{energy budget} available to trigger detector $i$.
+
+\paragraph{Threshold detection as geometric selection in phase space.}
+
+Each detector channel $i$ is modelled as a pointer degree of freedom $Q_i$ (or a small set of such variables) with a metastable region around $Q_i \approx 0$ and two stable pointer states $Q_i \approx \pm Q_0$.
+The coupling to the brane in $\mathcal{R}_i$ is taken to be such that the rate at which energy is pumped into $Q_i$ scales with the local brane energy flux from mode $i$.
+In the simplest case one may write
+\begin{equation}
+  \dot{\Pi}_{Q_i} \;\supset\;
+  g \int_{\mathcal{R}_i} f(x)\, X^4(x,t)\, \mathrm{d}^3x,
+\end{equation}
+with some spatial weight $f(x)$ that selects the detector region.
+
+Because the pointer has a nonlinear threshold, only trajectories in phase space that receive enough energy early enough will cross the separatrix and fall into the ``click'' basin of attraction for outcome $i$.
+For a fixed $\Psi$, different microscopic $\lambda \in \Gamma_\Psi$ correspond to different detailed phase patterns of the internal modes, different microscopic deformations of the brane outside the interaction region and slightly different initial pointer microstates.
+These microscopic differences decide which detector crosses its threshold first.
+
+By invariance of $\mu_\Psi$ under the microscopic dynamics, the empirical frequency of outcome $i$ in repeated experiments with the same $\Psi$ is given by the phase-space volume of the basin of attraction for outcome $i$,
+\begin{equation}
+  P(i|\Psi) \;=\; \mu_\Psi\bigl(\Gamma_{\Psi \to i}\bigr),
+\end{equation}
+where $\Gamma_{\Psi \to i} \subset \Gamma_\Psi$ denotes the set of all microscopic initial conditions that evolve into the macrostate ``detector $i$ fired''.
+
+The structure of the dynamics suggests that, to leading order, the basin volume for each outcome scales with the corresponding energy budget $E_i$, and hence with $|\alpha_i|^2$:
+\begin{equation}
+  \mu_\Psi(\Gamma_{\Psi \to i}) \;\propto\; E_i \;\propto\; |\alpha_i|^2.
+\end{equation}
+Intuitively, in the space of microscopic initial conditions, the ``window'' of states that manage to push detector $i$ over its threshold before any competing detector does is wider when there is more energy available in channel $i$.
+Chaotic amplification of tiny microscopic differences into macroscopic pointer outcomes makes the basin boundaries highly intricate, but their \emph{relative} volumes are controlled by the average energy flux into each detector, which is set by $|\alpha_i|^2$.
+
+This leads to a Born-type rule as a phase-space statement:
+\begin{equation}
+  P(i|\Psi) \;=\;
+  \frac{|\alpha_i|^2}{\sum_j |\alpha_j|^2}
+  \;=\; |\alpha_i|^2,
+\end{equation}
+for normalized $\Psi$.
+At this stage this is still a conjecture about basin volumes under a natural invariant measure.
+The next step is to test it in simplified toy models and in the discrete brane simulation.
+
+\subsubsection{Toy models and numerical tests}
+\label{sec:born-experiments}
+
+The above picture can be probed in two stages: a reduced one-dimensional toy model and a full three-dimensional experiment on the discrete brane.
+
+\paragraph{1D chain + threshold detector.}
+
+As a first toy model, consider a one-dimensional chain of coupled oscillators (a discrete wave equation) with displacements $\xi_n(t)$ and momenta $\pi_n(t)$.
+A ``particle'' is represented by a wave packet
+\begin{equation}
+  \xi_n(0) = \alpha\, \phi_A(n) + \beta\, \phi_B(n) + \text{(high-frequency noise)},
+\end{equation}
+where $\phi_A$ and $\phi_B$ are spatially separated mode profiles that propagate towards two detector sites $n_A$ and $n_B$.
+Each detector degree of freedom $Q_A$, $Q_B$ has metastable dynamics and a nonlinear threshold, and is locally coupled to the chain at $n_A$ and $n_B$ respectively.
+
+We fix the coarse parameters $(\alpha,\beta)$ and the profiles $\phi_{A,B}$ and sample many microscopic initial conditions by adding high-frequency noise with fixed total energy and random phases, and by slightly perturbing the detector microstates around a metastable equilibrium.
+For each sampled microstate $\lambda_k$ the evolution is deterministic; we record which detector crosses its threshold first.
+The Born rule claim is that the empirical frequencies
+\begin{equation}
+  f_A = \frac{N_A}{N_A + N_B},
+  \qquad
+  f_B = \frac{N_B}{N_A + N_B},
+\end{equation}
+approximate
+\begin{equation}
+  f_A \approx \frac{|\alpha|^2}{|\alpha|^2 + |\beta|^2},
+  \qquad
+  f_B \approx \frac{|\beta|^2}{|\alpha|^2 + |\beta|^2},
+\end{equation}
+for large ensembles, with convergence improving as the sampled ensemble approximates $\mu_\Psi$.
+
+\paragraph{Experiment $E_{\mathrm{Born}}$: threshold statistics on the discrete brane.}
+
+On the full 3D brane we can implement an analogous experiment, here referred to as $E_{\mathrm{Born}}$.
+
+\begin{enumerate}
+  \item \textbf{Geometry and setup.}
+    Choose a rectangular simulation box that is elongated along one spatial direction (say $x$), with two well-separated detector regions $\mathcal{R}_A$ and $\mathcal{R}_B$ located near the two ends of the box.
+    Implement two pointer degrees of freedom $Q_A$, $Q_B$ (for instance as small attached oscillator subsystems) with metastable dynamics and two stable ``clicked'' states.
+  \item \textbf{Initial state: split soliton envelope.}
+    Initialize a single toroidal soliton (or an effective photon-like wave packet) whose coarse envelope splits into two spatial lobes propagating towards $\mathcal{R}_A$ and $\mathcal{R}_B$.
+    The relative intensities of the two lobes define a two-component effective state
+    \begin{equation}
+      \Psi = (\alpha,\beta),
+      \qquad
+      |\alpha|^2 + |\beta|^2 = 1,
+    \end{equation}
+    with $|\alpha|^2$ and $|\beta|^2$ proportional to the energy carried into $\mathcal{R}_A$ and $\mathcal{R}_B$ respectively.
+  \item \textbf{Measurement interaction.}
+    Couple the brane displacement $X^4$ in $\mathcal{R}_A$ to $Q_A$ (and similarly $X^4$ in $\mathcal{R}_B$ to $Q_B$) such that the energy absorption rate into each pointer is proportional to the local brane energy flux.
+    The existing nonlinear saturation structure can be reused as the threshold mechanism:
+    once the effective drive on $Q_i$ crosses a critical value, the pointer is driven into a stable ``clicked'' state.
+  \item \textbf{Ensemble of microstates.}
+    Fix the coarse parameters of $\Psi$ and the macroscopic pointer parameters.
+    Generate an ensemble of microscopic initial conditions $\lambda_k$ by:
+    (i) randomizing the internal phase of the torus;
+    (ii) adding small high-frequency brane noise with fixed total energy and random phases; and
+    (iii) slightly perturbing the pointer micro-degrees of freedom around their metastable equilibrium.
+    These perturbations leave $\Psi$ essentially unchanged but sample different points $\lambda_k$ within $\Gamma_\Psi$.
+  \item \textbf{Run and count.}
+    For each $\lambda_k$, evolve the system until exactly one pointer has irreversibly crossed its threshold and settled into a clicked state.
+    Record which pointer clicked first and, optionally, the time of the click and the energy absorbed.
+  \item \textbf{Parameter scan.}
+    Repeat the experiment for different values of $(\alpha,\beta)$, for instance by varying $|\alpha|^2 = 0.1, 0.2, \dots, 0.9$ while keeping the total energy fixed.
+    For each setting, estimate the empirical frequencies
+    \begin{equation}
+      f_A = \frac{N_A}{N_A+N_B},
+      \qquad
+      f_B = \frac{N_B}{N_A+N_B},
+    \end{equation}
+    and compare to the target Born weights $|\alpha|^2$ and $|\beta|^2$.
+\end{enumerate}
+
+A positive result, $f_A \approx |\alpha|^2$ (and $f_B \approx |\beta|^2$) over a reasonable parameter range, would be strong evidence that nonlinear thresholds plus the Liouville measure on hidden brane microstates reproduce Born-type statistics in this framework.
+Systematic deviations would be equally valuable, either falsifying the simplest threshold setup or indicating additional structure (for example, different coupling functionals of the envelope) needed to recover quantum behaviour.
+
+\paragraph{Status and outlook.}
+
+The above does not yet amount to a full derivation of the Born rule from the microscopic brane Lagrangian, but it turns the qualitative statement ``collapse from dynamics'' into concrete, testable questions:
+(i) is the Liouville measure on brane phase space, conditioned on a given $\Psi$, the relevant ensemble for repeated preparations?
+(ii) do the basins of attraction of thresholded pointer states have volumes proportional to $|\alpha_i|^2$?
+(iii) is this proportionality robust under changes of microscopic detector details, or does it require fine-tuning?
+
+All three questions can be addressed first in reduced toy models and then in the full three-dimensional simulator.
+Even partial confirmation (or falsification) would significantly sharpen the status of the present interpretation.
+
+\subsection{Internal Structure of the
+Electron}\label{internal-structure-of-the-electron}
+
+Our framework is conceptually compatible with the toroidal self-confinement picture
+of Williamson and van der Mark, but replaces the purely electromagnetic substrate by
+a continuous elastic brane. Confinement and stability here follow from geometric
+tension in response to amplitude deformation into the embedding dimension; the
+electron-like excitation is thus a brane-borne soliton rather than a free-space EM knot.
+
+\textbf{Note on controversy:} We are aware that the original Williamson and van der Mark model is controversial and not part of the standard model of particle physics. Here we adopt its geometric intuition—a toroidal self-confined structure—within a different, brane-based substrate, rather than endorsing the original purely electromagnetic account.
+
+In standard quantum field theory, the electron is treated as a
+point-like fermion described by the \textbf{Dirac spinor}, which encodes
+its spin-½ behavior and relativistic dynamics. In this deterministic
+wave-based theory, however, we depart from the particle ontology and
+instead interpret the electron as a \textbf{self-stabilizing,
+soliton-like wave packet} within the aether-like medium. This
+reinterpretation has several key implications:
+
+\paragraph{Absence of a Central
+Charge}\label{absence-of-a-central-charge}
+
+In classical models and quantum electrodynamics, the electron's electric
+field is modeled as emanating from a point-like center. In contrast, in
+a solitonic wave model:
+
+\begin{itemize}
+\tightlist
+\item
+  There is \textbf{no central point} from which the electric field
+  originates.
+\item
+  The \textbf{electric field must emerge as a distributed effect} of the
+  wave packet's structure, shaped by the configuration of the
+  oscillating medium.
+\end{itemize}
+
+Thus, the electric field is not imposed externally but arises
+\textbf{self-consistently from the internal geometry and dynamics} of
+the wave packet.
+
+\paragraph{Possible mechanisms for an emergent monopole charge.}
+
+In the present framework we see (at least) two plausible and not
+mutually exclusive mechanisms by which a net monopole charge can
+emerge from an underlying ``photon-like'' internal mode:
+
+\begin{enumerate}
+\item \textbf{Nonlinearity and effective sources.}
+In the linear, weakly excited regime of the brane, the effective
+electromagnetic sector is approximately source-free and supports
+neutral photon-like waves with $\partial_\mu F^{\mu\nu} \approx 0$.
+The toroidal electron soliton, however, lives in a strongly nonlinear,
+self-trapped regime where the brane configuration $\Xi(x)$ induces an
+effective current $J^\mu_{\mathrm{eff}}[\Xi]$ in the emergent
+Maxwell-like equations,
+\[
+  \partial_\mu F^{\mu\nu} = J^\mu_{\mathrm{eff}}[\Xi] \, .
+\]
+In this picture the net electric charge of the electron is the
+monopole component of $J^0_{\mathrm{eff}}$, i.e.\ the part of the
+effective source that does not average to zero over large scales.
+The underlying internal mode is ``photon-like'' in its frequency and
+circulation, but it is no longer a source-free Maxwell solution; its
+nonlinear coupling to the brane background generates a genuine
+monopole term.
+
+\item \textbf{Internal separation and screening on the torus surface.}
+Alternatively, (or in addition) one may view the toroidal soliton as a
+composite pattern of amplitude and phase excitations on the brane
+surface. Locally, these excitations can produce both positive- and
+negative-like contributions to an effective charge density on the
+torus. Nonlinear self-organization then drives the configuration into
+a state where part of this internal structure generates predominantly
+closed field lines that remain confined near the torus (a
+``screened'' component), while a residual unscreened component
+produces a net monopole field. In this view the ``charge visible to
+the outside'' corresponds to the unscreened part of the effective
+charge distribution, which for the electron carries total charge
+$-e$, even though the internal pattern on the torus surface is more
+intricate than a uniformly charged shell.
+\end{enumerate}
+
+Both mechanisms emphasize that the electron's charge is not attributed
+to a separate point-like positive or negative core, but arises from
+the global geometry and nonlinear dynamics of the toroidal brane
+configuration itself.
+
+\paragraph{Spin as Phase Topology}\label{spin-as-phase-topology}
+
+The electron's spin-½ character emerges from the \textbf{phase topology} of the toroidal
+soliton structure. In the toroidal geometry, the internal oscillation phase locks to
+physical rotation by a half-angle relation $\Delta\phi = \tfrac{1}{2}\Delta\theta$.
+A $2\pi$ rotation multiplies the internal state by $-1$, requiring a $4\pi$ rotation
+to restore the original phase—exactly reproducing SU(2) double-cover behavior.
+This topological property arises naturally from the brane's curvature-tension dynamics,
+not from postulated symmetries.
+
+An explicit realization of this solitonic structure can be drawn from
+the work of Williamson \& van der Mark~\cite{Williamson1997} and the
+pedagogical exposition in Huygens Optics~\cite{HuygensOptics2025}, who
+proposed that the electron corresponds to a single photon---or
+light-like mode---bent into a toroidal, double-looped path. In our brane
+framework the same geometry arises naturally when the local amplitude
+deformation of the medium approaches a critical threshold
+$(E_{\mathrm{cr}})$. Beyond this threshold, the elastic
+energy density of the brane saturates and the wave folds into a
+self-trapped toroidal soliton. The circulating Poynting-like flow within
+the torus provides the effective current that produces the external
+electric field pattern, while the internal twist generates a
+topologically protected spin structure.
+
+\textbf{Note:} W\&vdM do not propose a brane or gravitational confinement; our brane-medium mechanism is an alternative generalization.
+
+\paragraph{Relation to Dirac's belt analogy.}
+Interestingly, the well-known \emph{Dirac belt trick}, often used as a visual
+illustration of spin-$\tfrac12$ behavior, may correspond far more literally to
+the W\&vdM electron structure than originally appreciated. In Dirac's analogy,
+a belt must be rotated by $4\pi$ to return to its untwisted state, reflecting
+the double connectivity of the rotation group. In the W\&vdM picture, the
+electron consists of a closed loop of circularly polarized electromagnetic
+radiation---a ``belt of light'' that is bent twice to form a torus. The field
+orientation along this toroidal path likewise requires a $4\pi$ rotation to
+recover its original phase, naturally producing the observed spinor
+periodicity. Within the brane framework proposed here, this configuration
+emerges as a stable topological excitation whose internal twist represents the
+geometric origin of spin.
+
+\paragraph{Internal state multiplicity and spinor structure.}
+The toroidal configuration admits four distinct internal states even
+before quantization. First, the direction of circulation of the confined
+wave around the toroidal core can be reversed; we encode this by a
+discrete ``chirality'' parameter $\chi = \pm 1$. In our interpretation,
+the sign of $\chi$ determines the sign of the induced amplitude
+deformation and hence the sign of electric charge, distinguishing
+electron from positron while leaving the magnitude of the charge and the
+magnetic dipole moment unchanged. Second, for each choice of $\chi$ the
+internal angular momentum of the soliton can be aligned or
+anti-aligned with a chosen axis, providing a discrete spin label
+$s = \pm \tfrac{1}{2}$. Together, the pair $(\chi,s)$ yields four
+classical soliton configurations, which we regard as the geometric
+precursors of the four components of an effective Dirac spinor field
+$\psi(x)$ introduced in Sec.~\ref{sec:emergent-dirac-from-torus}. There
+we show how the slowly varying envelope amplitudes associated with these
+internal states can be packaged into a multi-component order parameter
+obeying an emergent Dirac equation on the brane's spacetime. A fully
+covariant treatment in terms of spinor bundles on a curved effective
+geometry, and a systematic derivation of that Dirac equation from the
+underlying brane dynamics, remain topics for future work.
+
+\paragraph{Apparent Pointlikeness and Phase Resonance}\label{apparent-pointlikeness-and-phase-resonance}
+
+While the Williamson and van der Mark (W\&vdM) model describes the electron as a self-confined electromagnetic wave,
+this implies that the electron cannot be fundamentally pointlike in an ontological sense.
+However, the effective pointlike nature observed in high-energy scattering experiments can be understood
+through a combination of \textbf{kinematic resolution limits} and \textbf{dynamical phase-resonance thresholds}.
+
+\subparagraph{Resolution bound from the de Broglie wavelength}
+
+As discussed in the beat-pattern interpretation of Sec.~\ref{de-broglie-beat-pattern}, a moving
+particle's de~Broglie wavelength $\lambda_B = h/p$ sets a fundamental scale for spatial resolution
+in scattering experiments. The effective resolving power of one particle with respect to another
+is approximately $\lambda_B/2$. For relativistic scattering, where $p \gg m_e c$, this wavelength
+becomes much shorter than the electron's Compton wavelength $\lambda_C = h/(m_e c)$.
+
+Furthermore, in the toroidal electron model the effective transverse dimension of the structure
+is subject to Lorentz contraction along the direction of motion. For ultra-relativistic electrons,
+the contracted extent of the toroidal core in the longitudinal direction can become smaller than
+$\lambda_B/2$. Thus, even though the electron possesses a nontrivial internal structure on the
+Compton scale when at rest, its internal geometry is \textbf{kinematically hidden} at high momenta:
+the probe wavelength is too long to resolve the details of the toroidal structure.
+
+\subparagraph{Dynamical threshold: phase-resonant interactions}
+
+Even within the kinematically unresolved volume, interactions do not occur uniformly throughout
+the extended structure. In this framework, scattering events are triggered only when the
+\textbf{internal oscillatory phase modes} of two confined wave structures momentarily align,
+producing a highly localized threshold response within the nonlinear medium. These resonant overlaps
+are statistically rare, and their occurrence probability is governed by the relative phase distribution
+of the interacting fields. The spatial region in which the nonlinear threshold is exceeded---and hence
+where the interaction actually occurs---is much smaller than both $\lambda_C$ and $\lambda_B/2$.
+
+Thus, experimental pointlikeness results from the conjunction of two effects:
+\begin{itemize}
+\tightlist
+\item
+  A \textbf{resolution bound} set by the de~Broglie wavelength $\lambda_B/2$, below which the
+  internal structure cannot be probed, and
+\item
+  A \textbf{phase-resonant threshold} in the brane medium that localizes actual interaction
+  events to regions much smaller than the soliton size.
+\end{itemize}
+
+From a deterministic standpoint, this mechanism replaces intrinsic quantum randomness
+with an emergent statistical behavior arising from the ensemble of uncorrelated phase states.
+The phase-resonant threshold condition effectively acts as a delta-like interaction vertex,
+mirroring the point-interaction formalism of quantum electrodynamics (QED),
+but grounded in a continuous, field-based ontology.
+Thus, the W\&vdM model, when reinterpreted within the framework of the present deterministic wave theory,
+remains compatible with experimental evidence for pointlike interactions
+while maintaining a physically extended, wave-based structure for the electron.
+
+\paragraph{Electrostatic Self-Repulsion and Soliton
+Stability}\label{electrostatic-self-repulsion-and-soliton-stability}
+
+A major issue with any extended charged object is the tendency for it to
+\textbf{self-repel} due to the internal electric field. If the electron
+were a classical charged distribution, it should disintegrate under its
+own repulsion.
+
+In this model, however:
+
+\begin{itemize}
+\tightlist
+\item
+  The \textbf{soliton's angular momentum structure} provides an internal
+  \textbf{stabilizing mechanism}.
+\item
+  The \textbf{circulating energy or field modes} generate a binding
+  configuration --- a dynamic equilibrium between self-repulsion and
+  \textbf{self-sustained internal coherence}.
+\item
+  This makes the electron \textbf{stable not by construction}, but as a
+  \textbf{self-organizing resonance} in the field.
+\end{itemize}
+
+\subsubsection{Toroidal solitons and an emergent Dirac equation}
+\label{sec:emergent-dirac-from-torus}
+
+The toy envelope construction of Sec.~\ref{sec:toy-envelope-schroedinger}
+treats a single gapped internal mode as a scalar field $\eta$ and leads,
+in the nonrelativistic limit, to a Schrödinger-like evolution equation
+for a complex envelope $\psi(\mathbf x,t)$. For electron-like excitations
+we must additionally account for (i) their relativistic kinematics and
+(ii) their internal spin-$\tfrac12$ structure. In the present framework
+both features are tied to the internal geometry of the toroidal soliton.
+
+As discussed in Secs.~\ref{sec:charge-amplitude}
+and~\ref{internal-structure-of-the-electron}, the toroidal soliton admits
+two discrete internal labels:
+\begin{itemize}
+  \item a chirality $\chi=\pm 1$ that distinguishes the orientation of the
+        circulating internal field and hence the sign of the effective charge;
+  \item a spin label $s=\pm\tfrac{1}{2}$ that encodes whether the internal
+        angular momentum is aligned or anti-aligned with a chosen axis.
+\end{itemize}
+At the classical level these data define four distinct internal
+configurations $(\chi,s)$. We now introduce slowly varying envelope
+amplitudes $\psi_{\chi,s}(x)$ on the emergent spacetime,
+\[
+  \psi_{\chi,s} : x^\mu \mapsto \psi_{\chi,s}(x),
+\]
+which describe the coarse-grained density and phase of solitons of type
+$(\chi,s)$ centred near the spacetime point $x^\mu$. Collecting them into
+a four-component object,
+\begin{equation}
+  \psi(x) \;=\;
+  \begin{pmatrix}
+    \psi_{+,+}(x)\\[0.3em]
+    \psi_{+,-}(x)\\[0.3em]
+    \psi_{-,+}(x)\\[0.3em]
+    \psi_{-,-}(x)
+  \end{pmatrix},
+  \label{eq:dirac-spinor-from-solitons}
+\end{equation}
+one obtains an effective multi-component order parameter for the
+toroidal soliton sector.
+
+\paragraph{Mechanical picture: four internal modes on the torus}
+
+Conceptually, the electron soliton is a localized toroidal deformation of
+the brane, on which the field has \textbf{fast internal motion} at
+(roughly) the Compton frequency $\omega_C$. There are \textbf{four nearly
+degenerate internal eigenmodes} of that motion, labeled by
+$(\chi,s)\in\{+1,-1\}\times\{+\tfrac12,-\tfrac12\}$, where:
+\begin{itemize}
+  \item $\chi=\pm1$ is the \textbf{sense of circulation} of the double-loop
+        motion (right- vs.\ left-handed helical geodesics).
+  \item $s=\pm\frac12$ labels \textbf{two independent ways} to orient the
+        torus / internal momentum relative to the local brane frame (spin
+        up/down along some axis fixed by the soliton's rest frame).
+\end{itemize}
+
+Mechanically, we take torus coordinates $(u,v)\in[0,2\pi)^2$, with $u$
+around the \textbf{major circle} (centerline of the donut) and $v$ around
+the \textbf{minor circle} (cross-section). The Williamson \& van der
+Mark-like geodesics are \textbf{helical curves} on this torus, roughly of
+the form
+\[
+  \gamma_{\chi}(u) : (u,v(u))
+  \quad\text{with}\quad
+  v(u)\approx \chi\, u + \text{(small corrections)},
+\]
+each closed loop having length $\lambda_C$ and circulation at $\omega_C$.
+The four internal eigenmodes $\phi_{(\chi,s)}(u,v)$ are then:
+\begin{itemize}
+  \item localized in momentum space around \textbf{two opposite helical
+        directions} (chirality $\chi$),
+  \item and split into two modes that differ by how the internal momentum
+        pattern couples to the \textbf{external orientation} of the torus
+        (spin $s$).
+\end{itemize}
+
+One can think of the four modes as a \textbf{four-state internal ``fiber''}
+attached to each brane point, with a natural action of rotations (spin) and
+a flip of circulation (particle/antiparticle sector). The Dirac spinor will
+be exactly the \textbf{envelope} of these four internal modes.
+
+\paragraph{Mode expansion and projection: from brane PDE to envelope equations}
+
+We now make the statement ``Dirac spinor = envelope on four internal torus
+modes'' precise. Consider a single toroidal electron soliton in its rest
+frame. In a small neighbourhood of the soliton core, the transverse brane
+displacement in the extra dimension, $\xi_\perp(\mathbf{x},u,v,t)$, depends
+on the macroscopic brane coordinates $\mathbf{x}\in\mathbb{R}^3$, time $t$,
+and on internal torus coordinates $(u,v)\in[0,2\pi)^2$. Linearizing the
+microscopic brane equation around the static torus solution
+$\xi_{\perp,0}$, we obtain a linear operator $\mathcal{L}$ acting on small
+fluctuations $\delta\xi_\perp$,
+\begin{equation}
+  \mathcal{L}\,\delta\xi_\perp
+  \;=\;
+  \bigl(\partial_t^2 - c^2 \Delta_{\mathbf{x}} + \hat{\mathcal{L}}_{\rm int}\bigr)\,
+  \delta\xi_\perp
+  \;\approx\; 0,
+  \label{eq:brane-linearized-torus}
+\end{equation}
+where $\hat{\mathcal{L}}_{\rm int}$ is an elliptic operator capturing the
+dependence on the internal torus geometry $(u,v)$ and on the background
+soliton profile.
+
+On the internal torus, we define an eigenbasis of internal modes
+$\{\phi_{(\chi,s)}(u,v)\}$ by
+\begin{equation}
+  \hat{\mathcal{L}}_{\rm int}\,\phi_{(\chi,s)}(u,v)
+  \;=\;
+  -\,\Omega_{(\chi,s)}^2\,\phi_{(\chi,s)}(u,v),
+  \qquad
+  (\chi,s)\in\{+1,-1\}\times\{+\tfrac12,-\tfrac12\},
+  \label{eq:internal-mode-eigenvalue}
+\end{equation}
+with orthonormality
+\begin{equation}
+  \bigl\langle \phi_{(\chi,s)},\phi_{(\chi',s')}\bigr\rangle_{\rm T}
+  \;=\;
+  \int_{0}^{2\pi}\!\!\int_{0}^{2\pi}
+  \phi_{(\chi,s)}^*(u,v)\,\phi_{(\chi',s')}(u,v)\,\sqrt{g_{\rm int}}\,du\,dv
+  \;=\;\delta_{\chi\chi'}\delta_{ss'}.
+  \label{eq:internal-mode-orthonormality}
+\end{equation}
+We assume that the lowest nontrivial quartet of internal eigenmodes is
+(nearly) degenerate,
+\begin{equation}
+  \Omega_{(\chi,s)} \;\approx\; \omega_C,
+  \label{eq:mode-degeneracy}
+\end{equation}
+and that their spatial structure reflects the internal double-loop
+geodesics on the torus. Concretely, the label $\chi=\pm1$ distinguishes the
+two possible senses of circulation of the internal Compton loop, while
+$s=\pm\tfrac12$ distinguishes two orthogonal spin orientations relative to
+the local brane frame.
+
+We now expand the transverse displacement in this internal basis, making
+explicit the fast Compton-scale oscillation and slow spacetime envelopes:
+\begin{equation}
+  \delta\xi_\perp(\mathbf{x},u,v,t)
+  \;\approx\;
+  \sum_{(\chi,s)}
+  \bigl[
+    \psi_{\chi,s}(\mathbf{x},t)\,\phi_{(\chi,s)}(u,v)\,e^{-i\omega_C t}
+    + \psi_{\chi,s}^*(\mathbf{x},t)\,\phi_{(\chi,s)}^*(u,v)\,e^{+i\omega_C t}
+  \bigr].
+  \label{eq:torus_mode_expansion}
+\end{equation}
+Here $\psi_{\chi,s}(\mathbf{x},t)$ are slowly varying envelope fields in
+spacetime, satisfying
+\begin{equation}
+  \bigl|\partial_t \psi_{\chi,s}\bigr|\ll \omega_C\,|\psi_{\chi,s}|,
+  \qquad
+  \bigl|\nabla\psi_{\chi,s}\bigr|\ll \omega_C/c\,|\psi_{\chi,s}|.
+  \label{eq:slow-envelope-assumption}
+\end{equation}
+
+Inserting the ansatz~\eqref{eq:torus_mode_expansion} into the linearized
+brane equation and projecting onto each internal mode by
+$\langle\phi_{(\chi,s)},\cdot\rangle_{\rm T}$, we obtain coupled envelope
+equations. The dominant time derivatives act on the phase factor
+$e^{\mp i\omega_C t}$,
+\begin{equation}
+  \partial_t^2\bigl(\psi_{\chi,s} e^{-i\omega_C t}\bigr)
+  \;=\;
+  e^{-i\omega_C t}\bigl(-\omega_C^2 \psi_{\chi,s} - 2i\omega_C \partial_t\psi_{\chi,s}
+  + \partial_t^2\psi_{\chi,s}\bigr),
+  \label{eq:time-derivative-expansion}
+\end{equation}
+and the internal operator cancels the $-\omega_C^2$ term due to the
+eigenvalue condition~\eqref{eq:internal-mode-eigenvalue}. Neglecting the
+subleading $\partial_t^2\psi_{\chi,s}$ piece in the slowly varying
+approximation, the projected equation takes the schematic form
+\begin{equation}
+  2\,i\omega_C\,\partial_t \psi_{\chi,s}
+  \;\approx\;
+  c^2\,\Delta_{\mathbf{x}}\psi_{\chi,s}
+  \;+\;\text{(mode-mixing terms from internal geometry)}.
+  \label{eq:envelope_schematic}
+\end{equation}
+At this stage, one can either proceed in a non-relativistic fashion,
+leading to a Schr\"odinger-like equation for the envelopes, or restore a
+fully relativistic description by reintroducing the subleading time
+derivatives and collecting all four components into a multi-component
+field.
+
+\paragraph{Four-component envelope and emergent Klein--Gordon form}
+
+To obtain a relativistic envelope dynamics, we now keep the subleading
+$\partial_t^2\psi_{\chi,s}$ term and organize the four envelopes into the
+single four-component field $\psi(x)$ of
+Eq.~\eqref{eq:dirac-spinor-from-solitons}. Because all four internal modes
+share the same Compton frequency, the projected equations can be written,
+to leading order in gradients, as
+\begin{equation}
+  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\psi
+  \;+\;
+  \hat{\mathcal{M}}_{\mu\nu}\,\partial^\mu\partial^\nu\psi
+  \;+\;
+  \hat{\mathcal{N}}_{\mu}\,\partial^\mu\psi
+  \;\approx\; 0.
+  \label{eq:KG_with_mixings}
+\end{equation}
+Here $\hat{\mathcal{M}}_{\mu\nu}$ and $\hat{\mathcal{N}}_{\mu}$ are
+$4\times 4$ matrices acting in the internal mode space, generated by the
+overlap integrals of internal derivatives of the eigenmodes,
+\begin{equation}
+  \bigl(\hat{\mathcal{N}}_{\mu}\bigr)_{(\chi,s),(\chi',s')}
+  \;\sim\;
+  \Bigl\langle\phi_{(\chi,s)},\;\partial_\mu\phi_{(\chi',s')}\Bigr\rangle_{\rm T},
+  \qquad \mu=0,1,2,3,
+  \label{eq:overlap-coupling}
+\end{equation}
+and similarly for $\hat{\mathcal{M}}_{\mu\nu}$. Physically, these terms
+encode how slow changes in the soliton position and orientation in
+spacetime couple to its internal torus modes. Rotational invariance of the
+brane medium implies that the $4$-dimensional internal space carries a
+representation of spatial rotations, and hence admits an action of
+spin-$\tfrac12$ generators.
+
+In the simplest approximation, we may neglect $\hat{\mathcal{M}}_{\mu\nu}$
+and absorb $\hat{\mathcal{N}}_{\mu}$ into a redefinition of $\psi$ and its
+derivatives, recovering a Klein--Gordon-type equation with a single mass
+scale $m$. Thus each component $\psi_{\chi,s}$ inherits, at the linearized level, a gapped
+Klein--Gordon-type dispersion relation analogous to
+Eq.~\eqref{eq:toy-KG},
+\begin{equation}
+  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\,\psi_{\chi,s}(x)
+  \;\approx\; 0,
+  \label{eq:KG-for-components}
+\end{equation}
+where $\Box$ denotes the d'Alembertian associated with the emergent
+Lorentzian metric of Sec.~\ref{sec:emergent-relativity}, $m$ is the
+effective rest mass determined by the soliton's internal energy, and
+$\hbar_\text{eff}$ is the same effective action scale that appeared in
+Eq.~\eqref{eq:schroedinger-from-envelope}. In analogy with the standard
+relativistic construction, we can regard
+Eq.~\eqref{eq:KG-for-components} as arising from a first-order system
+obtained by ``taking the square root'' of the Klein--Gordon operator.
+
+\paragraph{Internal mode space as a Clifford module and Dirac factorization}
+
+The key step is to use the four-dimensional internal mode space to
+realize a representation of the Dirac gamma matrices. Concretely, we
+identify the internal mode space with a tensor product
+$\mathbb{C}^2_\chi \otimes \mathbb{C}^2_s$, where $\mathbb{C}^2_\chi$
+carries the chirality label $\chi=\pm1$ and $\mathbb{C}^2_s$ carries the
+spin label $s=\pm\tfrac12$. In this basis we introduce the internal
+operators
+\begin{equation}
+  \beta \;=\; \sigma_z \otimes \mathbb{I}_2,
+  \qquad
+  \alpha^k \;=\; \sigma_x \otimes \sigma^k,
+  \qquad k=1,2,3,
+  \label{eq:internal_alpha_beta}
+\end{equation}
+where $\sigma^k$ are the Pauli matrices and $\mathbb{I}_2$ the $2\times 2$
+identity. These operators satisfy
+\begin{equation}
+  \{\alpha^i,\alpha^j\} = 2\delta^{ij}\mathbb{I}_4,
+  \qquad
+  \{\alpha^i,\beta\} = 0,
+  \qquad
+  \beta^2 = \mathbb{I}_4,
+  \label{eq:alpha-beta-clifford}
+\end{equation}
+and hence generate a representation of the Clifford algebra associated
+with Minkowski spacetime. We can now assemble the standard Dirac matrices
+in the Dirac representation,
+\begin{equation}
+  \gamma^0 = \beta,
+  \qquad
+  \gamma^k = \beta\,\alpha^k,
+  \qquad k=1,2,3,
+  \label{eq:gamma-from-alpha-beta}
+\end{equation}
+which obey
+$\{\gamma^\mu,\gamma^\nu\} = 2\,\eta^{\mu\nu}\,\mathbb{I}_4$ with
+$\eta^{\mu\nu} = \mathrm{diag}(+1,-1,-1,-1)$.
+
+\paragraph{Status of the Dirac structure.}
+It is important to emphasize the epistemic status of the construction presented in this subsection. We do \emph{not} derive the specific form of the operators $\alpha^k$ and $\beta$ from a first-principles calculation of the overlap integrals $\langle\phi_{(\chi,s)},\partial_i\phi_{(\chi',s')}\rangle_{\rm T}$. Instead, we \emph{postulate} that the four-dimensional internal mode space carries a representation of the Clifford algebra with the standard structure given in Eqs.~\eqref{eq:internal_alpha_beta}--\eqref{eq:gamma-from-alpha-beta}. This postulate is motivated by the approximate degeneracy of the four internal modes and by symmetry considerations, but a complete verification would require explicit computation of the mode-coupling integrals for a concrete toroidal soliton profile. Such a calculation—while conceptually straightforward—is technically involved and is left as a high-priority target for future work (see Sec.~\ref{scope-and-limitations}).
+
+The fact that such operators exist in the internal mode space is a
+consequence of the degeneracy of the four lowest internal eigenmodes and
+of the approximate rotational isotropy of the toroidal soliton. Small
+translations and rotations of the soliton in the brane induce linear
+transformations on the internal mode amplitudes, and these transformations
+generate a representation of the Lorentz group on the four-component
+envelope $\psi$.
+
+To see how a Dirac-like first-order equation emerges, consider writing
+the Klein--Gordon operator acting on $\psi$ in a factored form,
+\begin{equation}
+  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\psi
+  \;\approx\;
+  -\,\bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)
+   \bigl(i\gamma^\nu\partial_\nu + m c/\hbar_\text{eff}\bigr)\psi.
+  \label{eq:Dirac_factorization}
+\end{equation}
+Using the Clifford algebra relations~\eqref{eq:alpha-beta-clifford}, one
+checks that
+\begin{equation}
+  \bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)
+  \bigl(i\gamma^\nu\partial_\nu + m c/\hbar_\text{eff}\bigr)
+  \;=\;
+  -\,\Box - m^2 c^2/\hbar_\text{eff}^2,
+  \label{eq:factor-check}
+\end{equation}
+so that any solution of the first-order equation
+\begin{equation}
+  \bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)\psi
+  \;\approx\; 0
+  \label{eq:emergent-dirac-first-order}
+\end{equation}
+also solves the Klein--Gordon equation~\eqref{eq:KG-for-components}.
+
+Within our brane model, the identification of the gamma matrices with
+specific internal operators~\eqref{eq:internal_alpha_beta} reflects the
+following mechanical picture:
+\begin{itemize}
+  \item The chirality index $\chi$ distinguishes the two senses of
+        circulation of the Compton-scale double loop on the torus.
+        The operator $\beta$ acts as a ``particle/antiparticle''
+        grading between these sectors.
+  \item The spin index $s$ encodes the orientation of the internal
+        momentum circulation with respect to the local brane triad.
+        The Pauli matrices $\sigma^k$ acting in this space describe
+        how the internal pattern responds to rotations of the soliton
+        in the brane.
+  \item Spatial gradients of the soliton centre and orientation couple
+        linearly to these internal operators through overlap integrals
+        of the form $\langle\phi_{(\chi,s)},\partial_i\phi_{(\chi',s')}\rangle_{\rm T}$,
+        thereby generating effective terms proportional to
+        $\alpha^k \partial_k\psi$ in the envelope equation.
+\end{itemize}
+Collecting these contributions yields, to leading order in gradients,
+an effective envelope Lagrangian of the Dirac type,
+\begin{equation}
+  \mathcal{L}_{\rm eff}[\psi]
+  \;\approx\;
+  \bar{\psi}\,\bigl(i\hbar_\text{eff}\gamma^\mu\partial_\mu - m c\bigr)\psi,
+  \qquad
+  \bar{\psi} = \psi^\dagger\gamma^0,
+  \label{eq:dirac-lagrangian-eff}
+\end{equation}
+with
+$\psi = (\psi_{+,\uparrow},\psi_{+,\downarrow},\psi_{-,\uparrow},\psi_{-,\downarrow})^T$
+constructed from the internal torus modes via~\eqref{eq:torus_mode_expansion}.
+
+More concretely, in locally inertial coordinates on the brane (where the
+emergent metric is approximately Minkowskian with signature
+$(-,+,+,+)$), the slowly varying spinor
+field~\eqref{eq:dirac-spinor-from-solitons} obeys the effective Dirac
+equation
+\begin{equation}
+  \bigl(i\,\hbar_\text{eff}\,\gamma^\mu D_\mu - m c\bigr)\,\psi(x) \;=\; 0,
+  \label{eq:emergent-dirac}
+\end{equation}
+where the $\gamma^\mu$ are Dirac matrices satisfying
+$\{\gamma^\mu,\gamma^\nu\}=2\eta^{\mu\nu}$ with $\eta^{\mu\nu}$ the local
+Minkowski metric, and
+\begin{equation}
+  D_\mu \;=\; \partial_\mu + i\,\frac{q}{\hbar_\text{eff}}\,A_\mu(x)
+  \label{eq:dirac-covariant-derivative}
+\end{equation}
+is the covariant derivative associated with the emergent four-potential
+$A_\mu$ of Sec.~\ref{sec:em-from-motion}. The charge parameter $q$
+appearing here coincides with the coupling constant that enters the
+worldline interaction action~\eqref{eq:interaction-action}.
+
+Within the present interpretation,
+Eqs.~\eqref{eq:emergent-dirac}--\eqref{eq:dirac-covariant-derivative}
+do not introduce a new ontological ``electron field''. Instead, $\psi(x)$
+compactly encodes the coarse-grained configuration of toroidal solitons
+and their internal states in the emergent spacetime. Standard Dirac
+bilinears acquire a direct geometric meaning: the current
+$j^\mu = \bar\psi\gamma^\mu\psi$ describes the soliton number density and
+four-velocity field, while the axial current
+$s^\mu = \bar\psi\gamma^\mu\gamma^5\psi$ encodes the averaged orientation
+of the internal circulation (spin axis) of the torus. A fully covariant
+treatment in terms of spinor bundles on a curved effective spacetime
+would require a more systematic development of the brane's emergent
+geometry; here we restrict ourselves to this heuristic construction in
+weakly curved, approximately inertial regimes.
+
+\subsection{Entanglement as correlated brane configurations: a two-soliton toy model}
+\label{subsec:entanglement-brane}
+
+In the present framework, a multi-particle state is not a tensor
+product of independent objects but a single, globally defined brane
+configuration. A pair of ``particles'' corresponds to two spatially
+separated solitonic regions whose internal phase and geometric
+structure are constrained by a common creation process. We denote their
+collective configuration schematically by
+$\Xi(x) = \Xi_{\text{pair}}(x;\lambda)$, where the parameter $\lambda$
+collects the hidden brane degrees of freedom (e.g., relative phase,
+topological linking, or internal orientation) shared across the pair.
+
+Measurements at distant locations $A$ and $B$ couple locally to the
+brane field, but their outcome statistics are functions of the same
+underlying configuration $\Xi_{\text{pair}}(x;\lambda)$. Thus, the
+model predicts strong correlations between outcomes when the measurement
+settings probe the same latent brane structure, in close analogy to
+deterministic hidden-variable accounts of entanglement. In this sense,
+entanglement reflects \emph{global constraints on the brane
+configuration}, not instantaneous influences propagating through
+ordinary space.
+
+We now make this picture concrete by constructing an explicit toy model of a
+spin-singlet configuration of two toroidal solitons, and by formulating a
+deterministic measurement mechanism that yields CHSH-type correlations. This
+construction serves two purposes: (i) it exhibits a concrete micro-picture for
+an ``entangled'' two-soliton state in the present framework, and (ii) it makes
+transparent exactly where the model falls short of reproducing quantum
+correlations, thereby clarifying which additional ingredient (measurement
+dependence vs.\ effective nonlocality) would be required to match the quantum
+predictions.
+
+\subsubsection{Two-soliton singlet configurations on the brane}
+
+Let $\mathbf{X}(x,t)$ denote the brane embedding and let $X^4(x,t)$ denote
+the normal (``amplitude'') displacement field. A configuration with two
+well-separated toroidal solitons can be written schematically as
+\begin{equation}
+  \mathbf{X}(x,t;\lambda)
+  \;\approx\;
+  \mathbf{X}_0(x)
+  \;+\;
+  \boldsymbol{\xi}^{(1)}(x,t;\lambda)
+  \;+\;
+  \boldsymbol{\xi}^{(2)}(x,t;\lambda),
+\end{equation}
+where each $\boldsymbol{\xi}^{(i)}$ is supported near a center $\mathbf{y}_i$
+and represents a toroidal electron-like soliton with internal Compton-scale
+dynamics.
+
+Each torus carries an internal velocity field
+$\mathbf{v}_{\text{int}}^{(i)}(u,v;\lambda)$ along its geodesics in the
+internal coordinates $(u,v)$ (poloidal and toroidal angles). As discussed in
+Sec.~\ref{internal-structure-of-the-electron}, we define the integrated
+internal angular momentum (``spin'') of soliton $i$ by
+\begin{equation}
+  \mathbf{S}_i(\lambda)
+  \;=\;
+  \int_{\mathrm{torus}_i}
+  \mathrm{d}A\;
+  \bigl(\mathbf{r} \times \rho_m \,\mathbf{v}_{\text{int}}^{(i)}\bigr),
+\end{equation}
+with $\mathbf{r}$ the position on the torus and $\rho_m$ the mass density. For
+the class of solitons we consider, this internal structure reduces effectively
+to a fixed magnitude $|\mathbf{S}_i| = s_0 \approx \hbar/2$ and a direction
+determined by the sense of circulation and the orientation of the torus
+relative to the ambient brane.
+
+We now postulate that the relevant two-soliton configurations are parametrized
+by a hidden unit vector $\mathbf{n}(\lambda)$, such that
+\begin{equation}
+  \mathbf{S}_1(\lambda) = + s_0\,\mathbf{n}(\lambda),
+  \qquad
+  \mathbf{S}_2(\lambda) = - s_0\,\mathbf{n}(\lambda).
+  \label{eq:singlet_spin_relation}
+\end{equation}
+That is, the internal velocity patterns on the two tori are \emph{phase-locked}
+but carry opposite internal angular momentum along a shared axis
+$\mathbf{n}(\lambda)$. At the level of the brane embedding, this means that
+the detailed internal geodesic pattern of the first soliton is mirrored with
+opposite circulation in the second soliton, and the intervening brane region
+encodes the same axis $\mathbf{n}(\lambda)$ as a gentle twist or shear of the
+medium.
+
+A spin-singlet \emph{ensemble} is then represented by a distribution
+$\rho(\lambda)$ over such global configurations, with $\mathbf{n}(\lambda)$
+isotropically distributed on the unit sphere:
+\begin{equation}
+  \rho(\lambda) \equiv \rho\bigl(\mathbf{n}(\lambda),\ldots\bigr),
+  \qquad
+  \mathbf{n}(\lambda) \text{ uniformly distributed on } S^2.
+\end{equation}
+The ellipsis indicates that $\lambda$ may contain additional internal phases
+or shape parameters which are irrelevant for the spin statistics.
+
+\subsubsection{Local threshold measurements on the brane}
+
+In our framework, a measurement device is a large, metastable brane
+configuration whose dynamics is sensitive to the local internal structure of
+an incoming soliton and exhibits a threshold nonlinearity at some saturation
+amplitude (as discussed in Sec.~\ref{threshold-localization}). For definiteness one may
+think of a Stern--Gerlach-type spin measurement, where the device defines a
+spatial direction $\mathbf{a}$ (analyzer axis).
+
+We model such a device as a spatial region $\mathcal{D}_A$ of the brane where
+the local Lagrangian density contains an interaction term of the schematic form
+\begin{equation}
+  \mathcal{L}_{\text{int}}^{(A)}
+  \;\sim\;
+  -\,\gamma\,
+  \bigl(\mathbf{s}_{\text{eff}}(x,t;\lambda)\cdot\mathbf{a}\bigr)\,
+  X^4(x,t),
+  \qquad x \in \mathcal{D}_A,
+  \label{eq:L_int_detector}
+\end{equation}
+where $\mathbf{s}_{\text{eff}}(x,t;\lambda)$ is a coarse-grained spin density
+of the incoming soliton, extracted from its internal velocity pattern, and
+$\gamma$ is a coupling strength. Since the soliton in $\mathcal{D}_A$ carries
+spin $\mathbf{S}_1(\lambda) = s_0 \mathbf{n}(\lambda)$, this interaction
+effectively biases the local dynamics according to the sign and magnitude of
+$\mathbf{n}(\lambda)\cdot\mathbf{a}$.
+
+The metastability of the device is such that small differences in this bias
+are amplified: once the local amplitude $X^4$ in certain subregions of
+$\mathcal{D}_A$ exceeds the saturation threshold, the threshold nonlinearity
+drives the brane towards one of two macroscopically distinct pointer
+configurations, which we denote ``up'' and ``down''. In other words, the
+device implements an effective sign function on the hidden axis:
+\begin{equation}
+  A(\mathbf{a},\lambda)
+  \;=\;
+  \operatorname{sgn}\bigl(\mathbf{n}(\lambda)\cdot\mathbf{a}\bigr)
+  \in\{+1,-1\}.
+  \label{eq:A_outcome_rule}
+\end{equation}
+Importantly, this outcome is determined \emph{locally} from the brane dynamics
+in $\mathcal{D}_A$, given the incoming soliton and the pre-existing device
+configuration; there is no explicit nonlocal term in the evolution equations
+at this level of description.
+
+At the distant wing $B$, a second analyzer defines a direction $\mathbf{b}$
+and couples to the second soliton with spin
+$\mathbf{S}_2(\lambda) = - s_0 \mathbf{n}(\lambda)$. The same reasoning leads
+to the deterministic outcome rule
+\begin{equation}
+  B(\mathbf{b},\lambda)
+  \;=\;
+  -\,\operatorname{sgn}\bigl(\mathbf{n}(\lambda)\cdot\mathbf{b}\bigr),
+  \label{eq:B_outcome_rule}
+\end{equation}
+again determined purely by the local interaction of the second soliton with
+the device in a region $\mathcal{D}_B$ of the brane.
+
+\subsubsection{CHSH correlations and Bell constraints}
+
+Given the outcome functions \eqref{eq:A_outcome_rule} and
+\eqref{eq:B_outcome_rule}, and assuming (i) that the hidden axis
+$\mathbf{n}(\lambda)$ is isotropically distributed on $S^2$, and (ii) that
+this distribution is statistically independent of the analyzer settings
+$\mathbf{a}$ and $\mathbf{b}$, the correlation of outcomes is
+\begin{equation}
+  E(\mathbf{a},\mathbf{b})
+  \;=\;
+  \bigl\langle A(\mathbf{a},\lambda)\,B(\mathbf{b},\lambda)\bigr\rangle_\lambda
+  \;=\;
+  -\,\bigl\langle
+    \operatorname{sgn}(\mathbf{n}\cdot\mathbf{a})\,
+    \operatorname{sgn}(\mathbf{n}\cdot\mathbf{b})
+  \bigr\rangle_{\mathbf{n}}.
+\end{equation}
+For a uniform distribution of $\mathbf{n}$ on $S^2$, this expectation value
+can be evaluated explicitly as a function of the angle
+$\theta = \arccos(\mathbf{a}\cdot\mathbf{b}) \in [0,\pi]$ between the
+analyzers. One finds the well-known linear correlation
+\begin{equation}
+  E(\theta)
+  \;=\;
+  -1 + \frac{2\theta}{\pi},
+  \qquad
+  \theta = \arccos(\mathbf{a}\cdot\mathbf{b}).
+  \label{eq:classical_correlation}
+\end{equation}
+This is exactly the correlation of a broad class of local hidden-variable
+models with outcomes given by the sign of a scalar product between a hidden
+unit vector and the analyzer directions.
+
+The model defined by \eqref{eq:singlet_spin_relation},
+\eqref{eq:A_outcome_rule} and \eqref{eq:B_outcome_rule} is therefore a
+\emph{concrete realization} of such a local hidden-variable theory within our
+brane framework. It is fully deterministic, explicitly local at the level of
+the evolution equations, and reproduces classical (non-quantum) spin
+correlations of the form \eqref{eq:classical_correlation}. In particular, any
+CHSH combination built from $E(\mathbf{a},\mathbf{b})$ obeys the Bell bound
+$|S|\leq 2$.
+
+By contrast, the quantum mechanical singlet state yields
+\begin{equation}
+  E_{\rm QM}(\mathbf{a},\mathbf{b})
+  \;=\;
+  -\cos\theta,
+\end{equation}
+which violates the CHSH inequality up to Tsirelson's bound
+$|S|\leq 2\sqrt{2}$ for suitable choices of $\mathbf{a}$ and $\mathbf{b}$.
+Thus our toy model, while consistent, does not yet reproduce the quantum
+correlations. This is not a failure of the brane dynamics per se, but rather a
+precise instance of Bell's theorem: under the assumptions of locality and
+\emph{measurement independence} (statistical independence of $\lambda$ and the
+analyzer settings), no deterministic hidden-variable model can reproduce
+$E_{\rm QM}(\theta)$.
+
+Within the present framework there are, conceptually, two possible paths to
+reconcile the brane picture with the observed quantum correlations:
+\begin{enumerate}
+  \item One may retain strict locality of the brane dynamics but relax
+        measurement independence. In a deterministic classical field theory,
+        the initial brane configuration can, in principle, correlate the
+        internal structure of the solitons and the microscopic state of the
+        analyzers, so that the effective distribution
+        $\rho(\lambda\,|\,\mathbf{a},\mathbf{b})$ depends on the settings.
+        This corresponds to a superdeterministic resolution of Bell's theorem.
+  \item Alternatively, one may insist on measurement independence but allow
+        the effective coarse-grained dynamics of $X^4$ and the internal modes
+        to contain an apparently nonlocal coupling between distant regions of
+        the brane, so that the outcome at one wing can depend on the
+        configuration at the other beyond the light cone. This would parallel
+        the spirit of Bohmian nonlocality, but formulated in terms of the
+        brane medium.
+\end{enumerate}
+
+We do not pursue either option in detail here. The value of the present
+construction is that it anchors the discussion of entanglement and Bell-type
+correlations in an explicit micro-picture: entangled pairs correspond to
+global brane configurations with correlated internal angular momentum on two
+toroidal solitons, and measurement outcomes emerge from local threshold
+dynamics of the same amplitude field $X^4$ that underlies the rest of our
+model. The remaining discrepancy with quantum correlations is thus not a vague
+conceptual gap but a sharply formulated open problem about the interplay of
+initial conditions, locality and coarse-graining in the brane dynamics.
+
+\subsection{Scope and Limitations}\label{scope-and-limitations}
+
+The foregoing treatment focuses on single-particle wave mechanics and
+interference. In particular, we have shown how a localized solitonic
+excitation in the brane can reproduce de~Broglie-like wave behaviour,
+and how uncertainty relations arise as statements about wave-packet
+properties. We have \emph{sketched} how wave-packet evolution in the
+brane might parallel Schrödinger-like dynamics in suitable regimes, but
+an explicit mapping from the brane fields $\xi$ or $X$ to a complex
+wavefunction $\psi$ has not been fully worked out.
+
+For multi-particle correlations, in Sec.~\ref{subsec:entanglement-brane} we
+have presented an explicit toy model of a spin-singlet two-soliton
+configuration with deterministic, local measurement dynamics. This model
+successfully demonstrates how entangled pairs can be represented as global
+brane configurations with correlated internal angular momentum, and how local
+threshold measurements extract correlated outcomes. However, the model
+reproduces only classical (linear) Bell correlations of the form
+$E(\theta) = -1 + 2\theta/\pi$, not the quantum mechanical prediction
+$E_{\rm QM}(\theta) = -\cos\theta$. This discrepancy is a precise instance of
+Bell's theorem and makes explicit that reproducing full quantum correlations
+would require either relaxing measurement independence (superdeterminism) or
+introducing effective nonlocal couplings in the brane dynamics. Developing a
+complete account that derives Tsirelson bounds from first principles remains
+an open challenge and a priority for future work.
+
+Finally, the toroidal soliton admits four internal configurations
+$(\chi,s)$ that we interpret as classical precursors of a Dirac spinor
+structure. In Sec.~\ref{sec:emergent-dirac-from-torus} we have presented a
+systematic derivation showing how the Dirac equation emerges as the
+envelope dynamics of these four degenerate internal torus modes. The
+derivation proceeds via explicit mode decomposition, projection onto
+internal eigenmodes, emergence of a Klein--Gordon form, and Clifford
+algebraic factorization to first order. While this constitutes a
+significant advance over purely heuristic treatments, a fully covariant
+extension to curved effective geometries and a complete treatment of
+nonlinear back-reaction effects remain topics for future work. In
+particular, the explicit computation of overlap integrals
+$\langle\phi_{(\chi,s)},\partial_\mu\phi_{(\chi',s')}\rangle_{\rm T}$ for
+a concrete Williamson--van der Mark-like torus model would provide a
+quantitative verification that the effective gamma matrices indeed match
+the standard Clifford algebra structure postulated here.
+
+\paragraph{Geometric Holonomy and Emergent Quantum Phenomena in the
+Brane
+Model}\label{geometric-holonomy-and-emergent-quantum-phenomena-in-the-brane-model}
+
+In our proposed model, fermions such as electrons are interpreted as
+stable soliton-like excitations of a tensioned three-dimensional brane
+embedded in a four-dimensional Euclidean space. The quantum properties
+traditionally ascribed to particles, including spin, charge
+quantization, and the Pauli exclusion principle, emerge naturally from
+the geometric structure of these solitonic solutions.
+Recent developments in our understanding of nonlinear confinement
+suggest that many effects previously attributed to abstract geometric
+phases arise instead as intrinsic features of localized, topologically
+stable field configurations. Within a nonlinear brane medium capable of
+self-confinement, the formation of solitonic or toroidal defects
+introduces genuine topological structure into the field—regions where
+the local phase cannot be continuously deformed to a trivial state.
+Quantum-like properties such as spin, quantization, and phase coherence
+emerge directly from these topological constraints, rather than from
+externally imposed connections on a smooth parameter manifold.
+
+The local geometry surrounding such confined wave structures can still
+be characterized by effective gauge potentials,
+\[
+A_\mu(\mathbf{x}) = i\int \Psi^*(\mathbf{x}) \partial_\mu \Psi(\mathbf{x}) \, d^3x,
+\]
+where $\Psi(\mathbf{x})$ describes the internal field configuration of
+the confined photon or brane soliton. The circulation of this connection
+around a closed path defines an accumulated phase,
+\[
+\Theta = \oint A_\mu d\lambda^\mu,
+\]
+which represents the effective geometric phase associated with the
+curved trajectory of the field vectors inside the self-confined region.
+In contrast to the purely kinematic Berry phase~\cite{Berry1984}, this phase is not an
+artifact of parallel transport in a parameter space, but a physical
+manifestation of real spatial curvature and topological winding within
+the medium.
+
+The nonlinear interaction terms that generate confinement allow local curvature and
+torsion to concentrate energy density into stable, finite structures.
+In this context, the framework of Katanaev's geometric elasticity~\cite{Katanaev2009}
+provides a natural language: curvature and torsion fields correspond to
+the strain and dislocation tensors induced by self-confined wave
+packets. These localized distortions endow the surrounding medium with
+effective gauge connections, which in turn determine the quantized
+phase structure of the soliton.
+
+When multiple internal polarization or spin states coexist, the local
+field curvature can couple these modes through nonlinear terms,
+producing a behavior analogous to a non-Abelian connection. However,
+this SU(2)-like structure is not introduced ad hoc—as in the
+Wilczek–Zee formalism~\cite{WilczekZee1984}—but emerges dynamically from the coupling between
+orthogonal field components within the confined region. The resulting
+internal rotation symmetry defines the spin degree of freedom as a
+tangible geometric feature of the soliton's topology.
+
+A direct physical analogy exists with the Aharonov–Bohm effect~\cite{AharonovBohm1959}: even in
+regions where the external electromagnetic field vanishes, the presence
+of a confined or vortex-like defect produces observable phase shifts in
+the surrounding wavefronts. In the brane framework, such interference
+effects arise from the nontrivial circulation of the internal field
+connection around topological defects, confirming that the essential
+cause of quantum phase phenomena is the geometry of the field itself,
+not the abstract topology of an external configuration space.
+
+In summary, what were once interpreted as geometric-phase phenomena
+(Berry, Wilczek–Zee, Aharonov–Bohm) are here understood as emergent
+manifestations of real geometric and topological structure in a
+nonlinear, self-confining field medium. This reinterpretation provides a
+clear ontological basis for quantum behavior: wave quantization,
+fermionic statistics, and spin arise as necessary consequences of
+localized curvature and torsion within the field, unifying geometric and
+topological aspects under a single physical framework.
+
+\subsection{Parameter matching: \texorpdfstring{$c,\hbar,e,G$}{c,hbar,e,G} from brane microphysics}
+\label{sec:param-matching}
+
+The microscopic brane model introduces a set of elastic and geometric parameters
+%
+\begin{equation}
+  \bigl\{\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \lambda, \kappa_{\Phi}, \mu_G, \ell_\ast, \dots \bigr\},
+\end{equation}
+%
+which control mass density, tension, bending stiffness, nonlinear saturation, and the coupling of the amplitude direction $X^4$ to emergent electromagnetic and gravitational fields.
+In the previous subsections we showed how small-amplitude brane waves reproduce a relativistic dispersion relation, how static deformations in $X^4$ generate a Coulomb sector, and how slowly varying gradients in $X^4$ induce an effective metric.
+In this subsection we collect these ingredients and make explicit how the physical constants
+%
+\begin{equation}
+  c, \qquad \hbar, \qquad e, \qquad G
+\end{equation}
+%
+arise as specific combinations of the brane microparameters.
+
+\subsubsection{Speed of light}
+
+In the linear, long-wavelength limit the amplitude perturbation
+\(
+  \xi := X^4 - X^4_{\mathrm{flat}}
+\)
+obeys a wave equation of the form
+%
+\begin{equation}
+  \rho_m \,\partial_{tt} \xi - T \,\Delta \xi = 0,
+  \label{eq:lin-wave-param}
+\end{equation}
+%
+where $\rho_m$ is the effective mass density of the brane and $T$ is its elastic tension.
+Eq.~\eqref{eq:lin-wave-param} can be written as
+%
+\begin{equation}
+  \partial_{tt} \xi - c^2 \Delta \xi = 0,
+  \qquad
+  c^2 = \frac{T}{\rho_m}.
+  \label{eq:c-from-brane}
+\end{equation}
+%
+We \emph{define} the brane's small-amplitude wave speed to coincide with the physical speed of light and thus impose the matching condition
+%
+\begin{equation}
+  c^2 = \frac{T}{\rho_m}.
+  \label{eq:c-matching}
+\end{equation}
+%
+This can be read either as a choice of units (setting $c=1$ in brane units and fixing $T/\rho_m$ accordingly), or as an empirical constraint on the brane material.
+
+\subsubsection{Planck's constant and rest mass}
+
+A localized toroidal soliton representing a rest electron exhibits a dominant internal carrier frequency $\omega_C$ (its Compton frequency) together with a slowly varying spatial envelope.
+In its rest frame we may write, schematically,
+%
+\begin{equation}
+  \xi(t,\mathbf{x}) \approx A(\mathbf{x}) \cos(\omega_C t),
+\end{equation}
+%
+with a localized profile $A(\mathbf{x})$ determined by the nonlinear balance of tension, bending, and saturation.
+The corresponding energy functional was introduced in Eq.~\eqref{eq:energy-density}:
+%
+\begin{equation}
+  \mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
+  +\frac{T}{2}\mathrm{tr}(E)
+  +\mu|E|^2
+  +\frac{\kappa}{2}|b|^2
+  +W_\text{sat}(E).
+  \label{eq:energy-functional-param}
+\end{equation}
+%
+Evaluated on a stationary soliton solution, this yields a rest energy $E_0$ which can be expressed in the form
+%
+\begin{equation}
+  E_0 = \mathcal{C}_{\mathrm{brane}} \,\omega_C^2,
+  \label{eq:E0-Cbrane}
+\end{equation}
+%
+where $\mathcal{C}_{\mathrm{brane}}$ is a positive constant determined by the soliton's shape and the microparameters $(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast)$.
+Eq.~\eqref{eq:E0-Cbrane} naturally suggests defining an effective Planck constant
+%
+\begin{equation}
+  \hbar_{\mathrm{eff}} := \frac{E_0}{\omega_C}
+  = \mathcal{C}_{\mathrm{brane}} \,\omega_C.
+  \label{eq:hbar-eff}
+\end{equation}
+%
+We require that this matches the observed Planck constant,
+%
+\begin{equation}
+  \hbar_{\mathrm{eff}} = \hbar,
+  \qquad\Rightarrow\qquad
+  \mathcal{C}_{\mathrm{brane}}(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast)\;
+  \omega_C(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast) = \hbar.
+  \label{eq:hbar-matching}
+\end{equation}
+%
+Together with the relativistic relation $E_0 = m_e c^2$, this yields
+%
+\begin{equation}
+  m_{\mathrm{e,eff}} := \frac{E_0}{c^2}
+  = \frac{\hbar \,\omega_C}{c^2},
+\end{equation}
+%
+and demanding $m_{\mathrm{e,eff}} = m_e$ imposes a second consistency condition relating the soliton frequency, its size, and the elastic parameters.
+In practice, $\omega_C$ and $E_0$ can be determined from the nonlinear field equations, and the relation
+$\hbar = E_0/\omega_C$ fixes one nontrivial combination of $(\rho_m,T,\kappa,\epsilon_{\mathrm{cr}},\ell_\ast)$.
+
+\subsubsection{Electric charge from the amplitude bulge}
+
+In the static regime we model the Coulomb sector by a Poisson-type equation for the amplitude deformation,
+%
+\begin{equation}
+  \Delta \xi = -\lambda \rho_Q,
+  \qquad
+  \int_{\mathbb{R}^3} \rho_Q(\mathbf{x})\,d^3x = Q,
+  \label{eq:poisson-xi-param}
+\end{equation}
+%
+where $\rho_Q$ is a ``charge density'' on the brane and $Q$ is a dimensionless total charge associated with a given soliton.
+For a compact source, the far-field solution is
+%
+\begin{equation}
+  \xi(r) \sim \frac{\lambda Q}{4\pi r}.
+\end{equation}
+%
+We identify the emergent electrostatic potential as
+%
+\begin{equation}
+  \Phi = \kappa_{\Phi} \,\xi,
+  \qquad
+  \mathbf{E} = -\nabla \Phi,
+\end{equation}
+%
+where $\kappa_{\Phi}$ is the amplitude-to-potential coupling constant introduced in Section~\ref{subsec:charge-amplitude}.
+In the far field
+%
+\begin{equation}
+  \mathbf{E}(r)
+  = -\nabla(\kappa_{\Phi} \xi)
+  \sim \kappa_{\Phi} \frac{\lambda Q}{4\pi} \frac{\hat{r}}{r^2}.
+  \label{eq:E-from-brane-param}
+\end{equation}
+%
+Matching this to Coulomb's law in vacuum,
+%
+\begin{equation}
+  \mathbf{E}(r) = \frac{q}{4\pi \varepsilon_0} \frac{\hat{r}}{r^2},
+\end{equation}
+%
+we read off
+%
+\begin{equation}
+  q = \varepsilon_0 \kappa_{\Phi} \lambda Q.
+  \label{eq:q-matching}
+\end{equation}
+%
+For the fundamental electron soliton we choose the normalization $Q=-1$, so that
+%
+\begin{equation}
+  e = \varepsilon_0\,|\kappa_{\Phi}| \lambda,
+  \label{eq:e-from-kappa-lambda}
+\end{equation}
+%
+which fixes the product $\kappa_{\Phi} \lambda$ of the amplitude--potential coupling and the Poisson coupling.
+The detailed internal charge distribution of the toroidal soliton affects higher multipole moments and short-distance corrections but does not enter the leading-order identification of $e$.
+
+\subsubsection{Newton's constant from curvature coupling}
+
+Finally, we consider the gravitational sector.
+The induced metric on the brane was introduced in Eq.~\eqref{eq:induced-metric}:
+%
+\begin{equation}
+  g_{ij}(x,t)=\partial_i\mathbf{X}\cdot\partial_j\mathbf{X}\quad (i,j=1,2,3).
+\end{equation}
+%
+For small deformations in $X^4$, this can be written as
+%
+\begin{equation}
+  g_{\mu\nu} = \eta_{\mu\nu}
+  + \partial_\mu X^4 \partial_\nu X^4
+  + \text{(higher-order curvature terms)},
+\end{equation}
+%
+and we introduced an explicit bending term in the brane Lagrangian in Eq.~\eqref{eq:brane-lagrangian}:
+%
+\begin{equation}
+  \mathcal{L}_{\mathrm{bend}} = -\frac{\kappa}{2} |b|^2,
+  \label{eq:lbend-param}
+\end{equation}
+%
+where $b_{ij}$ denotes the extrinsic curvature (second fundamental form) of the brane and $\kappa$ is the bending stiffness.
+Upon coarse-graining over distances much larger than a microscopic scale $\ell_\ast$, the curvature term~\eqref{eq:lbend-param} induces an effective Einstein--Hilbert action for the induced metric,
+%
+\begin{equation}
+  S_{\mathrm{eff}}[g]
+  \sim \zeta_G \,\kappa \,\ell_\ast^2 \int d^3x\,dt\; \sqrt{-g}\, R,
+  \label{eq:Seff-param}
+\end{equation}
+%
+where $R$ is the Ricci scalar constructed from $g_{\mu\nu}$ and $\zeta_G$ is a dimensionless geometrical factor encoding details of the coarse-graining.
+Comparing~\eqref{eq:Seff-param} with the Einstein--Hilbert action
+%
+\begin{equation}
+  S_{\mathrm{EH}} = \frac{c^3}{16\pi G} \int d^3x\,dt\; \sqrt{-g}\, R,
+\end{equation}
+%
+we obtain the matching condition
+%
+\begin{equation}
+  \zeta_G \,\kappa \,\ell_\ast^2 = \frac{c^3}{16\pi G},
+  \qquad\Rightarrow\qquad
+  G = \frac{c^3}{16\pi \zeta_G \kappa \ell_\ast^2}.
+  \label{eq:G-from-brane}
+\end{equation}
+%
+In the weak-field, static limit this reproduces the usual Poisson equation for the Newtonian potential $\Phi_G$ and the standard relation
+$g_{00} \simeq - (1 + 2\Phi_G/c^2)$.
+Thus Newton's constant $G$ is not a fundamental independent input of the model; rather, it is determined by the bending stiffness $\kappa$, the microscopic length $\ell_\ast$, and the geometric factor $\zeta_G$.
+
+\subsubsection{Summary of constraints}
+
+Collecting the above results, the four fundamental constants are expressed in terms of brane microparameters as
+%
+\begin{align}
+  c^2 &= \frac{T}{\rho_m},
+  \label{eq:param-summary-c}
+  \\
+  \hbar &= \mathcal{C}_{\mathrm{brane}}(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast)\;
+           \omega_C(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast),
+  \label{eq:param-summary-hbar}
+  \\
+  e &= \varepsilon_0\,|\kappa_{\Phi}| \lambda,
+  \label{eq:param-summary-e}
+  \\
+  G &= \frac{c^3}{16\pi \zeta_G \kappa \ell_\ast^2}.
+  \label{eq:param-summary-G}
+\end{align}
+%
+These relations make explicit which combinations of microscopic brane parameters must be adjusted to reproduce the observed values of $c$, $\hbar$, $e$ and $G$, and which parameters remain available to encode dimensionless quantities such as the fine structure constant and mass ratios between different solitonic species.
+
+\paragraph{Summary table.}
+For reference, we collect the parameter matching conditions in tabular form:
+%
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+\textbf{Constant} & \textbf{Matching condition} & \textbf{Key brane parameters} \\
+\hline
+$c$ & $c^2 = T/\rho_m$ & tension $T$, mass density $\rho_m$ \\
+\hline
+$\hbar$ & $\hbar = \mathcal{C}_{\mathrm{brane}} \,\omega_C$ & all microparameters $(\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \ell_\ast)$ \\
+\hline
+$e$ & $e = \varepsilon_0\,|\kappa_{\Phi}| \lambda$ & amplitude coupling $\kappa_{\Phi}$, Poisson coupling $\lambda$ \\
+\hline
+$G$ & $G = c^3/(16\pi \zeta_G \kappa \ell_\ast^2)$ & bending stiffness $\kappa$, microscopic scale $\ell_\ast$ \\
+\hline
+\end{tabular}
+\end{center}
+%
+Each row represents a constraint relating one observed fundamental constant to a specific combination of brane microparameters.
+
+In the experimental section that follows, we show how these parameter choices are implemented numerically and how the emergent behavior is validated against known physical phenomena.
