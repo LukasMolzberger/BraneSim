@@ -31,9 +31,19 @@ def initialize_traveling_wave(state, grid, wavelength, amplitude, wave_speed, ce
     # Gaussian envelope
     envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
 
+    # Envelope derivative: dA/dx = -(x - center)/σ² * A(x)
+    envelope_derivative = -((x - center) / (sigma ** 2)) * envelope
+
     # Position and velocity for right-moving wave
     state.positions[:, 3] = envelope * torch.cos(k * (x - center))
-    state.velocities[:, 3] = omega * envelope * torch.sin(k * (x - center))
+
+    # Velocity has two components:
+    # 1. Phase velocity: ω A(x) sin(kx)
+    # 2. Envelope velocity: -c A'(x) cos(kx)
+    state.velocities[:, 3] = (
+        omega * envelope * torch.sin(k * (x - center)) +
+        (-wave_speed) * envelope_derivative * torch.cos(k * (x - center))
+    )
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
     print(f"  Width σ = {sigma:.6e} m")

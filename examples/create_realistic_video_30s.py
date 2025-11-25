@@ -28,8 +28,16 @@ def initialize_traveling_wave(state, grid, wavelength, amplitude, wave_speed, ce
 
     envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
 
+    # Envelope derivative: dA/dx = -(x - center)/σ² * A(x)
+    envelope_derivative = -((x - center) / (sigma ** 2)) * envelope
+
     state.positions[:, 3] = envelope * torch.cos(k * (x - center))
-    state.velocities[:, 3] = omega * envelope * torch.sin(k * (x - center))
+
+    # Velocity with both phase and envelope terms
+    state.velocities[:, 3] = (
+        omega * envelope * torch.sin(k * (x - center)) +
+        (-wave_speed) * envelope_derivative * torch.cos(k * (x - center))
+    )
 
 
 def main():
