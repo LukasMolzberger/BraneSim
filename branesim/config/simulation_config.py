@@ -314,6 +314,83 @@ class SimulationConfig:
 
         return config
 
+    @classmethod
+    def for_2d_test(
+        cls,
+        nx: int = 50,
+        ny: int = 50,
+        wave_speed: float = 1.0,
+        spacing: float = 0.02,
+        cfl_factor: float = 0.4,
+        **kwargs
+    ) -> 'SimulationConfig':
+        """
+        Create simple 2D test configuration.
+
+        For a 2D membrane with springs, the wave speed is:
+            c = √(T/ρ_s) where ρ_s [kg/m²] is surface mass density
+
+        The effective 2D tension comes from the spring network:
+            T = k·L₀ (effective surface tension)
+
+        Args:
+            nx: Number of grid points in x direction
+            ny: Number of grid points in y direction
+            wave_speed: Desired wave speed [m/s]
+            spacing: Grid spacing [m]
+            cfl_factor: CFL number
+            **kwargs: Override parameters
+
+        Returns:
+            SimulationConfig for 2D simulation
+        """
+        # Compute parameters
+        dt = cfl_factor * spacing / wave_speed
+
+        # For 2D: surface mass density σ [kg/m²]
+        sigma = 1.0  # kg/m² (mass per unit area)
+        rho_s = sigma
+
+        # Required tension for desired wave speed: T = c²·σ
+        T = wave_speed**2 * sigma
+
+        # For 2D, we set L₀ = h (no pre-tension in 2D springs)
+        L_0 = spacing
+
+        # Spring constant: k = T/L₀
+        k = T / L_0
+
+        config_dict = {
+            'tension': T,
+            'mass_density': rho_s,
+            'grid_spacing': spacing,
+            'time_step': dt,
+            'grid_shape': (nx, ny),
+            'dimension': Dimensionality.TWO_D,
+            'spring_constant': k,
+            'rest_length': L_0,
+        }
+
+        config_dict.update(kwargs)
+
+        config = cls(**config_dict)
+
+        # Print diagnostic info
+        mass_per_point = sigma * spacing**2
+        print(f"\n2D Configuration:")
+        print(f"  Grid: {nx} × {ny} points")
+        print(f"  Grid spacing h = {spacing:.6f} m")
+        print(f"  Rest length L₀ = {L_0:.6f} m")
+        print(f"  Spring constant k = {k:.2f} N/m")
+        print(f"  Tension T = k·L₀ = {T:.6f} N")
+        print(f"  Surface mass density σ = {sigma:.6f} kg/m²")
+        print(f"  Mass per point m = σ·h² = {mass_per_point:.6f} kg")
+        print(f"  Expected wave speed c = √(T/σ) = {np.sqrt(T/sigma):.6f} m/s")
+        print(f"  Time step dt = {dt:.6f} s")
+        print(f"  CFL = {cfl_factor:.3f}\n")
+
+        return config
+
     def __repr__(self) -> str:
         """String representation."""
         c = self.compute_wave_speed()

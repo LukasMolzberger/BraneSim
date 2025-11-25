@@ -1,16 +1,18 @@
 """
-LinearTensionForceComputer: Simplified force model for 1D wave propagation.
+LinearTensionForceComputer: Simplified force model for wave propagation.
 
 Instead of computing full geometric spring forces with pre-tension,
 this implements a linearized tension model that directly gives the wave equation:
 
-    m · ∂²ξ/∂t² = T · ∂²ξ/∂x²
+    m · ∂²ξ/∂t² = T · ∇²ξ
 
-For a discrete 1D system:
-    F_i = T/h² · (ξᵢ₊₁ + ξᵢ₋₁ - 2ξᵢ)
+For a discrete system:
+    F_i = (T/h) · Σⱼ (ξⱼ - ξᵢ)
+
+where the sum is over all neighbors j of point i.
 
 This avoids numerical stiffness from geometric nonlinearity while maintaining
-correct wave propagation physics.
+correct wave propagation physics in 1D, 2D, and 3D.
 """
 
 import torch
@@ -20,10 +22,15 @@ from branesim.core.grid import BraneGrid
 
 class LinearTensionForceComputer:
     """
-    Linearized tension force for 1D wave propagation.
+    Linearized tension force for wave propagation in 1D/2D/3D.
 
     Implements F = T · ∇²ξ in discrete form, giving clean wave equation
     without geometric nonlinearity or stiffness issues.
+
+    For each point i:
+        F_i = (T/h) · Σⱼ (ξⱼ - ξᵢ)
+
+    where j ranges over all neighbors of i.
 
     Attributes:
         tension: Tension T [N]
@@ -47,13 +54,12 @@ class LinearTensionForceComputer:
 
     def compute_forces(self, state: BraneState, grid: BraneGrid) -> torch.Tensor:
         """
-        Compute linear tension forces: F = T/h² · (ξᵢ₊₁ + ξᵢ₋₁ - 2ξᵢ).
+        Compute linear tension forces: F_i = (T/h) · Σⱼ (ξⱼ - ξᵢ).
 
-        This gives the discrete wave equation:
-            m · ∂²ξ/∂t² = T/h² · (ξᵢ₊₁ + ξᵢ₋₁ - 2ξᵢ)
+        This approximates the continuous wave equation:
+            ∂²ξ/∂t² = (T/ρ) · ∇²ξ
 
-        which approximates the continuous wave equation:
-            ∂²ξ/∂t² = (T/μ) · ∂²ξ/∂x²
+        Works for 1D, 2D, and 3D by summing over all neighbors.
 
         Args:
             state: BraneState with current positions
@@ -67,32 +73,26 @@ class LinearTensionForceComputer:
         # Only compute for transverse direction (ξ³)
         xi = state.positions[:, 3]
 
-        # For 1D, each interior point has exactly 2 neighbors (left and right)
-        # neighbors shape: [N, 2]
-        left_ids = grid.neighbors[:, 0]   # Left neighbor
-        right_ids = grid.neighbors[:, 1]  # Right neighbor
+        # Vectorized computation over all neighbor slots
+        for neighbor_idx in range(grid.max_neighbors):
+            # Get neighbor indices [N]
+            neighbor_ids = grid.neighbors[:, neighbor_idx]
 
-        left_valid = left_ids >= 0
-        right_valid = right_ids >= 0
+            # Mask valid neighbors (not -1)
+            valid_mask = neighbor_ids >= 0
 
-        # Interior points: have both neighbors
-        interior = left_valid & right_valid
+            if not valid_mask.any():
+                continue
 
-        if interior.any():
-            xi_left = xi[left_ids[interior]]
-            xi_center = xi[interior]
-            xi_right = xi[right_ids[interior]]
+            # For valid neighbors: F += (T/h) · (ξⱼ - ξᵢ)
+            xi_i = xi[valid_mask]
+            xi_j = xi[neighbor_ids[valid_mask]]
 
-            # Discrete second difference: Δ²ξ = (ξᵢ₊₁ + ξᵢ₋₁ - 2ξᵢ)
-            delta_2_xi = xi_right + xi_left - 2 * xi_center
+            # Force contribution from this neighbor
+            force_contribution = (self.tension / self.grid_spacing) * (xi_j - xi_i)
 
-            # Force: F = (T/h) · Δ²ξ
-            # Spring model: k_eff = T/h connecting adjacent masses
-            # This gives wave speed c = √(T/μ) in the long-wavelength limit
-            force_magnitude = (self.tension / self.grid_spacing) * delta_2_xi
-
-            # Apply only in transverse direction (ξ³)
-            forces[interior, 3] = force_magnitude
+            # Accumulate forces
+            forces[valid_mask, 3] += force_contribution
 
         return forces
 
@@ -101,10 +101,9 @@ class LinearTensionForceComputer:
         Compute potential energy.
 
         For linear tension model:
-            PE = (T/2h) · Σ (ξᵢ₊₁ - ξᵢ)²
+            PE = (T/4h) · Σ_links (ξⱼ - ξᵢ)²
 
-        This approximates the continuous string energy:
-            PE = (T/2) ∫ (∂ξ/∂x)² dx
+        Factor of 1/4 accounts for double-counting of links in neighbor iteration.
 
         Args:
             state: BraneState
@@ -114,22 +113,26 @@ class LinearTensionForceComputer:
             Total potential energy [J]
         """
         xi = state.positions[:, 3]
+        total_energy = torch.tensor(0.0, device=state.device, dtype=state.dtype)
 
-        # Sum over all links
-        right_ids = grid.neighbors[:, 1]
-        valid = right_ids >= 0
+        # Sum over all neighbor connections
+        for neighbor_idx in range(grid.max_neighbors):
+            neighbor_ids = grid.neighbors[:, neighbor_idx]
+            valid = neighbor_ids >= 0
 
-        if not valid.any():
-            return torch.tensor(0.0, device=state.device, dtype=state.dtype)
+            if not valid.any():
+                continue
 
-        xi_center = xi[valid]
-        xi_right = xi[right_ids[valid]]
+            xi_i = xi[valid]
+            xi_j = xi[neighbor_ids[valid]]
 
-        # Strain energy: (T/2h) · (Δξ)²
-        delta_xi = xi_right - xi_center
-        potential = 0.5 * self.tension / self.grid_spacing * torch.sum(delta_xi ** 2)
+            # Strain energy: (T/2h) · (Δξ)²
+            # Factor of 1/2 from each spring
+            delta_xi = xi_j - xi_i
+            total_energy += 0.5 * self.tension / self.grid_spacing * torch.sum(delta_xi ** 2)
 
-        return potential
+        # Divide by 2 to account for double-counting (each link counted from both ends)
+        return total_energy / 2.0
 
     def __repr__(self) -> str:
         """String representation."""

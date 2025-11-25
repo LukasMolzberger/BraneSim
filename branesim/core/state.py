@@ -242,20 +242,25 @@ class BraneState:
             self.fixed_mask[-1] = True
 
         elif self.dimension == Dimensionality.TWO_D:
-            # Fix all edge points
+            # Fix all edge points (vectorized)
             nx, ny = self.grid_shape
-            for i in range(self.num_points):
-                x, y = self.grid_coords[i]
-                if x == 0 or x == nx - 1 or y == 0 or y == ny - 1:
-                    self.fixed_mask[i] = True
+            x_coords = self.grid_coords[:, 0]
+            y_coords = self.grid_coords[:, 1]
+            edge_mask = (x_coords == 0) | (x_coords == nx - 1) | (y_coords == 0) | (y_coords == ny - 1)
+            self.fixed_mask[edge_mask] = True
 
         else:  # THREE_D
-            # Fix all face points
+            # Fix all face points (vectorized)
             nx, ny, nz = self.grid_shape
-            for i in range(self.num_points):
-                x, y, z = self.grid_coords[i]
-                if x == 0 or x == nx - 1 or y == 0 or y == ny - 1 or z == 0 or z == nz - 1:
-                    self.fixed_mask[i] = True
+            x_coords = self.grid_coords[:, 0]
+            y_coords = self.grid_coords[:, 1]
+            z_coords = self.grid_coords[:, 2]
+            face_mask = (
+                (x_coords == 0) | (x_coords == nx - 1) |
+                (y_coords == 0) | (y_coords == ny - 1) |
+                (z_coords == 0) | (z_coords == nz - 1)
+            )
+            self.fixed_mask[face_mask] = True
 
         # Store initial positions for fixed points
         self.fixed_positions[self.fixed_mask] = self.positions[self.fixed_mask].clone()
