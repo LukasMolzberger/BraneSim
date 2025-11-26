@@ -19,20 +19,23 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 from branesim.config.simulation_config import PhysicalConstants
+from branesim.core.initial_conditions import initialize_right_moving_velocities
 
 
-def initialize_plane_wave_packet_x(state, grid, amplitude, wave_speed, center_x, width_x, wavelength):
+def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength):
     """
-    Initialize a wave packet moving in the +x direction with standing wave mode in y.
+    Initialize ONLY the shape of a 2D tunnel wave packet.
 
     Uses fundamental standing wave mode sin(πy/L_y) in y-direction to naturally
     satisfy fixed boundary conditions at y=0 and y=L_y. Localized Gaussian in x.
+
+    Velocities are initialized separately using initialize_right_moving_velocities().
+    This allows dimension-independent velocity initialization.
 
     Args:
         state: BraneState
         grid: BraneGrid
         amplitude: Peak amplitude [m]
-        wave_speed: Wave speed [m/s]
         center_x: Center x coordinate [m]
         width_x: Gaussian width σ_x [m]
         wavelength: Carrier wavelength [m]
@@ -55,29 +58,17 @@ def initialize_plane_wave_packet_x(state, grid, amplitude, wave_speed, center_x,
     # Full envelope: localized in x, standing wave in y
     envelope = envelope_x * y_mode
 
-    # Wave numbers and frequency (same as 1D case)
+    # Wave number
     k = 2 * np.pi / wavelength
-    omega = wave_speed * k
 
-    # Envelope derivative in x: ∂A/∂x = -(x - center_x)/σ_x² * A(x,y)
-    envelope_derivative_x = -((x - center_x) / (width_x ** 2)) * envelope
-
-    # Position: ξ(x,y,0) = A(x) * sin(πy/L_y) * cos(k(x-x₀))
+    # Position field only - velocities set separately
     state.positions[:, 3] = envelope * torch.cos(k * (x - center_x))
-
-    # Velocity: For right-moving wave packet (same formula as 1D case)
-    # ∂ξ/∂t = sin(πy/L_y) * [ω*A(x)*sin(k(x-x₀)) - c*A'(x)*cos(k(x-x₀))]
-    state.velocities[:, 3] = (
-        omega * envelope * torch.sin(k * (x - center_x)) +
-        (-wave_speed) * envelope_derivative_x * torch.cos(k * (x - center_x))
-    )
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
     print(f"  Width σ_x = {width_x:.6e} m")
     print(f"  Center x = {center_x:.6e} m")
     print(f"  Amplitude = {amplitude:.6e} m")
     print(f"  Wave number k = {k:.6e} rad/m")
-    print(f"  Angular frequency ω = {omega:.6e} rad/s")
     print(f"  Y-mode: sin(πy/{domain_length_y:.3e}) - fundamental standing wave")
     print(f"  Satisfies fixed boundary conditions at y=0 and y=L_y")
 
@@ -151,7 +142,7 @@ def main():
     physics = LinearTensionForceComputer(tension, h)
     solver = VelocityVerletSolver(dt, sigma, physics, grid)
 
-    # Initialize wave packet
+    # Initialize wave packet (two-step process)
     print(f"\nInitializing photon wave packet...")
 
     # Wavelength: multiple of grid spacing for good resolution
@@ -166,8 +157,21 @@ def main():
     # Center: in the left third of domain
     center_x = domain_length_x / 3.0
 
-    initialize_plane_wave_packet_x(state, grid, amplitude, c, center_x, width_x, wavelength)
+    # Step 1: Initialize shape only
+    print(f"\n[1] Initializing wave shape...")
+    initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength)
 
+    # Step 2: Initialize velocities for right-moving wave at speed c
+    print(f"\n[2] Initializing velocities for right-moving wave...")
+    initialize_right_moving_velocities(
+        state=state,
+        grid=grid,
+        wave_speed=c,
+        direction=None,  # Default: +x
+        field_component=3
+    )
+
+    # Step 3: Compute initial accelerations
     solver.initialize_accelerations(state)
     state.apply_fixed_boundaries()
 
