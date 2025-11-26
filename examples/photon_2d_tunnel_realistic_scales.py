@@ -98,13 +98,14 @@ def main():
     print(f"  m_e = {constants.m_e:.6e} kg")
 
     # Configuration with realistic scales
-    # Grid spacing as multiple of Compton wavelength
-    lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
+    # Grid spacing as multiple of Compton wavelength (halved for double resolution)
+    lambda_C_multiplier = 5.0  # Grid spacing = 5 × λ_C (double resolution)
     h = constants.lambda_C * lambda_C_multiplier
 
     # Domain size - tunnel geometry (long in x, narrow in y)
-    nx = 400  # Long tunnel
-    ny = 50   # Narrow tunnel
+    # Double the grid points to maintain same domain size
+    nx = 800  # Long tunnel (doubled)
+    ny = 100  # Narrow tunnel (doubled)
     domain_length_x = nx * h
     domain_length_y = ny * h
 
