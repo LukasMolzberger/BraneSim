@@ -152,12 +152,16 @@ class LinearTensionForceComputer:
 
     def compute_potential_energy(self, state: BraneState, grid: BraneGrid) -> torch.Tensor:
         """
-        Compute potential energy using (D+1)-dimensional distances.
+        Compute potential energy using (D+1)-dimensional distances with dimension-dependent scaling.
 
         For linear tension model with proper dimensionality:
-            PE = (T/2) · Σ_links |R_j - R_i|²
+            PE = (energy_scale/2) · Σ_links weight_ij · |R_j - R_i|²
 
-        where |R_j - R_i| is computed in the (D+1)-dimensional space.
+        where |R_j - R_i| is computed in the (D+1)-dimensional space, and
+        energy_scale and weights match the force computation:
+            1D: energy_scale = T/h, weights = 1
+            2D: energy_scale = T, weights depend on diagonal vs axial neighbors
+            3D: energy_scale = T·h, weights depend on face/edge/corner neighbors
 
         Args:
             state: BraneState
@@ -168,13 +172,39 @@ class LinearTensionForceComputer:
         """
         total_energy = torch.tensor(0.0, device=state.device, dtype=state.dtype)
 
-        # Determine active dimensions based on brane dimensionality
+        # Determine active dimensions and scaling based on brane dimensionality
         if grid.dimension == Dimensionality.ONE_D:
             active_dims = [0, 3]  # (x, ξ)
+            energy_scale = self.tension / self.grid_spacing  # T/h
+            weights = torch.ones(2, device=state.device, dtype=state.dtype)
         elif grid.dimension == Dimensionality.TWO_D:
             active_dims = [0, 1, 3]  # (x, y, ξ)
+            energy_scale = self.tension  # T
+            # Weights for 8 neighbors: diagonal neighbors weighted by 1/√2
+            inv_sqrt2 = 1.0 / np.sqrt(2.0)
+            weights = torch.tensor(
+                [inv_sqrt2, 1.0, inv_sqrt2, 1.0, 1.0, inv_sqrt2, 1.0, inv_sqrt2],
+                device=state.device, dtype=state.dtype
+            )
         else:  # THREE_D
             active_dims = [0, 1, 2, 3]  # (x, y, z, ξ)
+            energy_scale = self.tension * self.grid_spacing  # T·h
+            # Build 3D neighbor weights (26 neighbors)
+            inv_sqrt2 = 1.0 / np.sqrt(2.0)
+            inv_sqrt3 = 1.0 / np.sqrt(3.0)
+            weights_3d = []
+            for di in [-1, 0, 1]:
+                for dj in [-1, 0, 1]:
+                    for dk in [-1, 0, 1]:
+                        if not (di == 0 and dj == 0 and dk == 0):
+                            num_nonzero = (di != 0) + (dj != 0) + (dk != 0)
+                            if num_nonzero == 1:  # Face neighbor
+                                weights_3d.append(1.0)
+                            elif num_nonzero == 2:  # Edge neighbor
+                                weights_3d.append(inv_sqrt2)
+                            else:  # Corner neighbor
+                                weights_3d.append(inv_sqrt3)
+            weights = torch.tensor(weights_3d, device=state.device, dtype=state.dtype)
 
         # Sum over all neighbor connections
         for neighbor_idx in range(grid.max_neighbors):
@@ -194,8 +224,11 @@ class LinearTensionForceComputer:
             # Distance squared in (D+1)-dimensional space [N_valid]
             distance_sq = torch.sum(delta ** 2, dim=1)
 
-            # Strain energy: (T/2) · |ΔR|²
-            total_energy += 0.5 * self.tension / self.grid_spacing * torch.sum(distance_sq)
+            # Get weight for this neighbor slot
+            weight = weights[neighbor_idx]
+
+            # Strain energy: (energy_scale·weight/2) · |ΔR|²
+            total_energy += 0.5 * energy_scale * weight * torch.sum(distance_sq)
 
         # Divide by 2 to account for double-counting (each link counted from both ends)
         return total_energy / 2.0

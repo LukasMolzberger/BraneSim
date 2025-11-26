@@ -160,16 +160,27 @@ class VelocityVerletSolver:
 
     def compute_wave_speed(self) -> float:
         """
-        Compute theoretical wave speed based on dimensionality.
+        Compute theoretical wave speed based on dimensionality and physics model.
 
-        1D: c = √(T₀/μ) where T₀ = k·(h - L₀) is pre-tension,
-                              μ = ρ_m·h is mass per unit length
+        For LinearTensionForceComputer:
+            c = √(T/ρ_m) for all dimensions
 
-        2D/3D: c = √(T/ρ_m) where T is surface tension
+        For SpringForceComputer:
+            1D: c = √(T₀/μ) where T₀ = k·(h - L₀) is pre-tension,
+                                  μ = ρ_m·h is mass per unit length
+            2D/3D: c = √(T/ρ_m) where T is surface tension
 
         Returns:
             Wave speed in m/s
         """
+        # Import here to avoid circular dependency
+        from branesim.physics.linear_tension_forces import LinearTensionForceComputer
+
+        # For LinearTensionForceComputer, use tension directly
+        if isinstance(self.physics, LinearTensionForceComputer):
+            return (self.physics.tension / self.mass_density) ** 0.5
+
+        # For SpringForceComputer and other spring-based models
         k = self.physics.spring_constant
         L_0 = self.physics.rest_length
         h = self.grid.spacing
