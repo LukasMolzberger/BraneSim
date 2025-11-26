@@ -30,9 +30,12 @@ class SimulationConfig:
     """
     Complete simulation configuration.
 
+    CRITICAL CONSTRAINT: c = 3×10⁸ m/s is a PHYSICAL CONSTANT.
+    The relation T = ρ_m · c² is ENFORCED, not computed.
+
     Physical Parameters:
-        tension: float (T), membrane tension [N/m]
-        mass_density: float (ρ_m), mass per unit volume [kg/m³]
+        mass_density: float (ρ_m), mass per unit volume/area/length [kg/m³ or kg/m² or kg/m]
+                      This is THE fundamental parameter. Tension is derived from this.
         grid_spacing: float (h), spatial resolution [m]
         time_step: float (dt) [s]
 
@@ -45,6 +48,9 @@ class SimulationConfig:
         rest_length: float (L_0) [m]
         critical_strain: float or None (ε_cr) for saturation
 
+    Derived Parameters (computed automatically):
+        tension: float (T), computed as T = ρ_m · c² [N/m]
+
     Computational:
         device: str ('cpu' or 'cuda')
         dtype: str ('float32' or 'float64')
@@ -54,8 +60,7 @@ class SimulationConfig:
         output_dir: str
     """
 
-    # Physical parameters
-    tension: float
+    # Physical parameters - mass_density is fundamental
     mass_density: float
     grid_spacing: float
     time_step: float
@@ -77,8 +82,21 @@ class SimulationConfig:
     save_interval: int = 10
     output_dir: str = './output'
 
+    # Derived parameter (will be set in __post_init__)
+    tension: float = None
+
     def __post_init__(self):
-        """Validate configuration after initialization."""
+        """
+        Derive tension from mass_density and validate configuration.
+
+        ENFORCES: T = ρ_m · c²
+        """
+        constants = PhysicalConstants()
+
+        # CRITICAL: Derive tension from mass density and physical constant c
+        self.tension = self.mass_density * constants.c ** 2
+
+        # Now validate
         self._validate()
 
     def _validate(self):
@@ -108,7 +126,7 @@ class SimulationConfig:
             raise ValueError(f"Spring constant must be positive, got {self.spring_constant}")
 
         # Check CFL stability condition
-        wave_speed = self.compute_wave_speed()
+        wave_speed = self._get_effective_wave_speed()
         cfl_number = wave_speed * self.time_step / self.grid_spacing
 
         if cfl_number > 0.5:
@@ -137,24 +155,42 @@ class SimulationConfig:
         if self.dtype not in ['float32', 'float64']:
             raise ValueError(f"dtype must be 'float32' or 'float64', got '{self.dtype}'")
 
-    def compute_wave_speed(self) -> float:
+    def verify_wave_speed(self) -> tuple[float, float, float]:
         """
-        Compute wave speed based on dimensionality.
+        Verify that configured parameters reproduce the physical speed of light.
 
-        1D: c = √(T₀/μ) where T₀ = k·(h - L₀), μ = mass_density [kg/m]
-        2D/3D: c = √(T/ρ) where T is tension, ρ is mass density
+        CRITICAL: c = 3×10⁸ m/s is a PHYSICAL CONSTANT, not something we compute.
+        This method checks if the discrete model parameters reproduce this value.
 
         Returns:
-            Wave speed in m/s
+            Tuple of (expected_c, computed_c, relative_error)
         """
+        constants = PhysicalConstants()
+        expected_c = constants.c
+
+        # Compute effective wave speed from current parameters
         if self.dimension == Dimensionality.ONE_D:
             # For 1D: use pre-tension formula
             T_0 = self.spring_constant * (self.grid_spacing - self.rest_length)
             mu = self.mass_density  # Linear density [kg/m]
-            return np.sqrt(T_0 / mu)
+            computed_c = np.sqrt(T_0 / mu)
         else:
             # For 2D/3D: use standard formula
-            return np.sqrt(self.tension / self.mass_density)
+            computed_c = np.sqrt(self.tension / self.mass_density)
+
+        relative_error = abs(computed_c - expected_c) / expected_c
+
+        return expected_c, computed_c, relative_error
+
+    def _get_effective_wave_speed(self) -> float:
+        """
+        Internal helper to get effective wave speed for CFL checking.
+
+        Returns:
+            Computed wave speed in m/s
+        """
+        _, computed_c, _ = self.verify_wave_speed()
+        return computed_c
 
     def compute_cfl_number(self) -> float:
         """
@@ -163,7 +199,7 @@ class SimulationConfig:
         Returns:
             CFL number (should be < 0.5 for stability)
         """
-        c = self.compute_wave_speed()
+        c = self._get_effective_wave_speed()
         return c * self.time_step / self.grid_spacing
 
     @classmethod
@@ -171,6 +207,7 @@ class SimulationConfig:
         cls,
         grid_shape: Tuple[int, ...],
         dimension: Dimensionality,
+        mass_density: float = None,
         lambda_C_multiplier: float = 10.0,
         cfl_factor: float = 0.4,
         **kwargs
@@ -178,36 +215,46 @@ class SimulationConfig:
         """
         Create config from physical constants.
 
+        ENFORCES: c = 3×10⁸ m/s (physical constant)
+        ENFORCES: T = ρ_m · c² (derived, not specified)
+
         Automatically computes grid spacing, time step, and spring constant
-        based on Compton wavelength and wave speed.
+        based on Compton wavelength and the speed of light.
 
         Args:
             grid_shape: Grid dimensions
             dimension: Dimensionality enum
+            mass_density: Mass density ρ_m [kg/m³ or kg/m² or kg/m]. If None, uses a default.
             lambda_C_multiplier: Grid spacing as multiple of Compton wavelength
             cfl_factor: CFL number (default 0.4 for stability margin)
-            **kwargs: Override specific parameters
+            **kwargs: Override specific parameters (cannot override tension - it's derived!)
 
         Returns:
-            SimulationConfig instance
+            SimulationConfig instance with physical wave speed c
         """
         constants = PhysicalConstants()
 
         # Derived parameters
         h = constants.lambda_C * lambda_C_multiplier  # Grid spacing
-        c = constants.c  # Speed of light
+        c = constants.c  # Speed of light (PHYSICAL CONSTANT)
         dt = cfl_factor * h / c  # Time step from CFL
+
+        # Mass density - use provided or default
+        if mass_density is None:
+            # Default: choose ρ_m such that T = 1.0 N
+            # This gives ρ_m = T/c² = 1.0 / c²
+            mass_density = 1.0 / c**2
 
         # Spring parameters
         L_0 = h  # Rest length = grid spacing
-        T = 1.0  # Arbitrary tension (can be calibrated later)
-        rho_m = T / c**2  # Mass density from wave speed c = √(T/ρ_m)
+        # CRITICAL: Tension is DERIVED from mass density
+        # (Will be computed in __post_init__ but we need k = T/L_0)
+        T = mass_density * c**2
         k = T / L_0  # Spring constant
 
         # Build configuration dict
         config_dict = {
-            'tension': T,
-            'mass_density': rho_m,
+            'mass_density': mass_density,  # Fundamental parameter
             'grid_spacing': h,
             'time_step': dt,
             'grid_shape': grid_shape,
@@ -216,7 +263,12 @@ class SimulationConfig:
             'rest_length': L_0,
         }
 
-        # Override with user-provided kwargs
+        # Override with user-provided kwargs (except tension!)
+        if 'tension' in kwargs:
+            raise ValueError(
+                "Cannot override 'tension' - it is derived from mass_density and c. "
+                "Set 'mass_density' instead."
+            )
         config_dict.update(kwargs)
 
         return cls(**config_dict)
@@ -393,14 +445,21 @@ class SimulationConfig:
 
     def __repr__(self) -> str:
         """String representation."""
-        c = self.compute_wave_speed()
+        expected_c, computed_c, error = self.verify_wave_speed()
         cfl = self.compute_cfl_number()
+
+        # Show warning if wave speed deviates significantly from physical constant
+        if error > 0.01:  # > 1% error
+            c_str = f"c_eff = {computed_c:.2e} m/s [WARNING: {error*100:.1f}% from c_physical]"
+        else:
+            c_str = f"c_eff = {computed_c:.2e} m/s"
+
         return (
             f"SimulationConfig(\n"
             f"  {self.dimension.name}, grid_shape={self.grid_shape}\n"
-            f"  c = {c:.2e} m/s, CFL = {cfl:.3f}\n"
+            f"  {c_str}, CFL = {cfl:.3f}\n"
             f"  h = {self.grid_spacing:.2e} m, dt = {self.time_step:.2e} s\n"
-            f"  T = {self.tension:.2e} N/m, ρ_m = {self.mass_density:.2e} kg/m³\n"
+            f"  T = {self.tension:.2e} N/m (= ρ_m · c²), ρ_m = {self.mass_density:.2e} kg/m³\n"
             f"  k = {self.spring_constant:.2e} N/m, L_0 = {self.rest_length:.2e} m\n"
             f"  device={self.device}, dtype={self.dtype}\n"
             f")"

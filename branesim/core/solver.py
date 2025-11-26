@@ -158,43 +158,56 @@ class VelocityVerletSolver:
             'total': (kinetic + potential).item()
         }
 
-    def compute_wave_speed(self) -> float:
+    def verify_wave_speed(self) -> tuple[float, float, float]:
         """
-        Compute theoretical wave speed based on dimensionality and physics model.
+        Verify that the configured parameters reproduce the physical speed of light.
 
-        For LinearTensionForceComputer:
-            c = √(T/ρ_m) for all dimensions
-
-        For SpringForceComputer:
-            1D: c = √(T₀/μ) where T₀ = k·(h - L₀) is pre-tension,
-                                  μ = ρ_m·h is mass per unit length
-            2D/3D: c = √(T/ρ_m) where T is surface tension
+        CRITICAL: c = 3×10⁸ m/s is a PHYSICAL CONSTANT, not something we compute.
+        This method checks if the discrete model parameters reproduce this value.
 
         Returns:
-            Wave speed in m/s
+            Tuple of (expected_c, computed_c, relative_error)
+            where:
+                expected_c = 3×10⁸ m/s (physical constant)
+                computed_c = wave speed from current parameters
+                relative_error = |computed_c - expected_c| / expected_c
         """
-        # Import here to avoid circular dependency
+        from branesim.config.simulation_config import PhysicalConstants
         from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 
-        # For LinearTensionForceComputer, use tension directly
+        constants = PhysicalConstants()
+        expected_c = constants.c
+
+        # Compute effective wave speed from current parameters
         if isinstance(self.physics, LinearTensionForceComputer):
-            return (self.physics.tension / self.mass_density) ** 0.5
-
-        # For SpringForceComputer and other spring-based models
-        k = self.physics.spring_constant
-        L_0 = self.physics.rest_length
-        h = self.grid.spacing
-
-        if self.grid.dimension.value == 1:
-            # For 1D: pre-tension from stretched springs
-            T_0 = k * (h - L_0)  # Pre-tension [N]
-            # Note: For 1D, mass_density is LINEAR density μ [kg/m], not volumetric
-            mu = self.mass_density  # [kg/m]
-            return (T_0 / mu) ** 0.5
+            computed_c = (self.physics.tension / self.mass_density) ** 0.5
         else:
-            # For 2D/3D: use tension/mass_density
-            tension = k * L_0
-            return (tension / self.mass_density) ** 0.5
+            # SpringForceComputer
+            k = self.physics.spring_constant
+            L_0 = self.physics.rest_length
+            h = self.grid.spacing
+
+            if self.grid.dimension.value == 1:
+                T_0 = k * (h - L_0)
+                mu = self.mass_density
+                computed_c = (T_0 / mu) ** 0.5
+            else:
+                tension = k * L_0
+                computed_c = (tension / self.mass_density) ** 0.5
+
+        relative_error = abs(computed_c - expected_c) / expected_c
+
+        return expected_c, computed_c, relative_error
+
+    def _get_effective_wave_speed(self) -> float:
+        """
+        Internal helper to get effective wave speed for CFL checking.
+
+        Returns:
+            Computed wave speed in m/s
+        """
+        _, computed_c, _ = self.verify_wave_speed()
+        return computed_c
 
     def reset_time(self):
         """Reset simulation time and step count to zero."""
@@ -203,9 +216,17 @@ class VelocityVerletSolver:
 
     def __repr__(self) -> str:
         """String representation."""
+        expected_c, computed_c, error = self.verify_wave_speed()
+
+        # Show warning if wave speed deviates significantly from physical constant
+        if error > 0.01:  # > 1% error
+            warning = f" [WARNING: {error*100:.1f}% from c_physical]"
+        else:
+            warning = ""
+
         return (
             f"VelocityVerletSolver(dt={self.dt:.2e}s, "
             f"ρ_m={self.mass_density:.2e} kg/m³, "
-            f"c={self.compute_wave_speed():.2e} m/s, "
+            f"c_eff={computed_c:.2e} m/s{warning}, "
             f"t={self.time:.2e}s, steps={self.step_count})"
         )
