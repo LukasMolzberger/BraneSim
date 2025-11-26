@@ -16,7 +16,8 @@ correct wave propagation physics in 1D, 2D, and 3D.
 """
 
 import torch
-from branesim.core.state import BraneState
+import numpy as np
+from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 
 
@@ -54,12 +55,14 @@ class LinearTensionForceComputer:
 
     def compute_forces(self, state: BraneState, grid: BraneGrid) -> torch.Tensor:
         """
-        Compute linear tension forces: F_i = (T/h) · Σⱼ (ξⱼ - ξᵢ).
+        Compute linear tension forces with proper neighbor weighting.
 
-        This approximates the continuous wave equation:
-            ∂²ξ/∂t² = (T/ρ) · ∇²ξ
+        For discrete Laplacian:
+        - 1D: 2 cardinal neighbors, weight = 1.0
+        - 2D: 4 cardinal neighbors (weight = 1.0), 4 diagonal (weight = 0.5)
+        - 3D: 6 cardinal neighbors (weight = 1.0), 12 edge/face diagonal (weight varies)
 
-        Works for 1D, 2D, and 3D by summing over all neighbors.
+        This approximates: ∂²ξ/∂t² = (T/ρ) · ∇²ξ
 
         Args:
             state: BraneState with current positions
@@ -73,6 +76,39 @@ class LinearTensionForceComputer:
         # Only compute for transverse direction (ξ³)
         xi = state.positions[:, 3]
 
+        # Determine neighbor weights based on dimensionality and distance
+        if grid.dimension == Dimensionality.ONE_D:
+            # 1D: 2 neighbors (left, right) at distance h
+            weights = torch.ones(2, device=state.device, dtype=state.dtype)
+        elif grid.dimension == Dimensionality.TWO_D:
+            # 2D: 8 neighbors in order [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
+            # Diagonal neighbors at distance √2·h: indices 0, 2, 5, 7 (weight 1/√2)
+            # Cardinal neighbors at distance h: indices 1, 3, 4, 6 (weight 1.0)
+            inv_sqrt2 = 1.0 / np.sqrt(2.0)
+            weights = torch.tensor([inv_sqrt2, 1.0, inv_sqrt2, 1.0, 1.0, inv_sqrt2, 1.0, inv_sqrt2],
+                                   device=state.device, dtype=state.dtype)
+        else:  # THREE_D
+            # 3D: 26 neighbors at different distances
+            # Face neighbors (distance h): weight 1.0
+            # Edge neighbors (distance √2·h): weight 1/√2
+            # Corner neighbors (distance √3·h): weight 1/√3
+            # Order from grid: all combos of (di,dj,dk) ∈ {-1,0,1}³ except (0,0,0)
+            inv_sqrt2 = 1.0 / np.sqrt(2.0)
+            inv_sqrt3 = 1.0 / np.sqrt(3.0)
+            weights_3d = []
+            for di in [-1, 0, 1]:
+                for dj in [-1, 0, 1]:
+                    for dk in [-1, 0, 1]:
+                        if not (di == 0 and dj == 0 and dk == 0):
+                            num_nonzero = (di != 0) + (dj != 0) + (dk != 0)
+                            if num_nonzero == 1:  # Face neighbor (distance h)
+                                weights_3d.append(1.0)
+                            elif num_nonzero == 2:  # Edge neighbor (distance √2·h)
+                                weights_3d.append(inv_sqrt2)
+                            else:  # Corner neighbor (distance √3·h, num_nonzero == 3)
+                                weights_3d.append(inv_sqrt3)
+            weights = torch.tensor(weights_3d, device=state.device, dtype=state.dtype)
+
         # Vectorized computation over all neighbor slots
         for neighbor_idx in range(grid.max_neighbors):
             # Get neighbor indices [N]
@@ -84,12 +120,13 @@ class LinearTensionForceComputer:
             if not valid_mask.any():
                 continue
 
-            # For valid neighbors: F += (T/h) · (ξⱼ - ξᵢ)
+            # For valid neighbors: F += weight · (T/h) · (ξⱼ - ξᵢ)
             xi_i = xi[valid_mask]
             xi_j = xi[neighbor_ids[valid_mask]]
 
-            # Force contribution from this neighbor
-            force_contribution = (self.tension / self.grid_spacing) * (xi_j - xi_i)
+            # Force contribution from this neighbor with proper weight
+            weight = weights[neighbor_idx]
+            force_contribution = weight * (self.tension / self.grid_spacing) * (xi_j - xi_i)
 
             # Accumulate forces
             forces[valid_mask, 3] += force_contribution
