@@ -64,8 +64,8 @@ def initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, cent
     # Velocity: For right-moving wave packet
     # ∂ξ/∂t = -c * dA/dx * cos(kx) + ω * A(x,y) * sin(kx)
     state.velocities[:, 3] = (
-        -wave_speed * envelope_derivative * torch.cos(k * x) +
-        omega * envelope * torch.sin(k * x)
+        omega * envelope * torch.sin(k * (x - center_x)) +
+        (-wave_speed) * envelope_derivative * torch.cos(k * (x - center_x))
     )
 
     print(f"  Center: ({center_x:.4f}, {center_y:.4f}) m")
