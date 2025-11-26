@@ -13,6 +13,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
+from matplotlib.colors import hsv_to_rgb
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -20,6 +21,49 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.core.initial_conditions import initialize_right_moving_velocities
+
+
+def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
+    """
+    Convert 2D displacement vectors to RGB image using HSV color coding.
+
+    Args:
+        disp_x: x-component of displacement (2D array)
+        disp_y: y-component of displacement (2D array)
+        max_magnitude: Maximum magnitude for normalization (if None, uses max of data)
+
+    Returns:
+        RGB image (nx, ny, 3) where:
+        - Hue encodes direction (0-360 degrees)
+        - Saturation = 1.0 (full color)
+        - Value encodes magnitude (0-1)
+    """
+    # Compute magnitude and angle
+    magnitude = np.sqrt(disp_x**2 + disp_y**2)
+    angle = np.arctan2(disp_y, disp_x)  # Returns angle in [-pi, pi]
+
+    # Normalize angle to [0, 1] for hue
+    hue = (angle + np.pi) / (2 * np.pi)
+
+    # Normalize magnitude to [0, 1] for value
+    if max_magnitude is None:
+        max_magnitude = magnitude.max()
+
+    if max_magnitude > 0:
+        value = magnitude / max_magnitude
+    else:
+        value = np.zeros_like(magnitude)
+
+    # Full saturation
+    saturation = np.ones_like(magnitude)
+
+    # Stack into HSV image
+    hsv = np.stack([hue, saturation, value], axis=-1)
+
+    # Convert to RGB
+    rgb = hsv_to_rgb(hsv)
+
+    return rgb, magnitude, angle
 
 
 def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength):
@@ -130,6 +174,9 @@ def main():
     state = BraneState((nx, ny), Dimensionality.TWO_D, device, dtype)
     state.initialize_flat_configuration(h)
 
+    # Store initial positions for lateral distortion tracking
+    initial_positions = state.positions.clone()
+
     # Set fixed boundaries (all edges)
     state.set_fixed_boundaries()
     print(f"\nBoundary Conditions:")
@@ -201,10 +248,14 @@ def main():
     num_snapshots = 7
     snapshot_times = np.linspace(0, simulation_time, num_snapshots)
     snapshots = {}
+    snapshots_lateral_x = {}  # Store x-component of lateral displacement
+    snapshots_lateral_y = {}  # Store y-component of lateral displacement
     snapshot_steps = {int(t / dt): t for t in snapshot_times}
 
     # For animation - save every N steps
     animation_frames = []
+    animation_frames_lateral_x = []  # For lateral distortion animation
+    animation_frames_lateral_y = []  # For lateral distortion animation
     animation_times = []
     frame_interval = max(1, num_steps // 300)  # ~300 frames total
 
@@ -218,10 +269,23 @@ def main():
             field = state.get_field_component(3).cpu().numpy()
             snapshots[snapshot_steps[step]] = field.copy()
 
+            # Store lateral displacements (x and y components)
+            lateral_disp_x = (state.positions[:, 0] - initial_positions[:, 0]).cpu().numpy()
+            lateral_disp_y = (state.positions[:, 1] - initial_positions[:, 1]).cpu().numpy()
+            snapshots_lateral_x[snapshot_steps[step]] = lateral_disp_x.copy()
+            snapshots_lateral_y[snapshot_steps[step]] = lateral_disp_y.copy()
+
         # Save frames for animation
         if step % frame_interval == 0:
             field = state.get_field_component(3).cpu().numpy()
             animation_frames.append(field.copy())
+
+            # Save lateral displacement frames
+            lateral_disp_x = (state.positions[:, 0] - initial_positions[:, 0]).cpu().numpy()
+            lateral_disp_y = (state.positions[:, 1] - initial_positions[:, 1]).cpu().numpy()
+            animation_frames_lateral_x.append(lateral_disp_x.copy())
+            animation_frames_lateral_y.append(lateral_disp_y.copy())
+
             animation_times.append(solver.time)
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
@@ -358,6 +422,115 @@ def main():
     print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales.mp4")
 
     plt.close(fig_anim)
+
+    # Lateral distortion visualization
+    print(f"\nCreating lateral distortion plots...")
+
+    # Find max lateral displacement magnitude for consistent scaling
+    max_disp_mag = 0
+    for t in snapshots_lateral_x.keys():
+        disp_x = snapshots_lateral_x[t].reshape(nx, ny)
+        disp_y = snapshots_lateral_y[t].reshape(nx, ny)
+        mag = np.sqrt(disp_x**2 + disp_y**2).max()
+        max_disp_mag = max(max_disp_mag, mag)
+
+    # Create snapshot plots for lateral distortion
+    fig_lat, axes_lat = plt.subplots(num_snapshots, 1, figsize=(16, 12))
+    fig_lat.suptitle(f'2D Photon - Lateral Distortion (Color = Direction, Brightness = Magnitude)',
+                     fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_lateral_x:
+            disp_x = snapshots_lateral_x[t].reshape(nx, ny)
+            disp_y = snapshots_lateral_y[t].reshape(nx, ny)
+
+            # Convert to RGB image
+            rgb_image, magnitude, angle = displacement_to_rgb(disp_x, disp_y, max_disp_mag)
+
+            # Plot RGB image (transpose spatial dimensions only, keep color channel last)
+            axes_lat[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
+                                extent=[x_nm[0], x_nm[-1], y_nm[0], y_nm[-1]],
+                                aspect='auto')
+
+            axes_lat[idx].set_ylabel('y [nm]', fontsize=11)
+            axes_lat[idx].set_xlim(x_nm[0], x_nm[-1])
+            axes_lat[idx].set_ylim(y_nm[0], y_nm[-1])
+
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes_lat[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                              transform=axes_lat[idx].transAxes,
+                              fontsize=12, verticalalignment='top',
+                              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            # Add magnitude info
+            max_mag_pm = max_disp_mag * 1e12
+            axes_lat[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
+                              transform=axes_lat[idx].transAxes,
+                              fontsize=10, verticalalignment='top',
+                              horizontalalignment='right',
+                              bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+
+            if idx == num_snapshots - 1:
+                axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('photon_2d_tunnel_realistic_scales_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_lateral_distortion.png")
+
+    # Create lateral distortion animation
+    print(f"\nCreating lateral distortion animation...")
+
+    # Find max magnitude across all frames for consistent scaling
+    max_disp_mag_anim = 0
+    for idx in range(len(animation_frames_lateral_x)):
+        disp_x = animation_frames_lateral_x[idx].reshape(nx, ny)
+        disp_y = animation_frames_lateral_y[idx].reshape(nx, ny)
+        mag = np.sqrt(disp_x**2 + disp_y**2).max()
+        max_disp_mag_anim = max(max_disp_mag_anim, mag)
+
+    fig_anim_lat, ax_anim_lat = plt.subplots(figsize=(12, 3))
+
+    # Initial frame
+    disp_x_init = animation_frames_lateral_x[0].reshape(nx, ny)
+    disp_y_init = animation_frames_lateral_y[0].reshape(nx, ny)
+    rgb_init, _, _ = displacement_to_rgb(disp_x_init, disp_y_init, max_disp_mag_anim)
+
+    # Transpose spatial dimensions only, keep color channel last
+    im_anim_lat = ax_anim_lat.imshow(np.transpose(rgb_init, (1, 0, 2)), origin='lower',
+                                    extent=[x_nm[0], x_nm[-1], y_nm[0], y_nm[-1]],
+                                    aspect='auto', animated=True)
+
+    ax_anim_lat.set_xlabel('x [nm]', fontsize=12)
+    ax_anim_lat.set_ylabel('y [nm]', fontsize=12)
+    time_text_lat = ax_anim_lat.text(0.02, 0.95, '', transform=ax_anim_lat.transAxes,
+                                    fontsize=12, verticalalignment='top',
+                                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    ax_anim_lat.set_title('2D Photon - Lateral Distortion (Color = Direction, Brightness = Magnitude)',
+                         fontsize=14, fontweight='bold')
+
+    def animate_lateral(frame_idx):
+        """Update function for lateral distortion animation."""
+        disp_x = animation_frames_lateral_x[frame_idx].reshape(nx, ny)
+        disp_y = animation_frames_lateral_y[frame_idx].reshape(nx, ny)
+        rgb_image, _, _ = displacement_to_rgb(disp_x, disp_y, max_disp_mag_anim)
+
+        # Transpose spatial dimensions only, keep color channel last
+        im_anim_lat.set_array(np.transpose(rgb_image, (1, 0, 2)))
+        t_fs = animation_times[frame_idx] * 1e15
+        time_text_lat.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_lat, time_text_lat]
+
+    anim_lat = FuncAnimation(fig_anim_lat, animate_lateral, frames=len(animation_frames_lateral_x),
+                            interval=50, blit=True, repeat=True)
+
+    # Save animation
+    writer_lat = FFMpegWriter(fps=20, bitrate=2000)
+    anim_lat.save('photon_2d_tunnel_realistic_scales_lateral_distortion.mp4', writer=writer_lat, dpi=100)
+    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_lateral_distortion.mp4")
+
+    plt.close(fig_anim_lat)
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

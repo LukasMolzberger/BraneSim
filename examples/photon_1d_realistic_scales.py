@@ -115,6 +115,9 @@ def main():
     state = BraneState((nx,), Dimensionality.ONE_D, device, dtype)
     state.initialize_flat_configuration(h)
 
+    # Store initial positions for lateral distortion tracking
+    initial_positions = state.positions.clone()
+
     # Set fixed boundaries
     state.set_fixed_boundaries()
     print(f"\nBoundary Conditions:")
@@ -186,6 +189,7 @@ def main():
     num_snapshots = 7
     snapshot_times = np.linspace(0, simulation_time, num_snapshots)
     snapshots = {}
+    snapshots_lateral = {}  # Store lateral displacements
     snapshot_steps = {int(t / dt): t for t in snapshot_times}
 
     x_coords = np.arange(nx) * h
@@ -196,6 +200,10 @@ def main():
         if step in snapshot_steps:
             field = state.get_field_component(3).cpu().numpy()
             snapshots[snapshot_steps[step]] = field.copy()
+
+            # Store lateral displacement (x-component)
+            lateral_disp = (state.positions[:, 0] - initial_positions[:, 0]).cpu().numpy()
+            snapshots_lateral[snapshot_steps[step]] = lateral_disp.copy()
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             center = track_wave_center(state, grid)
@@ -310,6 +318,51 @@ def main():
     plt.tight_layout()
     plt.savefig('photon_1d_realistic_scales_analysis.png', dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_realistic_scales_analysis.png")
+
+    # Lateral distortion visualization
+    print(f"\nCreating lateral distortion plots...")
+
+    fig3, axes3 = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig3.suptitle(f'1D Photon - Lateral Distortion (Left/Right Movement)',
+                 fontsize=16, fontweight='bold')
+
+    # Find max lateral displacement for consistent scaling
+    max_lateral_disp = max([np.abs(snapshots_lateral[t]).max() for t in snapshots_lateral.keys()])
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_lateral:
+            lateral_disp = snapshots_lateral[t]
+
+            # Convert to picometers for better readability (lateral displacement is tiny)
+            x_nm = x_coords * 1e9
+            lateral_disp_pm = lateral_disp * 1e12
+
+            axes3[idx].plot(x_nm, lateral_disp_pm, 'r-', linewidth=2, label='x-displacement')
+            axes3[idx].axhline(y=0, color='k', linestyle='--', linewidth=0.5, alpha=0.5)
+            axes3[idx].plot([x_nm[0], x_nm[-1]], [0, 0], 'ro',
+                          markersize=8, label='Fixed boundaries' if idx == 0 else '')
+
+            axes3[idx].set_ylabel('Δx [pm]', fontsize=11)
+            axes3[idx].set_xlim(x_nm[0], x_nm[-1])
+            axes3[idx].set_ylim(-1.5*max_lateral_disp*1e12, 1.5*max_lateral_disp*1e12)
+            axes3[idx].grid(True, alpha=0.3)
+
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes3[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                          transform=axes3[idx].transAxes,
+                          fontsize=12, verticalalignment='top',
+                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            if idx == 0:
+                axes3[idx].legend(loc='upper right', fontsize=10)
+
+            if idx == num_snapshots - 1:
+                axes3[idx].set_xlabel('Position [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('photon_1d_realistic_scales_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_realistic_scales_lateral_distortion.png")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")
