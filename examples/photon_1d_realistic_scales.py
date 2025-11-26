@@ -18,39 +18,36 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 from branesim.config.simulation_config import PhysicalConstants
+from branesim.core.initial_conditions import (
+    initialize_right_moving_velocities,
+    measure_wave_speed,
+    verify_wave_propagation,
+)
 
 
-def initialize_traveling_wave(state, grid, wavelength, amplitude, wave_speed, center):
-    """Initialize a wave packet centered at a position."""
+def initialize_wave_shape_1d(state, grid, wavelength, amplitude, center):
+    """
+    Initialize ONLY the shape of a 1D wave packet.
+
+    Velocities are initialized separately using initialize_right_moving_velocities().
+    This allows dimension-independent velocity initialization.
+    """
     x = torch.arange(grid.grid_shape[0], device=state.device, dtype=state.dtype) * grid.spacing
 
     k = 2 * np.pi / wavelength
-    omega = wave_speed * k
     sigma = 3 * wavelength / (2 * np.pi)  # Width of wave packet
 
     # Gaussian envelope
     envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
 
-    # Envelope derivative: dA/dx = -(x - center)/σ² * A(x)
-    envelope_derivative = -((x - center) / (sigma ** 2)) * envelope
-
-    # Position and velocity for right-moving wave
+    # Position field only - velocities set separately
     state.positions[:, 3] = envelope * torch.cos(k * (x - center))
-
-    # Velocity has two components:
-    # 1. Phase velocity: ω A(x) sin(kx)
-    # 2. Envelope velocity: -c A'(x) cos(kx)
-    state.velocities[:, 3] = (
-        omega * envelope * torch.sin(k * (x - center)) +
-        (-wave_speed) * envelope_derivative * torch.cos(k * (x - center))
-    )
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
     print(f"  Width σ = {sigma:.6e} m")
     print(f"  Center = {center:.6e} m")
     print(f"  Amplitude = {amplitude:.6e} m")
     print(f"  Wave number k = {k:.6e} rad/m")
-    print(f"  Angular frequency ω = {omega:.6e} rad/s")
 
 
 def track_wave_center(state, grid):
@@ -129,7 +126,7 @@ def main():
     physics = LinearTensionForceComputer(tension, h)
     solver = VelocityVerletSolver(dt, mu, physics, grid)
 
-    # Initialize wave packet
+    # Initialize wave packet (two-step process)
     print(f"\nInitializing photon wave packet...")
 
     # Wavelength: multiple of grid spacing for good resolution
@@ -141,7 +138,21 @@ def main():
     # Center: in the left third of domain
     center_position = domain_length / 3.0
 
-    initialize_traveling_wave(state, grid, wavelength, amplitude, c, center_position)
+    # Step 1: Initialize shape only
+    print(f"\n[1] Initializing wave shape...")
+    initialize_wave_shape_1d(state, grid, wavelength, amplitude, center_position)
+
+    # Step 2: Initialize velocities for right-moving wave at speed c
+    print(f"\n[2] Initializing velocities for right-moving wave...")
+    initialize_right_moving_velocities(
+        state=state,
+        grid=grid,
+        wave_speed=c,
+        direction=None,  # Default: +x
+        field_component=3
+    )
+
+    # Step 3: Compute initial accelerations
     solver.initialize_accelerations(state)
     state.apply_fixed_boundaries()
 
@@ -213,19 +224,16 @@ def main():
     print(f"\n{'=' * 70}")
     print("Results:")
     print(f"{'=' * 70}")
-    print(f"\nWave Propagation:")
-    print(f"  Initial position: {initial_center:.6e} m")
-    print(f"  Final position:   {final_center:.6e} m")
-    print(f"  Distance traveled: {distance_traveled:.6e} m")
-    print(f"  Simulation time:  {simulation_time:.6e} s")
-    print(f"  Expected speed c: {c:.6e} m/s")
-    print(f"  Measured speed:   {measured_speed:.6e} m/s")
-    print(f"  Speed error:      {speed_error:.6e} ({speed_error*100:.4f}%)")
 
-    if speed_error < 0.05:
-        print(f"  ✓ Speed within 5% of c")
-    else:
-        print(f"  ⚠ Speed error > 5%")
+    # Use the verification function
+    verify_wave_propagation(
+        state=state,
+        grid=grid,
+        wave_speed_expected=c,
+        time_elapsed=simulation_time,
+        initial_center_x=initial_center,
+        field_component=3
+    )
 
     print(f"\nEnergy Conservation:")
     print(f"  Initial: {initial_energy['total']:.6e} J")
