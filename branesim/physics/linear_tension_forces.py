@@ -76,11 +76,16 @@ class LinearTensionForceComputer:
         # Only compute for transverse direction (ξ³)
         xi = state.positions[:, 3]
 
-        # Determine neighbor weights based on dimensionality and distance
+        # Force scaling: F = T·h^(d-2) · Σⱼ (ξⱼ - ξᵢ) where d = dimensionality
+        # This accounts for mass scaling as h^d and Laplacian as 1/h²
         if grid.dimension == Dimensionality.ONE_D:
+            # 1D: force_scale = T·h^(1-2) = T/h
+            force_scale = self.tension / self.grid_spacing
             # 1D: 2 neighbors (left, right) at distance h
             weights = torch.ones(2, device=state.device, dtype=state.dtype)
         elif grid.dimension == Dimensionality.TWO_D:
+            # 2D: force_scale = T·h^(2-2) = T
+            force_scale = self.tension
             # 2D: 8 neighbors in order [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
             # Diagonal neighbors at distance √2·h: indices 0, 2, 5, 7 (weight 1/√2)
             # Cardinal neighbors at distance h: indices 1, 3, 4, 6 (weight 1.0)
@@ -88,6 +93,8 @@ class LinearTensionForceComputer:
             weights = torch.tensor([inv_sqrt2, 1.0, inv_sqrt2, 1.0, 1.0, inv_sqrt2, 1.0, inv_sqrt2],
                                    device=state.device, dtype=state.dtype)
         else:  # THREE_D
+            # 3D: force_scale = T·h^(3-2) = T·h
+            force_scale = self.tension * self.grid_spacing
             # 3D: 26 neighbors at different distances
             # Face neighbors (distance h): weight 1.0
             # Edge neighbors (distance √2·h): weight 1/√2
@@ -120,13 +127,13 @@ class LinearTensionForceComputer:
             if not valid_mask.any():
                 continue
 
-            # For valid neighbors: F += weight · (T/h) · (ξⱼ - ξᵢ)
+            # For valid neighbors: F += weight · force_scale · (ξⱼ - ξᵢ)
             xi_i = xi[valid_mask]
             xi_j = xi[neighbor_ids[valid_mask]]
 
-            # Force contribution from this neighbor with proper weight
+            # Force contribution from this neighbor with proper weight and scaling
             weight = weights[neighbor_idx]
-            force_contribution = weight * (self.tension / self.grid_spacing) * (xi_j - xi_i)
+            force_contribution = weight * force_scale * (xi_j - xi_i)
 
             # Accumulate forces
             forces[valid_mask, 3] += force_contribution
