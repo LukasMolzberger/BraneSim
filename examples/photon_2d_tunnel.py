@@ -22,12 +22,12 @@ from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 from branesim.config.simulation_config import SimulationConfig
 
 
-def initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, center_y, width_x, width_y, wavelength):
+def initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, width_x, wavelength):
     """
-    Initialize a localized 2D wave packet moving in the +x direction.
+    Initialize a wave packet moving in the +x direction with standing wave mode in y.
 
-    The packet is localized in both x and y (2D Gaussian envelope) with a sinusoidal carrier.
-    This matches the 1D animate_1d_wave.py implementation.
+    Uses fundamental standing wave mode sin(πy/L_y) in y-direction to naturally
+    satisfy fixed boundary conditions at y=0 and y=L_y. Localized Gaussian in x.
 
     Args:
         state: BraneState
@@ -35,9 +35,7 @@ def initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, cent
         amplitude: Peak amplitude [m]
         wave_speed: Wave speed [m/s]
         center_x: Center x coordinate [m]
-        center_y: Center y coordinate [m]
         width_x: Gaussian width σ_x [m]
-        width_y: Gaussian width σ_y [m]
         wavelength: Carrier wavelength [m]
     """
     # Get spatial coordinates
@@ -45,33 +43,42 @@ def initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, cent
     x = coords[:, 0]
     y = coords[:, 1]
 
-    # 2D Gaussian envelope localized in both x and y
-    envelope = amplitude * torch.exp(
-        -((x - center_x) ** 2) / (2 * width_x ** 2)
-        -((y - center_y) ** 2) / (2 * width_y ** 2)
-    )
+    # Domain dimensions
+    nx, ny = grid.grid_shape
+    domain_length_y = (ny - 1) * grid.spacing
+
+    # Gaussian envelope in x
+    envelope_x = amplitude * torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
+
+    # Standing wave mode in y: sin(πy/L_y) satisfies ξ(y=0)=0 and ξ(y=L_y)=0
+    y_mode = torch.sin(np.pi * y / domain_length_y)
+
+    # Full envelope: localized in x, standing wave in y
+    envelope = envelope_x * y_mode
 
     # Wave number and frequency
     k = 2 * np.pi / wavelength
     omega = wave_speed * k
 
-    # Envelope derivative in x: dA/dx = -(x - center_x)/σ_x² * A(x,y)
-    envelope_derivative = -((x - center_x) / (width_x ** 2)) * envelope
+    # Envelope derivative in x: ∂A/∂x = -(x - center_x)/σ_x² * A(x,y)
+    envelope_derivative_x = -((x - center_x) / (width_x ** 2)) * envelope
 
-    # Position: ξ(x,y,0) = A(x,y) * cos(kx)
-    state.positions[:, 3] = envelope * torch.cos(k * x)
+    # Position: ξ(x,y,0) = A(x) * sin(πy/L_y) * cos(k(x-x₀))
+    state.positions[:, 3] = envelope * torch.cos(k * (x - center_x))
 
     # Velocity: For right-moving wave packet
-    # ∂ξ/∂t = -c * dA/dx * cos(kx) + ω * A(x,y) * sin(kx)
+    # ∂ξ/∂t = sin(πy/L_y) * [ω*A(x)*sin(k(x-x₀)) - c*A'(x)*cos(k(x-x₀))]
     state.velocities[:, 3] = (
         omega * envelope * torch.sin(k * (x - center_x)) +
-        (-wave_speed) * envelope_derivative * torch.cos(k * (x - center_x))
+        (-wave_speed) * envelope_derivative_x * torch.cos(k * (x - center_x))
     )
 
-    print(f"  Center: ({center_x:.4f}, {center_y:.4f}) m")
-    print(f"  Width (σ_x, σ_y): ({width_x:.4f}, {width_y:.4f}) m")
+    print(f"  Center x: {center_x:.4f} m")
+    print(f"  Width σ_x: {width_x:.4f} m")
     print(f"  Wavelength: {wavelength:.4f} m")
     print(f"  Amplitude: {amplitude:.6f} m")
+    print(f"  Y-mode: sin(πy/{domain_length_y:.3f}) - fundamental standing wave")
+    print(f"  Satisfies fixed boundary conditions at y=0 and y=L_y")
 
 
 def main():
@@ -122,16 +129,14 @@ def main():
     physics = LinearTensionForceComputer(config.tension, spacing)
     solver = VelocityVerletSolver(config.time_step, config.mass_density, physics, grid)
 
-    # Initialize localized wave packet (particle-like) on the left
-    print(f"\nInitializing localized 2D wave packet (particle)...")
+    # Initialize wave packet with standing wave mode in y
+    print(f"\nInitializing wave packet...")
     amplitude = 0.002  # m
     center_x = 0.4  # Start at 0.4m from left edge
-    center_y = (ny - 1) * spacing / 2.0  # Center in tunnel height
     width_x = 0.3  # m (pulse width in x - wider like 1D example)
-    width_y = 0.05  # m (pulse width in y - narrow to see localization)
     wavelength = 0.2  # m (carrier wavelength)
 
-    initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, center_y, width_x, width_y, wavelength)
+    initialize_wave_packet_2d(state, grid, amplitude, wave_speed, center_x, width_x, wavelength)
 
     solver.initialize_accelerations(state)
 
