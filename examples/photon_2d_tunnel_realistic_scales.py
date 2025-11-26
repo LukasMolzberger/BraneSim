@@ -55,16 +55,9 @@ def initialize_plane_wave_packet_x(state, grid, amplitude, wave_speed, center_x,
     # Full envelope: localized in x, standing wave in y
     envelope = envelope_x * y_mode
 
-    # Wave numbers and frequency
-    # In 2D with standing wave mode, dispersion: ω² = c²(k_x² + k_y²)
-    k_x = 2 * np.pi / wavelength  # x-direction carrier wave number
-    k_y = np.pi / domain_length_y  # y-direction standing wave mode
-    k = k_x  # Keep k for compatibility
-    omega = wave_speed * np.sqrt(k_x**2 + k_y**2)  # Correct 2D dispersion
-
-    # Group velocity: v_g = dω/dk_x = c·k_x/√(k_x² + k_y²)
-    # This is the speed at which the envelope moves
-    group_velocity = wave_speed * k_x / np.sqrt(k_x**2 + k_y**2)
+    # Wave numbers and frequency (same as 1D case)
+    k = 2 * np.pi / wavelength
+    omega = wave_speed * k
 
     # Envelope derivative in x: ∂A/∂x = -(x - center_x)/σ_x² * A(x,y)
     envelope_derivative_x = -((x - center_x) / (width_x ** 2)) * envelope
@@ -72,12 +65,11 @@ def initialize_plane_wave_packet_x(state, grid, amplitude, wave_speed, center_x,
     # Position: ξ(x,y,0) = A(x) * sin(πy/L_y) * cos(k(x-x₀))
     state.positions[:, 3] = envelope * torch.cos(k * (x - center_x))
 
-    # Velocity: For right-moving wave packet
-    # ∂ξ/∂t = sin(πy/L_y) * [ω*A(x)*sin(k(x-x₀)) - v_g*A'(x)*cos(k(x-x₀))]
-    # Use group velocity v_g for envelope motion, not phase velocity c
+    # Velocity: For right-moving wave packet (same formula as 1D case)
+    # ∂ξ/∂t = sin(πy/L_y) * [ω*A(x)*sin(k(x-x₀)) - c*A'(x)*cos(k(x-x₀))]
     state.velocities[:, 3] = (
         omega * envelope * torch.sin(k * (x - center_x)) +
-        (-group_velocity) * envelope_derivative_x * torch.cos(k * (x - center_x))
+        (-wave_speed) * envelope_derivative_x * torch.cos(k * (x - center_x))
     )
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
