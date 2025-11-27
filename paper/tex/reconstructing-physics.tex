@@ -481,11 +481,23 @@ For later reference we summarize the different levels of description related to 
     \]
     with a phenomenological constant $\kappa_{\text{EM}}$.
   \item \textbf{Effective gravitational potential:}
-    In the weak-field regime we define a gravitational potential
-    \[
-      \Phi_G(\mathbf x) \;=\; \kappa_G \,|\nabla X^4(\mathbf x)|^2 ,
-    \]
-    which enters the effective spacetime metric in the usual Newtonian limit.
+    In the weak-field regime we introduce a scalar gravitational potential
+    $\Phi_G(\mathbf x)$ as the quantity that appears in the induced metric
+    \eqref{eq:weak_field_GR_metric}. Operationally, $\Phi_G$ is determined
+    from the coarse-grained elastic energy density $\varepsilon(\mathbf x)$
+    stored in the brane deformations, via a Poisson equation of the form
+    \begin{equation}
+      \nabla^2 \Phi_G(\mathbf x)
+      \;\simeq\;
+      4\pi G_\text{eff}\,\rho_\text{eff}(\mathbf x),
+      \qquad
+      \rho_\text{eff}(\mathbf x) = \frac{\varepsilon(\mathbf x)}{c^2}.
+    \end{equation}
+    In the static limit the dominant contribution to $\varepsilon$ comes
+    from the gradient energy of the amplitude field, so that locally
+    $\varepsilon \sim \tfrac{T}{2}|\nabla X^4|^2$. In this sense gravity
+    is sourced by the \emph{sign-insensitive} elastic energy density of
+    the brane, rather than directly by the sign of $X^4$.
 \end{itemize}
 Unless stated otherwise, $\Phi$ refers to the effective electrostatic potential $\Phi_{\text{EM}}$.
 
@@ -658,7 +670,8 @@ of $\bar{X}^4$.
 \subsubsection{Weak-field gravity and Newtonian limit}
 \label{subsec:weak_field_gravity}
 
-In our model the brane is embedded into a $4$-dimensional ambient space via
+In our model the brane worldvolume is embedded into a flat $5$-dimensional
+ambient space via
 \begin{equation}
   X^A(x^\mu) = \bigl( ct,\; x^1,x^2,x^3,\; X^4(x^\mu) \bigr),
   \qquad
@@ -762,6 +775,8 @@ metric of the deformed brane, rather than postulating a metric
 dependence on a specific scalar such as $|\nabla X^4|^2$.
 
 \paragraph{Geodesic equation and Newtonian limit}
+
+\textit{Working hypothesis:} We assume that solitonic excitations and light rays follow geodesics of the emergent metric $g_{\mu\nu}$. This is a natural expectation from the correspondence between brane geometry and effective spacetime, but it has not been proved microscopically.
 
 In the weak-field metric \eqref{eq:weak_field_GR_metric} the spatial part of the geodesic equation for a slow test particle ($|\mathbf v| \ll c$) reduces to
 \begin{equation}
@@ -1015,6 +1030,15 @@ T_{\mu\nu}^\text{(eff)}
 = -\frac{2}{\sqrt{-g}}
 \frac{\delta S_\text{matter}}{\delta g^{\mu\nu}}.
 \end{equation}
+Equivalently, one may think of $T_{\mu\nu}^\text{(eff)}$ as arising from
+a coarse-grained average of the microscopic brane stress tensor
+$\tau_{\mu\nu}[\mathbf X]$ over cells of size $\ell_\ast$ that are large
+compared to the lattice spacing but small on macroscopic scales,
+\begin{equation}
+  T_{\mu\nu}^\text{(eff)}(x)
+  \;\equiv\;
+  \bigl\langle \tau_{\mu\nu}[\mathbf X](x) \bigr\rangle_{\text{cell of size }\ell_\ast}.
+\end{equation}
 Varying the total effective action
 $S_\text{eff} = S_\text{grav}[g] + S_\text{matter}[g,\Psi]$
 with respect to $g^{\mu\nu}$ then yields, at leading order in the
@@ -1027,6 +1051,8 @@ G_{\mu\nu}[g] + \Lambda_\text{eff} g_{\mu\nu}
 \label{eq:einstein-like-from-brane}
 \end{equation}
 where $G_{\mu\nu}[g]$ is the Einstein tensor of the emergent metric.
+
+\textit{Caveat:} Eq.~\eqref{eq:einstein-like-from-brane} is an \emph{effective description} that summarizes the leading-order behavior of the coarse-grained brane geometry. A complete microscopic derivation---including explicit computation of the emergent coefficients $G_\text{eff}$ and $\Lambda_\text{eff}$ from $(\rho_m,T,\mu,\kappa,\epsilon_\text{cr})$---remains future work.
 
 In this picture, what appears as ``spacetime curvature'' to internal
 observers is nothing but the accumulated lateral response of the brane,
