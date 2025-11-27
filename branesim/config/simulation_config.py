@@ -443,6 +443,124 @@ class SimulationConfig:
 
         return config
 
+    @classmethod
+    def from_compton_calibration(
+        cls,
+        grid_shape: Tuple[int, ...],
+        dimension: Dimensionality,
+        lambda_C_multiplier: float = 10.0,
+        cfl_factor: float = 0.4,
+        critical_strain: Optional[float] = None,
+        **kwargs
+    ) -> 'SimulationConfig':
+        """
+        Create 3D configuration using Compton-cell mass calibration (Route i from paper).
+
+        This implements the amplitude scale calibration described in the paper:
+        - Compton-cell assumption: ρ λ_C³ ≈ m_e
+        - Bulk modulus: K = ρ c²
+        - Point mass: m_point = ρ h³
+        - Spring constant: k_spring = K h
+
+        This ensures the lattice reproduces the continuum wave speed c² = K/ρ.
+
+        Args:
+            grid_shape: Grid dimensions (nx, ny, nz) for 3D
+            dimension: Must be Dimensionality.THREE_D
+            lambda_C_multiplier: Grid spacing as multiple of Compton wavelength
+            cfl_factor: CFL number (default 0.4 for stability)
+            critical_strain: Optional ε_cr for saturation nonlinearity
+            **kwargs: Override specific parameters
+
+        Returns:
+            SimulationConfig with Compton-calibrated parameters
+
+        Raises:
+            ValueError: If dimension is not THREE_D
+
+        Examples:
+            >>> config = SimulationConfig.from_compton_calibration(
+            ...     grid_shape=(32, 32, 32),
+            ...     dimension=Dimensionality.THREE_D,
+            ...     lambda_C_multiplier=10.0,
+            ...     critical_strain=0.1
+            ... )
+
+        References:
+            See paper Section "Amplitude scale calibration" (experimental-setting.tex)
+        """
+        if dimension != Dimensionality.THREE_D:
+            raise ValueError(
+                f"Compton calibration is only valid for 3D. Got {dimension}"
+            )
+
+        # Import here to avoid circular dependency
+        from branesim.physics.parameters import brane_lattice_params_3d
+
+        constants = PhysicalConstants()
+
+        # Grid spacing
+        h = constants.lambda_C * lambda_C_multiplier
+
+        # Compute calibrated parameters
+        params = brane_lattice_params_3d(
+            grid_spacing_m=h,
+            use_compton_default=True,
+            c=constants.c
+        )
+
+        # Time step from CFL condition
+        dt = cfl_factor * h / constants.c
+
+        # Mass density from Compton-cell calibration
+        rho_m = params["rho"]
+
+        # Spring constant from bulk modulus
+        k = params["k_spring"]
+
+        # Rest length = grid spacing (no pre-tension in 3D)
+        L_0 = h
+
+        # Build configuration
+        config_dict = {
+            'mass_density': rho_m,
+            'grid_spacing': h,
+            'time_step': dt,
+            'grid_shape': grid_shape,
+            'dimension': dimension,
+            'spring_constant': k,
+            'rest_length': L_0,
+            'critical_strain': critical_strain,
+        }
+
+        # Override with user kwargs
+        if 'tension' in kwargs:
+            raise ValueError(
+                "Cannot override 'tension' - it is derived from mass_density and c."
+            )
+        config_dict.update(kwargs)
+
+        config = cls(**config_dict)
+
+        # Print diagnostic info
+        nx, ny, nz = grid_shape
+        mass_per_point = rho_m * h**3
+        print(f"\n3D Compton-Calibrated Configuration:")
+        print(f"  Grid: {nx} × {ny} × {nz} = {nx*ny*nz} points")
+        print(f"  Reduced Compton wavelength λ_C = {constants.lambda_C:.4e} m")
+        print(f"  Grid spacing h = {lambda_C_multiplier:.1f} λ_C = {h:.4e} m")
+        print(f"  Mass density ρ = m_e/λ_C³ = {rho_m:.4e} kg/m³")
+        print(f"  Bulk modulus K = ρ c² = {params['K']:.4e} Pa")
+        print(f"  Spring constant k = K h = {k:.4e} N/m")
+        print(f"  Point mass m = ρ h³ = {mass_per_point:.4e} kg")
+        print(f"  Rest length L₀ = {L_0:.4e} m")
+        if critical_strain is not None:
+            print(f"  Critical strain ε_cr = {critical_strain:.4f}")
+        print(f"  Time step dt = {dt:.4e} s")
+        print(f"  CFL = {cfl_factor:.3f}\n")
+
+        return config
+
     def __repr__(self) -> str:
         """String representation."""
         expected_c, computed_c, error = self.verify_wave_speed()
