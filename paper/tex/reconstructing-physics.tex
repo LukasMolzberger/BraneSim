@@ -682,7 +682,20 @@ At a coarse-grained, quasi-static level we distinguish two long-range sectors:
     \nabla^2 \bar X^4(\mathbf x).
   \end{equation}
   This coupling is \emph{linear} and therefore sensitive to the sign of $\bar X^4$.
-  \item \emph{Gravity:} The gravitational sector couples to the energy density stored in the deformation of the brane, which is \emph{quadratic} in the derivatives of $X^4$ and hence insensitive to the sign of $X^4$.
+  \item \emph{Gravity:} The gravitational sector is sourced by the
+        coarse-grained \emph{elastic energy density} stored in the
+        deformation of the brane. Localized amplitude bulges
+        $X^4(\mathbf x)$ together with their induced lateral
+        displacements $X^{1,2,3}(\mathbf x)$ generate strain and
+        extrinsic curvature; the corresponding energy density
+        $\varepsilon(\mathbf x)$ (built from tension, bending and
+        saturation terms) defines an effective mass density
+        $\rho_\text{eff}(\mathbf x) = \varepsilon(\mathbf x)/c^2$.
+        Because the elastic energy depends on \emph{quadratic}
+        combinations of the deformations, this gravitational coupling
+        is insensitive to the sign of $X^4$. As discussed below, the
+        Newtonian potential $\Phi_G$ is then obtained from
+        $\rho_\text{eff}$ via a Poisson equation on the brane.
 \end{itemize}
 
 \paragraph{Metric ansatz from the brane}
@@ -711,56 +724,42 @@ we obtain
 \end{equation}
 This already exhibits a purely spatial curvature which is quadratic in the gradients $\nabla X^4$.
 
-To describe both time dilation and light bending in a weak-field limit, we introduce an effective $3+1$-metric $g_{\mu\nu}$ on the brane that depends on a scalar constructed from the transverse gradients,
+To make contact with the usual weak-field form of general relativity,
+it is convenient to work directly with the embedding and its induced
+metric. In the static, weak-field regime we parametrize the embedding as
 \begin{equation}
-  u(\mathbf x) := \bigl|\nabla X^4(\mathbf x)\bigr|^2,
-\end{equation}
-and define
-\begin{equation}
-  g_{\mu\nu} = \eta_{\mu\nu} + h_{\mu\nu}\bigl(u(\mathbf x)\bigr)
-\end{equation}
-with
-\begin{equation}
-  h_{00} = \alpha\,u(\mathbf x),
+  X^0(x) = \left(1 + \frac{\Phi_G(\mathbf x)}{c^2}\right) c t,
   \qquad
-  h_{0i} = 0,
+  X^i(x) = \left(1 - \frac{\Phi_G(\mathbf x)}{c^2}\right) x^i,
   \qquad
-  h_{ij} = \beta\,u(\mathbf x)\,\delta_{ij}.
+  X^4(x) = \xi_\perp(\mathbf x),
 \end{equation}
-Here $\alpha$ and $\beta$ are phenomenological parameters to be fixed by matching to the usual weak-field form of general relativity.
-
-We emphasize that this metric ansatz is \emph{phenomenological} rather than derived: it is \emph{not} obtained from an Einstein--Hilbert action or a systematic expansion of the brane Lagrangian. Instead, we postulate a constitutive relation that encodes an effective coupling between amplitude gradients $|\nabla X^4|^2$ and spacetime curvature, chosen such that the resulting geodesic motion reproduces the observed weak-field behavior of general relativity. A microscopic derivation from first principles---for instance by computing how localized energy concentrations affect the geometry of wave propagation on the brane---remains an open problem.
-
-In the Newtonian / weak-field limit of GR the metric can be written as
+with $|\Phi_G/c^2|\ll 1$ and slowly varying transverse displacement
+$\xi_\perp$. The induced metric
+\begin{equation}
+  g_{\mu\nu}(x) = \eta_{AB}\,\partial_\mu X^A\,\partial_\nu X^B
+\end{equation}
+then yields, to first order in $\Phi_G/c^2$ and up to terms of order
+$|\nabla \xi_\perp|^2$,
+\begin{equation}
+  g_{00} \simeq -\left(1 + \frac{2\Phi_G(\mathbf x)}{c^2}\right),
+  \qquad
+  g_{0i} \simeq 0,
+  \qquad
+  g_{ij} \simeq \left(1 - \frac{2\Phi_G(\mathbf x)}{c^2}\right)\delta_{ij}.
+\end{equation}
+Equivalently, the line element can be written in the familiar
+weak-field form
 \begin{equation}
   ds^2 = -\left(1 + \frac{2\Phi_G}{c^2}\right)c^2 dt^2
          + \left(1 - \frac{2\Phi_G}{c^2}\right)\delta_{ij}\,dx^i dx^j,
   \label{eq:weak_field_GR_metric}
 \end{equation}
-where $\Phi_G$ is the Newtonian gravitational potential. Matching this to our ansatz yields
-\begin{equation}
-  h_{00} = -\frac{2\Phi_G}{c^2},
-  \qquad
-  h_{ij} = -\frac{2\Phi_G}{c^2}\,\delta_{ij}.
-\end{equation}
-This implies
-\begin{equation}
-  \alpha\,u(\mathbf x) = -\frac{2\Phi_G(\mathbf x)}{c^2},
-  \qquad
-  \beta\,u(\mathbf x) = -\frac{2\Phi_G(\mathbf x)}{c^2},
-\end{equation}
-so that $\alpha = \beta$ and
-\begin{equation}
-  \Phi_G(\mathbf x) = -\frac{\alpha c^2}{2}\,u(\mathbf x).
-\end{equation}
-Choosing $\alpha < 0$ we parametrize
-\begin{equation}
-  \Phi_G(\mathbf x) = \kappa_G\,\bigl|\nabla X^4(\mathbf x)\bigr|^2,
-  \qquad
-  \kappa_G := -\frac{\alpha c^2}{2} > 0.
-  \label{eq:PhiG_from_gradX4}
-\end{equation}
-In this way the effective gravitational potential is manifestly \emph{quadratic} in the brane gradients and therefore invariant under $X^4 \to -X^4$.
+where $\Phi_G(\mathbf x)$ now directly measures the inward contraction
+of spatial brane coordinates relative to the ambient flat background.
+In this way the standard Newtonian limit is recovered from the induced
+metric of the deformed brane, rather than postulating a metric
+dependence on a specific scalar such as $|\nabla X^4|^2$.
 
 \paragraph{Geodesic equation and Newtonian limit}
 
