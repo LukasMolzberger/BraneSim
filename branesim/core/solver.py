@@ -173,27 +173,22 @@ class VelocityVerletSolver:
                 relative_error = |computed_c - expected_c| / expected_c
         """
         from branesim.config.simulation_config import PhysicalConstants
-        from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 
         constants = PhysicalConstants()
         expected_c = constants.c
 
-        # Compute effective wave speed from current parameters
-        if isinstance(self.physics, LinearTensionForceComputer):
-            computed_c = (self.physics.tension / self.mass_density) ** 0.5
-        else:
-            # SpringForceComputer
-            k = self.physics.spring_constant
-            L_0 = self.physics.rest_length
-            h = self.grid.spacing
+        # Compute effective wave speed from SpringForceComputer parameters
+        k = self.physics.spring_constant
+        L_0 = self.physics.rest_length
+        h = self.grid.spacing
 
-            if self.grid.dimension.value == 1:
-                T_0 = k * (h - L_0)
-                mu = self.mass_density
-                computed_c = (T_0 / mu) ** 0.5
-            else:
-                tension = k * L_0
-                computed_c = (tension / self.mass_density) ** 0.5
+        if self.grid.dimension.value == 1:
+            T_0 = k * (h - L_0)
+            mu = self.mass_density
+            computed_c = (T_0 / mu) ** 0.5
+        else:
+            tension = k * L_0
+            computed_c = (tension / self.mass_density) ** 0.5
 
         relative_error = abs(computed_c - expected_c) / expected_c
 
