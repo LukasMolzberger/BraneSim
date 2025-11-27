@@ -146,6 +146,12 @@ so that the discrete configuration $\{\mathbf R_p\}$ is a sampling of the contin
 $\mathbf X(x,t)$ introduced in Section~\ref{sec:conceptual-model}.
 The fourth component of $\mathbf R_p$ encodes the out-of-brane displacement; there is no separate amplitude field.
 
+The choice of continuum parameters $(\rho,K,\kappa,\epsilon_{\text{cr}},\dots)$
+is constrained by the parameter-matching conditions of
+Section~\ref{sec:param-matching}; in particular, the amplitude scale calibration
+of Section~\ref{amplitude-scale-calibration} implements the matching to
+$(m_e,c,\hbar,e)$ at the level of the discrete lattice.
+
 
 \subsubsection{Lattice and neighborhoods}\label{lattice-and-neighborhoods}
 
@@ -234,6 +240,62 @@ Forces are $\mathbf F_p=-\partial U/\partial \mathbf R_p$. Because $|\mathbf R_q
 \paragraph{Discrete-to-continuum parameter mapping}\label{discrete-continuum-mapping}
 
 The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate. The effective \textbf{isotropic tension} $T$ in the continuum is encoded in the discrete spring stiffness parameter $k$ appearing in $\phi(\epsilon)$; in the small-strain limit, dimensional analysis and dispersion measurements yield $T \sim k/h$. The \textbf{critical strain scale} $\epsilon_\text{cr}$ in the saturation potential directly corresponds to the discrete threshold parameter with the same symbol, setting the amplitude at which nonlinear confinement begins. The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
+
+\subsubsection{Amplitude scale calibration}\label{amplitude-scale-calibration}
+
+To instantiate the brane in physical units we must fix not only the wave speed
+$c$ but also the absolute scale of normal displacements $X^4$, which has the
+same dimension of length as the lateral coordinates. Two complementary routes
+are used to estimate the amplitude scale $A$ of microscopic oscillations.
+
+\paragraph{Route (i): Compton-cell mass calibration.}
+We first tie the bulk mechanical parameters to the electron rest mass and the
+reduced Compton wavelength
+$\lambda_C = \hbar/(m_e c)$. In the continuum, a small-amplitude transverse wave
+with typical amplitude $A$, angular frequency $\omega$ and effective volume
+$V_{\text{eff}}$ has elastic energy
+\begin{equation}
+  E_{\text{wave}} \;\sim\; \frac{1}{2}\,\rho\,A^2\,\omega^2\,V_{\text{eff}},
+  \label{eq:wave-energy-amplitude}
+\end{equation}
+where $\rho$ is the brane mass density. As a simple calibration ansatz we assume
+that a Compton-scale ``cell'' of the brane carries roughly one electron mass,
+\begin{equation}
+  \rho\,\lambda_C^3 \;\approx\; m_e,
+\end{equation}
+which fixes $\rho$ and, via $c^2 = K/\rho$, the bulk modulus $K$. For a mode
+with $\omega \approx 2\pi c/\lambda_C$ localized in a volume
+$V_{\text{eff}}\sim\lambda_C^3$, imposing that this configuration represents
+a single quantum with energy $E_{\text{wave}}\approx\hbar\omega$ yields an
+amplitude scale $A=\mathcal{O}(\lambda_C)$; a simple estimate gives
+$A \approx \lambda_C/\sqrt{\pi}$ up to order-unity geometric factors. This
+choice sets the overall substrate mechanical scale (via $\rho$ and $K$) in terms
+of $(m_e,c,\hbar)$.
+
+\paragraph{Route (ii): Charge and internal energy density.}
+Independently, Section~\ref{sec:charge-magnitude} relates the observed charge
+magnitude $|e|$ to the internal energy density and geometry of a Compton-scale
+toroidal soliton. There the same displacement field $X^4(\mathbf{x},t)$ is used
+to compute an elastic energy density $\mathcal{E}(\xi,\partial\xi)$ in J/m$^3$,
+which is required to integrate to $m_e c^2$ over a toroidal volume, while the
+far-field gradient of the time-averaged deformation reproduces a Coulomb
+potential with $q\approx e$. This construction fixes another combination of the
+mechanical parameters and the typical internal amplitude $A$ of the soliton.
+Within the uncertainties of the torus geometry, the resulting $A$ is again of
+order $\lambda_C$, in agreement with the Compton-cell calibration above.
+
+\paragraph{Practical simulation choice.}
+In the discrete code we select a lattice spacing $h$ and identify each node with
+a material volume $h^3$ and mass $m_p = \rho h^3$. Given a target amplitude
+scale $A$ from either route, a ``one-quantum'' initialization of a photon-like
+packet or a toroidal electron is implemented by choosing discrete displacements
+$[R_p]_4$ such that the discrete elastic energy
+$\tfrac{1}{2}\sum_p m_p |\dot{R}_{p,4}|^2 + U_{\text{elastic}}(\{\mathbf R_p\})$
+matches $\hbar\omega$ (for a photon) or $m_e c^2$ (for an electron) to within a
+specified tolerance. Both calibration routes therefore determine not only the
+mechanical parameters $(\rho,K)$ but also the physically meaningful range of
+normal displacements $X^4$ to be used when setting up initial conditions in the
+experiments of Section~\ref{experiments}.
 
 \subsubsection{Time integration and stability}\label{time-integration-and-stability}
 
