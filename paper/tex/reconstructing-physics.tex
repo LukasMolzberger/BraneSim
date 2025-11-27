@@ -469,6 +469,9 @@ For later reference we summarize the different levels of description related to 
 \begin{itemize}
   \item \textbf{Microscopic amplitude:}
     $X^4(x,t)$ denotes the fourth component of the embedding $\mathbf X(x,t)$ at microscopic resolution, defined for each material point $x \in \Omega$ and microscopic time $t$.
+    All embedding components $X^a$ carry the same physical dimension of length,
+    so $X^4$ is a genuine geometric displacement into the fourth direction,
+    not a dimensionless field.
   \item \textbf{Coarse-grained amplitude:}
     $\bar X^4(\mathbf x)$ denotes a coarse-grained or time-averaged amplitude field obtained from $X^4(x,t)$ by averaging over microscopic oscillations and small spatial scales. It lives on the emergent spatial coordinates $\mathbf x \in \mathbb{R}^3$.
   \item \textbf{Effective electrostatic potential:}
@@ -1324,7 +1327,7 @@ suggests a deeper connection: if the electron's rest mass and its charge
 both arise from the same localized energy configuration, then the observed
 value of $|e|$ should be derivable from the internal energy density and
 geometry of the soliton, rather than being an independent fundamental
-constant.
+constant. In the brane framework, this energy density is a literal elastic energy density in units of J/m$^3$, built from time derivatives and spatial gradients of the length-valued displacement field $\xi_\perp$ or $X^4$.
 
 This idea was pursued quantitatively by Williamson and van der
 Mark~\cite{Williamson1997} and further elaborated in the pedagogical
@@ -3049,6 +3052,13 @@ The microscopic brane model introduces a set of elastic and geometric parameters
 \end{equation}
 %
 which control mass density, tension, bending stiffness, nonlinear saturation, and the coupling of the amplitude direction $X^4$ to emergent electromagnetic and gravitational fields.
+All of these are \emph{physical} substrate constants with their usual SI units:
+for example, $\rho_m$ has units kg/m$^3$ and $T$ has units J/m$^3$, with the
+small-amplitude wave speed satisfying $c^2 = T/\rho_m$. Fixing $c$ to the
+observed speed of light therefore constrains only the \emph{ratio} $T/\rho_m$,
+not their absolute scale. The remaining overall mechanical scale of the brane
+must be fixed by additional matching conditions involving $\hbar$, $m_e$ and
+the internal structure of the solitons.
 In the previous subsections we showed how small-amplitude brane waves reproduce a relativistic dispersion relation, how static deformations in $X^4$ generate a Coulomb sector, and how slowly varying gradients in $X^4$ induce an effective metric.
 In this subsection we collect these ingredients and make explicit how the physical constants
 %
@@ -3206,6 +3216,46 @@ For the fundamental electron soliton we choose the normalization $Q=-1$, so that
 %
 which fixes the product $\kappa_{\Phi} \lambda$ of the amplitude--potential coupling and the Poisson coupling.
 The detailed internal charge distribution of the toroidal soliton affects higher multipole moments and short-distance corrections but does not enter the leading-order identification of $e$.
+
+\subsubsection{Amplitude scale and units of the fourth coordinate}
+\label{sec:amplitude-scale}
+
+Recall from Section~\ref{continuous-formulation} that all components of the
+embedding $\mathbf X=(X^1,X^2,X^3,X^4)$ carry the same physical dimension of
+length, and that we write the normal displacement as $\xi_\perp(x,t)$, which
+in the small-slope regime coincides (up to sign and gauge choice) with
+$X^4(x,t)$. This fourth coordinate is \emph{not} dimensionless: any numerical
+value of $X^4$ is measured in meters on the same microscopic length scale as
+the lateral coordinates $X^1,X^2,X^3$. Consequently there is \emph{no
+independent ``amplitude unit''} that one could rescale freely; changing the
+characteristic scale of $\xi_\perp$ is achieved \emph{only} by adjusting the
+brane material parameters $(\rho_m,T,\kappa,\epsilon_{\mathrm{cr}},\ell_\ast)$.
+
+In the small-strain wave regime, $c^2 = T/\rho_m$. Setting $c$ equal to the
+observed speed of light therefore constrains only the \emph{ratio}
+$T/\rho_m$, not their absolute scale. To fix the absolute mechanical scale of
+the brane---and with it the typical amplitude $A$ of Compton-wavelength
+oscillations in an electron soliton---one must match $\hbar$ and $m_e$ and
+solve the nonlinear equations for the toroidal profile. This matching
+determines, for instance, the brane mass density $\rho_m$ in kg/m$^3$, the
+tension $T$ in J/m$^3$, and (via the soliton's internal structure) the
+characteristic normal-displacement amplitude $A$ in meters at the
+microscopic scale.
+
+Once that calibration has been performed, the energy density
+$\varepsilon(\xi_\perp,\partial\xi_\perp)$ in Eq.~\eqref{eq:energy-density}
+becomes a fully dimensional elastic energy per unit volume (J/m$^3$), built
+from spatial gradients and time derivatives of a length-valued field
+$\xi_\perp$ or $X^4$. In other words, the passage from the substrate's
+elastic energy to the effective electromagnetic field energy is not a
+heuristic analogy but a literal identification: the electromagnetic energy
+stored in a region corresponds to the mechanical elastic energy carried by
+the corresponding portion of the brane. This transforms the qualitative
+notion of ``charge from energy density'' into a concrete calibration
+condition: measuring $e$ in Coulombs must match the integrated elastic
+energy (in Joules) over a Compton volume, with all conversion factors
+determined by $(\rho_m,T,\kappa,\epsilon_{\mathrm{cr}},\ell_\ast)$ and the
+nonlinear soliton profile.
 
 \subsubsection{Newton's constant from curvature coupling}
 
