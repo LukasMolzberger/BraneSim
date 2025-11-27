@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
-from branesim.physics.linear_tension_forces import LinearTensionForceComputer
+from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities,
@@ -126,7 +126,9 @@ def main():
 
     grid = BraneGrid((nx,), Dimensionality.ONE_D, h, device)
 
-    physics = LinearTensionForceComputer(tension, h)
+    # Spring constant k ~ T/h for wave speed c = sqrt(T/μ)
+    spring_constant = tension / h
+    physics = SpringForceComputer(spring_constant, h)
     solver = VelocityVerletSolver(dt, mu, physics, grid)
 
     # Initialize wave packet (two-step process)
