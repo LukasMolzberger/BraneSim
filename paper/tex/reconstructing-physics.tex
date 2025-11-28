@@ -670,6 +670,29 @@ of $\bar{X}^4$.
 \subsubsection{Weak-field gravity and Newtonian limit}
 \label{subsec:weak_field_gravity}
 
+\subsubsection*{Lateral contraction as gravity: core assumption}
+
+We describe the brane as an embedding
+$X^A(x^\mu) = (ct, x^1,x^2,x^3, X^4(x^\mu))$
+into a flat $5$D ambient space with metric $\eta_{AB}=\mathrm{diag}(-1,1,1,1,1)$.
+The brane's worldvolume metric $g_{\mu\nu}=\eta_{AB}\partial_\mu X^A \partial_\nu X^B$ encodes the ``spacetime'' experienced by brane-confined matter.
+
+A localized soliton---say a point mass at $\mathbf x_0$---exerts a long-range elastic attraction on neighboring brane regions through tension, bending, and saturation forces. The resulting deformation field $X^4(\mathbf x)$ is accompanied by an inward displacement of the ambient coordinates $X^i(\mathbf x)$ toward $\mathbf x_0$: the brane material \emph{contracts laterally} in the neighborhood of the mass.
+
+Because internal observers define their coordinate system through the brane's intrinsic geometry, this physical contraction of the embedding coordinates manifests to them as an apparent expansion of \emph{spatial metric components}. In other words, what we call ``gravitational curvature'' is the brane's elastic response to localized energy densities, encoded in the induced metric $g_{ij}$.
+
+At the same time, time-evolution on the brane is governed by the local energy density $\mathcal{V}$ of the elastic medium. Regions of higher $\mathcal{V}$ oscillate more slowly in proper time, leading to gravitational time dilation. Together, lateral contraction and time dilation reproduce the weak-field GR metric
+\begin{equation}
+ds^2
+= -\left(1 + \frac{2\Phi_G}{c^2}\right)c^2 dt^2
++ \left(1 - \frac{2\Phi_G}{c^2}\right)\delta_{ij}\,dx^i dx^j,
+\end{equation}
+where $\Phi_G(\mathbf x)$ parametrizes the degree of lateral contraction.
+
+In the following paragraphs we make this picture explicit. The precise microscopic derivation linking the elastic energy density $\varepsilon(\mathbf x)$ to $\Phi_G(\mathbf x)$ via a Poisson equation, as well as the full Einstein dynamics, are sketched in later sections rather than derived in full detail here. The key point is conceptual: gravity is the coarse-grained, geometrical description of the brane's elastic response to energy density.
+
+\paragraph{Metric ansatz from the brane}
+
 In our model the brane worldvolume is embedded into a flat $5$-dimensional
 ambient space via
 \begin{equation}
@@ -710,8 +733,6 @@ At a coarse-grained, quasi-static level we distinguish two long-range sectors:
         Newtonian potential $\Phi_G$ is then obtained from
         $\rho_\text{eff}$ via a Poisson equation on the brane.
 \end{itemize}
-
-\paragraph{Metric ansatz from the brane}
 
 We start from the ambient metric
 \begin{equation}
@@ -790,54 +811,17 @@ Thus, massive test bodies follow the standard Newtonian equations of motion in t
 
 Light rays follow null geodesics of the same metric. In the weak-field approximation this reproduces the usual GR bending of light around a localized mass. In particular, if the deformation of the brane sourced by a localized soliton produces an effective potential $\Phi_G \approx -G M / r$ at large distances, then test particles and light rays will be deflected in the same way as in linearized GR.
 
-\paragraph{Poisson equation with brane energy as source}
+\paragraph{Sourcing the potential by brane energy}
 
-To relate the potential $\Phi_G$ to the \emph{energy density} stored in the brane, we start from the effective Lagrangian density for the transverse mode,
-\begin{equation}
-  \mathcal L_\perp
-  = \frac{\rho_m}{2} (\partial_t X^4)^2
-    - \frac{T}{2} \bigl|\nabla X^4\bigr|^2
-    - U_{\mathrm{nl}}(X^4),
-\end{equation}
-with effective mass density $\rho_m$, tension $T$ and nonlinear potential $U_{\mathrm{nl}}$. The corresponding energy density is
-\begin{equation}
-  \varepsilon(x) = T_{00}(x)
-  = \frac{\rho_m}{2} (\partial_t X^4)^2
-    + \frac{T}{2} \bigl|\nabla X^4\bigr|^2
-    + U_{\mathrm{nl}}(X^4).
-\end{equation}
-In the static, weak-field regime of interest here we can neglect time derivatives and strong nonlinearities away from the soliton core and approximate
-\begin{equation}
-  \varepsilon(\mathbf x) \;\simeq\; \frac{T}{2} \bigl|\nabla X^4(\mathbf x)\bigr|^2.
-\end{equation}
-
-At the coarse-grained level we define the gravitational potential via the usual Newtonian convolution
-\begin{equation}
-  \Phi_G(\mathbf x)
-  = - G \int d^3 x'\, \frac{\varepsilon(\mathbf x')/c^2}{|\mathbf x - \mathbf x'|},
-\end{equation}
-which implies the Poisson-type equation
+At the level of this paper we \emph{assume} that in the coarse-grained, static regime the emergent potential $\Phi_G$ obeys a Poisson-type relation
 \begin{equation}
   \nabla^2 \Phi_G(\mathbf x)
-  = 4\pi G \frac{\varepsilon(\mathbf x)}{c^2}.
+  \;\approx\;
+  4\pi G\,\rho_{\mathrm{eff}}(\mathbf x),
   \label{eq:Poisson_from_energy}
 \end{equation}
-Substituting the brane expression for $\varepsilon$ yields
-\begin{equation}
-  \nabla^2 \Phi_G(\mathbf x)
-  = 4\pi G \frac{1}{c^2}
-  \left[
-    \frac{\rho_m}{2} (\partial_t X^4)^2
-    + \frac{T}{2} \bigl|\nabla X^4\bigr|^2
-    + U_{\mathrm{nl}}(X^4)
-  \right],
-\end{equation}
-and in the static weak-field limit
-\begin{equation}
-  \nabla^2 \Phi_G(\mathbf x)
-  \;\simeq\;
-  2\pi G \frac{T}{c^2} \bigl|\nabla X^4(\mathbf x)\bigr|^2.
-\end{equation}
+with $\rho_{\mathrm{eff}} = \varepsilon/c^2$ the coarse-grained brane energy density. A microscopic derivation of the exact prefactors from the brane Lagrangian---including the explicit contribution of tension, bending, and saturation terms to $\varepsilon$---is left for future work.
+
 At distances much larger than the soliton size (e.g.\ the electron Compton wavelength) each localized soliton can be approximated by a point mass
 \begin{equation}
   M_n = \frac{1}{c^2} \int d^3x\, \varepsilon_n(\mathbf x),
@@ -847,322 +831,83 @@ which leads to the standard multi-body Newtonian potential
   \Phi_G(\mathbf x) \approx -\sum_{n} \frac{G M_n}{|\mathbf x - \mathbf x_n|}.
 \end{equation}
 
-\subsection{Towards an Einstein-like Field Equation from Brane Dynamics}
+\subsection{Outlook: emergent Einstein dynamics (sketch)}
 \label{sec:einstein-from-brane}
 
-The previous subsection treated gravity in a deliberately modest way:
-we postulated that the effective Newtonian potential $\Phi_G$ is
-determined by the brane energy density via a Poisson equation on the
-brane, and we \emph{then} chose an effective spacetime metric
-$g_{\mu\nu}$ such that the standard weak-field limit is reproduced.
-In this subsection we outline how an \emph{Einstein-like} field equation
-for $g_{\mu\nu}$ can emerge directly from the microscopic brane
-dynamics.
+The previous subsection treated gravity kinematically: we showed explicitly how the standard weak-field GR metric arises from lateral contraction and time dilation of the brane, and assumed a Poisson-type sourcing by energy density. In principle, the full Einstein field equations can emerge dynamically from the brane's elastic Lagrangian through a two-step coarse-graining argument.
 
-The key point is that, in this model, gravity is not an independent
-field added on top of the brane. Instead, it arises from the same
-\emph{lateral motion and deformation} that already appear in the elastic
-energy, encoded in the induced metric $g_{ij}$ and the extrinsic
-curvature $b_{ij}$. At long wavelengths, the dynamics of these geometric
-quantities can be re-expressed as an effective gravitational action
-whose leading term is of Einstein--Hilbert form.
-
-\paragraph{Microscopic action for the brane.}
-
-Recall from Sec.~\ref{continuous-formulation} that the brane is
-described by the embedding
-\begin{equation}
-\mathbf{X}(x,t) = (X^1,X^2,X^3,X^4),
-\qquad
-x \in \Omega\subset\mathbb{R}^3,
-\label{eq:embedding-map-recall}
-\end{equation}
-with induced spatial metric and extrinsic curvature
-\begin{equation}
-g_{ij}(x,t) = \partial_i\mathbf{X}\cdot\partial_j\mathbf{X},
-\qquad
-b_{ij}(x,t) = \partial_i\partial_j \mathbf{X}\cdot\mathbf{n},
-\label{eq:metric-and-bij-recall}
-\end{equation}
-where $\mathbf{n}$ is the unit normal in the embedding space.
-The local energy density of the brane was written as
-\begin{equation}
-\mathcal{E}(x,t)
-= \frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
-+ \frac{T}{2}\mathrm{tr}(E)
-+ \mu|E|^2
-+ \frac{\kappa}{2}|b|^2
-+ W_\text{sat}(E),
-\label{eq:energy-density-recall}
-\end{equation}
-with strain tensor $E_{ij}$ defined from $g_{ij}$, tension $T$,
-shear modulus $\mu$, bending stiffness $\kappa$, and a saturation
-potential $W_\text{sat}(E)$ that limits large strains, see
-Eq.~\eqref{eq:saturation-potential}. The microscopic action is then
-schematically
-\begin{equation}
-S_\text{brane}[\mathbf{X}]
-= \int dt \int_\Omega d^3x\,\mathcal{L}_\text{brane}
-= \int dt \int_\Omega d^3x\,
-\bigl(
-\tfrac{\rho_m}{2}|\partial_t\mathbf{X}|^2
-- \mathcal{V}[g_{ij},b_{ij}]
-\bigr),
-\label{eq:brane-action}
-\end{equation}
-where the potential energy density $\mathcal{V}$ contains the
-elastic and saturation terms,
+First, the brane is described by an elastic action functional of the induced metric $g_{ij}$ and extrinsic curvature $b_{ij}$, with energy density
 \begin{equation}
 \mathcal{V}[g_{ij},b_{ij}]
 = \frac{T}{2}\mathrm{tr}(E)
 + \mu|E|^2
 + \frac{\kappa}{2}|b|^2
-+ W_\text{sat}(E).
-\label{eq:elastic-potential}
++ W_\text{sat}(E),
 \end{equation}
-
-In other words, the full dynamics of the brane --- including both
-amplitude deformations $X^4$ and lateral motion $X^{1,2,3}$ --- is
-already encoded in an action functional of the embedding, or
-equivalently of the induced metric and the extrinsic curvature.
-
-\paragraph{Geometric reparametrization: from bending energy to curvature.}
-
-The elastic potential~\eqref{eq:elastic-potential} is a local functional
-of $g_{ij}$ and $b_{ij}$. For a thin, nearly homogeneous hypersurface
-embedded in a higher-dimensional flat space, the Gauss--Codazzi relations
-connect intrinsic curvature invariants derived from $g_{ij}$ to
-quadratic combinations of the extrinsic curvature $b_{ij}$. For a
-3-dimensional brane in 4 dimensions this has the schematic form
+encoding tension, shear, bending, and saturation. For a thin hypersurface embedded in flat ambient space, the Gauss--Codazzi relations connect the bending energy $\kappa|b|^2$ to intrinsic curvature $R(g)$ plus total derivatives and higher-order corrections. Thus the elastic energy can be reorganized into a geometric functional of the form
 \begin{equation}
-R(g)
-\;\sim\;
-b^2 - b_{ij} b^{ij}
-\;+\;
-\text{(total derivatives and higher-order terms)},
-\label{eq:gauss-codazzi-schematic}
-\end{equation}
-where $R(g)$ is the scalar curvature of the induced metric and
-$b^2 = (g^{ij} b_{ij})^2$.
-This means that, in an expansion around a gently curved background,
-the bending energy contribution
-$\tfrac{\kappa}{2}|b|^2$ can be reorganized into an intrinsic curvature
-term plus additional, higher-derivative corrections.
-
-At the same time, the strain tensor $E_{ij}$ is related to the deviation
-of $g_{ij}$ from the reference metric,
-\begin{equation}
-g_{ij} = \delta_{ij} + 2E_{ij} + \mathcal{O}(E^2).
-\end{equation}
-Thus the tension and shear terms in $\mathcal{V}[g_{ij},b_{ij}]$ can be
-re-expressed as a local functional of $g_{ij}$ and its first derivatives.
-
-Putting these pieces together, one can view the elastic energy of the
-brane as an effective \emph{geometric} functional of the induced metric:
-\begin{equation}
-\int_\Omega d^3x\,\mathcal{V}[g_{ij},b_{ij}]
-\;\simeq\;
-\int_\Omega d^3x\,\sqrt{\gamma}
-\Bigl(
+\int d^3x\,\sqrt{\gamma}\Bigl(
 \Lambda_\text{eff}
 + \frac{M_\text{P,eff}^2}{2}\,R(g)
-+ \text{higher-derivative terms}
++ \text{higher derivatives}
 \Bigr),
-\label{eq:effective-geom-action-3d}
 \end{equation}
-where $\gamma = \det(g_{ij})$, $\Lambda_\text{eff}$ is an effective
-brane tension and $M_\text{P,eff}$ is an emergent ``Planck mass'' set by
-the microscopic moduli $(T,\mu,\kappa,\epsilon_\text{cr})$.
-The higher-derivative terms encode short-distance corrections beyond the
-Einstein--Hilbert form.
+with $\Lambda_\text{eff}$ an effective brane tension and $M_\text{P,eff}$ an emergent Planck mass set by $(\rho_m,T,\mu,\kappa,\epsilon_\text{cr})$.
 
-\paragraph{Emergent 3+1 covariance and effective gravitational action.}
-
-Internal observers do not see the material coordinates $x^i$ and the
-external time $t$ directly. Instead, they reconstruct an effective
-spacetime metric $g_{\mu\nu}$ from the propagation of small-amplitude
-waves, as discussed in Sec.~\ref{sec:emergent-relativity}. To leading
-order these waves satisfy a covariant wave equation of the form
-\begin{equation}
-\square_g \psi
-\;=\;
-\frac{1}{\sqrt{-g}}
-\partial_\mu\bigl( \sqrt{-g}\,g^{\mu\nu}\partial_\nu \psi\bigr)
-\;=\; 0,
-\end{equation}
-where $g_{\mu\nu}$ encodes both the effective light cones and the
-spatial distances on the brane. The Lorentz symmetry of the small-amplitude
-wave equation thus promotes the purely spatial geometric functional
-in~\eqref{eq:effective-geom-action-3d} to a 3+1-dimensional effective
-action of the generic form
+Second, the emergent Lorentz symmetry of small-amplitude waves (Sec.~\ref{sec:emergent-relativity}) promotes this spatial functional to a 3+1-dimensional action of generic Einstein--Hilbert form,
 \begin{equation}
 S_\text{grav}[g]
 \;\simeq\;
 \frac{c^3}{16\pi G_\text{eff}}
-\int d^4x\,\sqrt{-g}
-\bigl(
+\int d^4x\,\sqrt{-g}\,\bigl(
 R(g) - 2\Lambda_\text{eff}
 \bigr)
 \;+\;
 S_\text{higher}[g],
-\label{eq:einstein-hilbert-emergent}
 \end{equation}
-where $G_\text{eff}$ is an emergent Newton constant determined by the
-same lateral stiffness parameters that enter the elastic energy, and
-$S_\text{higher}[g]$ collects higher-derivative and nonlocal corrections.
-
-The important conceptual step is that \emph{no new degree of freedom is
-introduced}: the metric $g_{\mu\nu}$ is a coarse-grained description of
-the lateral motion and strain of the brane. Equation
-\eqref{eq:einstein-hilbert-emergent} is simply a convenient, covariant
-way of encoding how costly it is (in brane energy) to bend and stretch
-the medium on large scales.
-
-\paragraph{Einstein-like field equation and lateral motion as source of gravity.}
-
-Matter fields and solitonic excitations on the brane are described by
-additional terms in the microscopic action $S_\text{brane}[\mathbf{X}]$.
-At the coarse-grained level these contribute an effective matter action
-$S_\text{matter}[g,\Psi]$, whose variation with respect to the emergent
-metric defines an effective stress--energy tensor
-\begin{equation}
-T_{\mu\nu}^\text{(eff)}
-= -\frac{2}{\sqrt{-g}}
-\frac{\delta S_\text{matter}}{\delta g^{\mu\nu}}.
-\end{equation}
-Equivalently, one may think of $T_{\mu\nu}^\text{(eff)}$ as arising from
-a coarse-grained average of the microscopic brane stress tensor
-$\tau_{\mu\nu}[\mathbf X]$ over cells of size $\ell_\ast$ that are large
-compared to the lattice spacing but small on macroscopic scales,
-\begin{equation}
-  T_{\mu\nu}^\text{(eff)}(x)
-  \;\equiv\;
-  \bigl\langle \tau_{\mu\nu}[\mathbf X](x) \bigr\rangle_{\text{cell of size }\ell_\ast}.
-\end{equation}
-Varying the total effective action
-$S_\text{eff} = S_\text{grav}[g] + S_\text{matter}[g,\Psi]$
-with respect to $g^{\mu\nu}$ then yields, at leading order in the
-derivative expansion,
+where $G_\text{eff}$ is determined by the lateral stiffness parameters. Varying this together with a coarse-grained matter action yields an Einstein-like field equation
 \begin{equation}
 G_{\mu\nu}[g] + \Lambda_\text{eff} g_{\mu\nu}
-= \frac{8\pi G_\text{eff}}{c^4}\,T_{\mu\nu}^\text{(eff)}
-\;+\;
-\text{(higher-derivative corrections)},
-\label{eq:einstein-like-from-brane}
-\end{equation}
-where $G_{\mu\nu}[g]$ is the Einstein tensor of the emergent metric.
-
-\textit{Caveat:} Eq.~\eqref{eq:einstein-like-from-brane} is an \emph{effective description} that summarizes the leading-order behavior of the coarse-grained brane geometry. A complete microscopic derivation---including explicit computation of the emergent coefficients $G_\text{eff}$ and $\Lambda_\text{eff}$ from $(\rho_m,T,\mu,\kappa,\epsilon_\text{cr})$---remains future work.
-
-In this picture, what appears as ``spacetime curvature'' to internal
-observers is nothing but the accumulated lateral response of the brane,
-encoded in $g_{\mu\nu}[X]$:
-\begin{itemize}
-  \item Localized amplitude bulges $X^4$ create lateral strain $E_{ij}$
-        and extrinsic curvature $b_{ij}$;
-  \item The elastic cost of these deformations, dominated by the
-        lateral stiffness $(T,\mu,\kappa)$, induces an effective action
-        $S_\text{grav}[g]$ of the Einstein--Hilbert form;
-  \item The corresponding field equation \eqref{eq:einstein-like-from-brane}
-        states that the \emph{lateral geometry} of the brane (through
-        $G_{\mu\nu}[g]$) is controlled by the effective stress--energy
-        of all excitations propagating within it.
-\end{itemize}
-Thus the original intuition of ``gravity as a lateral effect'' becomes
-precise: gravitational dynamics is nothing but the large-scale, covariant
-re-expression of the brane's tendency to resist lateral motion and
-bending.
-
-\paragraph{Static weak-field limit and consistency with the Poisson picture.}
-
-In the static, weak-field regime with $|h_{\mu\nu}|\ll 1$ and slow
-motions, the $00$-component of
-Eq.~\eqref{eq:einstein-like-from-brane} reduces to
-\begin{equation}
-\nabla^2 \Phi_G(\mathbf{x})
 \;\approx\;
-4\pi G_\text{eff}\,\frac{\varepsilon(\mathbf{x})}{c^2},
+\frac{8\pi G_\text{eff}}{c^4}\,T_{\mu\nu}^\text{(eff)},
 \end{equation}
-with $\varepsilon(\mathbf{x})$ the brane energy density defined in
-Eq.~\eqref{eq:energy-density-recall}. This reproduces the Poisson
-equation used in the previous subsection, including the identification
-of the gravitational source with the energy stored in lateral gradients
-and internal oscillations, and it explains why both matter and radiation
-gravitate via their energy content.
+in which the lateral geometry of the brane (through $G_{\mu\nu}[g]$) is controlled by the effective stress--energy $T_{\mu\nu}^\text{(eff)}$ of all excitations.
 
-A complete microscopic derivation of the coefficients
-$\Lambda_\text{eff}$ and $G_\text{eff}$ in terms of $(T,\mu,\kappa,
-\rho_m,\epsilon_\text{cr},\dots)$ would require a full multi-scale
-analysis of the brane dynamics and lies beyond the scope of this work.
-However, the structural result~\eqref{eq:einstein-like-from-brane}
-already shows how an Einstein-like field equation can be understood as
-the \emph{coarse-grained equation of motion} for the lateral geometry of
-the brane, induced by its microscopic elastic Lagrangian.
+\textit{Status:} This derivation is a structural sketch. A complete microscopic computation---including explicit evaluation of $G_\text{eff}$ and $\Lambda_\text{eff}$ from $(\rho_m,T,\mu,\kappa,\epsilon_\text{cr})$ and a rigorous multi-scale analysis---remains future work. The central message is conceptual: what appears as spacetime curvature to internal observers is the accumulated lateral response of an elastic medium, with gravitational dynamics nothing but the covariant, coarse-grained description of the brane's resistance to bending and stretching.
 
-\paragraph{Consistency with the EM sector and the sign issue}
+\subsubsection{Numerical probe: curvature around a toroidal soliton}
+\label{sec:numerical-gravity-probe}
 
-In the electrostatic sector we model the free charge density as
-\begin{equation}
-  \rho_{\mathrm{free}}(\mathbf x)
-  = q_0\bigl(-\nabla^2 \bar X^4(\mathbf x)\bigr)
-\end{equation}
-for some constant $q_0$. Flipping the sign of $\bar X^4$ in the core of a toroidal soliton,
-\begin{equation}
-  \bar X^4 \to -\bar X^4,
-\end{equation}
-reverses the sign of $\rho_{\mathrm{free}}$ and hence of the Coulomb field:
-electron $\leftrightarrow$ positron.
+The discrete brane simulator can provide a direct numerical check of the weak-field gravity picture: if a stable toroidal soliton (representing an electron-like particle) is initialized at rest in an otherwise flat brane, does the surrounding induced metric exhibit the expected $1/r$ Newtonian potential and the corresponding spatial curvature?
 
-By contrast, the gravitational source depends on the energy density
-\begin{equation}
-  \varepsilon(\mathbf x)
-  \sim
-  \frac{T}{2}\bigl|\nabla X^4(\mathbf x)\bigr|^2
-\end{equation}
-and thus on the \emph{quadratic} quantity $|\nabla X^4|^2$, which is invariant under $X^4 \to -X^4$. Consequently, the effective gravitational mass
-\begin{equation}
-  M = \frac{1}{c^2} \int d^3x\,\varepsilon(\mathbf x)
-\end{equation}
-is the same for an electron and its positron counterpart (up to the details of their internal structure), even though their electrostatic charges and fields differ by a sign.
+\paragraph{Setup}
 
-This expression is just the standard mass--energy equivalence in a new
-guise: the effective gravitational mass of any localized brane excitation
-is the total energy of its deformation pattern divided by $c^2$. The
-fact that $M$ depends only on the energy density $\varepsilon$ and not
-on the sign of $X^4$ mirrors the textbook result that both matter and
-radiation gravitate via their energy content. Van der Mark and
-'t~Hooft~\cite{vanderMark2000LightHeavy} make this very explicit by
-considering a perfectly reflecting box filled with light: when placed on
-a balance, the box weighs an amount $M = E/c^2$ more than when it is
-empty, even though the individual photons have zero rest mass. In our
-brane picture the same reasoning applies mechanically: whether the
-energy is stored in a delocalized photon wave packet or in a tightly
-confined toroidal soliton, the gravitational source is always the
-integrated energy density of the brane configuration in the
-center-of-mass frame.
+We initialize a localized soliton with rest energy $E_0 \approx m_e c^2$ at the origin, and let the system relax to a quasi-static equilibrium. At distances $r$ much larger than the Compton wavelength $\lambda_C$, the brane remains in the small-slope regime, so the induced metric can be computed from the deformed embedding $\mathbf{X}(x)$ via the formula
+\[
+  g_{ij}(x) = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}.
+\]
+We extract the effective gravitational potential $\Phi_G(r)$ by fitting the diagonal spatial metric components to the weak-field form
+\[
+  g_{ii} \;\simeq\; 1 - \frac{2\Phi_G(r)}{c^2},
+\]
+and check whether $\Phi_G(r) \propto -1/r$ at large $r$.
 
-One might object that if the Compton energy stored in the electron is
-really due to a photon circulating at speed $c$, why don't we see an
-electron's mass drop to zero if we somehow ``stop the internal
-circulation''? The answer is that, within the confinement picture
-outlined here, there is no such thing as ``stopping the spin'' without
-destroying the soliton altogether. The nonlinear threshold required to
-confine the photon mode into a stable torus demands that the circulating
-energy remain above a critical density; attempting to extract or slow
-that circulation would simply cause the soliton to dissipate back into
-free radiation. In other words, the electron's mass is tied to the
-existence of the confined structure: no circulation means no soliton,
-and hence no localized mass. This is fully consistent with mass being
-stored energy, as long as one recognizes that ``rest mass'' refers to a
-bound, dynamically maintained system rather than a static lump of
-substance.
+\paragraph{Expected signature}
 
-In this way a single brane medium supports two long-range interactions:
+If lateral contraction correctly reproduces Newtonian gravity, we expect:
 \begin{itemize}
-  \item a \emph{linear}, sign-sensitive electrostatic sector based on the Laplacian of $\bar X^4$, and
-  \item a \emph{quadratic}, sign-blind gravitational sector based on the energy density stored in gradients of $X^4$ and encoded in the effective metric $g_{\mu\nu}$.
+  \item The effective mass $M_\text{eff}$ obtained from $\Phi_G(r) \approx -G M_\text{eff}/r$ should match the soliton's rest energy $E_0/c^2$ up to numerical prefactors.
+  \item The radial profile $\Phi_G(r)$ should transition smoothly from a core region (where nonlinear saturation dominates) to a $1/r$ tail (where linear elasticity governs the response).
+  \item The azimuthally averaged transverse displacement $\langle X^4 \rangle$ should decay as $1/r$, consistent with the harmonic far-field solution derived in Sec.~\ref{sec:static-coulomb-from-brane}.
 \end{itemize}
-Both light rays and matter geodesics respond to the same metric and thus experience gravity in the same way, while the sign of the electrostatic interaction remains sensitive to the microscopic sign of the brane deformation.
+
+\paragraph{Status}
+
+This numerical experiment has not yet been performed. Implementing it requires:
+(i) a calibrated set of brane parameters that place a stable toroidal soliton in the correct mass range;
+(ii) a sufficiently large simulation box to resolve the $1/r$ tail over several decades in $r$; and
+(iii) high-precision metric extraction from the discrete embedding data.
+These technical prerequisites are straightforward but computationally demanding, and remain a high-priority target for validating the emergent-gravity interpretation.
 
 \subsubsection{Static Far Field and Emergent Coulomb Law}
 \label{sec:static-coulomb-from-brane}
