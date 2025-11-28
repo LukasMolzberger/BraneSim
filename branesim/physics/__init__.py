@@ -2,7 +2,7 @@
 
 # Import parameters (no dependencies)
 from branesim.physics.parameters import (
-    brane_lattice_params_3d,
+    compton_calibrated_brane_lattice_params,
     print_calibration_summary
 )
 
@@ -15,7 +15,7 @@ except ImportError:
     SpringForceComputer = None
 
 __all__ = [
-    'brane_lattice_params_3d',
+    'compton_calibrated_brane_lattice_params',
     'print_calibration_summary',
 ]
 

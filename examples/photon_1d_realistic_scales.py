@@ -18,6 +18,7 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
+from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities,
     measure_wave_speed,
@@ -78,10 +79,22 @@ def main():
     print(f"  ℏ = {constants.hbar:.6e} J·s")
     print(f"  m_e = {constants.m_e:.6e} kg")
 
-    # Configuration with realistic scales
+    # Configuration with Compton-cell calibration
     # Grid spacing as multiple of Compton wavelength
     lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
     h = constants.lambda_C * lambda_C_multiplier
+
+    # Get 1D Compton-calibrated parameters
+    params = compton_calibrated_brane_lattice_params(
+        grid_spacing_m=h,
+        dimensionality=1,
+        c=constants.c
+    )
+
+    # Extract 1D parameters
+    mu = params["rho_D"]  # 1D linear mass density [kg/m]
+    spring_constant = params["k_spring"]  # Spring constant [N/m]
+    tension = params["T_D"]  # 1D tension [N]
 
     # Domain size
     nx = 400
@@ -94,19 +107,25 @@ def main():
     cfl_factor = 0.1
     dt = cfl_factor * h / c
 
-    # Mass density: choose to give desired wave speed
-    # For c = √(T/μ), with T = 1.0 N, we need μ = T/c²
-    tension = 1.0  # N
-    mu = tension / c**2  # kg/m (linear mass density)
+    # Verify that wave speed will be c
+    # For 1D: c = √(T/μ) where T is the 1D tension
+    expected_wave_speed = np.sqrt(tension / mu)
+
+    print(f"\nCompton-Cell Calibration (1D):")
+    print(f"  Reduced Compton wavelength λ_C = {params['lambda_C']:.4e} m")
+    print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h:.6e} m")
+    print(f"  1D linear mass density ρ_1 = m_e/λ_C = {mu:.6e} kg/m")
+    print(f"  1D tension T_1 = ρ_1×c² = {tension:.6e} N")
+    print(f"  Spring constant k = T_1/h = {spring_constant:.6e} N/m")
+    print(f"  Point mass m = ρ_1×h = {params['m_point']:.6e} kg")
+    print(f"  Expected wave speed = √(T_1/ρ_1) = {expected_wave_speed:.6e} m/s")
+    print(f"  Speed of light c = {c:.6e} m/s")
+    print(f"  Wave speed error = {abs(expected_wave_speed - c)/c:.6e}")
 
     print(f"\nSimulation Configuration:")
-    print(f"  Grid spacing h = {h:.6e} m ({lambda_C_multiplier:.0f} × λ_C)")
     print(f"  Domain: {nx} points × {h:.3e} m = {domain_length:.6e} m")
     print(f"  Time step dt = {dt:.6e} s")
     print(f"  CFL number = {cfl_factor:.3f}")
-    print(f"  Tension T = {tension:.3f} N")
-    print(f"  Linear mass density μ = {mu:.6e} kg/m")
-    print(f"  Expected wave speed = √(T/μ) = {np.sqrt(tension/mu):.6e} m/s")
 
     # Create components
     device = torch.device('cpu')
@@ -126,8 +145,6 @@ def main():
 
     grid = BraneGrid((nx,), Dimensionality.ONE_D, h, device)
 
-    # Spring constant k ~ T/h for wave speed c = sqrt(T/μ)
-    spring_constant = tension / h
     physics = SpringForceComputer(spring_constant, h)
     solver = VelocityVerletSolver(dt, mu, physics, grid)
 

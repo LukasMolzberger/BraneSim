@@ -495,7 +495,7 @@ class SimulationConfig:
             )
 
         # Import here to avoid circular dependency
-        from branesim.physics.parameters import brane_lattice_params_3d
+        from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 
         constants = PhysicalConstants()
 
@@ -503,9 +503,9 @@ class SimulationConfig:
         h = constants.lambda_C * lambda_C_multiplier
 
         # Compute calibrated parameters
-        params = brane_lattice_params_3d(
+        params = compton_calibrated_brane_lattice_params(
             grid_spacing_m=h,
-            use_compton_default=True,
+            dimensionality=3,
             c=constants.c
         )
 
@@ -513,7 +513,7 @@ class SimulationConfig:
         dt = cfl_factor * h / constants.c
 
         # Mass density from Compton-cell calibration
-        rho_m = params["rho"]
+        rho_m = params["rho_D"]
 
         # Spring constant from bulk modulus
         k = params["k_spring"]
@@ -544,13 +544,13 @@ class SimulationConfig:
 
         # Print diagnostic info
         nx, ny, nz = grid_shape
-        mass_per_point = rho_m * h**3
+        mass_per_point = params["m_point"]
         print(f"\n3D Compton-Calibrated Configuration:")
         print(f"  Grid: {nx} × {ny} × {nz} = {nx*ny*nz} points")
         print(f"  Reduced Compton wavelength λ_C = {constants.lambda_C:.4e} m")
         print(f"  Grid spacing h = {lambda_C_multiplier:.1f} λ_C = {h:.4e} m")
         print(f"  Mass density ρ = m_e/λ_C³ = {rho_m:.4e} kg/m³")
-        print(f"  Bulk modulus K = ρ c² = {params['K']:.4e} Pa")
+        print(f"  Bulk modulus K = ρ c² = {params['T_D']:.4e} Pa")
         print(f"  Spring constant k = K h = {k:.4e} N/m")
         print(f"  Point mass m = ρ h³ = {mass_per_point:.4e} kg")
         print(f"  Rest length L₀ = {L_0:.4e} m")

@@ -20,6 +20,7 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.linear_tension_forces import LinearTensionForceComputer
 from branesim.config.simulation_config import PhysicalConstants
+from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 from branesim.core.initial_conditions import initialize_right_moving_velocities
 
 
@@ -132,10 +133,21 @@ def main():
     print(f"  ℏ = {constants.hbar:.6e} J·s")
     print(f"  m_e = {constants.m_e:.6e} kg")
 
-    # Configuration with realistic scales
+    # Configuration with Compton-cell calibration
     # Grid spacing as multiple of Compton wavelength (halved for double resolution)
     lambda_C_multiplier = 5.0  # Grid spacing = 5 × λ_C (double resolution)
     h = constants.lambda_C * lambda_C_multiplier
+
+    # Get 2D Compton-calibrated parameters
+    params = compton_calibrated_brane_lattice_params(
+        grid_spacing_m=h,
+        dimensionality=2,
+        c=constants.c
+    )
+
+    # Extract 2D parameters
+    sigma = params["rho_D"]  # 2D surface mass density [kg/m²]
+    tension = params["T_D"]  # 2D tension [N/m]
 
     # Domain size - tunnel geometry (long in x, narrow in y)
     # Double the grid points to maintain same domain size
@@ -151,21 +163,27 @@ def main():
     cfl_factor = 0.1
     dt = cfl_factor * h / c
 
-    # Mass density: For 2D, we need surface mass density σ = T/c²
-    # to get wave speed c = √(T/σ)
-    tension = 1.0  # N
-    sigma = tension / c**2  # kg/m² (surface mass density)
+    # Verify that wave speed will be c
+    # For 2D: c = √(T/σ) where T is the 2D tension
+    expected_wave_speed = np.sqrt(tension / sigma)
+
+    print(f"\nCompton-Cell Calibration (2D):")
+    print(f"  Reduced Compton wavelength λ_C = {params['lambda_C']:.4e} m")
+    print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h:.6e} m")
+    print(f"  2D surface mass density ρ_2 = m_e/λ_C² = {sigma:.6e} kg/m²")
+    print(f"  2D tension T_2 = ρ_2×c² = {tension:.6e} N/m")
+    print(f"  Spring constant k = T_2 = {params['k_spring']:.6e} N/m")
+    print(f"  Point mass m = ρ_2×h² = {params['m_point']:.6e} kg")
+    print(f"  Expected wave speed = √(T_2/ρ_2) = {expected_wave_speed:.6e} m/s")
+    print(f"  Speed of light c = {c:.6e} m/s")
+    print(f"  Wave speed error = {abs(expected_wave_speed - c)/c:.6e}")
 
     print(f"\nSimulation Configuration:")
-    print(f"  Grid spacing h = {h:.6e} m ({lambda_C_multiplier:.0f} × λ_C)")
     print(f"  Domain: {nx} × {ny} points")
     print(f"  Domain size: {domain_length_x:.6e} × {domain_length_y:.6e} m")
     print(f"  Aspect ratio: {nx/ny:.1f}:1 (tunnel geometry)")
     print(f"  Time step dt = {dt:.6e} s")
     print(f"  CFL number = {cfl_factor:.3f}")
-    print(f"  Tension T = {tension:.3f} N")
-    print(f"  Surface mass density σ = {sigma:.6e} kg/m²")
-    print(f"  Expected wave speed = √(T/σ) = {np.sqrt(tension/sigma):.6e} m/s")
 
     # Create components
     device = torch.device('cpu')

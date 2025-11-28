@@ -1,5 +1,5 @@
 """
-Physical parameter calibration for 3D brane simulations.
+Physical parameter calibration for brane simulations using Compton-cell calibration.
 
 This module implements the Compton-cell-based calibration procedure described
 in the paper (Section "Amplitude scale calibration"), connecting continuum
@@ -7,138 +7,147 @@ brane parameters to discrete lattice parameters.
 """
 
 import math
-from typing import Dict, Optional
 
 
-def brane_lattice_params_3d(
+def compton_calibrated_brane_lattice_params(
     grid_spacing_m: float,
-    use_compton_default: bool = True,
-    rho_mass_density: Optional[float] = None,
-    c: float = 2.99792458e8
-) -> Dict[str, float]:
+    dimensionality: int,
+    c: float = 2.99792458e8,
+) -> dict:
     """
-    Compute brane point mass and spring constant for a 3D cubic lattice,
-    using the Compton-cell-based physical estimate if desired.
+    Compton-calibrated brane lattice parameters for a D-dimensional lattice.
 
-    This implements Route (i) from the paper: Compton-cell mass calibration.
-    The key assumptions are:
-        - Reduced Compton wavelength: λ_C = ℏ/(m_e c)
-        - Brane volume mass density: ρ = m_e / λ_C³  (Compton-cell assumption)
-        - Brane bulk modulus: K = ρ c²
+    This uses the simple Compton-cell assumption:
 
-    For a discrete cubic lattice with spacing h:
-        - Point mass: m_point = ρ h³
-        - Axial spring constant: k_spring = K h
+        (1) Reduced Compton wavelength:
+            lambda_C = hbar / (m_e * c)
 
-    This mapping ensures the lattice reproduces the continuum wave speed
-    c² = K/ρ in the long-wavelength limit.
+        (2) Effective brane mass density in D dimensions:
+            rho_D = m_e / lambda_C^D
+
+        (3) Effective D-dimensional "tension" / stiffness:
+            T_D = rho_D * c^2
+
+    For a hypercubic lattice with spacing h:
+
+        mass per lattice point:
+            m_point = rho_D * h^D
+
+        spring constant of an axial spring:
+            k_spring = T_D * h^(D - 2)
+
+    which reproduces c^2 = T_D / rho_D in the long-wavelength limit for
+    D = 1, 2, 3:
+
+        D = 1:  rho_1 = m_e / lambda_C      (kg/m)
+                T_1   = rho_1 * c^2         (N)
+                m     = rho_1 * h           (kg)
+                k     = T_1 / h             (N/m)
+
+        D = 2:  rho_2 = m_e / lambda_C^2    (kg/m^2)
+                T_2   = rho_2 * c^2         (N/m)
+                m     = rho_2 * h^2         (kg)
+                k     = T_2                 (N/m)
+
+        D = 3:  rho_3 = m_e / lambda_C^3    (kg/m^3)
+                T_3   = rho_3 * c^2         (N/m^2)
+                m     = rho_3 * h^3         (kg)
+                k     = T_3 * h             (N/m)
 
     Parameters
     ----------
     grid_spacing_m : float
         Lattice spacing h in meters.
-    use_compton_default : bool, optional
-        If True, use the Compton-cell assumption: ρ = m_e / λ_C³, K = ρ c².
-        If False, you must supply rho_mass_density explicitly.
-    rho_mass_density : float, optional
-        Brane volume mass density ρ in kg/m³.
-        Only used if use_compton_default is False.
+    dimensionality : int
+        Spatial dimensionality D of the brane model (1, 2, or 3).
     c : float, optional
-        Wave speed in the brane (m/s), default is speed of light.
+        Wave speed in the brane (m/s), default is the speed of light.
 
     Returns
     -------
     params : dict
         {
-            "lambda_C": reduced Compton wavelength (m),
-            "rho": mass density ρ (kg/m³),
-            "K": bulk modulus K (Pa = N/m²),
-            "m_point": mass per lattice point (kg),
-            "k_spring": spring constant per axial spring (N/m)
+            "dim":        D,
+            "lambda_C":   reduced Compton wavelength (m),
+            "rho_D":      D-dim mass density (kg/m^D),
+            "T_D":        D-dim tension / stiffness (SI: N/m^(D-1)),
+            "m_point":    mass per lattice point (kg),
+            "k_spring":   axial spring constant (N/m),
+            "A_estimate": amplitude scale estimate ~ lambda_C / sqrt(pi) (m)
         }
-
-    Examples
-    --------
-    >>> # Use Compton-cell calibration with grid spacing 1e-13 m
-    >>> params = brane_lattice_params_3d(1e-13)
-    >>> print(f"Point mass: {params['m_point']:.2e} kg")
-    >>> print(f"Spring constant: {params['k_spring']:.2e} N/m")
-
-    >>> # Use custom mass density
-    >>> params = brane_lattice_params_3d(
-    ...     1e-13,
-    ...     use_compton_default=False,
-    ...     rho_mass_density=1e10
-    ... )
-
-    References
-    ----------
-    See paper Section "Amplitude scale calibration" (experimental-setting.tex)
-    for the theoretical derivation of these relations.
     """
+    if dimensionality not in (1, 2, 3):
+        raise ValueError("dimensionality must be 1, 2, or 3.")
+
     # Physical constants (CODATA-like)
-    hbar = 1.054571817e-34     # J·s
-    m_e = 9.1093837015e-31     # kg
+    hbar = 1.054571817e-34      # J*s
+    m_e  = 9.1093837015e-31     # kg
 
     # Reduced Compton wavelength of the electron
     lambda_C = hbar / (m_e * c)
 
-    if use_compton_default:
-        # Compton-cell assumption: ρ · λ_C³ ≈ m_e
-        rho = m_e / (lambda_C ** 3)
-    else:
-        if rho_mass_density is None:
-            raise ValueError(
-                "rho_mass_density must be provided when use_compton_default=False."
-            )
-        rho = rho_mass_density
-
-    # Effective bulk modulus / stiffness of the brane
-    K = rho * c ** 2
-
-    # Discrete mapping for a 3D cubic lattice:
-    # - each grid cell ~ volume h³
-    # - point mass m = ρ h³
-    # - axial spring constant k = K h
+    D = dimensionality
     h = grid_spacing_m
-    m_point = rho * h ** 3
-    k_spring = K * h
+
+    # D-dimensional Compton-based mass density:
+    #   rho_D * lambda_C^D = m_e  =>  rho_D = m_e / lambda_C^D
+    rho_D = m_e / (lambda_C ** D)
+
+    # Effective D-dimensional "tension" / stiffness:
+    #   T_D = rho_D * c^2
+    T_D = rho_D * c**2
+
+    # Discrete mass per lattice point:
+    m_point = rho_D * (h ** D)
+
+    # Axial spring constant following k = T_D * h^(D - 2)
+    k_spring = T_D * (h ** (D - 2))
+
+    # Compton-scale amplitude estimate for one-quantum excitation
+    # A ~ lambda_C / sqrt(pi)  (from earlier derivation)
+    A_estimate = lambda_C / math.sqrt(math.pi)
 
     return {
+        "dim": D,
         "lambda_C": lambda_C,
-        "rho": rho,
-        "K": K,
+        "rho_D": rho_D,
+        "T_D": T_D,
         "m_point": m_point,
         "k_spring": k_spring,
+        "A_estimate": A_estimate,
     }
 
 
-def print_calibration_summary(params: Dict[str, float], grid_spacing: float) -> None:
+def print_calibration_summary(params: dict, grid_spacing: float) -> None:
     """
     Print a human-readable summary of brane calibration parameters.
 
     Parameters
     ----------
     params : dict
-        Output from brane_lattice_params_3d()
+        Output from compton_calibrated_brane_lattice_params()
     grid_spacing : float
         Lattice spacing h in meters
     """
+    D = params['dim']
+    dim_label = {1: "1D", 2: "2D", 3: "3D"}[D]
+
     print("\n" + "=" * 60)
-    print("3D Brane Lattice Calibration (Compton-cell based)")
+    print(f"{dim_label} Brane Lattice Calibration (Compton-cell based)")
     print("=" * 60)
     print(f"Reduced Compton wavelength λ_C = {params['lambda_C']:.4e} m")
     print(f"Grid spacing h                 = {grid_spacing:.4e} m")
     print(f"Grid spacing / λ_C             = {grid_spacing / params['lambda_C']:.2f}")
     print()
     print("Continuum parameters:")
-    print(f"  Mass density ρ                = {params['rho']:.4e} kg/m³")
-    print(f"  Bulk modulus K                = {params['K']:.4e} Pa")
-    print(f"  Wave speed c = √(K/ρ)         = {math.sqrt(params['K'] / params['rho']):.4e} m/s")
+    print(f"  Mass density ρ_{D}             = {params['rho_D']:.4e} kg/m^{D}")
+    print(f"  Tension/stiffness T_{D}        = {params['T_D']:.4e} N/m^{D-1}")
+    print(f"  Wave speed c = √(T_{D}/ρ_{D})  = {math.sqrt(params['T_D'] / params['rho_D']):.4e} m/s")
     print()
     print("Discrete lattice parameters:")
-    print(f"  Point mass m = ρ h³           = {params['m_point']:.4e} kg")
-    print(f"  Spring constant k = K h       = {params['k_spring']:.4e} N/m")
+    print(f"  Point mass m = ρ_{D} h^{D}      = {params['m_point']:.4e} kg")
+    print(f"  Spring constant k              = {params['k_spring']:.4e} N/m")
+    print(f"  Amplitude estimate A           = {params['A_estimate']:.4e} m")
     print("=" * 60 + "\n")
 
 
@@ -150,10 +159,13 @@ if __name__ == "__main__":
     constants = PhysicalConstants()
     h = 10.0 * constants.lambda_C
 
-    params = brane_lattice_params_3d(h)
-    print_calibration_summary(params, h)
+    # Test all dimensions
+    for dim in [1, 2, 3]:
+        params = compton_calibrated_brane_lattice_params(h, dimensionality=dim)
+        print_calibration_summary(params, h)
 
     # Show how to use in simulation setup
-    print("Usage in simulation:")
-    print(f"  mass_per_point   = {params['m_point']:.4e}  # kg")
-    print(f"  spring_constant  = {params['k_spring']:.4e}  # N/m")
+    params_3d = compton_calibrated_brane_lattice_params(h, dimensionality=3)
+    print("Usage in 3D simulation:")
+    print(f"  mass_per_point   = {params_3d['m_point']:.4e}  # kg")
+    print(f"  spring_constant  = {params_3d['k_spring']:.4e}  # N/m")
