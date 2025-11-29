@@ -323,8 +323,8 @@ def main():
                 axes[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_realistic_scales_propagation.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_1d_realistic_scales_propagation.png")
+    plt.savefig('photon_1d_example_propagation.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_propagation.png")
 
     # Analysis plots
     fig2, axes2 = plt.subplots(2, 1, figsize=(12, 8))
@@ -350,8 +350,8 @@ def main():
     axes2[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_realistic_scales_analysis.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_1d_realistic_scales_analysis.png")
+    plt.savefig('photon_1d_example_analysis.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_analysis.png")
 
     # Lateral distortion visualization
     print(f"\nCreating lateral distortion plots...")
@@ -395,8 +395,8 @@ def main():
                 axes3[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_realistic_scales_lateral_distortion.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_1d_realistic_scales_lateral_distortion.png")
+    plt.savefig('photon_1d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_lateral_distortion.png")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

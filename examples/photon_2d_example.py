@@ -399,8 +399,8 @@ def main():
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_tunnel_realistic_scales_propagation.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_propagation.png")
+    plt.savefig('photon_2d_example_propagation.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_2d_example_propagation.png")
 
     # Energy conservation plot
     fig2, ax = plt.subplots(figsize=(10, 6))
@@ -415,8 +415,8 @@ def main():
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_tunnel_realistic_scales_energy.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_energy.png")
+    plt.savefig('photon_2d_example_energy.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_2d_example_energy.png")
 
     # Create animation
     print(f"\nCreating animation...")
@@ -453,8 +453,8 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save('photon_2d_tunnel_realistic_scales.mp4', writer=writer, dpi=100)
-    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales.mp4")
+    anim.save('photon_2d_example.mp4', writer=writer, dpi=100)
+    print(f"  ✓ Saved: photon_2d_example.mp4")
 
     plt.close(fig_anim)
 
@@ -510,8 +510,8 @@ def main():
                 axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_tunnel_realistic_scales_lateral_distortion.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_lateral_distortion.png")
+    plt.savefig('photon_2d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_2d_example_lateral_distortion.png")
 
     # Create lateral distortion animation
     print(f"\nCreating lateral distortion animation...")
@@ -562,8 +562,8 @@ def main():
 
     # Save animation
     writer_lat = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat.save('photon_2d_tunnel_realistic_scales_lateral_distortion.mp4', writer=writer_lat, dpi=100)
-    print(f"  ✓ Saved: photon_2d_tunnel_realistic_scales_lateral_distortion.mp4")
+    anim_lat.save('photon_2d_example_lateral_distortion.mp4', writer=writer_lat, dpi=100)
+    print(f"  ✓ Saved: photon_2d_example_lateral_distortion.mp4")
 
     plt.close(fig_anim_lat)
 
