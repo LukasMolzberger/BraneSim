@@ -57,7 +57,7 @@ c = √(T/ρ_m)
 
 **Implementation:**
 ```python
-# photon_1d_realistic_scales.py, lines 70-72
+# photon_1d_example.py, lines 70-72
 mu = 1.0  # kg/m (linear mass density)
 tension = mu * wave_speed**2  # T = μ·c²
 physics = LinearTensionForceComputer(tension, h)
@@ -139,7 +139,7 @@ CFL guideline: Δt < η·h/c with empirical η ≈ 0.33
 
 **Implementation:**
 ```python
-# photon_1d_realistic_scales.py, lines 76-77
+# photon_1d_example.py, lines 76-77
 cfl_factor = 0.1
 dt = cfl_factor * h / c
 ```
@@ -157,7 +157,7 @@ dt = cfl_factor * h / c
 
 **Implementation:**
 ```python
-# photon_1d_realistic_scales.py, lines 53-62
+# photon_1d_example.py, lines 53-62
 constants = PhysicalConstants()
 # c = 2.997925e+08 m/s
 # lambda_C = 3.861593e-13 m
@@ -201,7 +201,7 @@ wave pattern... a specific choice of R_p(t=0) and v_p(t=0).
 
 **Implementation:**
 ```python
-# photon_1d_realistic_scales.py, lines 23-46
+# photon_1d_example.py, lines 23-46
 def initialize_traveling_wave(state, grid, wavelength, amplitude, wave_speed, center):
     envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
     envelope_derivative = -((x - center) / (sigma ** 2)) * envelope
