@@ -73,7 +73,8 @@ def compton_calibrated_brane_lattice_params(
             "T_D":        D-dim tension / stiffness (SI: N/m^(D-1)),
             "m_point":    mass per lattice point (kg),
             "k_spring":   axial spring constant (N/m),
-            "A_estimate": amplitude scale estimate ~ lambda_C / sqrt(pi) (m)
+            "A_estimate": amplitude scale estimate ~ lambda_C / sqrt(pi) (m),
+            "rest_length": spring rest length for pretension implementation (m)
         }
     """
     if dimensionality not in (1, 2, 3):
@@ -107,6 +108,21 @@ def compton_calibrated_brane_lattice_params(
     # A ~ lambda_C / sqrt(pi)  (from earlier derivation)
     A_estimate = lambda_C / math.sqrt(math.pi)
 
+    # Rest length for pretension implementation
+    # CRITICAL: To implement the continuum pretension κ = ρc² in the discrete model,
+    # springs must be pre-stretched. For Compton calibration, this gives L_0 = 0.
+    #
+    # Physical reasoning:
+    #   - Continuum has pretension/tension T_D = ρ_D * c²
+    #   - Each discrete spring must carry background force to realize this pretension
+    #   - For spacing h and spring constant k_spring:
+    #     * D=1: F_0 = T_1,      k = T_1/h    → L_0 = h - T_1/k = h - h = 0
+    #     * D=2: F_0 = T_2*h,    k = T_2      → L_0 = h - (T_2*h)/T_2 = 0
+    #     * D=3: F_0 = T_3*h²,   k = T_3*h    → L_0 = h - (T_3*h²)/(T_3*h) = 0
+    #   - Without this pretension, the discrete model has zero background tension,
+    #     violating the κ = ρc² assumption used in the continuum derivation.
+    rest_length = 0.0
+
     return {
         "dim": D,
         "lambda_C": lambda_C,
@@ -115,6 +131,7 @@ def compton_calibrated_brane_lattice_params(
         "m_point": m_point,
         "k_spring": k_spring,
         "A_estimate": A_estimate,
+        "rest_length": rest_length,
     }
 
 
@@ -147,6 +164,7 @@ def print_calibration_summary(params: dict, grid_spacing: float) -> None:
     print("Discrete lattice parameters:")
     print(f"  Point mass m = ρ_{D} h^{D}      = {params['m_point']:.4e} kg")
     print(f"  Spring constant k              = {params['k_spring']:.4e} N/m")
+    print(f"  Rest length L_0 (pretension)   = {params['rest_length']:.4e} m")
     print(f"  Amplitude estimate A           = {params['A_estimate']:.4e} m")
     print("=" * 60 + "\n")
 

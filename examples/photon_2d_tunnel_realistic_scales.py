@@ -18,7 +18,7 @@ from matplotlib.colors import hsv_to_rgb
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
-from branesim.physics.linear_tension_forces import LinearTensionForceComputer
+from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 from branesim.core.initial_conditions import initialize_right_moving_velocities
@@ -204,7 +204,24 @@ def main():
 
     grid = BraneGrid((nx, ny), Dimensionality.TWO_D, h, device)
 
-    physics = LinearTensionForceComputer(tension, h)
+    # CRITICAL: Implement pretension κ = ρc²
+    # In continuum: surface tension T_2 = ρ_2 * c² [N/m]
+    # In discrete: each spring carries force F_0 = T_2 * h [N] (accounting for transverse dimension)
+    # With k_spring = T_2: F_0 = k(h - L_0) must equal T_2 * h
+    # Solving: T_2(h - L_0) = T_2*h → L_0 = 0
+    rest_length = 0.0  # Springs pre-stretched to carry background tension
+    spring_constant = params["k_spring"]  # k = T_2 [N/m]
+    background_force = spring_constant * (h - rest_length)  # Force per spring [N]
+
+    print(f"\nPretension Implementation:")
+    print(f"  Rest length L_0 = {rest_length:.6e} m")
+    print(f"  Actual spacing a = {h:.6e} m")
+    print(f"  Background strain = (a - L_0)/L_0 = {'infinite (L_0=0)' if rest_length == 0 else f'{(h-rest_length)/rest_length:.6e}'}")
+    print(f"  Background force per spring F_0 = k(a - L_0) = {background_force:.6e} N")
+    print(f"  Expected force per spring = T_2*h = {tension*h:.6e} N")
+    print(f"  Match: {abs(background_force - tension*h)/(tension*h):.6e}")
+
+    physics = SpringForceComputer(spring_constant, rest_length)
     solver = VelocityVerletSolver(dt, sigma, physics, grid)
 
     # Initialize wave packet (two-step process)

@@ -145,7 +145,22 @@ def main():
 
     grid = BraneGrid((nx,), Dimensionality.ONE_D, h, device)
 
-    physics = SpringForceComputer(spring_constant, h)
+    # CRITICAL: Implement pretension κ = ρc²
+    # In continuum: tension T_1 = ρ_1 * c²
+    # In discrete: F_0 = k(h - L_0) must equal T_1
+    # Solving: L_0 = h - T_1/k = h - (ρ_1*c²)/(T_1/h) = h - h = 0
+    rest_length = 0.0  # Springs pre-stretched to carry background tension T_1
+    background_tension = spring_constant * (h - rest_length)
+
+    print(f"\nPretension Implementation:")
+    print(f"  Rest length L_0 = {rest_length:.6e} m")
+    print(f"  Actual spacing a = {h:.6e} m")
+    print(f"  Background strain = (a - L_0)/L_0 = {'infinite (L_0=0)' if rest_length == 0 else f'{(h-rest_length)/rest_length:.6e}'}")
+    print(f"  Background tension F_0 = k(a - L_0) = {background_tension:.6e} N")
+    print(f"  Expected tension T_1 = ρ_1*c² = {tension:.6e} N")
+    print(f"  Match: {abs(background_tension - tension)/tension:.6e}")
+
+    physics = SpringForceComputer(spring_constant, rest_length)
     solver = VelocityVerletSolver(dt, mu, physics, grid)
 
     # Initialize wave packet (two-step process)
