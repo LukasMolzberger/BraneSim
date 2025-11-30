@@ -20,7 +20,7 @@ from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 from branesim.core.initial_conditions import (
-    initialize_right_moving_velocities,
+    initialize_right_moving_velocities_time_reversed,
     measure_wave_speed,
     verify_wave_propagation,
 )
@@ -30,8 +30,8 @@ def initialize_wave_shape_1d(state, grid, wavelength, amplitude, center):
     """
     Initialize ONLY the shape of a 1D wave packet.
 
-    Velocities are initialized separately using initialize_right_moving_velocities().
-    This allows dimension-independent velocity initialization.
+    Velocities are initialized separately using time-reversal initialization.
+    This uses the actual brane forces to compute consistent initial velocities.
     """
     x = torch.arange(grid.grid_shape[0], device=state.device, dtype=state.dtype) * grid.spacing
 
@@ -179,14 +179,16 @@ def main():
     print(f"\n[1] Initializing wave shape...")
     initialize_wave_shape_1d(state, grid, wavelength, amplitude, center_position)
 
-    # Step 2: Initialize velocities for right-moving wave at speed c
-    print(f"\n[2] Initializing velocities for right-moving wave...")
-    initialize_right_moving_velocities(
+    # Step 2: Initialize velocities using time-reversal method
+    print(f"\n[2] Initializing velocities using time-reversal method...")
+    initialize_right_moving_velocities_time_reversed(
         state=state,
         grid=grid,
+        physics=physics,
+        m_point=params["m_point"],
         wave_speed=c,
-        direction=None,  # Default: +x
-        field_component=3
+        field_component=3,
+        shift_cells=1,
     )
 
     # Step 3: Compute initial accelerations
@@ -224,6 +226,8 @@ def main():
     snapshot_times = np.linspace(0, simulation_time, num_snapshots)
     snapshots = {}
     snapshots_lateral = {}  # Store lateral displacements
+    snapshots_vel_amplitude = {}  # Store amplitude velocities
+    snapshots_vel_lateral = {}  # Store lateral velocities
     snapshot_steps = {int(t / dt): t for t in snapshot_times}
 
     x_coords = np.arange(nx) * h
@@ -238,6 +242,14 @@ def main():
             # Store lateral displacement (x-component)
             lateral_disp = (state.positions[:, 0] - initial_positions[:, 0]).cpu().numpy()
             snapshots_lateral[snapshot_steps[step]] = lateral_disp.copy()
+
+            # Store amplitude velocity (component 3 = X⁴)
+            vel_amplitude = state.velocities[:, 3].cpu().numpy()
+            snapshots_vel_amplitude[snapshot_steps[step]] = vel_amplitude.copy()
+
+            # Store lateral velocity (component 0 = X)
+            vel_lateral = state.velocities[:, 0].cpu().numpy()
+            snapshots_vel_lateral[snapshot_steps[step]] = vel_lateral.copy()
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             center = track_wave_center(state, grid)
@@ -289,7 +301,7 @@ def main():
     print(f"\nCreating plots...")
 
     fig, axes = plt.subplots(num_snapshots, 1, figsize=(14, 12))
-    fig.suptitle(f'1D Photon at Realistic Scales (c = {c:.3e} m/s)',
+    fig.suptitle(f'1D Photon at Realistic Scales (c = {c:.3e} m/s)\nTime-Reversal Initialization',
                  fontsize=16, fontweight='bold')
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
@@ -397,6 +409,96 @@ def main():
     plt.tight_layout()
     plt.savefig('photon_1d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateral_distortion.png")
+
+    # Amplitude velocity visualization
+    print(f"\nCreating amplitude velocity plots...")
+
+    fig4, axes4 = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig4.suptitle(f'1D Photon - Amplitude Velocity (v_ξ = ∂ξ/∂t)',
+                 fontsize=16, fontweight='bold')
+
+    # Find max amplitude velocity for consistent scaling
+    max_vel_amplitude = max([np.abs(snapshots_vel_amplitude[t]).max()
+                             for t in snapshots_vel_amplitude.keys()])
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_vel_amplitude:
+            vel_amplitude = snapshots_vel_amplitude[t]
+
+            # Convert to m/s (already in SI units)
+            x_nm = x_coords * 1e9
+
+            axes4[idx].plot(x_nm, vel_amplitude, 'purple', linewidth=2, label='v_ξ')
+            axes4[idx].axhline(y=0, color='k', linestyle='--', linewidth=0.5, alpha=0.5)
+            axes4[idx].plot([x_nm[0], x_nm[-1]], [0, 0], 'ro',
+                          markersize=8, label='Fixed boundaries' if idx == 0 else '')
+
+            axes4[idx].set_ylabel('v_ξ [m/s]', fontsize=11)
+            axes4[idx].set_xlim(x_nm[0], x_nm[-1])
+            axes4[idx].set_ylim(-1.5*max_vel_amplitude, 1.5*max_vel_amplitude)
+            axes4[idx].grid(True, alpha=0.3)
+
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes4[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                          transform=axes4[idx].transAxes,
+                          fontsize=12, verticalalignment='top',
+                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            if idx == 0:
+                axes4[idx].legend(loc='upper right', fontsize=10)
+
+            if idx == num_snapshots - 1:
+                axes4[idx].set_xlabel('Position [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('photon_1d_example_amplitude_velocity.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_amplitude_velocity.png")
+
+    # Lateral velocity visualization
+    print(f"\nCreating lateral velocity plots...")
+
+    fig5, axes5 = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig5.suptitle(f'1D Photon - Lateral Velocity (v_x = ∂x/∂t)',
+                 fontsize=16, fontweight='bold')
+
+    # Find max lateral velocity for consistent scaling
+    max_vel_lateral = max([np.abs(snapshots_vel_lateral[t]).max()
+                           for t in snapshots_vel_lateral.keys()])
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_vel_lateral:
+            vel_lateral = snapshots_vel_lateral[t]
+
+            # Convert to m/s (already in SI units)
+            x_nm = x_coords * 1e9
+
+            axes5[idx].plot(x_nm, vel_lateral, 'green', linewidth=2, label='v_x')
+            axes5[idx].axhline(y=0, color='k', linestyle='--', linewidth=0.5, alpha=0.5)
+            axes5[idx].plot([x_nm[0], x_nm[-1]], [0, 0], 'ro',
+                          markersize=8, label='Fixed boundaries' if idx == 0 else '')
+
+            axes5[idx].set_ylabel('v_x [m/s]', fontsize=11)
+            axes5[idx].set_xlim(x_nm[0], x_nm[-1])
+            axes5[idx].set_ylim(-1.5*max_vel_lateral, 1.5*max_vel_lateral)
+            axes5[idx].grid(True, alpha=0.3)
+
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes5[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                          transform=axes5[idx].transAxes,
+                          fontsize=12, verticalalignment='top',
+                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            if idx == 0:
+                axes5[idx].legend(loc='upper right', fontsize=10)
+
+            if idx == num_snapshots - 1:
+                axes5[idx].set_xlabel('Position [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('photon_1d_example_lateral_velocity.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_lateral_velocity.png")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

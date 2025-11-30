@@ -13,8 +13,12 @@ This works in 1D, 2D, and 3D - only the gradient computation changes.
 
 import torch
 import numpy as np
+from typing import TYPE_CHECKING
 from branesim.core.state import BraneState
 from branesim.core.grid import BraneGrid
+
+if TYPE_CHECKING:
+    from branesim.physics.forces import SpringForceComputer
 
 
 def initialize_right_moving_velocities(
@@ -143,6 +147,122 @@ def initialize_right_moving_velocities(
     print(f"  Wave speed: {wave_speed:.6e} m/s")
     print(f"  Direction: {direction.cpu().numpy()}")
     print(f"  Max |v|: {torch.abs(v).max().item():.6e} m/s")
+
+
+def initialize_right_moving_velocities_time_reversed(
+    state: BraneState,
+    grid: BraneGrid,
+    physics: "SpringForceComputer",
+    m_point: float,
+    wave_speed: float,
+    field_component: int = 3,
+    shift_cells: int = 1,
+) -> None:
+    """
+    Initialize velocities for a right-moving wave by *time-reversing* the
+    brane dynamics over Δt = (shift_cells * h) / c.
+
+    This method uses the ACTUAL brane forces (including pretension, geometric
+    coupling, and nonlinear saturation) to compute initial velocities, rather
+    than assuming a simple scalar wave model. This is more consistent with
+    the full 4D geometry and should reduce artificial splitting artifacts.
+
+    Physical principle:
+        - Current state has initial shape ξ₀(x) in positions[:, field_component]
+        - We define target shape ξ_target(x) which is ξ₀ shifted by
+          'shift_cells' grid cells to the right
+        - Using the full brane forces F (from SpringForceComputer), we compute
+          the acceleration a₀ at the initial state
+        - We solve the 2nd-order Taylor expansion:
+              ξ_target ≈ ξ₀ + v₀ Δt + 0.5 a₀ Δt²
+          for v₀, giving:
+              v₀ = (ξ_target - ξ₀ - 0.5 a₀ Δt²) / Δt
+
+    This gives initial velocities consistent with the actual brane model
+    (up to O(Δt³) errors), accounting for lateral distortion via the 4D
+    geometric coupling.
+
+    Args:
+        state: BraneState with initial positions already set (shape only)
+        grid: BraneGrid (currently 1D) with spacing h
+        physics: SpringForceComputer used in the simulation
+        m_point: Point mass (kg) for each brane node
+        wave_speed: Target propagation speed (should equal √(T/ρ_m) = c)
+        field_component: Index of embedding component containing the wave
+                        (default: 3 for X⁴)
+        shift_cells: How many grid cells the packet should move in Δt (default: 1)
+
+    Note:
+        - Currently implemented for 1D grids
+        - Only the amplitude component velocities are explicitly set; lateral
+          distortions emerge naturally from the forces during evolution
+        - This method respects the substrate-only evolution principle: it uses
+          only the microscopic spring forces, with no back-reaction from
+          emergent fields
+    """
+    device = state.device
+    dtype = state.dtype
+    grid_shape = grid.grid_shape
+
+    # Currently only 1D is implemented
+    if len(grid_shape) != 1:
+        raise ValueError(
+            "initialize_right_moving_velocities_time_reversed currently "
+            "supports only 1D grids."
+        )
+
+    nx = grid_shape[0]
+    N = state.num_points
+    if N != nx:
+        raise ValueError(f"State and grid size mismatch: N={N}, nx={nx}")
+
+    h = grid.spacing
+    dt_shift = (shift_cells * h) / wave_speed  # time to move 'shift_cells' cells at speed c
+
+    # --- 1) Extract current amplitude field ξ₀ -----------------------
+    xi0 = state.positions[:, field_component].to(device=device, dtype=dtype)
+
+    # --- 2) Build target field ξ_target = ξ₀ shifted right -----------
+    # Shift by 'shift_cells' cells; fill left boundary with 0 (fixed boundary)
+    xi_target = torch.zeros_like(xi0)
+    if shift_cells < nx:
+        xi_target[shift_cells:] = xi0[:-shift_cells]
+
+    # Enforce fixed boundaries if present
+    if state.fixed_mask is not None:
+        xi_target[state.fixed_mask] = 0.0
+
+    # --- 3) Compute accelerations a₀ from full brane forces ----------
+    # Forces: [N, 4] from all springs, including pretension and 4D geometry
+    forces = physics.compute_forces(state, grid)  # [N, 4]
+
+    # Acceleration in amplitude component
+    a_xi = forces[:, field_component] / m_point  # [N]
+
+    # --- 4) Solve Taylor expansion for v₀ in amplitude component -----
+    dt = torch.tensor(dt_shift, device=device, dtype=dtype)
+    half_dt2 = 0.5 * dt * dt
+
+    # v₀ = (ξ_target - ξ₀ - 0.5 a₀ Δt²) / Δt
+    v_xi = (xi_target - xi0 - half_dt2 * a_xi) / dt
+
+    # --- 5) Write velocities back to state ----------------------------
+    # Only set the amplitude component; leave lateral components as they were
+    # (typically zero). Lateral distortion will be generated dynamically by
+    # the forces.
+    state.velocities[:, field_component] = v_xi
+
+    # Respect fixed boundaries: clamp velocities at fixed nodes
+    if state.fixed_mask is not None:
+        state.velocities[state.fixed_mask, field_component] = 0.0
+
+    # Diagnostics
+    print("\nInitialized right-moving velocities (time-reversed):")
+    print(f"  dt_shift       = {dt_shift:.6e} s")
+    print(f"  grid spacing h = {h:.6e} m")
+    print(f"  nominal speed  = {wave_speed:.6e} m/s")
+    print(f"  shift_cells    = {shift_cells}")
+    print(f"  max |v_xi|     = {torch.abs(v_xi).max().item():.6e} m/s")
 
 
 def measure_wave_speed(
