@@ -5,7 +5,9 @@
 \subsection{Implementation Philosophy: Emergent vs. Explicit}\label{implementation-philosophy}
 
 \textbf{Core principle:} The simulation integrates \emph{only} the microscopic
-brane degrees of freedom (node positions and velocities). All emergent quantities
+brane degrees of freedom (node positions and velocities) evolving according to
+the discretized equations of motion derived from the action
+\eqref{eq:brane-action}. All emergent quantities
 — effective metric, electromagnetic fields, particle identities, measurement
 outcomes, etc. — are computed diagnostically from $\mathbf X(x,t)$ and
 $\dot{\mathbf X}(x,t)$ and are \emph{never} fed back into the equations of motion

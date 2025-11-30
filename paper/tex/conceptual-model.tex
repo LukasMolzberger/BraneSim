@@ -16,6 +16,10 @@ only the fundamental degrees of freedom, their Lagrangian and the resulting
 equations of motion. The interpretation of these equations in terms of
 relativistic spacetime, quantum behaviour, electromagnetism and gravity is
 postponed to Section~\ref{reconstructing-physics-as-an-emergent-brane-phenomenon}.
+All emergent fields and measurement concepts introduced there are defined as
+diagnostic functionals of the same substrate configuration $\mathbf X(x,t)$ and
+never modify the microscopic equations of motion (see also
+Section~\ref{experimental-setting}).
 
 The Michelson–Morley null result is naturally explained by Lorentz contraction of matter itself, rendering motion through the medium undetectable. In this view, the observed constancy of light speed reflects a dynamical property of the medium rather than a postulate about spacetime geometry.
 
@@ -89,6 +93,39 @@ We postulate a minimal elastic Lagrangian density (per unit material volume)
 -W_\text{sat}(E),
 \label{eq:brane-lagrangian}
 \end{equation}
+
+\paragraph{Action and equations of motion.}
+The fundamental dynamics follow from Hamilton's principle $\delta S = 0$ with
+\begin{equation}
+S[\mathbf X] \;=\; \int dt \int_{\Omega} d^3x\,
+\mathcal{L}\big(\mathbf X,\partial_t\mathbf X,\partial_i\mathbf X,
+\partial_i\partial_j\mathbf X\big).
+\label{eq:brane-action}
+\end{equation}
+Because the bending term involves second spatial derivatives of the embedding,
+the Euler--Lagrange equations take the higher-derivative form
+\begin{equation}
+\frac{\partial \mathcal L}{\partial X^A}
+-\partial_t\!\left(\frac{\partial \mathcal L}{\partial(\partial_t X^A)}\right)
+-\partial_i\!\left(\frac{\partial \mathcal L}{\partial(\partial_i X^A)}\right)
++\partial_i\partial_j\!\left(\frac{\partial \mathcal L}{\partial(\partial_i\partial_j X^A)}\right)
+=0,
+\label{eq:brane-eom-general}
+\end{equation}
+where $A=1,\dots,4$ labels the embedding directions and $i,j=1,2,3$ are brane
+coordinates. These equations are second order in time but up to fourth order in
+space, as in standard plate and shell theories. In the small-strain limit the
+Lagrangian reduces to Eq.~\eqref{eq:linearized-lagrangian}, and the
+Euler--Lagrange equations reproduce the linear wave equation discussed below.
+
+\paragraph{Remark (substrate time vs.\ emergent spacetime).}
+We treat $t$ as an external evolution parameter, not as a fourth geometric
+coordinate of a covariant world-volume. The microscopic action
+\eqref{eq:brane-action} is therefore not required to be four-dimensionally
+diffeomorphism invariant; instead, effective Lorentz symmetry and relativistic
+spacetime structure emerge from the isotropic wave dynamics in the linear
+regime, as discussed in Section~\ref{sec:emergent-relativity}.
+
 where
 \begin{itemize}
 \item $E=\tfrac{1}{2}(g-g^0)$ is the Green strain on the brane (intrinsic deformation),
