@@ -107,8 +107,19 @@ def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, w
     # Gaussian envelope in x (propagation direction)
     envelope_x = torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
 
+    # Hard-truncate Gaussian at 4σ to ensure compact support
+    # This prevents far-field regions from showing lateral motion before photon arrival
+    cutoff_x = 4.0 * width_x
+    mask_x = torch.abs(x - center_x) <= cutoff_x
+    envelope_x = envelope_x * mask_x
+
     # Gaussian envelope in y (transverse direction)
     envelope_y = torch.exp(-((y - center_y) ** 2) / (2 * width_y ** 2))
+
+    # Hard-truncate in y as well
+    cutoff_y = 4.0 * width_y
+    mask_y = torch.abs(y - center_y) <= cutoff_y
+    envelope_y = envelope_y * mask_y
 
     # Full 2D Gaussian envelope
     envelope = amplitude * envelope_x * envelope_y

@@ -73,15 +73,13 @@ def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
     return rgb, magnitude, angle
 
 
-def initialize_waveguide_wave_shape_3d(state, grid, amplitude, center_x, width_x, wavelength):
+def initialize_waveguide_wave_shape_3d(state, grid, amplitude, center_x, width_x, wavelength, width_y=None, width_z=None):
     """
-    Initialize ONLY the shape of a 3D waveguide wave packet.
+    Initialize ONLY the shape of a 3D localized photon wave packet.
 
-    Uses fundamental standing wave modes in y and z directions to naturally
-    satisfy fixed boundary conditions. Localized Gaussian in x-direction.
-
-    This mimics a rectangular waveguide where the photon propagates along x
-    with the fundamental TE or TM mode in the transverse (y,z) plane.
+    Uses Gaussian envelopes in x, y, and z directions to create a single
+    localized wave packet centered in the domain. This represents a free-space
+    photon propagating in 3D.
 
     Velocities are initialized separately.
 
@@ -92,6 +90,8 @@ def initialize_waveguide_wave_shape_3d(state, grid, amplitude, center_x, width_x
         center_x: Center x coordinate [m]
         width_x: Gaussian width σ_x [m]
         wavelength: Carrier wavelength [m]
+        width_y: Gaussian width σ_y [m] (if None, uses same as width_x)
+        width_z: Gaussian width σ_z [m] (if None, uses same as width_x)
     """
     # Get spatial coordinates
     coords = grid.get_spatial_coordinates()
@@ -101,35 +101,64 @@ def initialize_waveguide_wave_shape_3d(state, grid, amplitude, center_x, width_x
 
     # Domain dimensions
     nx, ny, nz = grid.grid_shape
+    domain_length_x = (nx - 1) * grid.spacing
     domain_length_y = (ny - 1) * grid.spacing
     domain_length_z = (nz - 1) * grid.spacing
 
+    # Center the wave packet in y and z directions
+    center_y = domain_length_y / 2.0
+    center_z = domain_length_z / 2.0
+
+    # Use same width in y and z as x if not specified
+    if width_y is None:
+        width_y = width_x
+    if width_z is None:
+        width_z = width_x
+
     # Gaussian envelope in x (propagation direction)
-    envelope_x = amplitude * torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
+    envelope_x = torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
 
-    # Standing wave mode in y: sin(πy/L_y) satisfies ξ(y=0)=0 and ξ(y=L_y)=0
-    y_mode = torch.sin(np.pi * y / domain_length_y)
+    # Hard-truncate Gaussian at 4σ to ensure compact support
+    # This prevents far-field regions from showing lateral motion before photon arrival
+    cutoff_x = 4.0 * width_x
+    mask_x = torch.abs(x - center_x) <= cutoff_x
+    envelope_x = envelope_x * mask_x
 
-    # Standing wave mode in z: sin(πz/L_z) satisfies ξ(z=0)=0 and ξ(z=L_z)=0
-    z_mode = torch.sin(np.pi * z / domain_length_z)
+    # Gaussian envelope in y (transverse direction)
+    envelope_y = torch.exp(-((y - center_y) ** 2) / (2 * width_y ** 2))
 
-    # Full envelope: localized in x, standing wave in y and z (fundamental mode)
-    envelope = envelope_x * y_mode * z_mode
+    # Hard-truncate in y as well
+    cutoff_y = 4.0 * width_y
+    mask_y = torch.abs(y - center_y) <= cutoff_y
+    envelope_y = envelope_y * mask_y
+
+    # Gaussian envelope in z (transverse direction)
+    envelope_z = torch.exp(-((z - center_z) ** 2) / (2 * width_z ** 2))
+
+    # Hard-truncate in z as well
+    cutoff_z = 4.0 * width_z
+    mask_z = torch.abs(z - center_z) <= cutoff_z
+    envelope_z = envelope_z * mask_z
+
+    # Full 3D Gaussian envelope
+    envelope = amplitude * envelope_x * envelope_y * envelope_z
 
     # Wave number
     k = 2 * np.pi / wavelength
 
     # Position field only - velocities set separately
+    # Carrier wave propagating in x-direction
     state.positions[:, 3] = envelope * torch.cos(k * (x - center_x))
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
-    print(f"  Width σ_x = {width_x:.6e} m")
-    print(f"  Center x = {center_x:.6e} m")
+    print(f"  Width σ_x = {width_x:.6e} m ({width_x/wavelength:.2f} × λ)")
+    print(f"  Width σ_y = {width_y:.6e} m ({width_y/wavelength:.2f} × λ)")
+    print(f"  Width σ_z = {width_z:.6e} m ({width_z/wavelength:.2f} × λ)")
+    print(f"  Center (x, y, z) = ({center_x:.6e}, {center_y:.6e}, {center_z:.6e}) m")
     print(f"  Amplitude = {amplitude:.6e} m")
     print(f"  Wave number k = {k:.6e} rad/m")
-    print(f"  Y-mode: sin(πy/{domain_length_y:.3e}) - fundamental standing wave")
-    print(f"  Z-mode: sin(πz/{domain_length_z:.3e}) - fundamental standing wave")
-    print(f"  Satisfies fixed boundary conditions on all 6 walls")
+    print(f"  Gaussian envelope: single localized wave packet")
+    print(f"  Free-space propagation (no waveguide confinement)")
 
 
 def extract_slice_xy(field_3d, grid_shape, z_index=None):

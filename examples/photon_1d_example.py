@@ -41,6 +41,12 @@ def initialize_wave_shape_1d(state, grid, wavelength, amplitude, center):
     # Gaussian envelope
     envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
 
+    # Hard-truncate Gaussian at 4σ to ensure compact support
+    # This prevents far-field regions from showing lateral motion before photon arrival
+    cutoff = 4.0 * sigma
+    mask = torch.abs(x - center) <= cutoff
+    envelope = envelope * mask
+
     # Position field only - velocities set separately
     state.positions[:, 3] = envelope * torch.cos(k * (x - center))
 
