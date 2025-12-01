@@ -285,6 +285,13 @@ potential with $q\approx e$. This construction fixes another combination of the
 mechanical parameters and the typical internal amplitude $A$ of the soliton.
 Within the uncertainties of the torus geometry, the resulting $A$ is again of
 order $\lambda_C$, in agreement with the Compton-cell calibration above.
+In particular, the single-quantum amplitude scale $A$ obtained here
+enters directly into the geometric nonlinearity parameter
+$\eta$ defined in Sec.~\ref{threshold-localization}. For modes with
+wavelengths of order the Compton wavelength $\lambda_C$, this parameter
+satisfies $\eta = \mathcal O(1)$: the same calibration that ties the
+substrate to $(m_e,c,\hbar)$ therefore also marks the onset of strong
+geometric nonlinearity for photon-like excitations.
 
 \paragraph{Practical simulation choice.}
 In the discrete code we select a lattice spacing $h$ and identify each node with
@@ -418,3 +425,11 @@ This demonstrates isotropic cones for internal observers in the linear regime.
 \end{itemize}
 
 \textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice, saturation potentials, and velocity-Verlet integration, providing better isotropy and numerical stability.
+
+\paragraph{Geometric nonlinearity diagnostic tool.}
+For diagnostic purposes we also provide a small Python script
+(used to generate Fig.~\ref{fig:geom-nonlinearity-compton}) that
+computes and visualizes $\eta(\lambda)$ for realistic electron
+parameters. This tool is not part of the simulation core, but serves
+to illustrate the Compton-scale onset of geometric nonlinearity in the
+calibrated substrate.

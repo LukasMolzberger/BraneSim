@@ -1482,6 +1482,173 @@ determines the particle's \textbf{rest mass} via the relation
 $E = \hbar \omega$ --- offering a natural explanation of mass without
 invoking a universal scalar field (e.g., the Higgs field).
 
+\subsubsection{Geometric nonlinearity and a Compton-scale threshold}
+\label{threshold-localization}
+
+To quantify when the brane leaves the small-strain, linear regime, it is
+useful to analyse a simplified discrete model of the substrate. Consider
+a one-dimensional chain of material points with lattice spacing $a$,
+embedded in four spatial dimensions. The $i$-th point has position
+\[
+  \mathbf r_i = (x_i, y_i, z_i, \xi_i),
+\]
+with equilibrium configuration
+\[
+  \mathbf r_i^{(0)} = (ia,0,0,0).
+\]
+We write
+\[
+  x_i = ia + u_i, \qquad
+  y_i = v_i,\quad
+  z_i = w_i,\quad
+  \xi_i = \chi_i,
+\]
+so that $u_i$ is the longitudinal displacement along the chain, while
+$(v_i,w_i,\chi_i)$ are transverse and normal (amplitude) displacements.
+
+Neighbouring points $i$ and $i+1$ are connected by a spring whose length is
+\begin{equation}
+  L_i = |\mathbf r_{i+1} - \mathbf r_i|
+      = \sqrt{(a + \Delta u_i)^2 + \Delta r_{\perp,i}^2},
+  \label{eq:spring-length-4d}
+\end{equation}
+with
+\[
+  \Delta u_i = u_{i+1}-u_i,
+  \qquad
+  \Delta\mathbf r_{\perp,i} = (\Delta v_i,\Delta w_i,\Delta\chi_i),
+  \qquad
+  \Delta r_{\perp,i}^2 = |\Delta\mathbf r_{\perp,i}|^2.
+\]
+
+For small relative displacements, $|\Delta u_i| \ll a$ and
+$|\Delta\mathbf r_{\perp,i}|\ll a$, we factor out $a$ and expand the square
+root in~\eqref{eq:spring-length-4d}. A straightforward Taylor expansion
+to cubic order yields
+\begin{equation}
+  L_i \;\approx\;
+  a
+  + \Delta u_i
+  + \frac{\Delta r_{\perp,i}^2}{2a}
+  - \frac{\Delta u_i\,\Delta r_{\perp,i}^2}{2a^2}
+  + \mathcal O(\text{4th order}),
+  \label{eq:length-expansion}
+\end{equation}
+so that the excess length relative to the geometric spacing is
+\begin{equation}
+  \delta L_i := L_i - a
+  \;\approx\;
+  \Delta u_i
+  + \frac{\Delta r_{\perp,i}^2}{2a}
+  + \mathcal O\!\bigl(\Delta u\,\Delta r_{\perp}^2,\Delta r_{\perp}^4\bigr).
+  \label{eq:deltaL-geometric}
+\end{equation}
+The first term is linear in the longitudinal gradient; the second term is
+\emph{purely geometric}: it is quadratic in transverse and normal gradients and
+persists even for Hookean springs.
+
+Let $L_0 < a$ be the rest length of the spring so that the chain is
+pre-tensioned by
+\[
+  \Delta_0 := a - L_0 > 0.
+\]
+For a Hookean stretching energy
+\(
+  V_i = \tfrac{1}{2}k\,(L_i - L_0)^2
+\)
+we write $L_i - L_0 = \Delta_0 + \delta L_i$ and expand for small
+$\delta L_i$:
+\begin{equation}
+  V_i \approx
+  \frac{k}{2}\Delta_0^2
+  + k\Delta_0\,\delta L_i
+  + \frac{k}{2}\,\delta L_i^2.
+\end{equation}
+The linear term in $\Delta u_i$ reproduces the usual longitudinal tension
+$T_0 = k\Delta_0$, while the leading transverse contribution reads
+\begin{equation}
+  V_{\text{geom},i}
+  \;\supset\;
+  k\Delta_0\,\frac{\Delta r_{\perp,i}^2}{2a}
+  \;=\;
+  \frac{T_0}{2a}\,\Delta r_{\perp,i}^2,
+  \label{eq:geom-energy-edge}
+\end{equation}
+with higher-order corrections coming from $\delta L_i^2$.
+
+In the continuum limit, $\Delta v_i \approx a\,\partial_x v$, etc., so that
+$\Delta r_{\perp,i}^2 \approx a^2 |\partial_x \mathbf X_\perp|^2$ with
+$\mathbf X_\perp = (v,w,\chi)$. Equation~\eqref{eq:geom-energy-edge} then
+becomes, per unit length,
+\begin{equation}
+  \mathcal E_{\text{geom}}
+  \;\approx\;
+  \frac{T_0}{2}\,|\partial_x \mathbf X_\perp|^2,
+\end{equation}
+which matches the continuum elastic energy used in
+Sec.~\ref{conceptual-model}. The important point is that this term arises
+\emph{purely from geometry}, even for a Hookean material law.
+
+A convenient dimensionless measure of geometric nonlinearity is the ratio
+between the extra extension caused by transverse motion and the pre-tension
+extension,
+\begin{equation}
+  \eta
+  := \frac{\delta L_{\perp}}{\Delta_0}
+  \;\approx\;
+  \frac{\Delta r_{\perp,i}^2}{2a\Delta_0}
+  \;\approx\;
+  \frac{1}{2}\,|\partial_x \mathbf X_\perp|^2,
+  \label{eq:eta-definition}
+\end{equation}
+where in the last step we used $\Delta_0 \approx a$ for a strongly pre-stretched
+chain. For a single approximately monochromatic mode in the normal direction,
+\[
+  \chi(x,t) = A \sin(kx - \omega t),
+\]
+one finds $|\partial_x \mathbf X_\perp| \sim kA$ so that
+\begin{equation}
+  \eta \;\sim\; \frac{1}{2}(kA)^2.
+  \label{eq:eta-plane-wave}
+\end{equation}
+Thus $\eta \ll 1$ corresponds to the homogeneous, small-strain, linear regime
+used in Sec.~\ref{emergent-relativity-and-lorentz-invariance}, while
+$\eta \gtrsim 1$ signals that geometric deformation from transverse gradients
+has become comparable to the pre-tension and the linear approximation breaks
+down.
+
+Crucially, in the \emph{one-quantum} sector the amplitude $A$ is not a free
+parameter. As discussed in Sec.~\ref{amplitude-scale-calibration}, demanding
+that a normal mode with carrier wavelength of order the Compton wavelength
+$\lambda_C$ carries one quantum of energy $E \approx \hbar\omega$ fixes
+$A \sim \mathcal O(\lambda_C)$ in terms of $(m_e,c,\hbar)$ and the brane
+tension $T_0$. Inserting this scale into~\eqref{eq:eta-plane-wave} shows that
+the condition $\eta \sim 1$ is reached for wavelengths
+\begin{equation}
+  \lambda_{\text{crit}}
+  \;\sim\;
+  \mathcal O(\lambda_C),
+\end{equation}
+up to order-unity geometric factors. In other words, for single-quantum
+excitations the onset of geometric nonlinearity is controlled essentially
+by the wavelength alone, and the linear photon-like regime breaks down when
+the carrier wavelength approaches the Compton scale. Above this threshold one
+expects strongly amplitude-dependent tension and a preference for localized,
+self-trapped excitations --- the solitonic ``particle'' sector of the model.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.8\linewidth]{geometric_nonlinearity_compton.pdf}
+  \caption{Dimensionless geometric nonlinearity parameter
+  $\eta = \tfrac{1}{2}(kA)^2$ as a function of the carrier wavelength
+  (in units of the Compton wavelength $\lambda_C$) for different choices
+  of the single-quantum amplitude scale $A$. The plot uses physical
+  electron parameters $(m_e,c,\hbar)$ and shows that $\eta$ crosses
+  order unity for wavelengths of order $\lambda_C$, marking the onset
+  of the geometrically nonlinear regime for photon-like excitations.}
+  \label{fig:geom-nonlinearity-compton}
+\end{figure}
+
 \paragraph{Localized Mass through Internal
 Dynamics}\label{localized-mass-through-internal-dynamics}
 
