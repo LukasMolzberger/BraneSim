@@ -67,12 +67,13 @@ def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
     return rgb, magnitude, angle
 
 
-def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength):
+def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength, width_y=None):
     """
-    Initialize ONLY the shape of a 2D tunnel wave packet.
+    Initialize ONLY the shape of a 2D localized photon wave packet.
 
-    Uses fundamental standing wave mode sin(πy/L_y) in y-direction to naturally
-    satisfy fixed boundary conditions at y=0 and y=L_y. Localized Gaussian in x.
+    Uses Gaussian envelopes in both x and y directions to create a single
+    localized wave packet centered in the domain. This represents a free-space
+    photon propagating in 2D.
 
     Velocities are initialized separately using initialize_right_moving_velocities().
     This allows dimension-independent velocity initialization.
@@ -84,6 +85,7 @@ def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, w
         center_x: Center x coordinate [m]
         width_x: Gaussian width σ_x [m]
         wavelength: Carrier wavelength [m]
+        width_y: Gaussian width σ_y [m] (if None, uses same as width_x)
     """
     # Get spatial coordinates
     coords = grid.get_spatial_coordinates()
@@ -92,30 +94,40 @@ def initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, w
 
     # Domain dimensions
     nx, ny = grid.grid_shape
+    domain_length_x = (nx - 1) * grid.spacing
     domain_length_y = (ny - 1) * grid.spacing
 
-    # Gaussian envelope in x
-    envelope_x = amplitude * torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
+    # Center the wave packet in y-direction
+    center_y = domain_length_y / 2.0
 
-    # Standing wave mode in y: sin(πy/L_y) satisfies ξ(y=0)=0 and ξ(y=L_y)=0
-    y_mode = torch.sin(np.pi * y / domain_length_y)
+    # Use same width in y as x if not specified
+    if width_y is None:
+        width_y = width_x
 
-    # Full envelope: localized in x, standing wave in y
-    envelope = envelope_x * y_mode
+    # Gaussian envelope in x (propagation direction)
+    envelope_x = torch.exp(-((x - center_x) ** 2) / (2 * width_x ** 2))
+
+    # Gaussian envelope in y (transverse direction)
+    envelope_y = torch.exp(-((y - center_y) ** 2) / (2 * width_y ** 2))
+
+    # Full 2D Gaussian envelope
+    envelope = amplitude * envelope_x * envelope_y
 
     # Wave number
     k = 2 * np.pi / wavelength
 
     # Position field only - velocities set separately
+    # Carrier wave propagating in x-direction
     state.positions[:, 3] = envelope * torch.cos(k * (x - center_x))
 
     print(f"  Wavelength λ = {wavelength:.6e} m ({wavelength/grid.spacing:.1f} × h)")
-    print(f"  Width σ_x = {width_x:.6e} m")
-    print(f"  Center x = {center_x:.6e} m")
+    print(f"  Width σ_x = {width_x:.6e} m ({width_x/wavelength:.2f} × λ)")
+    print(f"  Width σ_y = {width_y:.6e} m ({width_y/wavelength:.2f} × λ)")
+    print(f"  Center (x, y) = ({center_x:.6e}, {center_y:.6e}) m")
     print(f"  Amplitude = {amplitude:.6e} m")
     print(f"  Wave number k = {k:.6e} rad/m")
-    print(f"  Y-mode: sin(πy/{domain_length_y:.3e}) - fundamental standing wave")
-    print(f"  Satisfies fixed boundary conditions at y=0 and y=L_y")
+    print(f"  Gaussian envelope: single localized wave packet")
+    print(f"  Free-space propagation (no waveguide confinement)")
 
 
 def main():
@@ -152,7 +164,7 @@ def main():
     # Domain size - tunnel geometry (long in x, narrow in y)
     # Double the grid points to maintain same domain size
     nx = 800  # Long tunnel (doubled)
-    ny = 100  # Narrow tunnel (doubled)
+    ny = 200  # Narrow tunnel (doubled)
     domain_length_x = nx * h
     domain_length_y = ny * h
 
@@ -231,7 +243,7 @@ def main():
     wavelength = 40 * h  # 40 points per wavelength
 
     # Amplitude: small compared to domain
-    amplitude = 0.1 * h
+    amplitude = 0.2 * h
 
     # Width: several wavelengths (only in x, plane wave in y)
     width_x = 3 * wavelength / (2 * np.pi)  # Similar to 1D example
@@ -244,14 +256,14 @@ def main():
     initialize_tunnel_wave_shape_2d(state, grid, amplitude, center_x, width_x, wavelength)
 
     # Step 2: Initialize velocities for right-moving wave at speed c
-    print(f"\n[2] Initializing velocities for right-moving wave...")
-    initialize_right_moving_velocities(
-        state=state,
-        grid=grid,
-        wave_speed=c,
-        direction=None,  # Default: +x
-        field_component=3
-    )
+#    print(f"\n[2] Initializing velocities for right-moving wave...")
+#    initialize_right_moving_velocities(
+#        state=state,
+#        grid=grid,
+#        wave_speed=c,
+#        direction=None,  # Default: +x
+#        field_component=3
+#    )
 
     # Step 3: Compute initial accelerations
     solver.initialize_accelerations(state)

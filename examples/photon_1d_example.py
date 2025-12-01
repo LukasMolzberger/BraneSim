@@ -180,16 +180,16 @@ def main():
     initialize_wave_shape_1d(state, grid, wavelength, amplitude, center_position)
 
     # Step 2: Initialize velocities using time-reversal method
-    print(f"\n[2] Initializing velocities using time-reversal method...")
-    initialize_right_moving_velocities_time_reversed(
-        state=state,
-        grid=grid,
-        physics=physics,
-        m_point=params["m_point"],
-        wave_speed=c,
-        field_component=3,
-        shift_cells=1,
-    )
+#    print(f"\n[2] Initializing velocities using time-reversal method...")
+#    initialize_right_moving_velocities_time_reversed(
+#        state=state,
+#        grid=grid,
+#        physics=physics,
+#        m_point=params["m_point"],
+#        wave_speed=c,
+#        field_component=3,
+#        shift_cells=1,
+#    )
 
     # Step 3: Compute initial accelerations
     solver.initialize_accelerations(state)
