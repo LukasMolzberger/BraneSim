@@ -694,40 +694,6 @@ def main():
     print(f"  • Lateral distortion uses color to encode direction (hue) and brightness for magnitude")
     print(f"  • Wave propagates along x-axis in waveguide mode")
 
-    # ========================================================================
-    # OPTIONAL: VOLUMETRIC RENDERING
-    # ========================================================================
-    # Volumetric rendering using Mayavi
-    # (requires mayavi: pip install mayavi)
-
-    try:
-        from mayavi import mlab
-        print(f"\nCreating volumetric rendering...")
-
-        # Extract final field
-        final_field = snapshots[list(snapshots.keys())[-1]]
-        field_3d = final_field.reshape(nx, ny, nz)
-
-        # Create isosurface
-        mlab.figure(size=(800, 600), bgcolor=(1, 1, 1))
-        src = mlab.pipeline.scalar_field(field_3d)
-
-        # Positive amplitude isosurface (red)
-        mlab.pipeline.iso_surface(src, contours=[amplitude*0.5], opacity=0.6, color=(1, 0, 0))
-
-        # Negative amplitude isosurface (blue)
-        mlab.pipeline.iso_surface(src, contours=[-amplitude*0.5], opacity=0.6, color=(0, 0, 1))
-
-        mlab.axes()
-        mlab.outline()
-        mlab.title('3D Photon - Volumetric Rendering')
-        mlab.savefig('photon_3d_example_volumetric.png')
-        print(f"  ✓ Saved: photon_3d_example_volumetric.png")
-
-    except ImportError:
-        print(f"\n  Note: Mayavi not available for volumetric rendering")
-        print(f"        Install with: pip install mayavi")
-
 
 if __name__ == '__main__':
     main()
