@@ -343,7 +343,7 @@ def main():
 
     # Step 1: Initialize shape only
     print(f"\n[1] Initializing wave shape...")
-    initialize_wave_shape_1d(state, grid, wavelength, amplitude, center_position)
+#    initialize_wave_shape_1d(state, grid, wavelength, amplitude, center_position)
 
     # Step 2: Initialize velocities using time-reversal method
 #    print(f"\n[2] Initializing velocities using time-reversal method...")

@@ -205,25 +205,65 @@ class BraneState:
         Sets the first D components (X^0, ..., X^{D-1}) to spatial grid positions
         with given spacing, and leaves the amplitude (X^3) at zero.
 
+        Uses explicit additive loop: position[i] = position[i-1] + spacing
+        This ensures maximum uniformity - all distances between adjacent nodes
+        are the same bit pattern, minimizing force imbalances at t=0.
+
         Args:
             spacing: Grid spacing in meters
         """
-        # Set spatial components (first D dimensions)
-        spatial_positions = self.grid_coords.float() * spacing
-
         if self.dimension == Dimensionality.ONE_D:
-            self.positions[:, 0] = spatial_positions[:, 0]
+            # Build positions additively in loop to ensure uniform spacing
+            nx = self.grid_shape[0]
+            self.positions[0, 0] = 0.0
+            for i in range(1, nx):
+                self.positions[i, 0] = self.positions[i-1, 0] + spacing
             # X^1, X^2, X^3 remain zero
 
         elif self.dimension == Dimensionality.TWO_D:
-            self.positions[:, 0] = spatial_positions[:, 0]
-            self.positions[:, 1] = spatial_positions[:, 1]
+            # Build coordinate arrays additively
+            nx, ny = self.grid_shape
+
+            # X-coordinates via loop
+            x_coords = torch.zeros(nx, device=self.device, dtype=self.dtype)
+            for i in range(1, nx):
+                x_coords[i] = x_coords[i-1] + spacing
+
+            # Y-coordinates via loop
+            y_coords = torch.zeros(ny, device=self.device, dtype=self.dtype)
+            for j in range(1, ny):
+                y_coords[j] = y_coords[j-1] + spacing
+
+            # Create meshgrid and flatten
+            xx, yy = torch.meshgrid(x_coords, y_coords, indexing='ij')
+            self.positions[:, 0] = xx.flatten()
+            self.positions[:, 1] = yy.flatten()
             # X^2, X^3 remain zero
 
         else:  # THREE_D
-            self.positions[:, 0] = spatial_positions[:, 0]
-            self.positions[:, 1] = spatial_positions[:, 1]
-            self.positions[:, 2] = spatial_positions[:, 2]
+            # Build coordinate arrays additively
+            nx, ny, nz = self.grid_shape
+
+            # X-coordinates via loop
+            x_coords = torch.zeros(nx, device=self.device, dtype=self.dtype)
+            for i in range(1, nx):
+                x_coords[i] = x_coords[i-1] + spacing
+
+            # Y-coordinates via loop
+            y_coords = torch.zeros(ny, device=self.device, dtype=self.dtype)
+            for j in range(1, ny):
+                y_coords[j] = y_coords[j-1] + spacing
+
+            # Z-coordinates via loop
+            z_coords = torch.zeros(nz, device=self.device, dtype=self.dtype)
+            for k in range(1, nz):
+                z_coords[k] = z_coords[k-1] + spacing
+
+            # Create meshgrid and flatten
+            xx, yy, zz = torch.meshgrid(x_coords, y_coords, z_coords, indexing='ij')
+            self.positions[:, 0] = xx.flatten()
+            self.positions[:, 1] = yy.flatten()
+            self.positions[:, 2] = zz.flatten()
             # X^3 remains zero
 
     def set_fixed_boundaries(self):
