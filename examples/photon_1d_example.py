@@ -12,6 +12,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+import os
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -20,9 +22,11 @@ from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import compton_calibrated_brane_lattice_params
 from branesim.core.initial_conditions import (
-    initialize_right_moving_velocities_time_reversed,
-    measure_wave_speed,
     verify_wave_propagation,
+)
+from branesim.diagnostics.lateralization import (
+    LateralizationMeasurement,
+    LateralizationConfig,
 )
 
 
@@ -68,6 +72,149 @@ def track_wave_center(state, grid):
         center = (x_coords * energy_density).sum() / total
         return center.item() * grid.spacing
     return 0.0
+
+
+def export_csv_snapshot(filename, state, grid, initial_positions, spring_constant,
+                       lateralization, physics, h):
+    """
+    Export detailed CSV snapshot with all brane point data.
+
+    Columns: point_idx, x_position, xi_position, x_velocity, xi_velocity,
+             x_acceleration, xi_acceleration, delta_x, delta_xi, h_spacing,
+             L_to_next, delta_L_to_next,
+             F_left_x, F_left_xi, F_right_x, F_right_xi,
+             E_amp_kin, E_amp_pot, E_lat_kin, E_lat_pot, R_lat
+    """
+    nx = state.positions.shape[0]
+    neighbors = grid.neighbors
+
+    # Get lateralization measurement
+    R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
+
+    # Convert to numpy
+    positions = state.positions.cpu().numpy()
+    velocities = state.velocities.cpu().numpy()
+    accelerations = state.accelerations.cpu().numpy()
+    initial_pos = initial_positions.cpu().numpy()
+    R_lat = R_lat_local.cpu().numpy()
+    E_amp_kin = diagnostics['E_amp_kin'].cpu().numpy()
+    E_amp_pot = diagnostics['E_amp_pot'].cpu().numpy()
+    E_lat_kin = diagnostics['E_lat_kin'].cpu().numpy()
+    E_lat_pot = diagnostics['E_lat_pot'].cpu().numpy()
+
+    # Compute spring forces for each point
+    k = spring_constant
+    L0 = 0.0  # Rest length
+
+    # Store forces from left and right neighbors
+    F_left = np.zeros((nx, 4))   # Force from left neighbor
+    F_right = np.zeros((nx, 4))  # Force from right neighbor
+
+    for i in range(nx):
+        for j_idx in neighbors[i]:
+            j = j_idx.item() if isinstance(j_idx, torch.Tensor) else int(j_idx)
+            if j < 0:
+                continue
+
+            # Vector from i to j
+            d = positions[j] - positions[i]
+            length = np.sqrt(np.sum(d**2))
+
+            if length < 1e-20:
+                continue
+
+            # Spring force magnitude: F = k * (L - L0)
+            extension = length - L0
+            force_mag = k * extension
+
+            # Force direction (unit vector)
+            direction = d / length
+
+            # Force vector on point i from point j
+            force = force_mag * direction
+
+            # Determine if this is left or right neighbor
+            if j == i - 1:
+                F_left[i] = force
+            elif j == i + 1:
+                F_right[i] = force
+
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        # Write header
+        writer.writerow([
+            'point_idx',
+            'x_position', 'xi_position',
+            'x_velocity', 'xi_velocity',
+            'x_acceleration', 'xi_acceleration',
+            'delta_x', 'delta_xi',
+            'h_spacing',
+            'L_to_next', 'delta_L_to_next',
+            'F_left_x', 'F_left_xi', 'F_right_x', 'F_right_xi',
+            'E_amp_kin', 'E_amp_pot', 'E_lat_kin', 'E_lat_pot', 'R_lat'
+        ])
+
+        # Write data for each point
+        for i in range(nx):
+            # Positions and displacements
+            x_pos = positions[i, 0]
+            xi_pos = positions[i, 3]
+            x_vel = velocities[i, 0]
+            xi_vel = velocities[i, 3]
+            x_acc = accelerations[i, 0]
+            xi_acc = accelerations[i, 3]
+
+            # Displacement from initial
+            delta_x = positions[i, 0] - initial_pos[i, 0]
+            xi = positions[i, 3] - initial_pos[i, 3]
+
+            # Spring properties (to next neighbor if exists)
+            L_to_next = 0.0
+            delta_L_to_next = 0.0
+
+            if i < nx - 1:  # Not the last point
+                # Find next neighbor
+                for j_idx in neighbors[i]:
+                    j = j_idx.item() if isinstance(j_idx, torch.Tensor) else int(j_idx)
+                    if j == i + 1:  # Next neighbor
+                        # Current spring vector
+                        dX = positions[j] - positions[i]
+                        L_to_next = np.sqrt(np.sum(dX**2))
+
+                        # Reference spring vector
+                        dX0 = initial_pos[j] - initial_pos[i]
+                        L0 = np.sqrt(np.sum(dX0**2))
+
+                        # Extension beyond reference
+                        delta_L_to_next = L_to_next - L0
+                        break
+
+            # Forces from neighbors
+            f_left_x = F_left[i, 0]
+            f_left_xi = F_left[i, 3]
+            f_right_x = F_right[i, 0]
+            f_right_xi = F_right[i, 3]
+
+            # Energy and lateralization
+            e_amp_kin = E_amp_kin[i]
+            e_amp_pot = E_amp_pot[i]
+            e_lat_kin = E_lat_kin[i]
+            e_lat_pot = E_lat_pot[i]
+            r_lat = R_lat[i]
+
+            # Write row
+            writer.writerow([
+                i,
+                x_pos, xi_pos,
+                x_vel, xi_vel,
+                x_acc, xi_acc,
+                delta_x, xi,
+                h,
+                L_to_next, delta_L_to_next,
+                f_left_x, f_left_xi, f_right_x, f_right_xi,
+                e_amp_kin, e_amp_pot, e_lat_kin, e_lat_pot, r_lat
+            ])
 
 
 def main():
@@ -169,6 +316,19 @@ def main():
     physics = SpringForceComputer(spring_constant, rest_length)
     solver = VelocityVerletSolver(dt, mu, physics, grid)
 
+    # Set up lateralization measurement
+    lat_config = LateralizationConfig(
+        amplitude_dim=3,   # ξ = X⁴
+        lateral_dims=(0,), # x is the single lateral DOF in 1D brane
+    )
+
+    lateralization = LateralizationMeasurement(
+        config=lat_config,
+        grid=grid,
+        m_point=params["m_point"],
+        reference_positions=initial_positions,
+    )
+
     # Initialize wave packet (two-step process)
     print(f"\nInitializing photon wave packet...")
 
@@ -234,7 +394,13 @@ def main():
     snapshots_lateral = {}  # Store lateral displacements
     snapshots_vel_amplitude = {}  # Store amplitude velocities
     snapshots_vel_lateral = {}  # Store lateral velocities
+    snapshots_lateralization = {}  # Store lateralization ratio
+    lateralization_global_history = []  # Store global R_lat over time
     snapshot_steps = {int(t / dt): t for t in snapshot_times}
+
+    # Add extra snapshot at step 1 (right after first time step)
+    snapshot_steps[1] = dt
+    num_snapshots += 1  # Now 8 total snapshots
 
     x_coords = np.arange(nx) * h
 
@@ -257,12 +423,35 @@ def main():
             vel_lateral = state.velocities[:, 0].cpu().numpy()
             snapshots_vel_lateral[snapshot_steps[step]] = vel_lateral.copy()
 
+            # Measure lateralization ratio
+            R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
+            snapshots_lateralization[snapshot_steps[step]] = R_lat_local.cpu().numpy().copy()
+
+            # Export CSV snapshot
+            csv_filename = f'photon_1d_snapshot_t{step:06d}.csv'
+            export_csv_snapshot(csv_filename, state, grid, initial_positions,
+                              spring_constant, lateralization, physics, h)
+            if step == 0:
+                print(f"  ✓ Exporting CSV snapshots (8 total: t=0, t=1, and 6 regular intervals)")
+
+            # Debug: print first measurement
+            if step == 0:
+                print(f"\n[DEBUG] First lateralization measurement:")
+                print(f"  R_lat_global: {R_lat_global:.6f}")
+                print(f"  R_lat_local range: [{R_lat_local.min().item():.6f}, {R_lat_local.max().item():.6f}]")
+                print(f"  E_amp_kin total: {diagnostics['E_amp_kin'].sum().item():.6e}")
+                print(f"  E_lat_kin total: {diagnostics['E_lat_kin'].sum().item():.6e}")
+                print(f"  E_amp_pot total: {diagnostics['E_amp_pot'].sum().item():.6e}")
+                print(f"  E_lat_pot total: {diagnostics['E_lat_pot'].sum().item():.6e}")
+
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             center = track_wave_center(state, grid)
             energy = solver.compute_energy(state)
+            R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
             times.append(solver.time)
             centers.append(center)
             energies.append(energy['total'])
+            lateralization_global_history.append(R_lat_global)
 
         if step % print_interval == 0:
             print(f"  Step {step:8d}/{num_steps}: t={solver.time:.6e}s, "
@@ -505,6 +694,58 @@ def main():
     plt.tight_layout()
     plt.savefig('photon_1d_example_lateral_velocity.png', dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateral_velocity.png")
+
+    # Lateralization ratio visualization
+    print(f"\nCreating lateralization ratio plots...")
+
+    fig6, axes6 = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig6.suptitle(f'1D Photon - Lateralization Ratio (R_lat = E_lat / E_total)',
+                 fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_lateralization:
+            R_lat = snapshots_lateralization[t]
+            x_nm = x_coords * 1e9
+
+            axes6[idx].plot(x_nm, R_lat, 'orange', linewidth=2, label='R_lat')
+            axes6[idx].axhline(y=0.5, color='k', linestyle='--', linewidth=0.5, alpha=0.5, label='R_lat=0.5' if idx == 0 else '')
+            axes6[idx].set_ylabel('R_lat', fontsize=11)
+            axes6[idx].set_xlim(x_nm[0], x_nm[-1])
+            axes6[idx].set_ylim(0, 1)
+            axes6[idx].grid(True, alpha=0.3)
+
+            t_fs = t * 1e15
+            axes6[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                          transform=axes6[idx].transAxes,
+                          fontsize=12, verticalalignment='top',
+                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            if idx == 0:
+                axes6[idx].legend(loc='upper right', fontsize=10)
+            if idx == num_snapshots - 1:
+                axes6[idx].set_xlabel('Position [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('photon_1d_example_lateralization.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_lateralization.png")
+
+    # Global lateralization ratio vs time
+    print(f"\nCreating global lateralization ratio plot...")
+
+    fig7, ax7 = plt.subplots(1, 1, figsize=(12, 6))
+    R_lat_global_array = np.array(lateralization_global_history)
+    ax7.plot(times_fs, R_lat_global_array, 'orange', linewidth=2, label='Global R_lat')
+    ax7.axhline(y=0.5, color='k', linestyle='--', linewidth=1, alpha=0.5, label='R_lat=0.5')
+    ax7.set_xlabel('Time [fs]', fontsize=12)
+    ax7.set_ylabel('Global R_lat', fontsize=12)
+    ax7.set_title('Global Lateralization Ratio vs Time', fontsize=14, fontweight='bold')
+    ax7.set_ylim(0, 1)
+    ax7.grid(True, alpha=0.3)
+    ax7.legend(fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig('photon_1d_example_lateralization_global.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: photon_1d_example_lateralization_global.png")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")
