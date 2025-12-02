@@ -135,6 +135,160 @@ def compton_calibrated_brane_lattice_params(
     }
 
 
+def get_dimensionless_params(
+    grid_spacing_m: float,
+    dimensionality: int,
+    c: float = 2.99792458e8,
+    lambda_C_multiplier: float = 10.0,
+    cfl_factor: float = 0.1,
+) -> dict:
+    """
+    Get dimensionless simulation parameters with scaling layer.
+
+    This function wraps the physical parameter computation and adds a scaling
+    layer that converts everything to clean dimensionless units for the solver:
+        h_sim = 1.0
+        m_point_sim = 1.0
+        k_spring_sim = 1.0
+        c_sim = 1.0
+
+    The solver runs in these dimensionless units, and all physical quantities
+    are mapped via:
+        - Length scale L0 (typically lambda_C * lambda_C_multiplier)
+        - Time scale T0 = L0 / c_phys
+        - Mass scale M0 = m_point_phys
+
+    This ensures clean O(1) numerics without changing any physical ratios.
+
+    Parameters
+    ----------
+    grid_spacing_m : float
+        Physical lattice spacing h in meters.
+    dimensionality : int
+        Spatial dimensionality D of the brane model (1, 2, or 3).
+    c : float, optional
+        Speed of light in m/s, default is 2.99792458e8.
+    lambda_C_multiplier : float, optional
+        Grid spacing as multiple of Compton wavelength, default is 10.0.
+    cfl_factor : float, optional
+        CFL factor for time step calculation, default is 0.1.
+
+    Returns
+    -------
+    params : dict
+        Dictionary containing both physical and dimensionless parameters:
+        {
+            # Physical constants
+            "c_phys": speed of light [m/s],
+            "lambda_C": Compton wavelength [m],
+            "m_e": electron mass [kg],
+            "hbar": reduced Planck constant [J·s],
+
+            # Physical parameters
+            "h_phys": grid spacing [m],
+            "m_point_phys": point mass [kg],
+            "k_spring_phys": spring constant [N/m],
+            "rho_D": D-dim mass density [kg/m^D],
+            "T_D": D-dim tension [N/m^(D-1)],
+            "dt_phys": physical time step [s],
+            "rest_length": spring rest length [m],
+
+            # Scaling factors
+            "L0": length scale [m],
+            "T0": time scale [s],
+            "M0": mass scale [kg],
+            "E0": energy scale [J],
+
+            # Dimensionless simulation parameters
+            "h_sim": grid spacing in sim units (always 1.0),
+            "m_point_sim": point mass in sim units (always 1.0),
+            "k_spring_sim": spring constant in sim units (always 1.0),
+            "c_sim": wave speed in sim units (always 1.0),
+            "dt_sim": time step in sim units,
+
+            # Other
+            "dim": dimensionality,
+            "A_estimate": amplitude scale estimate [m],
+            "lambda_C_multiplier": grid spacing / lambda_C,
+            "cfl_factor": CFL factor,
+        }
+    """
+    # Get physical parameters
+    phys_params = compton_calibrated_brane_lattice_params(
+        grid_spacing_m=grid_spacing_m,
+        dimensionality=dimensionality,
+        c=c
+    )
+
+    # Physical constants
+    hbar = 1.054571817e-34      # J*s
+    m_e  = 9.1093837015e-31     # kg
+    lambda_C = phys_params["lambda_C"]
+
+    # Physical parameters
+    h_phys = grid_spacing_m
+    m_point_phys = phys_params["m_point"]
+    k_spring_phys = phys_params["k_spring"]
+    rho_D = phys_params["rho_D"]
+    T_D = phys_params["T_D"]
+
+    # Physical time step (from CFL condition)
+    dt_phys = cfl_factor * h_phys / c
+
+    # Scaling choices
+    # L0: Use the physical grid spacing (which is lambda_C * lambda_C_multiplier)
+    L0 = h_phys
+    # T0: Choose so that c_sim = 1
+    T0 = L0 / c
+    # M0: Choose so that m_point_sim = 1
+    M0 = m_point_phys
+    # E0: Natural energy scale
+    E0 = M0 * (L0 / T0) ** 2
+
+    # Dimensionless simulation parameters
+    h_sim = 1.0                  # Grid spacing in units of L0
+    m_point_sim = 1.0            # Point mass in units of M0
+    k_spring_sim = 1.0           # Spring constant chosen so c_sim = 1
+    c_sim = 1.0                  # Wave speed in sim units (by construction)
+    dt_sim = dt_phys / T0        # Dimensionless time step
+
+    return {
+        # Physical constants
+        "c_phys": c,
+        "lambda_C": lambda_C,
+        "m_e": m_e,
+        "hbar": hbar,
+
+        # Physical parameters
+        "h_phys": h_phys,
+        "m_point_phys": m_point_phys,
+        "k_spring_phys": k_spring_phys,
+        "rho_D": rho_D,
+        "T_D": T_D,
+        "dt_phys": dt_phys,
+        "rest_length": phys_params["rest_length"],
+
+        # Scaling factors
+        "L0": L0,
+        "T0": T0,
+        "M0": M0,
+        "E0": E0,
+
+        # Dimensionless simulation parameters
+        "h_sim": h_sim,
+        "m_point_sim": m_point_sim,
+        "k_spring_sim": k_spring_sim,
+        "c_sim": c_sim,
+        "dt_sim": dt_sim,
+
+        # Other
+        "dim": dimensionality,
+        "A_estimate": phys_params["A_estimate"],
+        "lambda_C_multiplier": lambda_C_multiplier,
+        "cfl_factor": cfl_factor,
+    }
+
+
 def print_calibration_summary(params: dict, grid_spacing: float) -> None:
     """
     Print a human-readable summary of brane calibration parameters.

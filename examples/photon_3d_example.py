@@ -27,7 +27,7 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
-from branesim.physics.parameters import compton_calibrated_brane_lattice_params
+from branesim.physics.parameters import get_dimensionless_params
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -242,14 +242,23 @@ def main():
     # Configuration with Compton-cell calibration
     # Grid spacing as multiple of Compton wavelength
     lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
-    h = constants.lambda_C * lambda_C_multiplier
+    h_phys = constants.lambda_C * lambda_C_multiplier
+    cfl_factor = 0.1
 
-    # Get 3D Compton-calibrated parameters
-    params = compton_calibrated_brane_lattice_params(
-        grid_spacing_m=h,
+    # Get dimensionless parameters with scaling layer
+    params = get_dimensionless_params(
+        grid_spacing_m=h_phys,
         dimensionality=3,
-        c=constants.c
+        c=constants.c,
+        lambda_C_multiplier=lambda_C_multiplier,
+        cfl_factor=cfl_factor
     )
+
+    # Extract scaling factors
+    L0 = params["L0"]
+    T0 = params["T0"]
+    M0 = params["M0"]
+    E0 = params["E0"]
 
     # Extract 3D parameters
     rho = params["rho_D"]  # 3D volume mass density [kg/m³]
@@ -260,46 +269,53 @@ def main():
     nx = 100  # Long waveguide
     ny = 20   # Narrow transverse
     nz = 20   # Narrow transverse
-    domain_length_x = nx * h
-    domain_length_y = ny * h
-    domain_length_z = nz * h
-
-    # Wave speed (speed of light)
-    c = constants.c
-
-    # CFL condition for stability
-    cfl_factor = 0.1
-    dt = cfl_factor * h / c
+    domain_length_phys_x = nx * h_phys
+    domain_length_phys_y = ny * h_phys
+    domain_length_phys_z = nz * h_phys
+    domain_length_sim = nx * params["h_sim"]  # = nx * 1.0 = nx
 
     # Verify that wave speed will be c
     # For 3D: c = √(T/ρ) where T is the 3D "tension" (actually pressure/stress)
     expected_wave_speed = np.sqrt(tension / rho)
 
-    print(f"\nCompton-Cell Calibration (3D):")
+    print(f"\nPhysical Parameters:")
     print(f"  Reduced Compton wavelength λ_C = {params['lambda_C']:.4e} m")
-    print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h:.6e} m")
+    print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h_phys:.6e} m")
     print(f"  3D volume mass density ρ_3 = m_e/λ_C³ = {rho:.6e} kg/m³")
     print(f"  3D elastic modulus T_3 = ρ_3×c² = {tension:.6e} Pa")
-    print(f"  Spring constant k = T_3×h = {params['k_spring']:.6e} N/m")
-    print(f"  Point mass m = ρ_3×h³ = {params['m_point']:.6e} kg")
+    print(f"  Spring constant k = T_3×h = {params['k_spring_phys']:.6e} N/m")
+    print(f"  Point mass m = ρ_3×h³ = {params['m_point_phys']:.6e} kg")
     print(f"  Expected wave speed = √(T_3/ρ_3) = {expected_wave_speed:.6e} m/s")
-    print(f"  Speed of light c = {c:.6e} m/s")
-    print(f"  Wave speed error = {abs(expected_wave_speed - c)/c:.6e}")
+    print(f"  Speed of light c = {constants.c:.6e} m/s")
+    print(f"  Wave speed error = {abs(expected_wave_speed - constants.c)/constants.c:.6e}")
+
+    print(f"\nScaling Factors:")
+    print(f"  Length scale L0 = {L0:.6e} m")
+    print(f"  Time scale T0 = {T0:.6e} s")
+    print(f"  Mass scale M0 = {M0:.6e} kg")
+    print(f"  Energy scale E0 = {E0:.6e} J")
+
+    print(f"\nDimensionless Simulation Parameters (Clean Units):")
+    print(f"  h_sim = {params['h_sim']:.1f} (grid spacing)")
+    print(f"  m_point_sim = {params['m_point_sim']:.1f} (point mass)")
+    print(f"  k_spring_sim = {params['k_spring_sim']:.1f} (spring constant)")
+    print(f"  c_sim = {params['c_sim']:.1f} (wave speed)")
+    print(f"  dt_sim = {params['dt_sim']:.6e} (time step)")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain: {nx} × {ny} × {nz} points")
-    print(f"  Domain size: {domain_length_x:.6e} × {domain_length_y:.6e} × {domain_length_z:.6e} m")
+    print(f"  Domain (physical): {domain_length_phys_x:.6e} × {domain_length_phys_y:.6e} × {domain_length_phys_z:.6e} m")
+    print(f"  Domain (sim units): {domain_length_sim:.1f} × {domain_length_sim * ny / nx:.1f} × {domain_length_sim * nz / nx:.1f}")
     print(f"  Total points: {nx*ny*nz:,}")
     print(f"  Aspect ratio: {nx}:{ny}:{nz} (waveguide geometry)")
-    print(f"  Time step dt = {dt:.6e} s")
     print(f"  CFL number = {cfl_factor:.3f}")
 
-    # Create components
+    # Create components using SIMULATION UNITS
     device = torch.device('cpu')
     dtype = torch.float64
 
     state = BraneState((nx, ny, nz), Dimensionality.THREE_D, device, dtype)
-    state.initialize_flat_configuration(h)
+    state.initialize_flat_configuration(params["h_sim"])  # Use sim spacing = 1.0
 
     # Store initial positions for lateral distortion tracking
     initial_positions = state.positions.clone()
@@ -310,46 +326,46 @@ def main():
     print(f"  Fixed points: {state.fixed_mask.sum().item()} / {nx * ny * nz}")
     print(f"  All 6 walls: FIXED (waveguide)")
 
-    grid = BraneGrid((nx, ny, nz), Dimensionality.THREE_D, h, device)
+    grid = BraneGrid((nx, ny, nz), Dimensionality.THREE_D, params["h_sim"], device)  # Sim spacing = 1.0
 
     # CRITICAL: Implement pretension κ = ρc²
-    # In continuum: elastic modulus T_3 = ρ_3 * c² [Pa]
-    # In discrete: each spring carries force F_0 = T_3 * h² [N]
-    # With k_spring = T_3 * h: F_0 = k(h - L_0) must equal T_3 * h²
-    # Solving: T_3*h(h - L_0) = T_3*h² → L_0 = 0
-    rest_length = 0.0  # Springs pre-stretched to carry background tension
-    spring_constant = params["k_spring"]  # k = T_3 * h [N/m]
-    background_force = spring_constant * (h - rest_length)  # Force per spring [N]
+    # Rest length = 0.0 in both physical and sim units
+    rest_length_sim = 0.0
+    rest_length_phys = params["rest_length"]
 
-    print(f"\nPretension Implementation:")
-    print(f"  Rest length L_0 = {rest_length:.6e} m")
-    print(f"  Actual spacing a = {h:.6e} m")
-    print(f"  Background strain = (a - L_0)/L_0 = {'infinite (L_0=0)' if rest_length == 0 else f'{(h-rest_length)/rest_length:.6e}'}")
-    print(f"  Background force per spring F_0 = k(a - L_0) = {background_force:.6e} N")
-    print(f"  Expected force per spring = T_3*h² = {tension*h**2:.6e} N")
-    print(f"  Match: {abs(background_force - tension*h**2)/(tension*h**2):.6e}")
+    print(f"\nPretension Implementation (Sim Units):")
+    print(f"  Rest length L_0 (sim) = {rest_length_sim:.1f}")
+    print(f"  Rest length L_0 (phys) = {rest_length_phys:.6e} m")
+    print(f"  Actual spacing (sim) = {params['h_sim']:.1f}")
+    print(f"  Spring constant (sim) = {params['k_spring_sim']:.1f}")
+    print(f"  Background tension F_0 (sim) = k×(h-L_0) = {params['k_spring_sim'] * (params['h_sim'] - rest_length_sim):.1f}")
 
-    physics = SpringForceComputer(spring_constant, rest_length)
-    solver = VelocityVerletSolver(dt, rho, physics, grid)
+    physics = SpringForceComputer(params["k_spring_sim"], rest_length_sim)
+    solver = VelocityVerletSolver(params["dt_sim"], params["m_point_sim"], physics, grid)
 
-    # Initialize wave packet
+    # Initialize wave packet IN SIMULATION UNITS
     print(f"\nInitializing photon wave packet...")
 
-    # Wavelength: multiple of grid spacing for good resolution
-    wavelength = 20 * h  # 20 points per wavelength
+    # Physical values (what we want in real units)
+    wavelength_phys = 20 * h_phys  # 20 points per wavelength
+    amplitude_phys = 0.1 * h_phys
+    width_x_phys = 3 * wavelength_phys / (2 * np.pi)
+    center_x_phys = domain_length_phys_x / 3.0
 
-    # Amplitude: small compared to domain
-    amplitude = 0.1 * h
+    # Convert to sim units by dividing by L0
+    wavelength_sim = wavelength_phys / L0  # = 20.0
+    amplitude_sim = amplitude_phys / L0    # = 0.1
+    width_x_sim = width_x_phys / L0
+    center_x_sim = center_x_phys / L0
 
-    # Width: several wavelengths (only in x)
-    width_x = 3 * wavelength / (2 * np.pi)
+    print(f"  Physical wavelength: {wavelength_phys:.6e} m")
+    print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
+    print(f"  Physical amplitude: {amplitude_phys:.6e} m")
+    print(f"  Sim amplitude: {amplitude_sim:.3f} grid units")
 
-    # Center: in the left third of domain
-    center_x = domain_length_x / 3.0
-
-    # Initialize shape only
-    print(f"\n[1] Initializing wave shape...")
-    initialize_waveguide_wave_shape_3d(state, grid, amplitude, center_x, width_x, wavelength)
+    # Initialize shape only (in sim units)
+    print(f"\n[1] Initializing wave shape (sim units)...")
+    initialize_waveguide_wave_shape_3d(state, grid, amplitude_sim, center_x_sim, width_x_sim, wavelength_sim)
 
     # Note: Velocities can be initialized here if needed using
     # initialize_right_moving_velocities() from initial_conditions.py
@@ -365,29 +381,31 @@ def main():
     print(f"  Energy = {initial_energy['total']:.6e} J")
 
     # Run simulation
-    # Time for light to cross domain: t = L/c
-    crossing_time = domain_length_x / c
-    simulation_time = 0.5 * crossing_time  # 0.5 crossings (reduced for faster demo)
+    # Time for light to cross domain: t = L/c (in physical units)
+    crossing_time_phys = domain_length_phys_x / constants.c
+    simulation_time_phys = 0.5 * crossing_time_phys  # 0.5 crossings (reduced for faster demo)
+    simulation_time_sim = simulation_time_phys / T0  # Convert to sim units
 
-    num_steps = int(simulation_time / dt)
+    num_steps = int(simulation_time_sim / params["dt_sim"])
 
     print(f"\nRunning simulation...")
-    print(f"  Light crossing time = {crossing_time:.6e} s")
-    print(f"  Simulation time = {simulation_time:.6e} s")
+    print(f"  Light crossing time (phys) = {crossing_time_phys:.6e} s")
+    print(f"  Simulation time (phys) = {simulation_time_phys:.6e} s")
+    print(f"  Simulation time (sim) = {simulation_time_sim:.3f} time units")
     print(f"  Number of steps = {num_steps:,}")
 
     # Tracking
-    times = []
+    times_phys = []  # Physical times for plotting
     energies = []
 
-    # Take snapshots at regular intervals
+    # Take snapshots at regular intervals (in physical time)
     num_snapshots = 7
-    snapshot_times = np.linspace(0, simulation_time, num_snapshots)
+    snapshot_times_phys = np.linspace(0, simulation_time_phys, num_snapshots)
     snapshots = {}
     snapshots_lateral_x = {}  # x-component of lateral displacement
     snapshots_lateral_y = {}  # y-component of lateral displacement
     snapshots_lateral_z = {}  # z-component of lateral displacement
-    snapshot_steps = {int(t / dt): t for t in snapshot_times}
+    snapshot_steps = {int(t / params["dt_phys"]): t for t in snapshot_times_phys}
 
     # For animation - save every N steps
     animation_frames = []
@@ -426,11 +444,13 @@ def main():
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             energy = solver.compute_energy(state)
-            times.append(solver.time)
+            time_phys = solver.time * T0  # Convert sim time to physical
+            times_phys.append(time_phys)
             energies.append(energy['total'])
 
         if step % print_interval == 0:
-            print(f"  Step {step:8d}/{num_steps}: t={solver.time:.6e}s, "
+            time_phys = solver.time * T0  # Convert for printing
+            print(f"  Step {step:8d}/{num_steps}: t={time_phys:.6e}s, "
                   f"E={energy['total']:.6e}J")
 
         if step < num_steps:
@@ -445,8 +465,8 @@ def main():
     print("Results:")
     print(f"{'=' * 70}")
     print(f"\nWave Propagation:")
-    print(f"  Photon propagates at c = {c:.6e} m/s")
-    print(f"  Waveguide dimensions: {domain_length_x:.6e} × {domain_length_y:.6e} × {domain_length_z:.6e} m")
+    print(f"  Photon propagates at c = {constants.c:.6e} m/s")
+    print(f"  Waveguide dimensions: {domain_length_phys_x:.6e} × {domain_length_phys_y:.6e} × {domain_length_phys_z:.6e} m")
 
     print(f"\nEnergy Conservation:")
     print(f"  Initial: {initial_energy['total']:.6e} J")
@@ -464,11 +484,14 @@ def main():
     print(f"\nCreating visualizations...")
     print(f"  Using 2D slice through middle of volume (z = {nz//2})")
 
-    # Coordinate arrays (in nanometers)
-    x_coords = np.arange(nx) * h * 1e9
-    y_coords = np.arange(ny) * h * 1e9
-    z_coords = np.arange(nz) * h * 1e9
-    amplitude_nm = amplitude * 1e9
+    # Coordinate arrays (in nanometers) - convert from physical units
+    x_coords_phys = np.arange(nx) * h_phys
+    y_coords_phys = np.arange(ny) * h_phys
+    z_coords_phys = np.arange(nz) * h_phys
+    x_coords = x_coords_phys * 1e9
+    y_coords = y_coords_phys * 1e9
+    z_coords = z_coords_phys * 1e9
+    amplitude_nm = amplitude_phys * 1e9
 
     # ========================================================================
     # 1. AMPLITUDE FIELD VISUALIZATION (XY slice at middle z)
@@ -479,9 +502,9 @@ def main():
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots:
-            # Extract XY slice at middle z
-            field_slice = extract_slice_xy(snapshots[t], (nx, ny, nz))
-            field_slice_nm = field_slice * 1e9
+            # Extract XY slice at middle z (sim units)
+            field_slice_sim = extract_slice_xy(snapshots[t], (nx, ny, nz))
+            field_slice_nm = field_slice_sim * L0 * 1e9  # Convert sim → phys → nm
 
             # Plot heatmap
             im = axes[idx].imshow(field_slice_nm.T, origin='lower',
@@ -522,13 +545,13 @@ def main():
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots:
-            # XZ slice at middle y
-            field_xz = extract_slice_xz(snapshots[t], (nx, ny, nz))
-            field_xz_nm = field_xz * 1e9
+            # XZ slice at middle y (sim units)
+            field_xz_sim = extract_slice_xz(snapshots[t], (nx, ny, nz))
+            field_xz_nm = field_xz_sim * L0 * 1e9  # Convert sim → phys → nm
 
-            # YZ slice at middle x
-            field_yz = extract_slice_yz(snapshots[t], (nx, ny, nz))
-            field_yz_nm = field_yz * 1e9
+            # YZ slice at middle x (sim units)
+            field_yz_sim = extract_slice_yz(snapshots[t], (nx, ny, nz))
+            field_yz_nm = field_yz_sim * L0 * 1e9  # Convert sim → phys → nm
 
             # Plot XZ slice
             im_xz = axes2[0, idx].imshow(field_xz_nm.T, origin='lower',
@@ -561,7 +584,7 @@ def main():
     # ========================================================================
     fig3, ax = plt.subplots(figsize=(10, 6))
 
-    times_fs = np.array(times) * 1e15
+    times_fs = np.array(times_phys) * 1e15  # Already in physical units
     energy_array = np.array(energies)
     ax.plot(times_fs, energy_array / initial_energy['total'], 'g-', linewidth=2)
     ax.axhline(y=1.0, color='r', linestyle='--', linewidth=1, alpha=0.5)
@@ -579,14 +602,17 @@ def main():
     # ========================================================================
     print(f"\nCreating lateral distortion plots...")
 
-    # Find max lateral displacement magnitude for consistent scaling
-    max_disp_mag = 0
+    # Find max lateral displacement magnitude for consistent scaling (convert sim → phys)
+    max_disp_mag_phys = 0
     for t in snapshots_lateral_x.keys():
-        # Extract XY slice at middle z
-        disp_x_slice = extract_slice_xy(snapshots_lateral_x[t], (nx, ny, nz))
-        disp_y_slice = extract_slice_xy(snapshots_lateral_y[t], (nx, ny, nz))
-        mag = np.sqrt(disp_x_slice**2 + disp_y_slice**2).max()
-        max_disp_mag = max(max_disp_mag, mag)
+        # Extract XY slice at middle z (sim units)
+        disp_x_slice_sim = extract_slice_xy(snapshots_lateral_x[t], (nx, ny, nz))
+        disp_y_slice_sim = extract_slice_xy(snapshots_lateral_y[t], (nx, ny, nz))
+        # Convert sim → phys
+        disp_x_slice_phys = disp_x_slice_sim * L0
+        disp_y_slice_phys = disp_y_slice_sim * L0
+        mag = np.sqrt(disp_x_slice_phys**2 + disp_y_slice_phys**2).max()
+        max_disp_mag_phys = max(max_disp_mag_phys, mag)
 
     fig_lat, axes_lat = plt.subplots(num_snapshots, 1, figsize=(14, 12))
     fig_lat.suptitle(f'3D Photon - Lateral Distortion (XY slice, Color=Direction, Brightness=Magnitude)',
@@ -594,12 +620,16 @@ def main():
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots_lateral_x:
-            # Extract XY slice at middle z
-            disp_x_slice = extract_slice_xy(snapshots_lateral_x[t], (nx, ny, nz))
-            disp_y_slice = extract_slice_xy(snapshots_lateral_y[t], (nx, ny, nz))
+            # Extract XY slice at middle z (sim units)
+            disp_x_slice_sim = extract_slice_xy(snapshots_lateral_x[t], (nx, ny, nz))
+            disp_y_slice_sim = extract_slice_xy(snapshots_lateral_y[t], (nx, ny, nz))
 
-            # Convert to RGB image
-            rgb_image, magnitude, angle = displacement_to_rgb_3d(disp_x_slice, disp_y_slice, max_disp_mag)
+            # Convert sim → phys
+            disp_x_slice_phys = disp_x_slice_sim * L0
+            disp_y_slice_phys = disp_y_slice_sim * L0
+
+            # Convert to RGB image (using physical units)
+            rgb_image, magnitude, angle = displacement_to_rgb_3d(disp_x_slice_phys, disp_y_slice_phys, max_disp_mag_phys)
 
             # Plot RGB image (transpose spatial dimensions only, keep color channel last)
             axes_lat[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
@@ -618,8 +648,8 @@ def main():
                               fontsize=12, verticalalignment='top',
                               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
-            # Add magnitude info
-            max_mag_pm = max_disp_mag * 1e12
+            # Add magnitude info (already in phys units)
+            max_mag_pm = max_disp_mag_phys * 1e12
             axes_lat[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
                               transform=axes_lat[idx].transAxes,
                               fontsize=10, verticalalignment='top',
@@ -641,9 +671,10 @@ def main():
 
     fig_anim, ax_anim = plt.subplots(figsize=(12, 4))
 
-    # Initial frame
-    field_init = extract_slice_xy(animation_frames[0], (nx, ny, nz)) * 1e9
-    im_anim = ax_anim.imshow(field_init.T, origin='lower',
+    # Initial frame (convert sim → nm)
+    field_init_sim = extract_slice_xy(animation_frames[0], (nx, ny, nz))
+    field_init_nm = field_init_sim * L0 * 1e9
+    im_anim = ax_anim.imshow(field_init_nm.T, origin='lower',
                              extent=[x_coords[0], x_coords[-1],
                                     y_coords[0], y_coords[-1]],
                              cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
@@ -658,14 +689,16 @@ def main():
     divider = make_axes_locatable(ax_anim)
     cax = divider.append_axes("right", size="3%", pad=0.05)
     plt.colorbar(im_anim, cax=cax, label='ξ [nm]')
-    ax_anim.set_title('3D Photon in Waveguide (XY slice, z=middle)',
+    ax_anim.set_title('3D Photon in Waveguide (XY slice, z=middle) - Dimensionless Units',
                      fontsize=14, fontweight='bold')
 
     def animate(frame_idx):
         """Update function for animation."""
-        field = extract_slice_xy(animation_frames[frame_idx], (nx, ny, nz)) * 1e9
-        im_anim.set_array(field.T)
-        t_fs = animation_times[frame_idx] * 1e15
+        field_sim = extract_slice_xy(animation_frames[frame_idx], (nx, ny, nz))
+        field_nm = field_sim * L0 * 1e9  # Convert sim → phys → nm
+        im_anim.set_array(field_nm.T)
+        t_sim = animation_times[frame_idx]
+        t_fs = t_sim * T0 * 1e15  # Convert sim → phys → fs
         time_text.set_text(f't = {t_fs:.3f} fs')
         return [im_anim, time_text]
 
@@ -683,10 +716,10 @@ def main():
     print("Simulation complete!")
     print(f"{'=' * 70}")
     print(f"\nPhysical Interpretation:")
-    print(f"  Domain size: {domain_length_x*1e9:.3f} × {domain_length_y*1e9:.3f} × {domain_length_z*1e9:.3f} nm")
-    print(f"  Domain size: {domain_length_x/constants.lambda_C:.0f} × {domain_length_y/constants.lambda_C:.0f} × {domain_length_z/constants.lambda_C:.0f} λ_C")
-    print(f"  Wavelength: {wavelength*1e9:.3f} nm")
-    print(f"  Simulation time: {simulation_time*1e15:.3f} femtoseconds")
+    print(f"  Domain size: {domain_length_phys_x*1e9:.3f} × {domain_length_phys_y*1e9:.3f} × {domain_length_phys_z*1e9:.3f} nm")
+    print(f"  Domain size: {domain_length_phys_x/constants.lambda_C:.0f} × {domain_length_phys_y/constants.lambda_C:.0f} × {domain_length_phys_z/constants.lambda_C:.0f} λ_C")
+    print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm")
+    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
 
     print(f"\nVisualization Notes:")
     print(f"  • Primary plots show XY slice at z = {nz//2} (middle of waveguide)")
