@@ -240,8 +240,8 @@ def main():
     print(f"  m_e = {constants.m_e:.6e} kg")
 
     # Configuration with Compton-cell calibration
-    # Grid spacing as multiple of Compton wavelength
-    lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
+    # Grid spacing as multiple of Compton wavelength (halved for double resolution)
+    lambda_C_multiplier = 5.0  # Grid spacing = 5 × λ_C (double resolution)
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
@@ -265,10 +265,10 @@ def main():
     tension = params["T_D"]  # 3D "tension" [Pa = N/m²]
 
     # Domain size - waveguide geometry (long in x, narrow in y and z)
-    # Note: Reduced size for faster computation (3D is computationally intensive)
-    nx = 100  # Long waveguide
-    ny = 20   # Narrow transverse
-    nz = 20   # Narrow transverse
+    # Double the grid points to maintain same physical domain size at higher resolution
+    nx = 200  # Long waveguide (doubled)
+    ny = 40   # Narrow transverse (doubled)
+    nz = 40   # Narrow transverse (doubled)
     domain_length_phys_x = nx * h_phys
     domain_length_phys_y = ny * h_phys
     domain_length_phys_z = nz * h_phys
@@ -347,13 +347,13 @@ def main():
     print(f"\nInitializing photon wave packet...")
 
     # Physical values (what we want in real units)
-    wavelength_phys = 20 * h_phys  # 20 points per wavelength
+    wavelength_phys = 40 * h_phys  # 40 points per wavelength (matches 1D/2D)
     amplitude_phys = 0.1 * h_phys
     width_x_phys = 3 * wavelength_phys / (2 * np.pi)
     center_x_phys = domain_length_phys_x / 3.0
 
     # Convert to sim units by dividing by L0
-    wavelength_sim = wavelength_phys / L0  # = 20.0
+    wavelength_sim = wavelength_phys / L0  # = 40.0
     amplitude_sim = amplitude_phys / L0    # = 0.1
     width_x_sim = width_x_phys / L0
     center_x_sim = center_x_phys / L0

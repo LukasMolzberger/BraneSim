@@ -4,6 +4,9 @@ Physical parameter calibration for brane simulations using Compton-cell calibrat
 This module implements the Compton-cell-based calibration procedure described
 in the paper (Section "Amplitude scale calibration"), connecting continuum
 brane parameters to discrete lattice parameters.
+
+Note: For unit conversion between physical and simulation units, see
+branesim.physics.dimensional_mapping.DimensionalMapper
 """
 
 import math
@@ -135,6 +138,132 @@ def compton_calibrated_brane_lattice_params(
     }
 
 
+def map_to_dimensionless_params(
+    phys_params: dict,
+    cfl_factor: float = 0.1,
+) -> dict:
+    """
+    Map physical parameters to dimensionless simulation parameters.
+
+    This is the core scaling layer that converts any physical parameter set
+    to clean dimensionless units for numerical simulation:
+        h_sim = 1.0
+        m_point_sim = 1.0
+        k_spring_sim = 1.0
+        c_sim = 1.0
+
+    The solver runs in these dimensionless units, and all physical quantities
+    are mapped via scaling factors:
+        - Length scale L0 = h_phys
+        - Time scale T0 = L0 / c_phys
+        - Mass scale M0 = m_point_phys
+
+    This ensures clean O(1) numerics without changing any physical ratios,
+    regardless of which calibration method produced the physical parameters.
+
+    Parameters
+    ----------
+    phys_params : dict
+        Physical parameter dictionary containing at minimum:
+        {
+            "h_phys": grid spacing [m],
+            "m_point": mass per lattice point [kg],
+            "k_spring": spring constant [N/m],
+            "c_phys": wave speed [m/s],
+            "rest_length": spring rest length [m],
+            "dim": dimensionality (1, 2, or 3),
+        }
+        May also contain rho_D, T_D, lambda_C, etc. depending on calibration method.
+    cfl_factor : float, optional
+        CFL factor for time step calculation, default is 0.1.
+
+    Returns
+    -------
+    params : dict
+        Dictionary containing physical, dimensionless, and scaling parameters:
+        {
+            # Physical parameters (passed through)
+            "h_phys": grid spacing [m],
+            "m_point_phys": point mass [kg],
+            "k_spring_phys": spring constant [N/m],
+            "c_phys": wave speed [m/s],
+            "rest_length": spring rest length [m],
+            "dt_phys": physical time step [s],
+            ... (other params from phys_params)
+
+            # Scaling factors
+            "L0": length scale [m],
+            "T0": time scale [s],
+            "M0": mass scale [kg],
+            "E0": energy scale [J],
+
+            # Dimensionless simulation parameters
+            "h_sim": grid spacing in sim units (always 1.0),
+            "m_point_sim": point mass in sim units (always 1.0),
+            "k_spring_sim": spring constant in sim units (always 1.0),
+            "c_sim": wave speed in sim units (always 1.0),
+            "dt_sim": time step in sim units,
+
+            # Metadata
+            "cfl_factor": CFL factor,
+        }
+    """
+    # Extract required physical parameters
+    h_phys = phys_params["h_phys"]
+    m_point_phys = phys_params["m_point"]
+    k_spring_phys = phys_params["k_spring"]
+    c_phys = phys_params["c_phys"]
+    rest_length = phys_params["rest_length"]
+
+    # Physical time step (from CFL condition)
+    dt_phys = cfl_factor * h_phys / c_phys
+
+    # Scaling choices
+    # L0: Use the physical grid spacing
+    L0 = h_phys
+    # T0: Choose so that c_sim = 1
+    T0 = L0 / c_phys
+    # M0: Choose so that m_point_sim = 1
+    M0 = m_point_phys
+    # E0: Natural energy scale
+    E0 = M0 * (L0 / T0) ** 2
+
+    # Dimensionless simulation parameters
+    h_sim = 1.0                  # Grid spacing in units of L0
+    m_point_sim = 1.0            # Point mass in units of M0
+    k_spring_sim = 1.0           # Spring constant chosen so c_sim = 1
+    c_sim = 1.0                  # Wave speed in sim units (by construction)
+    dt_sim = dt_phys / T0        # Dimensionless time step
+
+    # Build result by copying all physical params and adding simulation params
+    result = phys_params.copy()
+
+    # Standardize naming (ensure both m_point and m_point_phys exist)
+    result["m_point_phys"] = m_point_phys
+    result["k_spring_phys"] = k_spring_phys
+    result["dt_phys"] = dt_phys
+
+    # Add scaling factors
+    result.update({
+        "L0": L0,
+        "T0": T0,
+        "M0": M0,
+        "E0": E0,
+    })
+
+    # Add dimensionless simulation parameters
+    result.update({
+        "h_sim": h_sim,
+        "m_point_sim": m_point_sim,
+        "k_spring_sim": k_spring_sim,
+        "c_sim": c_sim,
+        "dt_sim": dt_sim,
+        "cfl_factor": cfl_factor,
+    })
+
+    return result
+
+
 def get_dimensionless_params(
     grid_spacing_m: float,
     dimensionality: int,
@@ -143,22 +272,22 @@ def get_dimensionless_params(
     cfl_factor: float = 0.1,
 ) -> dict:
     """
-    Get dimensionless simulation parameters with scaling layer.
+    Get dimensionless simulation parameters using Compton calibration.
 
-    This function wraps the physical parameter computation and adds a scaling
-    layer that converts everything to clean dimensionless units for the solver:
-        h_sim = 1.0
-        m_point_sim = 1.0
-        k_spring_sim = 1.0
-        c_sim = 1.0
+    This is a convenience function that combines Compton-based physical parameter
+    configuration with dimensionless mapping. It's equivalent to:
+        phys_params = compton_calibrated_brane_lattice_params(...)
+        sim_params = map_to_dimensionless_params(phys_params, cfl_factor)
 
-    The solver runs in these dimensionless units, and all physical quantities
-    are mapped via:
-        - Length scale L0 (typically lambda_C * lambda_C_multiplier)
-        - Time scale T0 = L0 / c_phys
-        - Mass scale M0 = m_point_phys
+    For other calibration methods, use map_to_dimensionless_params() directly.
 
-    This ensures clean O(1) numerics without changing any physical ratios.
+    For unit conversions between physical and simulation units, create a
+    DimensionalMapper:
+        from branesim.physics.dimensional_mapping import create_mapper_from_params
+        params = get_dimensionless_params(...)
+        mapper = create_mapper_from_params(params)
+        length_sim = mapper.to_sim_length(length_phys)
+        length_phys = mapper.to_phys_length(length_sim)
 
     Parameters
     ----------
@@ -176,117 +305,33 @@ def get_dimensionless_params(
     Returns
     -------
     params : dict
-        Dictionary containing both physical and dimensionless parameters:
-        {
-            # Physical constants
-            "c_phys": speed of light [m/s],
-            "lambda_C": Compton wavelength [m],
-            "m_e": electron mass [kg],
-            "hbar": reduced Planck constant [J·s],
-
-            # Physical parameters
-            "h_phys": grid spacing [m],
-            "m_point_phys": point mass [kg],
-            "k_spring_phys": spring constant [N/m],
-            "rho_D": D-dim mass density [kg/m^D],
-            "T_D": D-dim tension [N/m^(D-1)],
-            "dt_phys": physical time step [s],
-            "rest_length": spring rest length [m],
-
-            # Scaling factors
-            "L0": length scale [m],
-            "T0": time scale [s],
-            "M0": mass scale [kg],
-            "E0": energy scale [J],
-
-            # Dimensionless simulation parameters
-            "h_sim": grid spacing in sim units (always 1.0),
-            "m_point_sim": point mass in sim units (always 1.0),
-            "k_spring_sim": spring constant in sim units (always 1.0),
-            "c_sim": wave speed in sim units (always 1.0),
-            "dt_sim": time step in sim units,
-
-            # Other
-            "dim": dimensionality,
-            "A_estimate": amplitude scale estimate [m],
-            "lambda_C_multiplier": grid spacing / lambda_C,
-            "cfl_factor": CFL factor,
-        }
+        Dictionary containing both physical and dimensionless parameters.
+        See map_to_dimensionless_params() for details.
     """
-    # Get physical parameters
+    # Step 1: Configure physical parameters using Compton calibration
     phys_params = compton_calibrated_brane_lattice_params(
         grid_spacing_m=grid_spacing_m,
         dimensionality=dimensionality,
         c=c
     )
 
-    # Physical constants
-    hbar = 1.054571817e-34      # J*s
-    m_e  = 9.1093837015e-31     # kg
-    lambda_C = phys_params["lambda_C"]
+    # Add required fields for mapping
+    phys_params["h_phys"] = grid_spacing_m
+    phys_params["c_phys"] = c
 
-    # Physical parameters
-    h_phys = grid_spacing_m
-    m_point_phys = phys_params["m_point"]
-    k_spring_phys = phys_params["k_spring"]
-    rho_D = phys_params["rho_D"]
-    T_D = phys_params["T_D"]
+    # Step 2: Map to dimensionless parameters
+    sim_params = map_to_dimensionless_params(phys_params, cfl_factor)
 
-    # Physical time step (from CFL condition)
-    dt_phys = cfl_factor * h_phys / c
+    # Add Compton-specific metadata
+    sim_params["lambda_C_multiplier"] = lambda_C_multiplier
 
-    # Scaling choices
-    # L0: Use the physical grid spacing (which is lambda_C * lambda_C_multiplier)
-    L0 = h_phys
-    # T0: Choose so that c_sim = 1
-    T0 = L0 / c
-    # M0: Choose so that m_point_sim = 1
-    M0 = m_point_phys
-    # E0: Natural energy scale
-    E0 = M0 * (L0 / T0) ** 2
+    # Add physical constants if not already present
+    if "hbar" not in sim_params:
+        sim_params["hbar"] = 1.054571817e-34  # J*s
+    if "m_e" not in sim_params:
+        sim_params["m_e"] = 9.1093837015e-31  # kg
 
-    # Dimensionless simulation parameters
-    h_sim = 1.0                  # Grid spacing in units of L0
-    m_point_sim = 1.0            # Point mass in units of M0
-    k_spring_sim = 1.0           # Spring constant chosen so c_sim = 1
-    c_sim = 1.0                  # Wave speed in sim units (by construction)
-    dt_sim = dt_phys / T0        # Dimensionless time step
-
-    return {
-        # Physical constants
-        "c_phys": c,
-        "lambda_C": lambda_C,
-        "m_e": m_e,
-        "hbar": hbar,
-
-        # Physical parameters
-        "h_phys": h_phys,
-        "m_point_phys": m_point_phys,
-        "k_spring_phys": k_spring_phys,
-        "rho_D": rho_D,
-        "T_D": T_D,
-        "dt_phys": dt_phys,
-        "rest_length": phys_params["rest_length"],
-
-        # Scaling factors
-        "L0": L0,
-        "T0": T0,
-        "M0": M0,
-        "E0": E0,
-
-        # Dimensionless simulation parameters
-        "h_sim": h_sim,
-        "m_point_sim": m_point_sim,
-        "k_spring_sim": k_spring_sim,
-        "c_sim": c_sim,
-        "dt_sim": dt_sim,
-
-        # Other
-        "dim": dimensionality,
-        "A_estimate": phys_params["A_estimate"],
-        "lambda_C_multiplier": lambda_C_multiplier,
-        "cfl_factor": cfl_factor,
-    }
+    return sim_params
 
 
 def print_calibration_summary(params: dict, grid_spacing: float) -> None:
@@ -321,23 +366,3 @@ def print_calibration_summary(params: dict, grid_spacing: float) -> None:
     print(f"  Rest length L_0 (pretension)   = {params['rest_length']:.4e} m")
     print(f"  Amplitude estimate A           = {params['A_estimate']:.4e} m")
     print("=" * 60 + "\n")
-
-
-# Example usage (can be removed or kept for testing)
-if __name__ == "__main__":
-    # Example: lattice spacing at 10× Compton wavelength
-    from branesim.config.simulation_config import PhysicalConstants
-
-    constants = PhysicalConstants()
-    h = 10.0 * constants.lambda_C
-
-    # Test all dimensions
-    for dim in [1, 2, 3]:
-        params = compton_calibrated_brane_lattice_params(h, dimensionality=dim)
-        print_calibration_summary(params, h)
-
-    # Show how to use in simulation setup
-    params_3d = compton_calibrated_brane_lattice_params(h, dimensionality=3)
-    print("Usage in 3D simulation:")
-    print(f"  mass_per_point   = {params_3d['m_point']:.4e}  # kg")
-    print(f"  spring_constant  = {params_3d['k_spring']:.4e}  # N/m")
