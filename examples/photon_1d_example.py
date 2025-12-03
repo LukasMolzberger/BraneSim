@@ -20,8 +20,8 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
-from branesim.physics.parameters import get_dimensionless_params
-from branesim.physics.dimensional_mapping import create_mapper_from_params
+from branesim.physics.parameters import compton_calibrated_brane_lattice_params
+from branesim.physics.dimensional_mapping import map_to_dimensionless_params, create_mapper_from_params
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
     verify_wave_propagation,
@@ -265,16 +265,26 @@ def main():
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
-    # Get dimensionless parameters with scaling layer
-    params = get_dimensionless_params(
+    # Step 1: Get physical parameters using Compton calibration
+    phys_params = compton_calibrated_brane_lattice_params(
         grid_spacing_m=h_phys,
         dimensionality=1,
-        c=constants.c,
-        lambda_C_multiplier=lambda_C_multiplier,
-        cfl_factor=cfl_factor
+        c=constants.c
     )
 
-    # Create dimensional mapper for unit conversions
+    # Add required fields for dimensional mapping
+    phys_params["h_phys"] = h_phys
+    phys_params["c_phys"] = constants.c
+
+    # Step 2: Map to dimensionless parameters
+    params = map_to_dimensionless_params(phys_params, cfl_factor)
+
+    # Add constants for compatibility
+    params["hbar"] = constants.hbar
+    params["m_e"] = constants.m_e
+    params["lambda_C_multiplier"] = lambda_C_multiplier
+
+    # Step 3: Create dimensional mapper for unit conversions
     mapper = create_mapper_from_params(params)
 
     # Extract scaling factors (for CSV export which needs raw scales)
