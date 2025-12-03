@@ -28,6 +28,7 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import get_dimensionless_params
+from branesim.physics.dimensional_mapping import create_mapper_from_params
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -254,7 +255,10 @@ def main():
         cfl_factor=cfl_factor
     )
 
-    # Extract scaling factors
+    # Create dimensional mapper for unit conversions
+    mapper = create_mapper_from_params(params)
+
+    # Extract scaling factors (for backward compatibility)
     L0 = params["L0"]
     T0 = params["T0"]
     M0 = params["M0"]
@@ -352,11 +356,11 @@ def main():
     width_x_phys = 3 * wavelength_phys / (2 * np.pi)
     center_x_phys = domain_length_phys_x / 3.0
 
-    # Convert to sim units by dividing by L0
-    wavelength_sim = wavelength_phys / L0  # = 40.0
-    amplitude_sim = amplitude_phys / L0    # = 0.1
-    width_x_sim = width_x_phys / L0
-    center_x_sim = center_x_phys / L0
+    # Convert to sim units using mapper
+    wavelength_sim = mapper.to_sim_length(wavelength_phys)  # = 40.0
+    amplitude_sim = mapper.to_sim_length(amplitude_phys)    # = 0.1
+    width_x_sim = mapper.to_sim_length(width_x_phys)
+    center_x_sim = mapper.to_sim_length(center_x_phys)
 
     print(f"  Physical wavelength: {wavelength_phys:.6e} m")
     print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")

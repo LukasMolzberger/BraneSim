@@ -21,6 +21,7 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import get_dimensionless_params
+from branesim.physics.dimensional_mapping import create_mapper_from_params
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
     verify_wave_propagation,
@@ -273,7 +274,10 @@ def main():
         cfl_factor=cfl_factor
     )
 
-    # Extract scaling factors
+    # Create dimensional mapper for unit conversions
+    mapper = create_mapper_from_params(params)
+
+    # Extract scaling factors (for CSV export which needs raw scales)
     L0 = params["L0"]
     T0 = params["T0"]
     M0 = params["M0"]
@@ -371,10 +375,10 @@ def main():
     amplitude_phys = 0.1 * h_phys
     center_position_phys = domain_length_phys / 3.0
 
-    # Convert to sim units by dividing by L0
-    wavelength_sim = wavelength_phys / L0  # = 40 * 1.0 = 40
-    amplitude_sim = amplitude_phys / L0    # = 0.1 * 1.0 = 0.1
-    center_position_sim = center_position_phys / L0  # = (nx * 1.0) / 3.0 = nx/3
+    # Convert to sim units using mapper
+    wavelength_sim = mapper.to_sim_length(wavelength_phys)  # = 40.0
+    amplitude_sim = mapper.to_sim_length(amplitude_phys)    # = 0.1
+    center_position_sim = mapper.to_sim_length(center_position_phys)  # = nx/3
 
     print(f"  Physical wavelength: {wavelength_phys:.6e} m")
     print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
@@ -404,7 +408,7 @@ def main():
     # Initial measurements (in sim units, but energy uses physical mass)
     initial_energy = solver.compute_energy(state)
     initial_center_sim = track_wave_center(state, grid)  # Sim units
-    initial_center_phys = initial_center_sim * L0  # Convert to physical
+    initial_center_phys = mapper.to_phys_length(initial_center_sim)
 
     print(f"\nInitial State:")
     print(f"  Energy = {initial_energy['total']:.6e} J")
@@ -415,7 +419,7 @@ def main():
     # Time for light to cross domain: t = L/c (in physical units)
     crossing_time_phys = domain_length_phys / constants.c
     simulation_time_phys = 3.0 * crossing_time_phys  # 3 crossings
-    simulation_time_sim = simulation_time_phys / T0  # Convert to sim units
+    simulation_time_sim = mapper.to_sim_time(simulation_time_phys)
 
     num_steps = int(simulation_time_sim / params["dt_sim"])
 
@@ -494,7 +498,7 @@ def main():
             energy = solver.compute_energy(state)
             R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
             # Convert solver.time (sim units) to physical time
-            time_phys = solver.time * T0
+            time_phys = mapper.to_phys_time(solver.time)
             times_phys.append(time_phys)
             centers_sim.append(center_sim)
             energies.append(energy['total'])
@@ -502,8 +506,8 @@ def main():
 
         if step % print_interval == 0:
             # Convert time and center to physical for printing
-            time_phys = solver.time * T0
-            center_phys = center_sim * L0 if 'center_sim' in locals() else initial_center_phys
+            time_phys = mapper.to_phys_time(solver.time)
+            center_phys = mapper.to_phys_length(center_sim) if 'center_sim' in locals() else initial_center_phys
             energy_val = energy['total'] if 'energy' in locals() else initial_energy['total']
             print(f"  Step {step:8d}/{num_steps}: t={time_phys:.6e}s, "
                   f"center={center_phys:.3e}m, E={energy_val:.6e}J")
@@ -514,10 +518,10 @@ def main():
     # Final analysis
     final_energy = solver.compute_energy(state)
     final_center_sim = track_wave_center(state, grid)  # Sim units
-    final_center_phys = final_center_sim * L0  # Physical units
+    final_center_phys = mapper.to_phys_length(final_center_sim)
 
     distance_traveled_sim = final_center_sim - initial_center_sim  # Sim units
-    distance_traveled_phys = distance_traveled_sim * L0  # Physical units
+    distance_traveled_phys = mapper.to_phys_length(distance_traveled_sim)
     measured_speed = distance_traveled_phys / simulation_time_phys  # Physical units
     speed_error = abs(measured_speed - constants.c) / constants.c
 

@@ -269,6 +269,132 @@ class DimensionalMapper:
         )
 
 
+def map_to_dimensionless_params(
+    phys_params: dict,
+    cfl_factor: float = 0.1,
+) -> dict:
+    """
+    Map physical parameters to dimensionless simulation parameters.
+
+    This is the core scaling layer that converts any physical parameter set
+    to clean dimensionless units for numerical simulation:
+        h_sim = 1.0
+        m_point_sim = 1.0
+        k_spring_sim = 1.0
+        c_sim = 1.0
+
+    The solver runs in these dimensionless units, and all physical quantities
+    are mapped via scaling factors:
+        - Length scale L0 = h_phys
+        - Time scale T0 = L0 / c_phys
+        - Mass scale M0 = m_point_phys
+
+    This ensures clean O(1) numerics without changing any physical ratios,
+    regardless of which calibration method produced the physical parameters.
+
+    Parameters
+    ----------
+    phys_params : dict
+        Physical parameter dictionary containing at minimum:
+        {
+            "h_phys": grid spacing [m],
+            "m_point": mass per lattice point [kg],
+            "k_spring": spring constant [N/m],
+            "c_phys": wave speed [m/s],
+            "rest_length": spring rest length [m],
+            "dim": dimensionality (1, 2, or 3),
+        }
+        May also contain rho_D, T_D, lambda_C, etc. depending on calibration method.
+    cfl_factor : float, optional
+        CFL factor for time step calculation, default is 0.1.
+
+    Returns
+    -------
+    params : dict
+        Dictionary containing physical, dimensionless, and scaling parameters:
+        {
+            # Physical parameters (passed through)
+            "h_phys": grid spacing [m],
+            "m_point_phys": point mass [kg],
+            "k_spring_phys": spring constant [N/m],
+            "c_phys": wave speed [m/s],
+            "rest_length": spring rest length [m],
+            "dt_phys": physical time step [s],
+            ... (other params from phys_params)
+
+            # Scaling factors
+            "L0": length scale [m],
+            "T0": time scale [s],
+            "M0": mass scale [kg],
+            "E0": energy scale [J],
+
+            # Dimensionless simulation parameters
+            "h_sim": grid spacing in sim units (always 1.0),
+            "m_point_sim": point mass in sim units (always 1.0),
+            "k_spring_sim": spring constant in sim units (always 1.0),
+            "c_sim": wave speed in sim units (always 1.0),
+            "dt_sim": time step in sim units,
+
+            # Metadata
+            "cfl_factor": CFL factor,
+        }
+    """
+    # Extract required physical parameters
+    h_phys = phys_params["h_phys"]
+    m_point_phys = phys_params["m_point"]
+    k_spring_phys = phys_params["k_spring"]
+    c_phys = phys_params["c_phys"]
+    rest_length = phys_params["rest_length"]
+
+    # Physical time step (from CFL condition)
+    dt_phys = cfl_factor * h_phys / c_phys
+
+    # Scaling choices
+    # L0: Use the physical grid spacing
+    L0 = h_phys
+    # T0: Choose so that c_sim = 1
+    T0 = L0 / c_phys
+    # M0: Choose so that m_point_sim = 1
+    M0 = m_point_phys
+    # E0: Natural energy scale
+    E0 = M0 * (L0 / T0) ** 2
+
+    # Dimensionless simulation parameters
+    h_sim = 1.0                  # Grid spacing in units of L0
+    m_point_sim = 1.0            # Point mass in units of M0
+    k_spring_sim = 1.0           # Spring constant chosen so c_sim = 1
+    c_sim = 1.0                  # Wave speed in sim units (by construction)
+    dt_sim = dt_phys / T0        # Dimensionless time step
+
+    # Build result by copying all physical params and adding simulation params
+    result = phys_params.copy()
+
+    # Standardize naming (ensure both m_point and m_point_phys exist)
+    result["m_point_phys"] = m_point_phys
+    result["k_spring_phys"] = k_spring_phys
+    result["dt_phys"] = dt_phys
+
+    # Add scaling factors
+    result.update({
+        "L0": L0,
+        "T0": T0,
+        "M0": M0,
+        "E0": E0,
+    })
+
+    # Add dimensionless simulation parameters
+    result.update({
+        "h_sim": h_sim,
+        "m_point_sim": m_point_sim,
+        "k_spring_sim": k_spring_sim,
+        "c_sim": c_sim,
+        "dt_sim": dt_sim,
+        "cfl_factor": cfl_factor,
+    })
+
+    return result
+
+
 def create_mapper_from_params(params: dict) -> DimensionalMapper:
     """
     Create a DimensionalMapper from parameter dictionary.
