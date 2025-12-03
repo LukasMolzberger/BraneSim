@@ -256,17 +256,23 @@ def main():
     print("=" * 70)
 
     # ==================================================================
-    # CONFIGURATION: Adjust mass scale to explore wave speed
+    # CONFIGURATION: Adjust absolute substrate mass/energy scale
     # ==================================================================
-    # mass_scale_multiplier controls the brane mass density (stiffness is FIXED):
-    #   1.0   = Compton calibration → c_wave = c_light
-    #   < 1.0 = Lighter brane → c_wave > c_light (faster waves!)
-    #   > 1.0 = Heavier brane → c_wave < c_light (slower waves!)
+    # CONSTRAINT: Wave speed = c (speed of light, ALWAYS)
     #
-    # Wave speed: c_wave = c_light / √(mass_scale_multiplier)
-    # Example: 0.01 → wave propagates at 10× speed of light
+    # FREE PARAMETER: Absolute substrate mass/energy density scale
+    # substrate_scale scales BOTH ρ_D and T_D together:
+    #   - Both ρ_D and T_D multiply by substrate_scale
+    #   - This maintains c_wave = √(T_D/ρ_D) = c (constant)
+    #
+    # What varies:
+    #   1.0   = Compton calibration (baseline)
+    #   < 1.0 = Lighter/less energetic substrate
+    #   > 1.0 = Heavier/more energetic substrate
+    #
+    # This explores the one remaining degree of freedom after fixing c_wave = c
     # ==================================================================
-    mass_scale_multiplier = 0.008  # ← CHANGE THIS to explore different wave speeds
+    substrate_scale = 10000  # ← CHANGE THIS to explore different substrate scales
     # ==================================================================
 
     # Physical constants
@@ -283,11 +289,11 @@ def main():
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
-    # Get physical parameters using manual mass scale
+    # Get physical parameters using manual substrate scale
     phys_params = manual_brane_lattice_params(
         grid_spacing_m=h_phys,
         dimensionality=1,
-        mass_scale_multiplier=mass_scale_multiplier,
+        substrate_scale=substrate_scale,
         c=constants.c
     )
 
@@ -309,17 +315,17 @@ def main():
 
     # Simulation uses dimensionless units
     # h_sim = 1.0 ALWAYS (by choice of L0 = h_phys)
-    # k_sim = 1.0 ALWAYS (T_D is FIXED, independent of mass_scale_multiplier)
-    # m_sim VARIES with mass_scale_multiplier
-    # c_wave_sim VARIES: c_wave_sim = c_light / √(mass_scale_multiplier) in sim units
+    # c_wave = c ALWAYS (constraint: T_D/ρ_D = c²)
+    # m_sim and k_sim BOTH VARY with substrate_scale (maintaining c_wave = c)
     h_sim = mapper.to_sim_length(h_phys)  # = 1.0 always
-    m_sim = mapper.to_sim_mass(phys_params["m_point"])  # = mass_scale_multiplier
-    k_sim = mapper.to_sim_spring_constant(phys_params["k_spring"])  # = 1.0 always (FIXED T_D)
-    c_wave_sim = mapper.to_sim_velocity(phys_params["c_wave"])  # varies with mass_scale_multiplier
+    m_sim = mapper.to_sim_mass(phys_params["m_point"])  # = substrate_scale
+    k_sim = mapper.to_sim_spring_constant(phys_params["k_spring"])  # = substrate_scale
+    c_wave_sim = mapper.to_sim_velocity(phys_params["c_wave"])  # = 1.0 always (c_wave = c)
     rest_length_sim = mapper.to_sim_length(phys_params["rest_length"])
 
-    # Time step calculation (CFL condition)
-    dt_phys = cfl_factor * h_phys / constants.c
+    # Time step calculation (CFL condition based on ACTUAL wave speed)
+    # CRITICAL: Must use c_wave (actual wave speed in brane), not c_light!
+    dt_phys = cfl_factor * h_phys / phys_params["c_wave"]
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size
@@ -351,19 +357,15 @@ def main():
     print(f"\nDimensionless Simulation Parameters:")
     print(f"  h_sim = {h_sim:.6e}  (FIXED to 1.0, defines length scale L0)")
     print(f"  c_light_sim = 1.000000e+00  (FIXED to 1.0, defines time scale T0 = L0/c)")
-    print(f"  k_spring_sim = {k_sim:.6e}  (calculated = 1.0, T_D is FIXED)")
-    print(f"  m_point_sim = {m_sim:.6e}  (calculated = {mass_scale_multiplier:.2e}, ρ_D varies)")
+    print(f"  m_point_sim = {m_sim:.6e}  (= substrate_scale)")
+    print(f"  k_spring_sim = {k_sim:.6e}  (= substrate_scale)")
     print(f"  dt_sim = {dt_sim:.6e}  (time step)")
     print(f"")
-    print(f"  Actual wave propagation in simulation:")
-    print(f"    c_wave_sim = √(k_sim/m_sim) = {(k_sim/m_sim)**0.5:.6e}")
-    print(f"    c_wave / c_light = {(k_sim/m_sim)**0.5:.6e}  (wave speed relative to c)")
-    if mass_scale_multiplier < 1.0:
-        print(f"    → Lighter brane: wave propagates at {(k_sim/m_sim)**0.5*100:.1f}% of c_light")
-    elif mass_scale_multiplier > 1.0:
-        print(f"    → Heavier brane: wave propagates at {(k_sim/m_sim)**0.5*100:.1f}% of c_light")
-    else:
-        print(f"    → Compton calibration: wave propagates at c_light")
+    print(f"  Wave propagation:")
+    print(f"    c_wave_sim = √(k_sim/m_sim) = {(k_sim/m_sim)**0.5:.6e}  (= 1.0 always)")
+    print(f"    c_wave / c_light = {(k_sim/m_sim)**0.5:.6e}  (FIXED to 1.0)")
+    print(f"")
+    print(f"  Free parameter: substrate_scale = {substrate_scale:.2e}")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain (physical): {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
