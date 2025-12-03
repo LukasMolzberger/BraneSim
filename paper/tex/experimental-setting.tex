@@ -16,7 +16,7 @@ as independent sources, forces, or constraints.
 \paragraph{What is implemented (explicit in code):}
 \begin{itemize}
 \item The 4D embedding map $\mathbf{X}(x,t) \in \mathbb{R}^4$ discretized as node positions $\mathbf{R}_p(t)$
-\item Elastic energy functionals: stretching $U_\text{str}$ (with saturation) and bending $U_\text{bend}$
+\item Elastic energy functionals: stretching $U_\text{str}$ and bending $U_\text{bend}$
 \item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m_p \ddot{\mathbf{R}}_p = \mathbf{F}_p$
 \item Boundary conditions (periodic, free, or clamped)
 \item Initial conditions: Gaussian pulses, toroidal configurations, amplitude patterns
@@ -148,7 +148,7 @@ so that the discrete configuration $\{\mathbf R_p\}$ is a sampling of the contin
 $\mathbf X(x,t)$ introduced in Section~\ref{sec:conceptual-model}.
 The fourth component of $\mathbf R_p$ encodes the out-of-brane displacement; there is no separate amplitude field.
 
-The choice of continuum parameters $(\rho,K,\kappa,\epsilon_{\text{cr}},\dots)$
+The choice of continuum parameters $(\rho_m,T,\kappa)$
 is constrained by the parameter-matching conditions of
 Section~\ref{sec:param-matching}; in particular, the amplitude scale calibration
 of Section~\ref{amplitude-scale-calibration} implements the matching to
@@ -167,29 +167,20 @@ $(m_e,c,\hbar,e)$ at the level of the discrete lattice.
 We approximate the continuum energy in terms of \textbf{edge stretches} (intrinsic strain) and \textbf{bending} between neighboring edge directions.
 
 \begin{itemize}
-\item \textbf{Stretching energy (saturation built-in):}
+\item \textbf{Stretching energy (Hooke-like):}
   \[
   U_\text{str}=\sum_{(p,q)\in\mathcal E}
   \phi\left(\frac{|\mathbf R_q-\mathbf R_p|-h}{h}\right),
   \]
-  with a smooth, convex-near-zero, saturating $\phi$. Recommended:
+  with a simple quadratic potential
   \[
-  \phi(\epsilon)=\tfrac12 k\epsilon_\text{cr}^2\ln\big(1+(\epsilon/\epsilon_\text{cr})^2\big),
+  \phi(\epsilon)=\frac{1}{2}k\,\epsilon^2,
   \]
-  so $\phi\approx\tfrac12 k\epsilon^2$ for small strain and saturates for $|\epsilon|\gg\epsilon_\text{cr}$.
-  Here $k$ is a phenomenological in-brane stiffness parameter (energy scale per unit
-  squared strain) and $\epsilon_\text{cr}$ is the strain scale at which the elastic response
-  becomes significantly nonlinear.
-
-  In the small-strain limit the model reduces locally to a Hooke-like
-  response, while for $|\epsilon|\gg\epsilon_\text{cr}$ the growth soft-saturates and
-  prevents arbitrarily large tensions. In this work $\epsilon_\text{cr}$ is treated as a
-  generic material nonlinearity scale; any strong-field breakdown threshold must emerge
-  from the dynamics of localized excitations, rather than being imposed directly via $\phi$.
-
-  We deliberately avoid additional hard cutoffs or piecewise ``clamps'' on
-  amplitude or strain; all nonlinearity enters through the elastic energy
-  functional $U_\text{str}+U_\text{bend}$.
+  so that the discrete stretching law reduces locally to a
+  Hooke-like response. In the present work we do not include
+  any additional material saturation; all nonlinear behavior
+  arises from the geometric dependence of distances and curvature
+  on the brane embedding.
 
 \paragraph{Nonlinearity mode (implementation note).}
 
@@ -215,12 +206,11 @@ In code we distinguish multiple nonlinearity modes via a
 \end{itemize}
 Unless otherwise stated, all experiments use
 \texttt{PURE\_GEOMETRY}. The mathematical model in
-Section~\ref{conceptual-model} corresponds exactly to this mode (with
-$W_\text{sat}=0$ or quadratic saturation).
+Section~\ref{conceptual-model} corresponds exactly to this mode.
 
   The derivative (useful for force implementation) is
   \[
-  \phi'(\epsilon) = \frac{k\epsilon}{1+(\epsilon/\epsilon_\text{cr})^2}.
+  \phi'(\epsilon) = k\epsilon.
   \]
 
 \item \textbf{Bending/curvature energy (optional but stabilizing):}
@@ -241,7 +231,7 @@ Forces are $\mathbf F_p=-\partial U/\partial \mathbf R_p$. Because $|\mathbf R_q
 
 \paragraph{Discrete-to-continuum parameter mapping}\label{discrete-continuum-mapping}
 
-The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate. The effective \textbf{isotropic tension} $T$ in the continuum is encoded in the discrete spring stiffness parameter $k$ appearing in $\phi(\epsilon)$; in the small-strain limit, dimensional analysis and dispersion measurements yield $T \sim k/h$. The \textbf{critical strain scale} $\epsilon_\text{cr}$ in the saturation potential directly corresponds to the discrete threshold parameter with the same symbol, setting the amplitude at which nonlinear confinement begins. The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
+The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate. The effective \textbf{isotropic tension} $T$ in the continuum is encoded in the discrete spring stiffness parameter $k$ appearing in $\phi(\epsilon)$; in the small-strain limit, dimensional analysis and dispersion measurements yield $T \sim k/h$. The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
 
 \subsubsection{Amplitude scale calibration}\label{amplitude-scale-calibration}
 
@@ -320,7 +310,7 @@ experiments of Section~\ref{experiments}.
   Here $\rho$ is the continuum mass density and $h^3$ is the material volume represented by a node,
   so that each node effectively carries mass $m_p=\rho h^3$.
   Report drift (target $<10^{-5}$ over long runs, periodic BCs).
-\item \textbf{Implementation note:} No explicit amplitude or strain clamps are applied during time integration. All nonlinear confinement and saturation effects enter exclusively through the smooth saturation potential $\phi(\epsilon)$ defined in the stretching energy. The integrator advances $\mathbf R_p$ and $\mathbf v_p$ based solely on forces $\mathbf F_p = -\partial U/\partial \mathbf R_p$ computed from $U_\text{str} + U_\text{bend}$, ensuring that any emergent localization or threshold behavior arises from the elastic dynamics rather than from artificial hard cutoffs.
+\item \textbf{Implementation note:} No explicit amplitude or strain clamps are applied during time integration. All nonlinear confinement effects arise from the geometric dependence of edge lengths on the 4D embedding. The integrator advances $\mathbf R_p$ and $\mathbf v_p$ based solely on forces $\mathbf F_p = -\partial U/\partial \mathbf R_p$ computed from $U_\text{str} + U_\text{bend}$, ensuring that any emergent localization or threshold behavior arises from the elastic dynamics rather than from artificial hard cutoffs.
 \end{itemize}
 
 \subsubsection{Boundary conditions}\label{boundary-conditions}
@@ -361,16 +351,15 @@ This demonstrates isotropic cones for internal observers in the linear regime.
 \begin{itemize}
 \item \textbf{E1 — Nonlinear localization near the elastic threshold:}
   Launch a Gaussian disturbance with compact support and varying peak
-  strain, scanning across the onset of the nonlinear regime
-  $|\epsilon|\sim\epsilon_\text{cr}$. Track the time evolution of the
+  amplitude, scanning across the onset of the geometric nonlinear regime.
+  Track the time evolution of the
   energy density, center-of-energy position, and localization
-  functionals as a function of total energy and peak strain.
+  functionals as a function of total energy and peak amplitude.
 
-  The goal is \emph{not} to impose a microscopic strong-field limit, but to
-  determine whether the nonlinear elastic response alone admits long-lived,
-  self-localized lumps and whether there exists an emergent threshold in
-  energy density for such localization.
-  Diagnostics: peak strain vs. $\epsilon_\text{cr}$, energy localization, lifetime.
+  The goal is to determine whether the geometric nonlinearity alone
+  admits long-lived, self-localized lumps and whether there exists
+  an emergent threshold in energy density for such localization.
+  Diagnostics: peak amplitude, energy localization, lifetime.
 
 \item \textbf{E2 — Toroidal soliton (electron topology):} Seed a torus in 4D—i.e., initialize $\mathbf X$ so that the set of nodes with elevated normal offset forms a looped tube (major radius $R$, minor $r$). Add a compatible tangential phase pattern (as initial velocities) around the loop. Track confinement ratio, torus symmetry, robustness to perturbations.
 
@@ -383,9 +372,8 @@ This demonstrates isotropic cones for internal observers in the linear regime.
 
 \item \textbf{E4 — Geodesic bending:} Place a weak probe packet far from a localized bulge and ray-trace through $g$. Measure deflection vs. curvature intensity.
 
-\item \textbf{E5 — Emergent kinematics:} Propagate compact, small-amplitude packets; verify constant group speed $c$ and angular isotropy; quantify deviations as strain approaches $\epsilon_\text{cr}$.
- Here $\epsilon_\text{cr}$ enters only through the elastic nonlinearity; any breakdown of effective
-  Lorentz invariance is treated as an emergent phenomenon of the medium.
+\item \textbf{E5 — Emergent kinematics:} Propagate compact, small-amplitude packets; verify constant group speed $c$ and angular isotropy; quantify deviations as amplitude increases and geometric nonlinearity becomes significant.
+  Any breakdown of effective Lorentz invariance is treated as an emergent phenomenon of the medium.
 
 \item \textbf{E6 — Newtonian gravity recovery:} Place a localized, spherically symmetric amplitude bulge (representing a mass concentration) at rest in the brane. Initialize it with total energy $E_{\text{bulge}} \approx m_{\text{bulge}} c^2$ distributed over a compact volume $V_{\text{bulge}} \sim \lambda_{\text{bulge}}^3$. Compute the induced metric $g_{ij}$ by measuring local tangent vectors $\partial_i \mathbf{X}$ on a spherical shell at various radii $r$ from the bulge center. Extract the effective gravitational potential $\Phi_{\text{grav}}(\mathbf{x})$ from the effective emergent metric component $g_{00} \approx -(1 + 2\Phi_{\text{grav}}/c^2)$ and verify:
 \begin{itemize}
@@ -421,10 +409,10 @@ This demonstrates isotropic cones for internal observers in the linear regime.
 \begin{itemize}
 \item \textbf{Substrate:} a single geometric object $\mathbf X(x,t)\in\mathbb R^4$ with dynamics from $\mathcal L(\mathbf X,\partial\mathbf X)$.
 \item \textbf{Effective physics for internal observers:} built from the induced metric $g_{ij}$ and wave kinematics on the brane; no extra fields are postulated. The familiar EM interpretation can be treated phenomenologically elsewhere; it is not required here.
-\item \textbf{Threshold phenomena:} The localization thresholds and confinement scales discussed in this work (e.g., the energy density criterion $\langle\mathcal E\rangle_{V_c}V_c \ge m_e c^2$ and the strain scale $\epsilon_\text{cr}$) are not imposed as external cutoffs or quantum rules, but emerge dynamically from the nonlinear elastic response of the medium. The simulations test whether this purely geometric-tensional framework is sufficient to produce soliton stability and pair confinement without additional ad-hoc mechanisms.
+\item \textbf{Threshold phenomena:} The localization thresholds and confinement scales discussed in this work (e.g., the energy density criterion $\langle\mathcal E\rangle_{V_c}V_c \ge m_e c^2$) are not imposed as external cutoffs or quantum rules, but emerge dynamically from the geometric nonlinearity of the medium. The simulations test whether this purely geometric-tensional framework is sufficient to produce soliton stability and pair confinement without additional ad-hoc mechanisms.
 \end{itemize}
 
-\textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice, saturation potentials, and velocity-Verlet integration, providing better isotropy and numerical stability.
+\textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice with geometric nonlinearity and velocity-Verlet integration, providing better isotropy and numerical stability.
 
 \paragraph{Geometric nonlinearity diagnostic tool.}
 For diagnostic purposes we also provide a small Python script

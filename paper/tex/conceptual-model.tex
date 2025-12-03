@@ -79,7 +79,7 @@ which vanishes in the flat reference state and is positive (negative) for local 
 \sigma^{ij} \approx T\, g^{ij} + 2\mu\, E^{ij} + O(E^2),
 \label{eq:linear-stress-strain}
 \end{equation}
-where $E^{ij}=g^{ik}g^{j\ell}E_{k\ell}$ denotes the raised-index strain, $T$ is the isotropic tension, and $\mu$ the shear modulus. Nonlinear saturation effects enter via $W_\text{sat}(E)$ (defined below).
+where $E^{ij}=g^{ik}g^{j\ell}E_{k\ell}$ denotes the raised-index strain, $T$ is the isotropic tension, and $\mu$ the shear modulus.
 
 \subsubsection{Lagrangian and "geometric coupling"}\label{lagrangian-geometric-coupling}
 
@@ -89,8 +89,7 @@ We postulate a minimal elastic Lagrangian density (per unit material volume)
 =\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
 -\frac{T}{2}\mathrm{tr}(E)
 -\mu|E|^2
--\frac{\kappa}{2}|b|^2
--W_\text{sat}(E),
+-\frac{\kappa}{2}|b|^2,
 \label{eq:brane-lagrangian}
 \end{equation}
 
@@ -131,49 +130,30 @@ where
 \item $E=\tfrac{1}{2}(g-g^0)$ is the Green strain on the brane (intrinsic deformation),
 \item $T>0$ sets isotropic tension, $\mu\ge0$ adds shear stiffness (optional but useful for numerical conditioning),
 \item $\kappa\ge0$ penalizes curvature (bending) via $|b|^2=b_{ij}b^{ij}$,
-\item $\rho_m$ is the mass density of the brane substrate,
-\item $W_\text{sat}$ is an \emph{optional, exploratory} \textbf{smooth saturation potential} (see "Sources of nonlinearity" below) that can soften the response at large strain and introduce an additional strong-field threshold. In the minimal version of the model we set $W_\text{sat}=0$ and rely entirely on the geometric nonlinearity of the elastic brane.
+\item $\rho_m$ is the mass density of the brane substrate.
 \end{itemize}
 (Note: $|E|^2$ and $|b|^2$ denote metric contractions $E_{ij}E^{ij}$ and $b_{ij}b^{ij}$ respectively.)
 
 \textbf{Key point:} There is \textbf{no extra field}; "amplitude–lateral coupling" arises \textbf{geometrically} because \textbf{normal (4th-direction) displacements change the induced metric $g$}, which in turn changes in-brane distances and therefore produces lateral contraction around 4D bulges.
 
-A convenient convex, smooth saturation is:
-\begin{equation}
-W_\text{sat}(E)=\frac{k\epsilon_\text{cr}^2}{2}
-\ln\Big(1+\frac{\mathrm{tr}(E^2)}{\epsilon_\text{cr}^2}\Big),
-\label{eq:saturation-potential}
-\end{equation}
-with small-strain limit $W_\text{sat}\approx \tfrac{k}{2}\mathrm{tr}(E^2)$ and gradual saturation when $|E|\gg\epsilon_\text{cr}$. Parameters $k$ and $\epsilon_\text{cr}$ set the \textbf{stiffness} and the \textbf{critical strain scale}.
-
 \paragraph{Sources of nonlinearity.}
 
-It is useful to distinguish two conceptually different sources of
-nonlinearity in this framework:
-\begin{enumerate}
-  \item \emph{Pure geometric nonlinearity.} Even if the elastic law
-        is Hookean in the Green strain, the induced metric $g_{ij}$,
-        the strain tensor $E_{ij}$ and the curvature tensor $b_{ij}$
-        are nonlinear functionals of the embedding $X^A(x^\mu)$.
-        Large slopes and large curvatures therefore produce nonlinear
-        behavior purely from the geometry of the brane.
-        A compact quantitative estimate of when this geometric nonlinearity
-        becomes important for photon-like modes is given in
-        Sec.~\ref{threshold-localization}, where a discrete spring-chain
-        analogue leads to a dimensionless parameter
-        $\eta \sim \tfrac{1}{2}(kA)^2$ whose order-unity value marks the
-        breakdown of the linear regime.
-  \item \emph{Optional material or strong-field nonlinearity.} On top
-        of this geometric effect we may introduce smooth saturation or
-        strong-field potentials, schematically written as $W_\text{sat}$,
-        with their own scales (e.g.\ $\epsilon_{\text{cr}}$). These are
-        modeling options that we explore in some simulation modes for
-        strong-field regimes and for numerical robustness.
-\end{enumerate}
-The core ideas of emergent fields and soliton-like excitations are
-intended to work already in the purely geometric case~(1); case~(2)
-should be viewed as an exploratory extension rather than a mandatory
-assumption.
+Even if the elastic law is Hookean in the Green strain, the induced metric $g_{ij}$,
+the strain tensor $E_{ij}$ and the curvature tensor $b_{ij}$
+are nonlinear functionals of the embedding $X^A(x^\mu)$.
+Large slopes and large curvatures therefore produce nonlinear
+behavior purely from the geometry of the brane.
+A compact quantitative estimate of when this geometric nonlinearity
+becomes important for photon-like modes is given in
+Sec.~\ref{threshold-localization}, where a discrete spring-chain
+analogue leads to a dimensionless parameter
+$\eta \sim \tfrac{1}{2}(kA)^2$ whose order-unity value marks the
+breakdown of the linear regime.
+
+In the present paper we restrict attention to this purely geometric nonlinearity
+and do not introduce any additional material saturation terms; all nonlinearity
+considered here arises from the geometric dependence of $g_{ij}$, $E_{ij}$, and
+$b_{ij}$ on the embedding $X^A$.
 
 \subsubsection{Equations of motion}\label{equations-of-motion}
 
@@ -186,7 +166,7 @@ Variation of the action $S=\int\mathcal{L}\,dx\,dt$ gives
 where $\nabla_i$ is the material covariant derivative built from $g$, $\Delta_g$ the Laplace–Beltrami operator (we use $\Delta_g^2=\Delta_g(\Delta_g\,\cdot)$, the biharmonic operator, applied to the normal component), $\mathbf{X}_\perp=(\mathbf{X}\cdot\mathbf{n})\mathbf{n}$ the normal part, and $\sigma^{ij}$ the (symmetric) 2nd Piola–Kirchhoff stress derived from
 \[
 \frac{\partial \mathcal{L}}{\partial g_{ij}}
-=-\frac{T}{4}g^{ij}-\mu E^{ij}-\frac{\partial W_\text{sat}}{\partial g_{ij}}.
+=-\frac{T}{4}g^{ij}-\mu E^{ij}.
 \]
 Here $E^{ij}=g^{ik}g^{j\ell}E_{k\ell}$ denotes the raised-index strain. (Exact closed forms are standard in thin-shell/branes; we keep the compact tensor form for clarity.)
 
@@ -197,8 +177,7 @@ Define the local energy density
 \mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
 +\frac{T}{2}\mathrm{tr}(E)
 +\mu|E|^2
-+\frac{\kappa}{2}|b|^2
-+W_\text{sat}(E).
++\frac{\kappa}{2}|b|^2.
 \label{eq:energy-density}
 \end{equation}
 Soliton nucleation occurs when coarse-grained energy within a Compton-scale material volume reaches the electron rest energy:
@@ -207,17 +186,20 @@ Soliton nucleation occurs when coarse-grained energy within a Compton-scale mate
 V_c=\Big(\frac{\lambda_C}{2\pi}\Big)^3.
 \label{eq:threshold-criterion}
 \end{equation}
-Above threshold, the saturation $W_\text{sat}$ naturally \textbf{locks in} localized high-curvature 4D bulges/loops, yielding persistent toroidal configurations (electron/positron analogues) without requiring any extra "glue".
+Above threshold, the geometric nonlinearity inherent in the full
+strain and curvature tensors can naturally lock in localized
+high-curvature 4D bulges, turning a propagating photon-like mode
+into a self-confined, particle-like soliton.
 
 \subsubsection{Linear wave regime and isotropy}\label{linear-wave-regime-and-isotropy}
 
-Linearize about a flat embedding $\mathbf X_0(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_0+\boldsymbol\xi$, and retain leading order. Then $g_{ij}\approx\delta_{ij}$, $E\approx \tfrac12(\partial_i\xi_j+\partial_j\xi_i)$. With $\mu\to 0$, $\kappa\to 0$, and $W_\text{sat}$ quadratic near zero, one obtains
+Linearize about a flat embedding $\mathbf X_0(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_0+\boldsymbol\xi$, and retain leading order. Then $g_{ij}\approx\delta_{ij}$, $E\approx \tfrac12(\partial_i\xi_j+\partial_j\xi_i)$. With $\mu\to 0$ and $\kappa\to 0$, one obtains
 \begin{equation}
 \partial_{tt}\boldsymbol\xi = c^2\Delta\boldsymbol\xi,\qquad
 c=\sqrt{T/\rho_m}.
 \label{eq:linear-wave-equation}
 \end{equation}
-All \textbf{four components} of $\boldsymbol\xi$ (including the 4th coordinate) obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed $c=\sqrt{T/\rho_m}$ is the same for all directions and for all embedding coordinates. Nonlinear terms (finite $W_\text{sat}$, curvature) introduce deviations from this ideal isotropic behavior.
+All \textbf{four components} of $\boldsymbol\xi$ (including the 4th coordinate) obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed $c=\sqrt{T/\rho_m}$ is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large slopes and curvature) introduce deviations from this ideal isotropic behavior.
 
 \paragraph{Explicit derivation:} In the homogeneous, small-strain limit, the Lagrangian reduces to
 \begin{equation}
@@ -238,7 +220,7 @@ Section~\ref{emergent-relativity-and-lorentz-invariance}.
 \textbf{Regime of validity (boxed):}
 The linear wave equation~\eqref{eq:linear-wave-equation} with isotropic
 dispersion is valid in the small-strain regime, where geometric nonlinearities
-(curvature, saturation, threshold effects) can be neglected. In this regime the
+(curvature, threshold effects) can be neglected. In this regime the
 wave speed $c=\sqrt{T/\rho_m}$ is approximately constant and independent of
 direction. This linear, isotropic propagation behaviour underlies the emergent
 Lorentz symmetry discussed in

@@ -127,16 +127,10 @@ including time dilation, length contraction, and simultaneity breakdown
 \paragraph{Analogy: Emergent Relativity in Physical
 Media}\label{analogy-emergent-relativity-in-physical-media}
 
-Similar behaviour appears in \textbf{analog gravity models}, such as:
-\begin{itemize}
-\item \textbf{Bose--Einstein condensates (BECs)}, where phonons propagate
-      in an effective curved metric determined by the condensate flow;
-\item \textbf{Acoustic metrics} in fluids, where sound waves experience an
-      effective Lorentzian geometry emergent from the background flow;
-\item \textbf{Electromagnetic waves in metamaterials}, where engineered
-      permittivity and permeability mimic curved spacetime for light.
-\end{itemize}
-In each case, a fundamentally Newtonian or absolute-time microscopic
+Similar emergent-relativity behaviour appears in various
+condensed-matter and optical systems, but here we treat the
+elastic brane as ontologically fundamental rather than as an
+effective medium. In each such case, a fundamentally Newtonian or absolute-time microscopic
 model gives rise to an \emph{effective} relativistic geometry for the
 excitations. Our brane model follows the same pattern, but elevates this
 idea to an ontological postulate: there is only the medium and its
@@ -145,7 +139,7 @@ dynamics.
 
 \paragraph{Summary}\label{emergent-lorentz-summary}
 
-\textbf{Caveat on the regime of validity:} All derivations in this section assume the \emph{homogeneous, small-strain, linear regime} in which nonlinear terms and curvature contributions are negligible. In the presence of strong solitons, finite strains, or regions near the saturation threshold, the brane dynamics will generically produce small Lorentz-violating corrections. We quantify these deviations numerically via dispersion and isotropy diagnostics in Sec.~\ref{calibration-dispersion-isotropy}.
+\textbf{Caveat on the regime of validity:} All derivations in this section assume the \emph{homogeneous, small-strain, linear regime} in which nonlinear terms and curvature contributions are negligible. In the presence of strong solitons or finite strains, the brane dynamics will generically produce small Lorentz-violating corrections. We quantify these deviations numerically via dispersion and isotropy diagnostics in Sec.~\ref{calibration-dispersion-isotropy}.
 
 From this perspective:
 \begin{itemize}
@@ -485,7 +479,7 @@ For later reference we summarize the different levels of description related to 
       \Phi_{\text{EM}}(\mathbf x) \;=\; \kappa_{\text{EM}} \,\bar X^4(\mathbf x),
     \]
     with a phenomenological constant $\kappa_{\text{EM}}$.
-  \item \textbf{Effective gravitational potential:}
+  \item \textbf{Effective gravitational potential (assumption):}
     In the weak-field regime we introduce a scalar gravitational potential
     $\Phi_G(\mathbf x)$ as the quantity that appears in the induced metric
     \eqref{eq:weak_field_GR_metric}. Operationally, $\Phi_G$ is determined
@@ -498,6 +492,9 @@ For later reference we summarize the different levels of description related to 
       \qquad
       \rho_\text{eff}(\mathbf x) = \frac{\varepsilon(\mathbf x)}{c^2}.
     \end{equation}
+    This Poisson-like relation is an explicit assumption at the
+    current stage; a derivation of the exact proportionality from
+    the microscopic brane Lagrangian is left for future work.
     In the static limit the dominant contribution to $\varepsilon$ comes
     from the gradient energy of the amplitude field, so that locally
     $\varepsilon \sim \tfrac{T}{2}|\nabla X^4|^2$. In this sense gravity
@@ -682,7 +679,7 @@ $X^A(x^\mu) = (ct, x^1,x^2,x^3, X^4(x^\mu))$
 into a flat $5$D ambient space with metric $\eta_{AB}=\mathrm{diag}(-1,1,1,1,1)$.
 The brane's worldvolume metric $g_{\mu\nu}=\eta_{AB}\partial_\mu X^A \partial_\nu X^B$ encodes the ``spacetime'' experienced by brane-confined matter.
 
-A localized soliton---say a point mass at $\mathbf x_0$---exerts a long-range elastic attraction on neighboring brane regions through tension, bending, and saturation forces. The resulting deformation field $X^4(\mathbf x)$ is accompanied by an inward displacement of the ambient coordinates $X^i(\mathbf x)$ toward $\mathbf x_0$: the brane material \emph{contracts laterally} in the neighborhood of the mass.
+A localized soliton---say a point mass at $\mathbf x_0$---exerts a long-range elastic attraction on neighboring brane regions through tension and bending forces. The resulting deformation field $X^4(\mathbf x)$ is accompanied by an inward displacement of the ambient coordinates $X^i(\mathbf x)$ toward $\mathbf x_0$: the brane material \emph{contracts laterally} in the neighborhood of the mass.
 
 Because internal observers define their coordinate system through the brane's intrinsic geometry, this physical contraction of the embedding coordinates manifests to them as an apparent expansion of \emph{spatial metric components}. In other words, what we call ``gravitational curvature'' is the brane's elastic response to localized energy densities, encoded in the induced metric $g_{ij}$.
 
@@ -729,8 +726,8 @@ At a coarse-grained, quasi-static level we distinguish two long-range sectors:
         $X^4(\mathbf x)$ together with their induced lateral
         displacements $X^{1,2,3}(\mathbf x)$ generate strain and
         extrinsic curvature; the corresponding energy density
-        $\varepsilon(\mathbf x)$ (built from tension, bending and
-        saturation terms) defines an effective mass density
+        $\varepsilon(\mathbf x)$ (built from tension and bending
+        terms) defines an effective mass density
         $\rho_\text{eff}(\mathbf x) = \varepsilon(\mathbf x)/c^2$.
         Because the elastic energy depends on \emph{quadratic}
         combinations of the deformations, this gravitational coupling
@@ -825,7 +822,7 @@ At the level of this paper we \emph{assume} that in the coarse-grained, static r
   4\pi G\,\rho_{\mathrm{eff}}(\mathbf x),
   \label{eq:Poisson_from_energy}
 \end{equation}
-with $\rho_{\mathrm{eff}} = \varepsilon/c^2$ the coarse-grained brane energy density. A microscopic derivation of the exact prefactors from the brane Lagrangian---including the explicit contribution of tension, bending, and saturation terms to $\varepsilon$---is left for future work.
+with $\rho_{\mathrm{eff}} = \varepsilon/c^2$ the coarse-grained brane energy density. A microscopic derivation of the exact prefactors from the brane Lagrangian---including the explicit contribution of tension and bending terms to $\varepsilon$---is left for future work.
 
 At distances much larger than the soliton size (e.g.\ the electron Compton wavelength) each localized soliton can be approximated by a point mass
 \begin{equation}
@@ -846,10 +843,9 @@ First, the brane is described by an elastic action functional of the induced met
 \mathcal{V}[g_{ij},b_{ij}]
 = \frac{T}{2}\mathrm{tr}(E)
 + \mu|E|^2
-+ \frac{\kappa}{2}|b|^2
-+ W_\text{sat}(E),
++ \frac{\kappa}{2}|b|^2,
 \end{equation}
-encoding tension, shear, bending, and saturation. For a thin hypersurface embedded in flat ambient space, the Gauss--Codazzi relations connect the bending energy $\kappa|b|^2$ to intrinsic curvature $R(g)$ plus total derivatives and higher-order corrections. Thus the elastic energy can be reorganized into a geometric functional of the form
+encoding tension, shear, and bending. For a thin hypersurface embedded in flat ambient space, the Gauss--Codazzi relations connect the bending energy $\kappa|b|^2$ to intrinsic curvature $R(g)$ plus total derivatives and higher-order corrections. Thus the elastic energy can be reorganized into a geometric functional of the form
 \begin{equation}
 \int d^3x\,\sqrt{\gamma}\Bigl(
 \Lambda_\text{eff}
@@ -857,7 +853,7 @@ encoding tension, shear, bending, and saturation. For a thin hypersurface embedd
 + \text{higher derivatives}
 \Bigr),
 \end{equation}
-with $\Lambda_\text{eff}$ an effective brane tension and $M_\text{P,eff}$ an emergent Planck mass set by $(\rho_m,T,\mu,\kappa,\epsilon_\text{cr})$.
+with $\Lambda_\text{eff}$ an effective brane tension and $M_\text{P,eff}$ an emergent Planck mass set by $(\rho_m,T,\mu,\kappa)$.
 
 Second, the emergent Lorentz symmetry of small-amplitude waves (Sec.~\ref{sec:emergent-relativity}) promotes this spatial functional to a 3+1-dimensional action of generic Einstein--Hilbert form,
 \begin{equation}
@@ -902,7 +898,7 @@ and check whether $\Phi_G(r) \propto -1/r$ at large $r$.
 If lateral contraction correctly reproduces Newtonian gravity, we expect:
 \begin{itemize}
   \item The effective mass $M_\text{eff}$ obtained from $\Phi_G(r) \approx -G M_\text{eff}/r$ should match the soliton's rest energy $E_0/c^2$ up to numerical prefactors.
-  \item The radial profile $\Phi_G(r)$ should transition smoothly from a core region (where nonlinear saturation dominates) to a $1/r$ tail (where linear elasticity governs the response).
+  \item The radial profile $\Phi_G(r)$ should transition smoothly from a core region (where geometric nonlinearity dominates) to a $1/r$ tail (where linear elasticity governs the response).
   \item The azimuthally averaged transverse displacement $\langle X^4 \rangle$ should decay as $1/r$, consistent with the harmonic far-field solution derived in Sec.~\ref{sec:static-coulomb-from-brane}.
 \end{itemize}
 
@@ -946,14 +942,14 @@ assumptions:
   \item \textbf{Small-slope, nearly flat regime}: far outside the
     Compton-scale core of the torus, the induced strains are small and
     the brane is close to its flat reference state. In this regime
-    $g_{ij} \approx \delta_{ij}$, $\Delta_g \approx \Delta$ is the flat
-    Laplacian, and the saturation potential $W_\text{sat}$ is negligible.
+    $g_{ij} \approx \delta_{ij}$ and $\Delta_g \approx \Delta$ is the flat
+    Laplacian.
 
   \item \textbf{Isotropic far-field response}: in the same regime the
     stress tensor is approximately isotropic,
     $\sigma^{ij} \approx T_{\mathrm{eff}}\,\delta^{ij}$, where
     $T_{\mathrm{eff}}$ is an effective tension that includes small linear
-    corrections from $\mu$ and $W_\text{sat}$.
+    corrections from $\mu$.
 \end{enumerate}
 
 Under these assumptions the static equation for the embedding simplifies
@@ -1259,8 +1255,9 @@ It is natural to postulate that the same operator dictates the
 propagation of the effective interaction field sourced by moving
 solitons.
 
-We therefore promote the scalar potential $\Phi$ to the time component
-of a four-potential $A_\mu = (\Phi, -\mathbf{A})$ and demand that
+\textbf{Phenomenological step.}
+We now promote the scalar potential $\Phi$ to the time component
+of a four-potential $A_\mu = (\Phi, -\mathbf{A})$ and postulate that
 it obeys a Lorentz-covariant wave equation on the emergent spacetime
 (in Lorenz gauge $\partial_\mu A^\mu = 0$),
 \begin{equation}
@@ -2004,7 +2001,7 @@ On the full 3D brane we can implement an analogous experiment, here referred to 
     with $|\alpha|^2$ and $|\beta|^2$ proportional to the energy carried into $\mathcal{R}_A$ and $\mathcal{R}_B$ respectively.
   \item \textbf{Measurement interaction.}
     Couple the brane displacement $X^4$ in $\mathcal{R}_A$ to $Q_A$ (and similarly $X^4$ in $\mathcal{R}_B$ to $Q_B$) such that the energy absorption rate into each pointer is proportional to the local brane energy flux.
-    The existing nonlinear saturation structure can be reused as the threshold mechanism:
+    The existing geometric nonlinearity can be reused as the threshold mechanism:
     once the effective drive on $Q_i$ crosses a critical value, the pointer is driven into a stable ``clicked'' state.
   \item \textbf{Ensemble of microstates.}
     Fix the coarse parameters of $\Psi$ and the macroscopic pointer parameters.
@@ -2765,7 +2762,7 @@ The microscopic brane model introduces a set of elastic and geometric parameters
   \bigl\{\rho_m, T, \kappa, \epsilon_{\mathrm{cr}}, \lambda, \kappa_{\Phi}, \mu_G, \ell_\ast, \dots \bigr\},
 \end{equation}
 %
-which control mass density, tension, bending stiffness, nonlinear saturation, and the coupling of the amplitude direction $X^4$ to emergent electromagnetic and gravitational fields.
+which control mass density, tension, bending stiffness, geometric nonlinearity, and the coupling of the amplitude direction $X^4$ to emergent electromagnetic and gravitational fields.
 All of these are \emph{physical} substrate constants with their usual SI units:
 for example, $\rho_m$ has units kg/m$^3$ and $T$ has units J/m$^3$, with the
 small-amplitude wave speed satisfying $c^2 = T/\rho_m$. Fixing $c$ to the
@@ -2823,7 +2820,7 @@ In its rest frame we may write, schematically,
   \xi(t,\mathbf{x}) \approx A(\mathbf{x}) \cos(\omega_C t),
 \end{equation}
 %
-with a localized profile $A(\mathbf{x})$ determined by the nonlinear balance of tension, bending, and saturation.
+with a localized profile $A(\mathbf{x})$ determined by the nonlinear balance of tension and bending.
 The corresponding energy functional was introduced in Eq.~\eqref{eq:energy-density}:
 %
 \begin{equation}
