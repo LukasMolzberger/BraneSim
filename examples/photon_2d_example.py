@@ -282,14 +282,14 @@ def main():
     initialize_tunnel_wave_shape_2d(state, grid, amplitude_sim, center_x_sim, width_x_sim, wavelength_sim)
 
     # Step 2: Initialize velocities for right-moving wave at speed c
-#    print(f"\n[2] Initializing velocities for right-moving wave...")
-#    initialize_right_moving_velocities(
-#        state=state,
-#        grid=grid,
-#        wave_speed=c,
-#        direction=None,  # Default: +x
-#        field_component=3
-#    )
+    print(f"\n[2] Initializing velocities for right-moving wave...")
+    initialize_right_moving_velocities(
+        state=state,
+        grid=grid,
+        wave_speed=params["c_sim"],
+        direction=None,  # Default: +x
+        field_component=3
+    )
 
     # Step 3: Compute initial accelerations
     solver.initialize_accelerations(state)
