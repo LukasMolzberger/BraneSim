@@ -20,7 +20,11 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
-from branesim.physics.parameters import compton_calibrated_brane_lattice_params
+from branesim.physics.parameters import (
+    compton_calibrated_brane_lattice_params,
+    manual_brane_lattice_params,
+    print_calibration_summary,
+)
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
@@ -251,6 +255,20 @@ def main():
     print("1D Photon - Dimensionless Units (Clean Numerics)")
     print("=" * 70)
 
+    # ==================================================================
+    # CONFIGURATION: Adjust mass scale to explore wave speed
+    # ==================================================================
+    # mass_scale_multiplier controls the brane mass density (stiffness is FIXED):
+    #   1.0   = Compton calibration → c_wave = c_light
+    #   < 1.0 = Lighter brane → c_wave > c_light (faster waves!)
+    #   > 1.0 = Heavier brane → c_wave < c_light (slower waves!)
+    #
+    # Wave speed: c_wave = c_light / √(mass_scale_multiplier)
+    # Example: 0.01 → wave propagates at 10× speed of light
+    # ==================================================================
+    mass_scale_multiplier = 0.5  # ← CHANGE THIS to explore different wave speeds
+    # ==================================================================
+
     # Physical constants
     constants = PhysicalConstants()
 
@@ -260,17 +278,21 @@ def main():
     print(f"  ℏ = {constants.hbar:.6e} J·s")
     print(f"  m_e = {constants.m_e:.6e} kg")
 
-    # Configuration with Compton-cell calibration
+    # Configuration
     lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
-    # Get physical parameters using Compton calibration
-    phys_params = compton_calibrated_brane_lattice_params(
+    # Get physical parameters using manual mass scale
+    phys_params = manual_brane_lattice_params(
         grid_spacing_m=h_phys,
         dimensionality=1,
+        mass_scale_multiplier=mass_scale_multiplier,
         c=constants.c
     )
+
+    # Print calibration summary
+    print_calibration_summary(phys_params, h_phys)
 
     # Add required fields for dimensional mapping
     phys_params["h_phys"] = h_phys
@@ -285,11 +307,15 @@ def main():
     M0 = mapper.M0
     E0 = mapper.E0
 
-    # Simulation uses clean dimensionless units
-    h_sim = 1.0
-    m_sim = 1.0
-    k_sim = 1.0
-    c_sim = 1.0
+    # Simulation uses dimensionless units
+    # h_sim = 1.0 ALWAYS (by choice of L0 = h_phys)
+    # k_sim = 1.0 ALWAYS (T_D is FIXED, independent of mass_scale_multiplier)
+    # m_sim VARIES with mass_scale_multiplier
+    # c_wave_sim VARIES: c_wave_sim = c_light / √(mass_scale_multiplier) in sim units
+    h_sim = mapper.to_sim_length(h_phys)  # = 1.0 always
+    m_sim = mapper.to_sim_mass(phys_params["m_point"])  # = mass_scale_multiplier
+    k_sim = mapper.to_sim_spring_constant(phys_params["k_spring"])  # = 1.0 always (FIXED T_D)
+    c_wave_sim = mapper.to_sim_velocity(phys_params["c_wave"])  # varies with mass_scale_multiplier
     dt_sim = mapper.get_sim_time_step()
     rest_length_sim = mapper.to_sim_length(phys_params["rest_length"])
 
@@ -320,12 +346,22 @@ def main():
     print(f"  Mass scale M0 = {M0:.6e} kg")
     print(f"  Energy scale E0 = {E0:.6e} J")
 
-    print(f"\nDimensionless Simulation Parameters (Clean Units):")
-    print(f"  h_sim = {h_sim:.1f} (grid spacing)")
-    print(f"  m_point_sim = {m_sim:.1f} (point mass)")
-    print(f"  k_spring_sim = {k_sim:.1f} (spring constant)")
-    print(f"  c_sim = {c_sim:.1f} (wave speed)")
-    print(f"  dt_sim = {dt_sim:.6e} (time step)")
+    print(f"\nDimensionless Simulation Parameters:")
+    print(f"  h_sim = {h_sim:.6e}  (FIXED to 1.0, defines length scale L0)")
+    print(f"  c_light_sim = 1.000000e+00  (FIXED to 1.0, defines time scale T0 = L0/c)")
+    print(f"  k_spring_sim = {k_sim:.6e}  (calculated = 1.0, T_D is FIXED)")
+    print(f"  m_point_sim = {m_sim:.6e}  (calculated = {mass_scale_multiplier:.2e}, ρ_D varies)")
+    print(f"  dt_sim = {dt_sim:.6e}  (time step)")
+    print(f"")
+    print(f"  Actual wave propagation in simulation:")
+    print(f"    c_wave_sim = √(k_sim/m_sim) = {(k_sim/m_sim)**0.5:.6e}")
+    print(f"    c_wave / c_light = {(k_sim/m_sim)**0.5:.6e}  (wave speed relative to c)")
+    if mass_scale_multiplier < 1.0:
+        print(f"    → Lighter brane: wave propagates at {(k_sim/m_sim)**0.5*100:.1f}% of c_light")
+    elif mass_scale_multiplier > 1.0:
+        print(f"    → Heavier brane: wave propagates at {(k_sim/m_sim)**0.5*100:.1f}% of c_light")
+    else:
+        print(f"    → Compton calibration: wave propagates at c_light")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain (physical): {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
@@ -355,11 +391,11 @@ def main():
     rest_length_phys = phys_params["rest_length"]
 
     print(f"\nPretension Implementation (Sim Units):")
-    print(f"  Rest length L_0 (sim) = {rest_length_sim:.1f}")
+    print(f"  Rest length L_0 (sim) = {rest_length_sim:.6e}")
     print(f"  Rest length L_0 (phys) = {rest_length_phys:.6e} m")
-    print(f"  Actual spacing (sim) = {h_sim:.1f}")
-    print(f"  Spring constant (sim) = {k_sim:.1f}")
-    print(f"  Background tension F_0 (sim) = k×(h-L_0) = {k_sim * (h_sim - rest_length_sim):.1f}")
+    print(f"  Actual spacing (sim) = {h_sim:.6e}")
+    print(f"  Spring constant (sim) = {k_sim:.6e}")
+    print(f"  Background tension F_0 (sim) = k×(h-L_0) = {k_sim * (h_sim - rest_length_sim):.6e}")
 
     physics = SpringForceComputer(k_sim, rest_length_sim)
     solver = VelocityVerletSolver(dt_sim, m_sim, physics, grid)
@@ -401,12 +437,13 @@ def main():
 
     # Step 2: Initialize velocities using time-reversal method (in sim units)
     print(f"\n[2] Initializing velocities using time-reversal method (sim units)...")
+    # Note: We use c_wave_sim for initialization, which is the actual wave speed in sim units
     initialize_right_moving_velocities_time_reversed(
         state=state,
         grid=grid,
         physics=physics,
-        m_point=m_sim,  # Use sim mass = 1.0
-        wave_speed=c_sim,  # Use sim speed = 1.0
+        m_point=m_sim,
+        wave_speed=c_wave_sim,  # Actual wave speed in sim units (= √(k_sim/m_sim))
         field_component=3,
         shift_cells=1,
     )

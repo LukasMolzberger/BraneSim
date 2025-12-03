@@ -54,6 +54,9 @@ class DimensionalMapper:
             - "h_phys": grid spacing [m]
             - "m_point": mass per lattice point [kg]
             - "c_phys": wave speed [m/s]
+            - "m_point_reference": (optional) reference mass for scaling [kg]
+              If provided, this fixed reference is used for M0 instead of m_point.
+              This allows m_sim and k_sim to vary when m_point changes.
         cfl_factor : float, optional
             CFL factor for time step calculation, default is 0.1.
         """
@@ -62,9 +65,13 @@ class DimensionalMapper:
         self.c_phys = phys_params["c_phys"]
 
         # Compute scaling factors
+        # L0 and T0 are chosen to make h_sim = 1.0 and c_sim = 1.0
         self.L0 = self.h_phys
         self.T0 = self.L0 / self.c_phys
-        self.M0 = self.m_point_phys
+
+        # M0 is chosen as a fixed reference to allow m_sim and k_sim to vary
+        # If m_point_reference is provided, use it; otherwise use m_point (legacy)
+        self.M0 = phys_params.get("m_point_reference", self.m_point_phys)
         self.E0 = self.M0 * (self.L0 / self.T0) ** 2
 
         # Store CFL factor
