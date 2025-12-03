@@ -266,7 +266,7 @@ def main():
     # Wave speed: c_wave = c_light / √(mass_scale_multiplier)
     # Example: 0.01 → wave propagates at 10× speed of light
     # ==================================================================
-    mass_scale_multiplier = 0.5  # ← CHANGE THIS to explore different wave speeds
+    mass_scale_multiplier = 0.008  # ← CHANGE THIS to explore different wave speeds
     # ==================================================================
 
     # Physical constants
@@ -294,18 +294,18 @@ def main():
     # Print calibration summary
     print_calibration_summary(phys_params, h_phys)
 
-    # Add required fields for dimensional mapping
-    phys_params["h_phys"] = h_phys
-    phys_params["c_phys"] = constants.c
-
     # Create dimensional mapper for unit conversions
-    mapper = DimensionalMapper(phys_params, cfl_factor)
+    mapper = DimensionalMapper(
+        h_phys=h_phys,
+        c_light=constants.c,
+        mass_reference=phys_params["m_point_reference"]
+    )
 
     # Extract scaling factors (for CSV export which needs raw scales)
-    L0 = mapper.L0
-    T0 = mapper.T0
-    M0 = mapper.M0
-    E0 = mapper.E0
+    L0 = mapper.length_scale
+    T0 = mapper.time_scale
+    M0 = mapper.mass_scale
+    E0 = M0 * (L0 / T0) ** 2  # Energy scale derived from fundamental scales
 
     # Simulation uses dimensionless units
     # h_sim = 1.0 ALWAYS (by choice of L0 = h_phys)
@@ -316,8 +316,11 @@ def main():
     m_sim = mapper.to_sim_mass(phys_params["m_point"])  # = mass_scale_multiplier
     k_sim = mapper.to_sim_spring_constant(phys_params["k_spring"])  # = 1.0 always (FIXED T_D)
     c_wave_sim = mapper.to_sim_velocity(phys_params["c_wave"])  # varies with mass_scale_multiplier
-    dt_sim = mapper.get_sim_time_step()
     rest_length_sim = mapper.to_sim_length(phys_params["rest_length"])
+
+    # Time step calculation (CFL condition)
+    dt_phys = cfl_factor * h_phys / constants.c
+    dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size
     nx = 400
@@ -326,7 +329,6 @@ def main():
 
     # Verify wave speed
     expected_wave_speed = np.sqrt(phys_params["T_D"] / phys_params["rho_D"])
-    dt_phys = mapper.get_phys_time_step()
 
     print(f"\nPhysical Parameters:")
     print(f"  Compton wavelength λ_C = {phys_params['lambda_C']:.4e} m")

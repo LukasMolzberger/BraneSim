@@ -2,8 +2,7 @@
 Dimensional mapping between physical and simulation units.
 
 This module provides a clean interface for converting between physical (SI) units
-and dimensionless simulation units. It encapsulates all scaling factors and
-conversion logic in a single class.
+and dimensionless simulation units using three fundamental scaling factors.
 """
 
 import torch
@@ -16,66 +15,37 @@ ScalarOrArray = Union[float, int, torch.Tensor, np.ndarray]
 
 class DimensionalMapper:
     """
-    Bidirectional converter between physical and simulation units.
+    Transparent scaling layer for converting between physical and simulation units.
 
-    This class encapsulates the scaling factors and provides methods for
-    converting all physical quantities between SI units and dimensionless
-    simulation units.
+    The dimensional mapping is purely mechanical - it provides conversion factors
+    to scale physical quantities into numerically tractable dimensionless units.
 
-    The simulation uses clean O(1) dimensionless units where:
-        h_sim = 1.0 (grid spacing)
-        m_sim = 1.0 (point mass)
-        k_sim = 1.0 (spring constant)
-        c_sim = 1.0 (wave speed)
+    Scaling factors:
+        length_scale: Chosen so h_sim = 1.0
+        time_scale: Chosen so c_light_sim = 1.0 (time_scale = length_scale / c_light)
+        mass_scale: Fixed reference mass (independent of actual system mass)
 
-    Physical quantities are scaled by:
-        L0: length scale [m]
-        T0: time scale [s]
-        M0: mass scale [kg]
-        E0: energy scale [J]
-
-    Attributes:
-        L0: Length scale [m]
-        T0: Time scale [s]
-        M0: Mass scale [kg]
-        E0: Energy scale [J]
-        c_phys: Physical wave speed [m/s]
-        h_phys: Physical grid spacing [m]
+    All other quantities are derived from these three fundamental scales using
+    dimensional analysis.
     """
 
-    def __init__(self, phys_params: dict, cfl_factor: float = 0.1):
+    def __init__(self, h_phys: float, c_light: float, mass_reference: float):
         """
-        Initialize dimensional mapper from physical parameters.
+        Initialize dimensional mapper with three fundamental scales.
 
         Parameters
         ----------
-        phys_params : dict
-            Physical parameter dictionary containing:
-            - "h_phys": grid spacing [m]
-            - "m_point": mass per lattice point [kg]
-            - "c_phys": wave speed [m/s]
-            - "m_point_reference": (optional) reference mass for scaling [kg]
-              If provided, this fixed reference is used for M0 instead of m_point.
-              This allows m_sim and k_sim to vary when m_point changes.
-        cfl_factor : float, optional
-            CFL factor for time step calculation, default is 0.1.
+        h_phys : float
+            Physical grid spacing [m]. Defines length_scale.
+        c_light : float
+            Speed of light [m/s]. Used with length_scale to define time_scale.
+        mass_reference : float
+            Fixed reference mass [kg]. Defines mass_scale.
         """
-        self.h_phys = phys_params["h_phys"]
-        self.m_point_phys = phys_params["m_point"]
-        self.c_phys = phys_params["c_phys"]
-
-        # Compute scaling factors
-        # L0 and T0 are chosen to make h_sim = 1.0 and c_sim = 1.0
-        self.L0 = self.h_phys
-        self.T0 = self.L0 / self.c_phys
-
-        # M0 is chosen as a fixed reference to allow m_sim and k_sim to vary
-        # If m_point_reference is provided, use it; otherwise use m_point (legacy)
-        self.M0 = phys_params.get("m_point_reference", self.m_point_phys)
-        self.E0 = self.M0 * (self.L0 / self.T0) ** 2
-
-        # Store CFL factor
-        self.cfl_factor = cfl_factor
+        # Three fundamental scaling factors
+        self.length_scale = h_phys
+        self.time_scale = self.length_scale / c_light
+        self.mass_scale = mass_reference
 
     # ========================================================================
     # LENGTH conversions
@@ -83,11 +53,11 @@ class DimensionalMapper:
 
     def to_sim_length(self, length_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical length [m] to simulation units."""
-        return length_phys / self.L0
+        return length_phys / self.length_scale
 
     def to_phys_length(self, length_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation length to physical units [m]."""
-        return length_sim * self.L0
+        return length_sim * self.length_scale
 
     # ========================================================================
     # TIME conversions
@@ -95,11 +65,11 @@ class DimensionalMapper:
 
     def to_sim_time(self, time_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical time [s] to simulation units."""
-        return time_phys / self.T0
+        return time_phys / self.time_scale
 
     def to_phys_time(self, time_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation time to physical units [s]."""
-        return time_sim * self.T0
+        return time_sim * self.time_scale
 
     # ========================================================================
     # MASS conversions
@@ -107,11 +77,11 @@ class DimensionalMapper:
 
     def to_sim_mass(self, mass_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical mass [kg] to simulation units."""
-        return mass_phys / self.M0
+        return mass_phys / self.mass_scale
 
     def to_phys_mass(self, mass_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation mass to physical units [kg]."""
-        return mass_sim * self.M0
+        return mass_sim * self.mass_scale
 
     # ========================================================================
     # VELOCITY conversions (length/time)
@@ -119,11 +89,13 @@ class DimensionalMapper:
 
     def to_sim_velocity(self, velocity_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical velocity [m/s] to simulation units."""
-        return velocity_phys / (self.L0 / self.T0)
+        velocity_scale = self.length_scale / self.time_scale
+        return velocity_phys / velocity_scale
 
     def to_phys_velocity(self, velocity_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation velocity to physical units [m/s]."""
-        return velocity_sim * (self.L0 / self.T0)
+        velocity_scale = self.length_scale / self.time_scale
+        return velocity_sim * velocity_scale
 
     # ========================================================================
     # ACCELERATION conversions (length/time²)
@@ -131,11 +103,13 @@ class DimensionalMapper:
 
     def to_sim_acceleration(self, accel_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical acceleration [m/s²] to simulation units."""
-        return accel_phys / (self.L0 / self.T0**2)
+        accel_scale = self.length_scale / (self.time_scale ** 2)
+        return accel_phys / accel_scale
 
     def to_phys_acceleration(self, accel_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation acceleration to physical units [m/s²]."""
-        return accel_sim * (self.L0 / self.T0**2)
+        accel_scale = self.length_scale / (self.time_scale ** 2)
+        return accel_sim * accel_scale
 
     # ========================================================================
     # FORCE conversions (mass × length/time²)
@@ -143,11 +117,13 @@ class DimensionalMapper:
 
     def to_sim_force(self, force_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical force [N] to simulation units."""
-        return force_phys / (self.M0 * self.L0 / self.T0**2)
+        force_scale = self.mass_scale * self.length_scale / (self.time_scale ** 2)
+        return force_phys / force_scale
 
     def to_phys_force(self, force_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation force to physical units [N]."""
-        return force_sim * (self.M0 * self.L0 / self.T0**2)
+        force_scale = self.mass_scale * self.length_scale / (self.time_scale ** 2)
+        return force_sim * force_scale
 
     # ========================================================================
     # ENERGY conversions (mass × length²/time²)
@@ -155,23 +131,27 @@ class DimensionalMapper:
 
     def to_sim_energy(self, energy_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical energy [J] to simulation units."""
-        return energy_phys / self.E0
+        energy_scale = self.mass_scale * (self.length_scale ** 2) / (self.time_scale ** 2)
+        return energy_phys / energy_scale
 
     def to_phys_energy(self, energy_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation energy to physical units [J]."""
-        return energy_sim * self.E0
+        energy_scale = self.mass_scale * (self.length_scale ** 2) / (self.time_scale ** 2)
+        return energy_sim * energy_scale
 
     # ========================================================================
-    # SPRING CONSTANT conversions (force/length = N/m)
+    # SPRING CONSTANT conversions (force/length = mass/time²)
     # ========================================================================
 
     def to_sim_spring_constant(self, k_phys: ScalarOrArray) -> ScalarOrArray:
         """Convert physical spring constant [N/m] to simulation units."""
-        return k_phys / (self.M0 / self.T0**2)
+        k_scale = self.mass_scale / (self.time_scale ** 2)
+        return k_phys / k_scale
 
     def to_phys_spring_constant(self, k_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation spring constant to physical units [N/m]."""
-        return k_sim * (self.M0 / self.T0**2)
+        k_scale = self.mass_scale / (self.time_scale ** 2)
+        return k_sim * k_scale
 
     # ========================================================================
     # Convenience methods for common conversions
@@ -207,7 +187,7 @@ class DimensionalMapper:
         torch.Tensor
             Positions in simulation units [N, 4].
         """
-        return positions_phys / self.L0
+        return positions_phys / self.length_scale
 
     def to_phys_positions(self, positions_sim: torch.Tensor) -> torch.Tensor:
         """
@@ -223,54 +203,44 @@ class DimensionalMapper:
         torch.Tensor
             Positions in physical units [N, 4] in meters.
         """
-        return positions_sim * self.L0
+        return positions_sim * self.length_scale
 
     def to_sim_velocities(self, velocities_phys: torch.Tensor) -> torch.Tensor:
         """Convert physical velocities [N, 4] to simulation units."""
-        return velocities_phys / (self.L0 / self.T0)
+        velocity_scale = self.length_scale / self.time_scale
+        return velocities_phys / velocity_scale
 
     def to_phys_velocities(self, velocities_sim: torch.Tensor) -> torch.Tensor:
         """Convert simulation velocities [N, 4] to physical units [m/s]."""
-        return velocities_sim * (self.L0 / self.T0)
+        velocity_scale = self.length_scale / self.time_scale
+        return velocities_sim * velocity_scale
 
     def to_sim_accelerations(self, accelerations_phys: torch.Tensor) -> torch.Tensor:
         """Convert physical accelerations [N, 4] to simulation units."""
-        return accelerations_phys / (self.L0 / self.T0**2)
+        accel_scale = self.length_scale / (self.time_scale ** 2)
+        return accelerations_phys / accel_scale
 
     def to_phys_accelerations(self, accelerations_sim: torch.Tensor) -> torch.Tensor:
         """Convert simulation accelerations [N, 4] to physical units [m/s²]."""
-        return accelerations_sim * (self.L0 / self.T0**2)
+        accel_scale = self.length_scale / (self.time_scale ** 2)
+        return accelerations_sim * accel_scale
 
     def to_sim_forces(self, forces_phys: torch.Tensor) -> torch.Tensor:
         """Convert physical forces [N, 4] to simulation units."""
-        return forces_phys / (self.M0 * self.L0 / self.T0**2)
+        force_scale = self.mass_scale * self.length_scale / (self.time_scale ** 2)
+        return forces_phys / force_scale
 
     def to_phys_forces(self, forces_sim: torch.Tensor) -> torch.Tensor:
         """Convert simulation forces [N, 4] to physical units [N]."""
-        return forces_sim * (self.M0 * self.L0 / self.T0**2)
-
-    # ========================================================================
-    # Utility methods
-    # ========================================================================
-
-    def get_sim_time_step(self) -> float:
-        """Get dimensionless time step based on CFL condition."""
-        dt_phys = self.cfl_factor * self.h_phys / self.c_phys
-        return dt_phys / self.T0
-
-    def get_phys_time_step(self) -> float:
-        """Get physical time step [s] based on CFL condition."""
-        return self.cfl_factor * self.h_phys / self.c_phys
+        force_scale = self.mass_scale * self.length_scale / (self.time_scale ** 2)
+        return forces_sim * force_scale
 
     def __repr__(self) -> str:
         """String representation showing scaling factors."""
         return (
             f"DimensionalMapper(\n"
-            f"  L0 = {self.L0:.6e} m,\n"
-            f"  T0 = {self.T0:.6e} s,\n"
-            f"  M0 = {self.M0:.6e} kg,\n"
-            f"  E0 = {self.E0:.6e} J,\n"
-            f"  c_phys = {self.c_phys:.6e} m/s,\n"
-            f"  h_phys = {self.h_phys:.6e} m\n"
+            f"  length_scale = {self.length_scale:.6e} m,\n"
+            f"  time_scale   = {self.time_scale:.6e} s,\n"
+            f"  mass_scale   = {self.mass_scale:.6e} kg\n"
             f")"
         )
