@@ -6,11 +6,10 @@ in the paper (Section "Amplitude scale calibration"), connecting continuum
 brane parameters to discrete lattice parameters.
 
 Note: For unit conversion between physical and simulation units, see
-branesim.physics.dimensional_mapping.DimensionalMapper and map_to_dimensionless_params
+branesim.physics.dimensional_mapping.DimensionalMapper
 """
 
 import math
-from branesim.physics.dimensional_mapping import map_to_dimensionless_params
 
 
 def compton_calibrated_brane_lattice_params(

@@ -21,7 +21,7 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.parameters import compton_calibrated_brane_lattice_params
-from branesim.physics.dimensional_mapping import map_to_dimensionless_params, create_mapper_from_params
+from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
     verify_wave_propagation,
@@ -265,7 +265,7 @@ def main():
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
-    # Step 1: Get physical parameters using Compton calibration
+    # Get physical parameters using Compton calibration
     phys_params = compton_calibrated_brane_lattice_params(
         grid_spacing_m=h_phys,
         dimensionality=1,
@@ -276,39 +276,40 @@ def main():
     phys_params["h_phys"] = h_phys
     phys_params["c_phys"] = constants.c
 
-    # Step 2: Map to dimensionless parameters
-    params = map_to_dimensionless_params(phys_params, cfl_factor)
-
-    # Add constants for compatibility
-    params["hbar"] = constants.hbar
-    params["m_e"] = constants.m_e
-    params["lambda_C_multiplier"] = lambda_C_multiplier
-
-    # Step 3: Create dimensional mapper for unit conversions
-    mapper = create_mapper_from_params(params)
+    # Create dimensional mapper for unit conversions
+    mapper = DimensionalMapper(phys_params, cfl_factor)
 
     # Extract scaling factors (for CSV export which needs raw scales)
-    L0 = params["L0"]
-    T0 = params["T0"]
-    M0 = params["M0"]
-    E0 = params["E0"]
+    L0 = mapper.L0
+    T0 = mapper.T0
+    M0 = mapper.M0
+    E0 = mapper.E0
+
+    # Simulation uses clean dimensionless units
+    h_sim = 1.0
+    m_sim = 1.0
+    k_sim = 1.0
+    c_sim = 1.0
+    dt_sim = mapper.get_sim_time_step()
+    rest_length_sim = mapper.to_sim_length(phys_params["rest_length"])
 
     # Domain size
     nx = 400
     domain_length_phys = nx * h_phys
-    domain_length_sim = nx * params["h_sim"]  # = nx * 1.0 = nx
+    domain_length_sim = nx * h_sim  # = nx * 1.0 = nx
 
     # Verify wave speed
-    expected_wave_speed = np.sqrt(params["T_D"] / params["rho_D"])
+    expected_wave_speed = np.sqrt(phys_params["T_D"] / phys_params["rho_D"])
+    dt_phys = mapper.get_phys_time_step()
 
     print(f"\nPhysical Parameters:")
-    print(f"  Compton wavelength λ_C = {params['lambda_C']:.4e} m")
+    print(f"  Compton wavelength λ_C = {phys_params['lambda_C']:.4e} m")
     print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h_phys:.6e} m")
-    print(f"  1D linear mass density ρ_1 = {params['rho_D']:.6e} kg/m")
-    print(f"  1D tension T_1 = {params['T_D']:.6e} N")
-    print(f"  Spring constant k = {params['k_spring_phys']:.6e} N/m")
-    print(f"  Point mass m = {params['m_point_phys']:.6e} kg")
-    print(f"  Time step dt = {params['dt_phys']:.6e} s")
+    print(f"  1D linear mass density ρ_1 = {phys_params['rho_D']:.6e} kg/m")
+    print(f"  1D tension T_1 = {phys_params['T_D']:.6e} N")
+    print(f"  Spring constant k = {phys_params['k_spring']:.6e} N/m")
+    print(f"  Point mass m = {phys_params['m_point']:.6e} kg")
+    print(f"  Time step dt = {dt_phys:.6e} s")
     print(f"  Expected wave speed = {expected_wave_speed:.6e} m/s")
     print(f"  Speed of light c = {constants.c:.6e} m/s")
     print(f"  Wave speed error = {abs(expected_wave_speed - constants.c)/constants.c:.6e}")
@@ -320,15 +321,15 @@ def main():
     print(f"  Energy scale E0 = {E0:.6e} J")
 
     print(f"\nDimensionless Simulation Parameters (Clean Units):")
-    print(f"  h_sim = {params['h_sim']:.1f} (grid spacing)")
-    print(f"  m_point_sim = {params['m_point_sim']:.1f} (point mass)")
-    print(f"  k_spring_sim = {params['k_spring_sim']:.1f} (spring constant)")
-    print(f"  c_sim = {params['c_sim']:.1f} (wave speed)")
-    print(f"  dt_sim = {params['dt_sim']:.6e} (time step)")
+    print(f"  h_sim = {h_sim:.1f} (grid spacing)")
+    print(f"  m_point_sim = {m_sim:.1f} (point mass)")
+    print(f"  k_spring_sim = {k_sim:.1f} (spring constant)")
+    print(f"  c_sim = {c_sim:.1f} (wave speed)")
+    print(f"  dt_sim = {dt_sim:.6e} (time step)")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain (physical): {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
-    print(f"  Domain (sim units): {nx} points × {params['h_sim']:.1f} = {domain_length_sim:.1f}")
+    print(f"  Domain (sim units): {nx} points × {h_sim:.1f} = {domain_length_sim:.1f}")
     print(f"  CFL number = {cfl_factor:.3f}")
 
     # Create components using SIMULATION UNITS
@@ -336,7 +337,7 @@ def main():
     dtype = torch.float64
 
     state = BraneState((nx,), Dimensionality.ONE_D, device, dtype)
-    state.initialize_flat_configuration(params["h_sim"])  # Use sim spacing = 1.0
+    state.initialize_flat_configuration(h_sim)  # Use sim spacing = 1.0
 
     # Store initial positions for lateral distortion tracking
     initial_positions = state.positions.clone()
@@ -347,22 +348,21 @@ def main():
     print(f"  Fixed boundaries at x=0 and x={domain_length_phys:.3e} m")
     print(f"  Fixed points: {state.fixed_mask.sum().item()} / {nx}")
 
-    grid = BraneGrid((nx,), Dimensionality.ONE_D, params["h_sim"], device)  # Sim spacing = 1.0
+    grid = BraneGrid((nx,), Dimensionality.ONE_D, h_sim, device)  # Sim spacing = 1.0
 
     # CRITICAL: Implement pretension κ = ρc²
-    # Rest length = 0.0 in both physical and sim units
-    rest_length_sim = 0.0
-    rest_length_phys = params["rest_length"]
+    # Rest length already computed above via mapper
+    rest_length_phys = phys_params["rest_length"]
 
     print(f"\nPretension Implementation (Sim Units):")
     print(f"  Rest length L_0 (sim) = {rest_length_sim:.1f}")
     print(f"  Rest length L_0 (phys) = {rest_length_phys:.6e} m")
-    print(f"  Actual spacing (sim) = {params['h_sim']:.1f}")
-    print(f"  Spring constant (sim) = {params['k_spring_sim']:.1f}")
-    print(f"  Background tension F_0 (sim) = k×(h-L_0) = {params['k_spring_sim'] * (params['h_sim'] - rest_length_sim):.1f}")
+    print(f"  Actual spacing (sim) = {h_sim:.1f}")
+    print(f"  Spring constant (sim) = {k_sim:.1f}")
+    print(f"  Background tension F_0 (sim) = k×(h-L_0) = {k_sim * (h_sim - rest_length_sim):.1f}")
 
-    physics = SpringForceComputer(params["k_spring_sim"], rest_length_sim)
-    solver = VelocityVerletSolver(params["dt_sim"], params["m_point_sim"], physics, grid)
+    physics = SpringForceComputer(k_sim, rest_length_sim)
+    solver = VelocityVerletSolver(dt_sim, m_sim, physics, grid)
 
     # Set up lateralization measurement (uses PHYSICAL mass for correct energy scale)
     lat_config = LateralizationConfig(
@@ -373,7 +373,7 @@ def main():
     lateralization = LateralizationMeasurement(
         config=lat_config,
         grid=grid,
-        m_point=params["m_point_phys"],  # Use physical mass for energy calculations
+        m_point=phys_params["m_point"],  # Use physical mass for energy calculations
         reference_positions=initial_positions,
     )
 
@@ -405,8 +405,8 @@ def main():
         state=state,
         grid=grid,
         physics=physics,
-        m_point=params["m_point_sim"],  # Use sim mass = 1.0
-        wave_speed=params["c_sim"],      # Use sim speed = 1.0
+        m_point=m_sim,  # Use sim mass = 1.0
+        wave_speed=c_sim,  # Use sim speed = 1.0
         field_component=3,
         shift_cells=1,
     )
@@ -431,7 +431,7 @@ def main():
     simulation_time_phys = 3.0 * crossing_time_phys  # 3 crossings
     simulation_time_sim = mapper.to_sim_time(simulation_time_phys)
 
-    num_steps = int(simulation_time_sim / params["dt_sim"])
+    num_steps = int(simulation_time_sim / dt_sim)
 
     print(f"\nRunning simulation...")
     print(f"  Light crossing time (phys) = {crossing_time_phys:.6e} s")
@@ -453,10 +453,10 @@ def main():
     snapshots_vel_lateral = {}  # Store lateral velocities
     snapshots_lateralization = {}  # Store lateralization ratio
     lateralization_global_history = []  # Store global R_lat over time
-    snapshot_steps = {int(t / params["dt_phys"]): t for t in snapshot_times_phys}
+    snapshot_steps = {int(t / dt_phys): t for t in snapshot_times_phys}
 
     # Add extra snapshot at step 1 (right after first time step)
-    snapshot_steps[1] = params["dt_phys"]
+    snapshot_steps[1] = dt_phys
     num_snapshots += 1  # Now 8 total snapshots
 
     # Physical coordinates for plotting (convert from sim to physical)
@@ -488,7 +488,7 @@ def main():
             # Export CSV snapshot (converted to SI units)
             csv_filename = f'photon_1d_snapshot_t{step:06d}.csv'
             export_csv_snapshot(csv_filename, state, grid, initial_positions,
-                              params["k_spring_sim"], lateralization, physics, params["h_sim"],
+                              k_sim, lateralization, physics, h_sim,
                               L0, T0, E0, rest_length=rest_length_sim)
             if step == 0:
                 print(f"  ✓ Exporting CSV snapshots (8 total: t=0, t=1, and 6 regular intervals) in SI units")
