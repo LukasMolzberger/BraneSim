@@ -14,7 +14,6 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-import os
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -262,13 +261,13 @@ def main():
 
     D = 1
 
-    rho_D = 2.3590e-14 # kg/m^1
-    T_D = 2.1201e+03 # N/m^0
+    # 1D brane parameters constrained to give wave speed = c
+    rho_D = 2.3590e-14  # kg/m (linear mass density - arbitrary choice)
+    T_D = rho_D * constants.c**2  # N (tension - computed from c² = T_D/rho_D)
     rest_length_phys = 0.0
-    m_point = 9.109384e-30 # kg
 
-    # Wave speed (always equals c, since T_D/ρ_D = constant)
-    c_wave = math.sqrt(T_D / rho_D)  # = c always
+    # Wave speed (exactly equals c by construction)
+    c_wave = constants.c
 
     # Discrete mass per lattice point (varies with substrate_scale)
     m_point = rho_D * (h_phys ** D)
