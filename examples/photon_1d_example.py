@@ -255,8 +255,10 @@ def main():
     print(f"  m_e = {constants.m_e:.6e} kg")
 
     # Configuration
-    lambda_C_multiplier = 10.0  # Grid spacing = 10 × λ_C
-    h_phys = constants.lambda_C * lambda_C_multiplier
+    # Set photon wavelength to exactly the Compton wavelength
+    wavelength_phys = constants.lambda_C  # Photon wavelength = λ_C
+    points_per_wavelength = 40  # Grid resolution
+    h_phys = wavelength_phys / points_per_wavelength  # Grid spacing
     cfl_factor = 0.1
 
     D = 1
@@ -381,17 +383,17 @@ def main():
     # Initialize wave packet IN SIMULATION UNITS
     print(f"\nInitializing photon wave packet...")
 
-    # Physical values (what we want in real units)
-    wavelength_phys = 40 * h_phys  # 40 points per wavelength
+    # Physical values (wavelength already set to λ_C at configuration)
     amplitude_phys = 0.1 * h_phys
     center_position_phys = domain_length_phys / 3.0
 
     # Convert to sim units using mapper
-    wavelength_sim = mapper.to_sim_length(wavelength_phys)  # = 40.0
+    wavelength_sim = mapper.to_sim_length(wavelength_phys)  # = 40.0 (points per wavelength)
     amplitude_sim = mapper.to_sim_length(amplitude_phys)    # = 0.1
     center_position_sim = mapper.to_sim_length(center_position_phys)  # = nx/3
 
-    print(f"  Physical wavelength: {wavelength_phys:.6e} m")
+    print(f"  Physical wavelength: {wavelength_phys:.6e} m (= λ_C)")
+    print(f"  Physical wavelength: {wavelength_phys/constants.lambda_C:.2f} × λ_C")
     print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
     print(f"  Physical amplitude: {amplitude_phys:.6e} m")
     print(f"  Sim amplitude: {amplitude_sim:.3f} grid units")
