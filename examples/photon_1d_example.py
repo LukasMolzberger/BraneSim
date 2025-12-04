@@ -272,7 +272,7 @@ def main():
     #
     # This explores the one remaining degree of freedom after fixing c_wave = c
     # ==================================================================
-    substrate_scale = 10000  # ← CHANGE THIS to explore different substrate scales
+    substrate_scale = 0.01  # ← CHANGE THIS to explore different substrate scales
     # ==================================================================
 
     # Physical constants
@@ -422,18 +422,45 @@ def main():
 
     # Physical values (what we want in real units)
     wavelength_phys = 40 * h_phys  # 40 points per wavelength
-    amplitude_phys = 0.1 * h_phys
     center_position_phys = domain_length_phys / 3.0
+
+    # CRITICAL: Use FIXED photon energy (not fixed amplitude!)
+    # This allows us to observe transverse coupling effects as substrate_scale varies.
+    #
+    # For a harmonic oscillator: E = (1/2) * k * A²
+    # Therefore: A = sqrt(2 * E / k)
+    #
+    # With fixed E and varying k (due to substrate_scale):
+    #   - Light substrate (small k) → large amplitude → strong transverse coupling
+    #   - Heavy substrate (large k) → small amplitude → clean propagation
+    #
+    # Define fixed photon energy as a fraction of the Compton-calibrated energy scale
+    # This needs to be large enough to create a visible wave and strong transverse coupling
+    # With substrate_scale = 0.01, this creates ~10% amplitude relative to grid spacing
+    E_photon_fraction = 250000.0  # Photon energy as fraction of (k_compton * h_phys²)
+
+    # Reference: Compton-calibrated spring constant (independent of substrate_scale)
+    k_compton = phys_params["T_D"] / substrate_scale  # Remove substrate_scale factor
+    E_reference = k_compton * h_phys**2
+
+    # Fixed photon energy in physical units
+    E_photon_phys = E_photon_fraction * E_reference
+
+    # Amplitude computed from fixed energy: A = sqrt(2*E/k)
+    amplitude_phys = np.sqrt(2.0 * E_photon_phys / phys_params["k_spring"])
 
     # Convert to sim units using mapper
     wavelength_sim = mapper.to_sim_length(wavelength_phys)  # = 40.0
-    amplitude_sim = mapper.to_sim_length(amplitude_phys)    # = 0.1
+    amplitude_sim = mapper.to_sim_length(amplitude_phys)    # VARIES with substrate_scale!
     center_position_sim = mapper.to_sim_length(center_position_phys)  # = nx/3
 
     print(f"  Physical wavelength: {wavelength_phys:.6e} m")
     print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
-    print(f"  Physical amplitude: {amplitude_phys:.6e} m")
-    print(f"  Sim amplitude: {amplitude_sim:.3f} grid units")
+    print(f"  Fixed photon energy: {E_photon_phys:.6e} J")
+    print(f"  Physical amplitude: {amplitude_phys:.6e} m  (varies with substrate_scale)")
+    print(f"  Sim amplitude: {amplitude_sim:.6f} grid units  (varies with substrate_scale)")
+    print(f"  Energy / m_point ratio: {E_photon_phys / phys_params['m_point']:.6e}")
+    print(f"  Amplitude / h_phys ratio: {amplitude_phys / h_phys:.6f}")
 
     # Step 1: Initialize shape only (in sim units)
     print(f"\n[1] Initializing wave shape (sim units)...")
