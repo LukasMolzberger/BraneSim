@@ -9,6 +9,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import math
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,11 +21,6 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
-from branesim.physics.parameters import (
-    compton_calibrated_brane_lattice_params,
-    manual_brane_lattice_params,
-    print_calibration_summary,
-)
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
@@ -81,7 +77,7 @@ def track_wave_center(state, grid):
 
 
 def export_csv_snapshot(filename, state, grid, initial_positions, spring_constant,
-                       lateralization, physics, h, L0, T0, E0, rest_length=0.0):
+                       lateralization, physics, h, mapper, rest_length=0.0):
     """
     Export detailed CSV snapshot with all brane point data in SI units.
 
@@ -155,11 +151,6 @@ def export_csv_snapshot(filename, state, grid, initial_positions, spring_constan
             elif j == i + 1:
                 F_right_sim[i] = force
 
-    # Conversion factors
-    force_scale = E0 / L0  # M0 * L0 / T0^2
-    accel_scale = L0 / (T0 * T0)  # L0 / T0^2
-    vel_scale = L0 / T0  # L0 / T0
-
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
 
@@ -176,23 +167,23 @@ def export_csv_snapshot(filename, state, grid, initial_positions, spring_constan
             'E_amp_kin [J]', 'E_amp_pot [J]', 'E_lat_kin [J]', 'E_lat_pot [J]', 'R_lat'
         ])
 
-        # Write data for each point (convert to physical units)
+        # Write data for each point (convert to physical units using mapper)
         for i in range(nx):
             # Positions [sim → m]
-            x_pos = positions_sim[i, 0] * L0
-            xi_pos = positions_sim[i, 3] * L0
+            x_pos = mapper.to_phys_length(positions_sim[i, 0])
+            xi_pos = mapper.to_phys_length(positions_sim[i, 3])
 
             # Velocities [sim → m/s]
-            x_vel = velocities_sim[i, 0] * vel_scale
-            xi_vel = velocities_sim[i, 3] * vel_scale
+            x_vel = mapper.to_phys_velocity(velocities_sim[i, 0])
+            xi_vel = mapper.to_phys_velocity(velocities_sim[i, 3])
 
             # Accelerations [sim → m/s²]
-            x_acc = accelerations_sim[i, 0] * accel_scale
-            xi_acc = accelerations_sim[i, 3] * accel_scale
+            x_acc = mapper.to_phys_acceleration(accelerations_sim[i, 0])
+            xi_acc = mapper.to_phys_acceleration(accelerations_sim[i, 3])
 
             # Displacements from initial [sim → m]
-            delta_x = (positions_sim[i, 0] - initial_pos_sim[i, 0]) * L0
-            xi = (positions_sim[i, 3] - initial_pos_sim[i, 3]) * L0
+            delta_x = mapper.to_phys_length(positions_sim[i, 0] - initial_pos_sim[i, 0])
+            xi = mapper.to_phys_length(positions_sim[i, 3] - initial_pos_sim[i, 3])
 
             # Spring properties (to next neighbor if exists)
             L_to_next_phys = 0.0
@@ -209,21 +200,21 @@ def export_csv_snapshot(filename, state, grid, initial_positions, spring_constan
 
                         # Reference spring vector (sim units)
                         dX0_sim = initial_pos_sim[j] - initial_pos_sim[i]
-                        L0_ref_sim = np.sqrt(np.sum(dX0_sim**2))
+                        L_ref_sim = np.sqrt(np.sum(dX0_sim**2))
 
                         # Extension beyond reference (sim units)
-                        delta_L_to_next_sim = L_to_next_sim - L0_ref_sim
+                        delta_L_to_next_sim = L_to_next_sim - L_ref_sim
 
                         # Convert to physical [m]
-                        L_to_next_phys = L_to_next_sim * L0
-                        delta_L_to_next_phys = delta_L_to_next_sim * L0
+                        L_to_next_phys = mapper.to_phys_length(L_to_next_sim)
+                        delta_L_to_next_phys = mapper.to_phys_length(delta_L_to_next_sim)
                         break
 
             # Forces from neighbors [sim → N]
-            f_left_x = F_left_sim[i, 0] * force_scale
-            f_left_xi = F_left_sim[i, 3] * force_scale
-            f_right_x = F_right_sim[i, 0] * force_scale
-            f_right_xi = F_right_sim[i, 3] * force_scale
+            f_left_x = mapper.to_phys_force(F_left_sim[i, 0])
+            f_left_xi = mapper.to_phys_force(F_left_sim[i, 3])
+            f_right_x = mapper.to_phys_force(F_right_sim[i, 0])
+            f_right_xi = mapper.to_phys_force(F_right_sim[i, 3])
 
             # Energy and lateralization (already in J and dimensionless)
             e_amp_kin = E_amp_kin[i]
@@ -233,7 +224,7 @@ def export_csv_snapshot(filename, state, grid, initial_positions, spring_constan
             r_lat = R_lat[i]
 
             # Grid spacing in physical units [m]
-            h_phys = h * L0
+            h_phys = mapper.to_phys_length(h)
 
             # Write row (all in SI units)
             writer.writerow([
@@ -250,30 +241,10 @@ def export_csv_snapshot(filename, state, grid, initial_positions, spring_constan
 
 
 def main():
-    """Run 1D photon simulation with dimensionless units."""
+    """Run 1D photon simulation experiment."""
     print("=" * 70)
-    print("1D Photon - Dimensionless Units (Clean Numerics)")
+    print("1D Photon - Experiment")
     print("=" * 70)
-
-    # ==================================================================
-    # CONFIGURATION: Adjust absolute substrate mass/energy scale
-    # ==================================================================
-    # CONSTRAINT: Wave speed = c (speed of light, ALWAYS)
-    #
-    # FREE PARAMETER: Absolute substrate mass/energy density scale
-    # substrate_scale scales BOTH ρ_D and T_D together:
-    #   - Both ρ_D and T_D multiply by substrate_scale
-    #   - This maintains c_wave = √(T_D/ρ_D) = c (constant)
-    #
-    # What varies:
-    #   1.0   = Compton calibration (baseline)
-    #   < 1.0 = Lighter/less energetic substrate
-    #   > 1.0 = Heavier/more energetic substrate
-    #
-    # This explores the one remaining degree of freedom after fixing c_wave = c
-    # ==================================================================
-    substrate_scale = 10000  # ← CHANGE THIS to explore different substrate scales
-    # ==================================================================
 
     # Physical constants
     constants = PhysicalConstants()
@@ -289,43 +260,43 @@ def main():
     h_phys = constants.lambda_C * lambda_C_multiplier
     cfl_factor = 0.1
 
-    # Get physical parameters using manual substrate scale
-    phys_params = manual_brane_lattice_params(
-        grid_spacing_m=h_phys,
-        dimensionality=1,
-        substrate_scale=substrate_scale,
-        c=constants.c
-    )
+    D = 1
 
-    # Print calibration summary
-    print_calibration_summary(phys_params, h_phys)
+    rho_D = 2.3590e-14 # kg/m^1
+    T_D = 2.1201e+03 # N/m^0
+    rest_length_phys = 0.0
+    m_point = 9.109384e-30 # kg
+
+    # Wave speed (always equals c, since T_D/ρ_D = constant)
+    c_wave = math.sqrt(T_D / rho_D)  # = c always
+
+    # Discrete mass per lattice point (varies with substrate_scale)
+    m_point = rho_D * (h_phys ** D)
+
+    # Axial spring constant (varies with substrate_scale, since T_D varies)
+    k_spring = T_D * (h_phys ** (D - 2))
+
+
 
     # Create dimensional mapper for unit conversions
     mapper = DimensionalMapper(
         h_phys=h_phys,
         c_light=constants.c,
-        mass_reference=phys_params["m_point_reference"]
+        mass_reference=m_point
     )
-
-    # Extract scaling factors (for CSV export which needs raw scales)
-    L0 = mapper.length_scale
-    T0 = mapper.time_scale
-    M0 = mapper.mass_scale
-    E0 = M0 * (L0 / T0) ** 2  # Energy scale derived from fundamental scales
 
     # Simulation uses dimensionless units
     # h_sim = 1.0 ALWAYS (by choice of L0 = h_phys)
     # c_wave = c ALWAYS (constraint: T_D/ρ_D = c²)
-    # m_sim and k_sim BOTH VARY with substrate_scale (maintaining c_wave = c)
     h_sim = mapper.to_sim_length(h_phys)  # = 1.0 always
-    m_sim = mapper.to_sim_mass(phys_params["m_point"])  # = substrate_scale
-    k_sim = mapper.to_sim_spring_constant(phys_params["k_spring"])  # = substrate_scale
-    c_wave_sim = mapper.to_sim_velocity(phys_params["c_wave"])  # = 1.0 always (c_wave = c)
-    rest_length_sim = mapper.to_sim_length(phys_params["rest_length"])
+    m_sim = mapper.to_sim_mass(m_point)  # = substrate_scale
+    k_sim = mapper.to_sim_spring_constant(k_spring)  # = substrate_scale
+    c_wave_sim = mapper.to_sim_velocity(c_wave)  # = 1.0 always (c_wave = c)
+    rest_length_sim = mapper.to_sim_length(rest_length_phys)
 
     # Time step calculation (CFL condition based on ACTUAL wave speed)
     # CRITICAL: Must use c_wave (actual wave speed in brane), not c_light!
-    dt_phys = cfl_factor * h_phys / phys_params["c_wave"]
+    dt_phys = cfl_factor * h_phys / c_wave
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size
@@ -334,25 +305,20 @@ def main():
     domain_length_sim = nx * h_sim  # = nx * 1.0 = nx
 
     # Verify wave speed
-    expected_wave_speed = np.sqrt(phys_params["T_D"] / phys_params["rho_D"])
+    expected_wave_speed = np.sqrt(T_D / rho_D)
 
     print(f"\nPhysical Parameters:")
-    print(f"  Compton wavelength λ_C = {phys_params['lambda_C']:.4e} m")
-    print(f"  Grid spacing h = {lambda_C_multiplier:.0f} × λ_C = {h_phys:.6e} m")
-    print(f"  1D linear mass density ρ_1 = {phys_params['rho_D']:.6e} kg/m")
-    print(f"  1D tension T_1 = {phys_params['T_D']:.6e} N")
-    print(f"  Spring constant k = {phys_params['k_spring']:.6e} N/m")
-    print(f"  Point mass m = {phys_params['m_point']:.6e} kg")
+    print(f"  1D linear mass density ρ_1 = {rho_D:.6e} kg/m")
+    print(f"  1D tension T_1 = {T_D:.6e} N")
+    print(f"  Spring constant k = {k_spring:.6e} N/m")
+    print(f"  Point mass m = {m_point:.6e} kg")
     print(f"  Time step dt = {dt_phys:.6e} s")
     print(f"  Expected wave speed = {expected_wave_speed:.6e} m/s")
     print(f"  Speed of light c = {constants.c:.6e} m/s")
     print(f"  Wave speed error = {abs(expected_wave_speed - constants.c)/constants.c:.6e}")
 
     print(f"\nScaling Factors:")
-    print(f"  Length scale L0 = {L0:.6e} m")
-    print(f"  Time scale T0 = {T0:.6e} s")
-    print(f"  Mass scale M0 = {M0:.6e} kg")
-    print(f"  Energy scale E0 = {E0:.6e} J")
+    print(mapper)
 
     print(f"\nDimensionless Simulation Parameters:")
     print(f"  h_sim = {h_sim:.6e}  (FIXED to 1.0, defines length scale L0)")
@@ -365,7 +331,6 @@ def main():
     print(f"    c_wave_sim = √(k_sim/m_sim) = {(k_sim/m_sim)**0.5:.6e}  (= 1.0 always)")
     print(f"    c_wave / c_light = {(k_sim/m_sim)**0.5:.6e}  (FIXED to 1.0)")
     print(f"")
-    print(f"  Free parameter: substrate_scale = {substrate_scale:.2e}")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain (physical): {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
@@ -390,9 +355,6 @@ def main():
 
     grid = BraneGrid((nx,), Dimensionality.ONE_D, h_sim, device)  # Sim spacing = 1.0
 
-    # CRITICAL: Implement pretension κ = ρc²
-    # Rest length already computed above via mapper
-    rest_length_phys = phys_params["rest_length"]
 
     print(f"\nPretension Implementation (Sim Units):")
     print(f"  Rest length L_0 (sim) = {rest_length_sim:.6e}")
@@ -413,7 +375,7 @@ def main():
     lateralization = LateralizationMeasurement(
         config=lat_config,
         grid=grid,
-        m_point=phys_params["m_point"],  # Use physical mass for energy calculations
+        m_point=m_point,  # Use physical mass for energy calculations
         reference_positions=initial_positions,
     )
 
@@ -530,7 +492,7 @@ def main():
             csv_filename = f'photon_1d_snapshot_t{step:06d}.csv'
             export_csv_snapshot(csv_filename, state, grid, initial_positions,
                               k_sim, lateralization, physics, h_sim,
-                              L0, T0, E0, rest_length=rest_length_sim)
+                              mapper, rest_length=rest_length_sim)
             if step == 0:
                 print(f"  ✓ Exporting CSV snapshots (8 total: t=0, t=1, and 6 regular intervals) in SI units")
 
@@ -615,7 +577,7 @@ def main():
     print(f"\nCreating plots...")
 
     fig, axes = plt.subplots(num_snapshots, 1, figsize=(14, 12))
-    fig.suptitle(f'1D Photon at Realistic Scales (c = {constants.c:.3e} m/s)\nDimensionless Units',
+    fig.suptitle(f'1D Photon at Realistic Scales (c = {constants.c:.3e} m/s)',
                  fontsize=16, fontweight='bold')
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
@@ -624,7 +586,7 @@ def main():
 
             # Convert to nanometers for better readability (field in sim units, x_coords_phys in m)
             x_nm = x_coords_phys * 1e9
-            field_nm = field * L0 * 1e9  # Convert sim → phys → nm
+            field_nm = mapper.to_phys_length(field) * 1e9  # Convert sim → phys → nm
 
             axes[idx].plot(x_nm, field_nm, 'b-', linewidth=2)
             axes[idx].plot([x_nm[0], x_nm[-1]], [0, 0], 'ro',
@@ -657,7 +619,7 @@ def main():
 
     # Position vs time (in nm and fs)
     times_fs = np.array(times_phys) * 1e15
-    centers_phys = np.array(centers_sim) * L0  # Convert sim → physical
+    centers_phys = mapper.to_phys_length(np.array(centers_sim))  # Convert sim → physical
     centers_nm = centers_phys * 1e9
 
     axes2[0].plot(times_fs, centers_nm, 'b-', linewidth=2, label='Wave center')
@@ -688,12 +650,12 @@ def main():
                  fontsize=16, fontweight='bold')
 
     # Find max lateral displacement for consistent scaling (convert to physical)
-    max_lateral_disp = max([np.abs(snapshots_lateral[t]).max() for t in snapshots_lateral.keys()]) * L0
+    max_lateral_disp = max([mapper.to_phys_length(np.abs(snapshots_lateral[t]).max()) for t in snapshots_lateral.keys()])
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots_lateral:
             lateral_disp_sim = snapshots_lateral[t]
-            lateral_disp_phys = lateral_disp_sim * L0  # Convert to physical
+            lateral_disp_phys = mapper.to_phys_length(lateral_disp_sim)  # Convert to physical
 
             # Convert to picometers for better readability (lateral displacement is tiny)
             x_nm = x_coords_phys * 1e9
@@ -734,13 +696,13 @@ def main():
                  fontsize=16, fontweight='bold')
 
     # Find max amplitude velocity for consistent scaling (convert to physical)
-    max_vel_amplitude = max([np.abs(snapshots_vel_amplitude[t]).max()
-                             for t in snapshots_vel_amplitude.keys()]) * (L0 / T0)
+    max_vel_amplitude = max([mapper.to_phys_velocity(np.abs(snapshots_vel_amplitude[t]).max())
+                             for t in snapshots_vel_amplitude.keys()])
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots_vel_amplitude:
             vel_amplitude_sim = snapshots_vel_amplitude[t]
-            vel_amplitude_phys = vel_amplitude_sim * (L0 / T0)  # Convert to physical
+            vel_amplitude_phys = mapper.to_phys_velocity(vel_amplitude_sim)  # Convert to physical
 
             x_nm = x_coords_phys * 1e9
 
@@ -779,13 +741,13 @@ def main():
                  fontsize=16, fontweight='bold')
 
     # Find max lateral velocity for consistent scaling (convert to physical)
-    max_vel_lateral = max([np.abs(snapshots_vel_lateral[t]).max()
-                           for t in snapshots_vel_lateral.keys()]) * (L0 / T0)
+    max_vel_lateral = max([mapper.to_phys_velocity(np.abs(snapshots_vel_lateral[t]).max())
+                           for t in snapshots_vel_lateral.keys()])
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots_vel_lateral:
             vel_lateral_sim = snapshots_vel_lateral[t]
-            vel_lateral_phys = vel_lateral_sim * (L0 / T0)  # Convert to physical
+            vel_lateral_phys = mapper.to_phys_velocity(vel_lateral_sim)  # Convert to physical
 
             x_nm = x_coords_phys * 1e9
 
