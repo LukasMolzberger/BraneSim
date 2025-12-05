@@ -266,7 +266,7 @@ def main():
     # 1D brane parameters constrained to give wave speed = c
     rho_D = 2.3590e-14  # kg/m (linear mass density - arbitrary choice)
     T_D = rho_D * constants.c**2  # N (tension - computed from c² = T_D/rho_D)
-    rest_length_phys = 0.0
+    rest_length_phys = 0.0 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
@@ -384,7 +384,7 @@ def main():
     print(f"\nInitializing photon wave packet...")
 
     # Physical values (wavelength already set to λ_C at configuration)
-    amplitude_phys = 0.1 * h_phys
+    amplitude_phys = 10 * h_phys
     center_position_phys = domain_length_phys / 3.0
 
     # Convert to sim units using mapper

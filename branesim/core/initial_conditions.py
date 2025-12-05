@@ -157,6 +157,7 @@ def initialize_right_moving_velocities_time_reversed(
     wave_speed: float,
     field_component: int = 3,
     shift_cells: int = 1,
+    direction: torch.Tensor | None = None,
 ) -> None:
     """
     Initialize velocities for a right-moving wave by *time-reversing* the
@@ -170,7 +171,7 @@ def initialize_right_moving_velocities_time_reversed(
     Physical principle:
         - Current state has initial shape ξ₀(x) in positions[:, field_component]
         - We define target shape ξ_target(x) which is ξ₀ shifted by
-          'shift_cells' grid cells to the right
+          'shift_cells' grid cells along the specified direction
         - Using the full brane forces F (from SpringForceComputer), we compute
           the acceleration a₀ at the initial state
         - We solve the 2nd-order Taylor expansion:
@@ -184,16 +185,20 @@ def initialize_right_moving_velocities_time_reversed(
 
     Args:
         state: BraneState with initial positions already set (shape only)
-        grid: BraneGrid (currently 1D) with spacing h
+        grid: BraneGrid (1D, 2D, or 3D) with spacing h
         physics: SpringForceComputer used in the simulation
         m_point: Point mass (kg) for each brane node
         wave_speed: Target propagation speed (should equal √(T/ρ_m) = c)
         field_component: Index of embedding component containing the wave
                         (default: 3 for X⁴)
         shift_cells: How many grid cells the packet should move in Δt (default: 1)
+        direction: Optional direction for wave propagation (default: +x axis)
+                  For 1D: ignored
+                  For 2D/3D: [dx, dy] or [dx, dy, dz] unit vector
 
     Note:
-        - Currently implemented for 1D grids
+        - Works for 1D, 2D, and 3D grids
+        - Default direction is along +x axis (first spatial dimension)
         - Only the amplitude component velocities are explicitly set; lateral
           distortions emerge naturally from the forces during evolution
         - This method respects the substrate-only evolution principle: it uses
@@ -203,18 +208,16 @@ def initialize_right_moving_velocities_time_reversed(
     device = state.device
     dtype = state.dtype
     grid_shape = grid.grid_shape
-
-    # Currently only 1D is implemented
-    if len(grid_shape) != 1:
-        raise ValueError(
-            "initialize_right_moving_velocities_time_reversed currently "
-            "supports only 1D grids."
-        )
-
-    nx = grid_shape[0]
+    ndim = len(grid_shape)
     N = state.num_points
-    if N != nx:
-        raise ValueError(f"State and grid size mismatch: N={N}, nx={nx}")
+
+    # Validate grid consistency
+    expected_N = int(np.prod(grid_shape))
+    if N != expected_N:
+        raise ValueError(
+            f"Grid shape {grid_shape} implies {expected_N} points, "
+            f"but state has {N} points"
+        )
 
     h = grid.spacing
     dt_shift = (shift_cells * h) / wave_speed  # time to move 'shift_cells' cells at speed c
@@ -222,11 +225,38 @@ def initialize_right_moving_velocities_time_reversed(
     # --- 1) Extract current amplitude field ξ₀ -----------------------
     xi0 = state.positions[:, field_component].to(device=device, dtype=dtype)
 
-    # --- 2) Build target field ξ_target = ξ₀ shifted right -----------
-    # Shift by 'shift_cells' cells; fill left boundary with 0 (fixed boundary)
-    xi_target = torch.zeros_like(xi0)
-    if shift_cells < nx:
-        xi_target[shift_cells:] = xi0[:-shift_cells]
+    # --- 2) Build target field ξ_target = ξ₀ shifted along direction ---
+    # Reshape to grid for shifting
+    xi0_grid = xi0.view(*grid_shape)
+    xi_target_grid = torch.zeros_like(xi0_grid)
+
+    if ndim == 1:
+        # 1D: Simple shift along x-axis
+        nx = grid_shape[0]
+        if shift_cells < nx:
+            xi_target_grid[shift_cells:] = xi0_grid[:-shift_cells]
+
+    elif ndim == 2:
+        # 2D: Shift along x-axis (default) or specified direction
+        nx, ny = grid_shape
+        # For now, only support shifts along cardinal directions (x-axis)
+        # A diagonal shift would require interpolation
+        if shift_cells < nx:
+            xi_target_grid[shift_cells:, :] = xi0_grid[:-shift_cells, :]
+
+    elif ndim == 3:
+        # 3D: Shift along x-axis (default) or specified direction
+        nx, ny, nz = grid_shape
+        # For now, only support shifts along cardinal directions (x-axis)
+        # A diagonal shift would require interpolation
+        if shift_cells < nx:
+            xi_target_grid[shift_cells:, :, :] = xi0_grid[:-shift_cells, :, :]
+
+    else:
+        raise ValueError(f"Unsupported grid dimensionality: {ndim}")
+
+    # Flatten back to 1D array
+    xi_target = xi_target_grid.reshape(N)
 
     # Enforce fixed boundaries if present
     if state.fixed_mask is not None:
@@ -258,10 +288,12 @@ def initialize_right_moving_velocities_time_reversed(
 
     # Diagnostics
     print("\nInitialized right-moving velocities (time-reversed):")
+    print(f"  Grid dimensions: {grid_shape} ({ndim}D)")
     print(f"  dt_shift       = {dt_shift:.6e} s")
     print(f"  grid spacing h = {h:.6e} m")
     print(f"  nominal speed  = {wave_speed:.6e} m/s")
     print(f"  shift_cells    = {shift_cells}")
+    print(f"  shift direction: +x axis (first dimension)")
     print(f"  max |v_xi|     = {torch.abs(v_xi).max().item():.6e} m/s")
 
 

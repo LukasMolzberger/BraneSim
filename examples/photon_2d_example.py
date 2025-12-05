@@ -22,7 +22,10 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
-from branesim.core.initial_conditions import initialize_right_moving_velocities
+from branesim.core.initial_conditions import (
+    initialize_right_moving_velocities_time_reversed,
+    verify_wave_propagation,
+)
 
 
 def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
@@ -169,7 +172,7 @@ def main():
     m_e = constants.m_e
     rho_D = m_e / (constants.lambda_C ** 2)  # kg/m² (surface mass density - derived from Compton scale)
     T_D = rho_D * constants.c**2  # N/m (tension - computed from c² = T_D/rho_D)
-    rest_length_phys = 0.0
+    rest_length_phys = 0.0 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
@@ -270,7 +273,7 @@ def main():
 
     # Physical values (what we want in real units)
     wavelength_phys = 40 * h_phys  # 40 points per wavelength
-    amplitude_phys = 0.2 * h_phys
+    amplitude_phys = 10 * h_phys
     width_x_phys = 3 * wavelength_phys / (2 * np.pi)
     center_x_phys = domain_length_phys / 3.0
 
@@ -291,12 +294,14 @@ def main():
 
     # Step 2: Initialize velocities for right-moving wave at speed c
     print(f"\n[2] Initializing velocities for right-moving wave...")
-    initialize_right_moving_velocities(
+    initialize_right_moving_velocities_time_reversed(
         state=state,
         grid=grid,
-        wave_speed=c_sim,
-        direction=None,  # Default: +x
-        field_component=3
+        physics=physics,
+        m_point=m_sim,
+        wave_speed=c_sim,  # Actual wave speed in sim units (= √(k_sim/m_sim) = 1.0)
+        field_component=3,
+        shift_cells=1,
     )
 
     # Step 3: Compute initial accelerations

@@ -29,6 +29,10 @@ from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
+from branesim.core.initial_conditions import (
+    initialize_right_moving_velocities_time_reversed,
+    verify_wave_propagation,
+)
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -251,7 +255,7 @@ def main():
     m_e = constants.m_e
     rho_D = m_e / (constants.lambda_C ** 3)  # kg/m³ (volume mass density - derived from Compton scale)
     T_D = rho_D * constants.c**2  # Pa (elastic modulus - computed from c² = T_D/rho_D)
-    rest_length_phys = 0.0
+    rest_length_phys = 0.0 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
@@ -336,7 +340,7 @@ def main():
     state.set_fixed_boundaries()
     print(f"\nBoundary Conditions:")
     print(f"  Fixed points: {state.fixed_mask.sum().item()} / {nx * ny * nz}")
-    print(f"  All 6 walls: FIXED (waveguide)")
+    print(f"  All 6 walls: FIXED")
 
     grid = BraneGrid((nx, ny, nz), Dimensionality.THREE_D, h_sim, device)  # Sim spacing = 1.0
 
@@ -375,8 +379,15 @@ def main():
     initialize_waveguide_wave_shape_3d(state, grid, amplitude_sim, center_x_sim, width_x_sim, wavelength_sim)
 
     # Note: Velocities can be initialized here if needed using
-    # initialize_right_moving_velocities() from initial_conditions.py
-
+    initialize_right_moving_velocities_time_reversed(
+        state=state,
+        grid=grid,
+        physics=physics,
+        m_point=m_sim,
+        wave_speed=c_sim,  # Actual wave speed in sim units (= √(k_sim/m_sim) = 1.0)
+        field_component=3,
+        shift_cells=1,
+    )
     # Compute initial accelerations
     solver.initialize_accelerations(state)
     state.apply_fixed_boundaries()

@@ -20,6 +20,7 @@ import math
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -55,8 +56,172 @@ def track_wave_center(state, grid):
     return 0.0
 
 
+def export_csv_snapshot(filename, state, grid, initial_positions, spring_constant,
+                       lateralization, physics, h, mapper, rest_length=0.0):
+    """
+    Export detailed CSV snapshot with all brane point data in SI units.
+
+    All quantities are converted from simulation units to physical SI units before export.
+
+    Columns: point_idx, x_position, xi_position, x_velocity, xi_velocity,
+             x_acceleration, xi_acceleration, delta_x, delta_xi, h_spacing,
+             L_to_next, delta_L_to_next,
+             F_left_x, F_left_xi, F_right_x, F_right_xi,
+             E_amp_kin, E_amp_pot, E_lat_kin, E_lat_pot, R_lat
+
+    Units:
+        - Positions, displacements, lengths, h_spacing: meters [m]
+        - Velocities: meters per second [m/s]
+        - Accelerations: meters per second squared [m/s²]
+        - Forces: Newtons [N]
+        - Energies: Joules [J] (already in physical units)
+        - R_lat: dimensionless
+    """
+    nx = state.positions.shape[0]
+    neighbors = grid.neighbors
+
+    # Get lateralization measurement
+    R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
+
+    # Convert to numpy (still in sim units)
+    positions_sim = state.positions.cpu().numpy()
+    velocities_sim = state.velocities.cpu().numpy()
+    accelerations_sim = state.accelerations.cpu().numpy()
+    initial_pos_sim = initial_positions.cpu().numpy()
+    R_lat = R_lat_local.cpu().numpy()
+    E_amp_kin = diagnostics['E_amp_kin'].cpu().numpy()  # Already in J
+    E_amp_pot = diagnostics['E_amp_pot'].cpu().numpy()  # Already in J
+    E_lat_kin = diagnostics['E_lat_kin'].cpu().numpy()  # Already in J
+    E_lat_pot = diagnostics['E_lat_pot'].cpu().numpy()  # Already in J
+
+    # Compute spring forces for each point (in sim units)
+    k_sim = spring_constant
+    rest_length_sim = rest_length
+
+    # Store forces from left and right neighbors (in sim units)
+    F_left_sim = np.zeros((nx, 4))
+    F_right_sim = np.zeros((nx, 4))
+
+    for i in range(nx):
+        for j_idx in neighbors[i]:
+            j = j_idx.item() if isinstance(j_idx, torch.Tensor) else int(j_idx)
+            if j < 0:
+                continue
+
+            # Vector from i to j (sim units)
+            d = positions_sim[j] - positions_sim[i]
+            length = np.sqrt(np.sum(d**2))
+
+            if length < 1e-20:
+                continue
+
+            # Spring force magnitude: F = k * (L - L0) (sim units)
+            extension = length - rest_length_sim
+            force_mag = k_sim * extension
+
+            # Force direction (unit vector)
+            direction = d / length
+
+            # Force vector on point i from point j (sim units)
+            force = force_mag * direction
+
+            # Determine if this is left or right neighbor
+            if j == i - 1:
+                F_left_sim[i] = force
+            elif j == i + 1:
+                F_right_sim[i] = force
+
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        # Write header with units
+        writer.writerow([
+            'point_idx',
+            'x_position [m]', 'xi_position [m]',
+            'x_velocity [m/s]', 'xi_velocity [m/s]',
+            'x_acceleration [m/s^2]', 'xi_acceleration [m/s^2]',
+            'delta_x [m]', 'delta_xi [m]',
+            'h_spacing [m]',
+            'L_to_next [m]', 'delta_L_to_next [m]',
+            'F_left_x [N]', 'F_left_xi [N]', 'F_right_x [N]', 'F_right_xi [N]',
+            'E_amp_kin [J]', 'E_amp_pot [J]', 'E_lat_kin [J]', 'E_lat_pot [J]', 'R_lat'
+        ])
+
+        # Write data for each point (convert to physical units using mapper)
+        for i in range(nx):
+            # Positions [sim → m]
+            x_pos = mapper.to_phys_length(positions_sim[i, 0])
+            xi_pos = mapper.to_phys_length(positions_sim[i, 3])
+
+            # Velocities [sim → m/s]
+            x_vel = mapper.to_phys_velocity(velocities_sim[i, 0])
+            xi_vel = mapper.to_phys_velocity(velocities_sim[i, 3])
+
+            # Accelerations [sim → m/s²]
+            x_acc = mapper.to_phys_acceleration(accelerations_sim[i, 0])
+            xi_acc = mapper.to_phys_acceleration(accelerations_sim[i, 3])
+
+            # Displacements from initial [sim → m]
+            delta_x = mapper.to_phys_length(positions_sim[i, 0] - initial_pos_sim[i, 0])
+            xi = mapper.to_phys_length(positions_sim[i, 3] - initial_pos_sim[i, 3])
+
+            # Spring properties (to next neighbor if exists)
+            L_to_next_phys = 0.0
+            delta_L_to_next_phys = 0.0
+
+            if i < nx - 1:  # Not the last point
+                # Find next neighbor
+                for j_idx in neighbors[i]:
+                    j = j_idx.item() if isinstance(j_idx, torch.Tensor) else int(j_idx)
+                    if j == i + 1:  # Next neighbor
+                        # Current spring vector (sim units)
+                        dX_sim = positions_sim[j] - positions_sim[i]
+                        L_to_next_sim = np.sqrt(np.sum(dX_sim**2))
+
+                        # Reference spring vector (sim units)
+                        dX0_sim = initial_pos_sim[j] - initial_pos_sim[i]
+                        L_ref_sim = np.sqrt(np.sum(dX0_sim**2))
+
+                        # Extension beyond reference (sim units)
+                        delta_L_to_next_sim = L_to_next_sim - L_ref_sim
+
+                        # Convert to physical [m]
+                        L_to_next_phys = mapper.to_phys_length(L_to_next_sim)
+                        delta_L_to_next_phys = mapper.to_phys_length(delta_L_to_next_sim)
+                        break
+
+            # Forces from neighbors [sim → N]
+            f_left_x = mapper.to_phys_force(F_left_sim[i, 0])
+            f_left_xi = mapper.to_phys_force(F_left_sim[i, 3])
+            f_right_x = mapper.to_phys_force(F_right_sim[i, 0])
+            f_right_xi = mapper.to_phys_force(F_right_sim[i, 3])
+
+            # Energy and lateralization (already in J and dimensionless)
+            e_amp_kin = E_amp_kin[i]
+            e_amp_pot = E_amp_pot[i]
+            e_lat_kin = E_lat_kin[i]
+            e_lat_pot = E_lat_pot[i]
+            r_lat = R_lat[i]
+
+            # Grid spacing in physical units [m]
+            h_phys = mapper.to_phys_length(h)
+
+            # Write row (all in SI units)
+            writer.writerow([
+                i,
+                x_pos, xi_pos,
+                x_vel, xi_vel,
+                x_acc, xi_acc,
+                delta_x, xi,
+                h_phys,
+                L_to_next_phys, delta_L_to_next_phys,
+                f_left_x, f_left_xi, f_right_x, f_right_xi,
+                e_amp_kin, e_amp_pot, e_lat_kin, e_lat_pot, r_lat
+            ])
+
+
 def run_amplitude_simulation(amplitude_fraction, constants, h_phys, wavelength_phys, nx,
-                            num_steps=2000, verbose=False):
+                            num_steps=2000, verbose=False, export_csv=False):
     """
     Run simulation for a given amplitude and return key metrics.
 
@@ -91,7 +256,7 @@ def run_amplitude_simulation(amplitude_fraction, constants, h_phys, wavelength_p
     D = 1
     rho_D = 2.3590e-14  # kg/m
     T_D = rho_D * constants.c**2
-    rest_length_phys = 0.0
+    rest_length_phys = 0.00001 * h_phys
     c_wave = constants.c
     m_point = rho_D * (h_phys ** D)
     k_spring = T_D * (h_phys ** (D - 2))
@@ -195,13 +360,22 @@ def run_amplitude_simulation(amplitude_fraction, constants, h_phys, wavelength_p
     lateral_disp_phys_array = mapper.to_phys_length(lateral_disp_sim)
 
     if verbose:
-        print(f"  Amplitude: {amplitude_phys:.6e} m ({amplitude_fraction:.3f} × h)")
+        print(f"  Wavelength: {wavelength_phys:.6e} m | Amplitude: {amplitude_phys:.6e} m ({amplitude_fraction:.3f} × h)")
         print(f"  Speed: {measured_speed:.6e} m/s (error: {speed_error*100:.4f}%)")
         print(f"  Energy drift: {energy_drift:.6e}")
         print(f"  R_lat (final): {R_lat_global_final:.6f}")
         print(f"  R_lat (mean): {R_lat_global_mean:.6f}")
         print(f"  R_lat (max): {R_lat_global_max:.6f}")
         print(f"  Max lateral displacement: {max_lateral_disp:.6e} m")
+
+    # Export CSV snapshot if requested
+    if export_csv:
+        csv_filename = f'photon_sweep_amp_{amplitude_fraction:.1f}h.csv'
+        export_csv_snapshot(csv_filename, state, grid, initial_positions,
+                          k_sim, lateralization, physics, h_sim,
+                          mapper, rest_length=rest_length_sim)
+        if verbose:
+            print(f"  ✓ Exported CSV: {csv_filename}")
 
     return {
         'amplitude_fraction': amplitude_fraction,
@@ -247,8 +421,20 @@ def main():
     print(f"  Grid spacing: h = λ_C / {points_per_wavelength} = {h_phys:.6e} m")
     print(f"  Domain: {nx} points = {nx * h_phys:.6e} m")
 
-    # Amplitude sweep: from 1% to 50% of h in logarithmic steps
-    amplitude_fractions = np.logspace(-2, np.log10(0.5), 15)  # 0.01 to 0.5
+    # Theoretical prediction from geometric threshold analysis
+    A_th_theory = wavelength_phys / (2 * np.pi)  # λ/(2π)
+    A_th_h = A_th_theory / h_phys  # In units of h
+    print(f"\nTheoretical Geometric Threshold:")
+    print(f"  Critical amplitude A_th ≈ λ/(2π) = {A_th_theory:.6e} m")
+    print(f"  In units of h: A_th ≈ {A_th_h:.2f}h")
+    print(f"  (50/50 force partition between lateral and amplitude directions)")
+
+    # Amplitude sweep based on geometric threshold analysis:
+    # Theory predicts critical amplitude A_th ≈ λ/(2π) ≈ 6.37h
+    # (see docs/threshold-analysis-4-12-2025.md)
+    # Empirically, threshold appears 2-3 orders of magnitude higher than naive geometric prediction
+    # Sweep from 10h to 10000h to capture actual threshold behavior
+    amplitude_fractions = np.logspace(1, 4, 30)  # 10.0 to 10000.0 (30 samples)
 
     # Fixed simulation time
     num_steps = 2000
@@ -260,12 +446,18 @@ def main():
     results = []
 
     print(f"\nRunning simulations...")
+    # Export CSV for selected amplitudes to analyze forces
+    csv_export_indices = [0, 9, 19, 29]  # 10h, ~85h, ~924h, 10000h
+
     for i, amp_frac in enumerate(amplitude_fractions):
         print(f"\n[{i+1}/{len(amplitude_fractions)}] ", end='')
+        # Enable CSV export for selected amplitudes
+        export_csv = (i in csv_export_indices)
         result = run_amplitude_simulation(
             amp_frac, constants, h_phys, wavelength_phys, nx,
             num_steps=num_steps,
-            verbose=True
+            verbose=True,
+            export_csv=export_csv
         )
         results.append(result)
 
@@ -307,6 +499,7 @@ def main():
                  markersize=5, label='Max R_lat')
     ax2.axhline(y=0.1, color='r', linestyle='--', linewidth=1, alpha=0.5, label='10% threshold')
     ax2.axhline(y=0.5, color='purple', linestyle='--', linewidth=1, alpha=0.5, label='50% threshold')
+    # Naive geometric threshold (A_th ≈ 6.37h) is outside sweep range - empirically too small by 2-3 orders of magnitude
     ax2.set_xlabel('Amplitude [× h]', fontsize=11)
     ax2.set_ylabel('Lateralization Ratio R_lat', fontsize=11)
     ax2.set_title('Energy Coupling to Lateral Modes', fontsize=12, fontweight='bold')
@@ -377,8 +570,8 @@ def main():
     # Create spatial field diagrams (similar to photon_1d_example but over amplitude instead of time)
     print(f"\nCreating spatial field diagrams...")
 
-    # Select subset of amplitudes to plot (every 2nd to avoid clutter)
-    plot_indices = [0, 2, 4, 6, 8, 10, 12, 14]  # 8 amplitudes
+    # Select subset of amplitudes to plot (evenly spaced, focusing on threshold region)
+    plot_indices = [0, 4, 8, 12, 16, 20, 24, 27, 29]  # 9 amplitudes from 0.1h to 15h
     num_plots = len(plot_indices)
 
     # Physical x-coordinates
