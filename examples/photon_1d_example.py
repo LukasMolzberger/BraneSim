@@ -257,22 +257,23 @@ def main():
     # Configuration
     # Set photon wavelength to exactly the Compton wavelength
     wavelength_phys = constants.lambda_C  # Photon wavelength = λ_C
-    points_per_wavelength = 40  # Grid resolution
+    points_per_wavelength = 20  # Grid resolution
     h_phys = wavelength_phys / points_per_wavelength  # Grid spacing
     cfl_factor = 0.1
 
     D = 1
 
+    # Universal point mass (same for all dimensions - ensures consistent physics)
+    m_point = 2.861821e-27  # kg (fixed for all 1D/2D/3D simulations)
+
     # 1D brane parameters constrained to give wave speed = c
-    rho_D = 2.3590e-14  # kg/m (linear mass density - arbitrary choice)
+    # Derive mass density from point mass: ρ_D = m_point / h^D
+    rho_D = m_point / (h_phys ** D)  # kg/m (linear mass density)
     T_D = rho_D * constants.c**2  # N (tension - computed from c² = T_D/rho_D)
     rest_length_phys = 0.0 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
-
-    # Discrete mass per lattice point (varies with substrate_scale)
-    m_point = rho_D * (h_phys ** D)
 
     # Axial spring constant (varies with substrate_scale, since T_D varies)
     k_spring = T_D * (h_phys ** (D - 2))
@@ -339,8 +340,20 @@ def main():
     print(f"  CFL number = {cfl_factor:.3f}")
 
     # Create components using SIMULATION UNITS
-    device = torch.device('cpu')
-    dtype = torch.float64
+    # Auto-select best available device (GPU if available, otherwise CPU)
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        print(f"\n✓ Using NVIDIA GPU: {torch.cuda.get_device_name(0)}")
+        dtype = torch.float64
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = torch.device('mps')
+        print(f"\n✓ Using Apple Silicon GPU (MPS)")
+        dtype = torch.float32
+        print(f"  Using float32 (MPS doesn't support float64)")
+    else:
+        device = torch.device('cpu')
+        print(f"\n⚠ Using CPU (no GPU detected)")
+        dtype = torch.float64
 
     state = BraneState((nx,), Dimensionality.ONE_D, device, dtype)
     state.initialize_flat_configuration(h_sim)  # Use sim spacing = 1.0
@@ -429,13 +442,11 @@ def main():
     print(f"  Wave center (sim) = {initial_center_sim:.3f} grid units")
     print(f"  Wave center (phys) = {initial_center_phys:.6e} m")
 
-    # Run simulation
-    # Time for light to cross domain: t = L/c (in physical units)
+    # Run simulation - fixed number of steps
+    num_steps = 4000
+    simulation_time_sim = num_steps * dt_sim
+    simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys / constants.c
-    simulation_time_phys = 3.0 * crossing_time_phys  # 3 crossings
-    simulation_time_sim = mapper.to_sim_time(simulation_time_phys)
-
-    num_steps = int(simulation_time_sim / dt_sim)
 
     print(f"\nRunning simulation...")
     print(f"  Light crossing time (phys) = {crossing_time_phys:.6e} s")

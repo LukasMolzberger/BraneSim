@@ -302,8 +302,10 @@ class BraneState:
             )
             self.fixed_mask[face_mask] = True
 
-        # Store initial positions for fixed points
-        self.fixed_positions[self.fixed_mask] = self.positions[self.fixed_mask].clone()
+        # Store initial positions for fixed points using index operations
+        fixed_indices = torch.nonzero(self.fixed_mask, as_tuple=False).squeeze(1)
+        fixed_pos_values = torch.index_select(self.positions, 0, fixed_indices).clone()
+        self.fixed_positions.index_copy_(0, fixed_indices, fixed_pos_values)
 
     def apply_fixed_boundaries(self):
         """
@@ -311,12 +313,17 @@ class BraneState:
         and restoring positions for fixed points.
         """
         if self.fixed_mask.any():
+            # Convert boolean mask to indices for MPS compatibility
+            fixed_indices = torch.nonzero(self.fixed_mask, as_tuple=False).squeeze(1)
+
             # Zero out dynamics for fixed points
-            self.velocities[self.fixed_mask] = 0.0
-            self.accelerations[self.fixed_mask] = 0.0
-            self.new_accelerations[self.fixed_mask] = 0.0
-            # Restore fixed positions
-            self.positions[self.fixed_mask] = self.fixed_positions[self.fixed_mask]
+            self.velocities.index_fill_(0, fixed_indices, 0.0)
+            self.accelerations.index_fill_(0, fixed_indices, 0.0)
+            self.new_accelerations.index_fill_(0, fixed_indices, 0.0)
+
+            # Restore fixed positions using index_select and index_copy
+            fixed_pos_values = torch.index_select(self.fixed_positions, 0, fixed_indices)
+            self.positions.index_copy_(0, fixed_indices, fixed_pos_values)
 
     def __repr__(self) -> str:
         """String representation."""

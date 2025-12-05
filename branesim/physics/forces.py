@@ -68,9 +68,12 @@ class SpringForceComputer:
             if not valid_mask.any():
                 continue
 
+            # Convert boolean mask to indices early for consistency
+            valid_indices = torch.nonzero(valid_mask, as_tuple=False).squeeze(1)
+
             # Get positions for valid pairs [N_valid, 4]
-            p_pos = state.positions[valid_mask]
-            q_pos = state.positions[neighbor_ids[valid_mask]]
+            p_pos = state.positions[valid_indices]
+            q_pos = state.positions[neighbor_ids[valid_indices]]
 
             # Compute displacements [N_valid, 4]
             delta = q_pos - p_pos
@@ -88,8 +91,8 @@ class SpringForceComputer:
             # Total force [N_valid, 4]
             link_forces = force_mag * force_dir
 
-            # Accumulate forces
-            forces[valid_mask] += link_forces
+            # Accumulate forces using index_add (more reliable than boolean indexing on MPS)
+            forces.index_add_(0, valid_indices, link_forces)
 
         return forces
 

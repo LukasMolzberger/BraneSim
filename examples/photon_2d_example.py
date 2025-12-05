@@ -160,25 +160,26 @@ def main():
     print(f"  ℏ = {constants.hbar:.6e} J·s")
     print(f"  m_e = {constants.m_e:.6e} kg")
 
-    # Configuration
-    lambda_C_multiplier = 5.0  # Grid spacing = 5 × λ_C
-    h_phys = constants.lambda_C * lambda_C_multiplier
+    # Configuration - MATCH 1D RESOLUTION
+    # Set photon wavelength to exactly the Compton wavelength
+    wavelength_phys = constants.lambda_C  # Photon wavelength = λ_C
+    points_per_wavelength = 20  # Grid resolution (same as 1D)
+    h_phys = wavelength_phys / points_per_wavelength  # Grid spacing
     cfl_factor = 0.1
 
     D = 2
 
+    # Universal point mass (same for all dimensions - ensures consistent physics)
+    m_point = 2.861821e-27  # kg (fixed for all 1D/2D/3D simulations)
+
     # 2D brane parameters constrained to give wave speed = c
-    # Use same value as 1D for consistency (arbitrary choice)
-    m_e = constants.m_e
-    rho_D = m_e / (constants.lambda_C ** 2)  # kg/m² (surface mass density - derived from Compton scale)
+    # Derive mass density from point mass: ρ_D = m_point / h^D
+    rho_D = m_point / (h_phys ** D)  # kg/m² (surface mass density)
     T_D = rho_D * constants.c**2  # N/m (tension - computed from c² = T_D/rho_D)
     rest_length_phys = 0.0 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
-
-    # Discrete mass per lattice point
-    m_point = rho_D * (h_phys ** D)
 
     # Axial spring constant (for 2D: k = T_D * h^(D-2) = T_D * h^0 = T_D)
     k_spring = T_D * (h_phys ** (D - 2))
@@ -201,9 +202,9 @@ def main():
     dt_phys = cfl_factor * h_phys / c_wave
     dt_sim = mapper.to_sim_time(dt_phys)
 
-    # Domain size - tunnel geometry (long in x, narrow in y)
-    nx = 800  # Long tunnel
-    ny = 200  # Narrow tunnel
+    # Domain size - square geometry
+    nx = 400  # x dimension
+    ny = 200  # y dimension
     domain_length_phys = nx * h_phys
     domain_length_sim = nx * h_sim  # = nx * 1.0 = nx
 
@@ -240,8 +241,20 @@ def main():
     print(f"  CFL number = {cfl_factor:.3f}")
 
     # Create components using SIMULATION UNITS
-    device = torch.device('cpu')
-    dtype = torch.float64
+    # Auto-select best available device (GPU if available, otherwise CPU)
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        print(f"\n✓ Using NVIDIA GPU: {torch.cuda.get_device_name(0)}")
+        dtype = torch.float64
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = torch.device('mps')
+        print(f"\n✓ Using Apple Silicon GPU (MPS)")
+        dtype = torch.float32
+        print(f"  Using float32 (MPS doesn't support float64)")
+    else:
+        device = torch.device('cpu')
+        print(f"\n⚠ Using CPU (no GPU detected)")
+        dtype = torch.float64
 
     state = BraneState((nx, ny), Dimensionality.TWO_D, device, dtype)
     state.initialize_flat_configuration(h_sim)  # Use sim spacing = 1.0
@@ -272,7 +285,7 @@ def main():
     print(f"\nInitializing photon wave packet...")
 
     # Physical values (what we want in real units)
-    wavelength_phys = 40 * h_phys  # 40 points per wavelength
+    # wavelength_phys already set to lambda_C at configuration
     amplitude_phys = 10 * h_phys
     width_x_phys = 3 * wavelength_phys / (2 * np.pi)
     center_x_phys = domain_length_phys / 3.0
@@ -283,7 +296,8 @@ def main():
     width_x_sim = mapper.to_sim_length(width_x_phys)
     center_x_sim = mapper.to_sim_length(center_x_phys)
 
-    print(f"  Physical wavelength: {wavelength_phys:.6e} m")
+    print(f"  Physical wavelength: {wavelength_phys:.6e} m (= λ_C)")
+    print(f"  Physical wavelength: {wavelength_phys/constants.lambda_C:.2f} × λ_C")
     print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
     print(f"  Physical amplitude: {amplitude_phys:.6e} m")
     print(f"  Sim amplitude: {amplitude_sim:.3f} grid units")
@@ -314,13 +328,11 @@ def main():
     print(f"\nInitial State:")
     print(f"  Energy = {initial_energy['total']:.6e} J")
 
-    # Run simulation
-    # Time for light to cross domain: t = L/c (in physical units)
+    # Run simulation - fixed number of steps
+    num_steps = 4000
+    simulation_time_sim = num_steps * dt_sim
+    simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys / constants.c
-    simulation_time_phys = 3.0 * crossing_time_phys  # 3 crossings
-    simulation_time_sim = mapper.to_sim_time(simulation_time_phys)
-
-    num_steps = int(simulation_time_sim / dt_sim)
 
     print(f"\nRunning simulation...")
     print(f"  Light crossing time (phys) = {crossing_time_phys:.6e} s")
