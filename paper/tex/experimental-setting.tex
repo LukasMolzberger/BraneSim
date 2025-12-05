@@ -25,11 +25,11 @@ as independent sources, forces, or constraints.
 \paragraph{What must emerge (detected via measurement, \emph{not} coded):}
 \begin{itemize}
 \item \textbf{Lorentz invariance:} Isotropic dispersion $\omega(|\mathbf{k}|)$ measured from wave propagation tests (Section~\ref{calibration-dispersion-isotropy})
-\item \textbf{Gravity:} Induced metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ computed post-hoc from node positions; geodesic deflection ray-traced through $g$ (E4, E6)
-\item \textbf{Electromagnetism:} Coulomb-like $1/r^2$ field measured from time-averaged amplitude $\bar{X}^4(\mathbf{x})$ around stable toroidal solitons (E7)
-\item \textbf{Nonlinear threshold:} Emergent energy density threshold for soliton nucleation (E1); \emph{not} imposed as a hard cutoff on amplitude or strain
-\item \textbf{Particle stability:} Toroidal solitons that self-confine via nonlinear elasticity (E2); no explicit "particle glue" or confinement potential added
-\item \textbf{Spinor behavior:} $4\pi$ holonomy measured from phase transport around rotated configurations (E3)
+\item \textbf{Gravity:} Induced metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ computed post-hoc from node positions; geodesic deflection ray-traced through $g$
+\item \textbf{Electromagnetism:} Coulomb-like $1/r^2$ field measured from time-averaged amplitude $\bar{X}^4(\mathbf{x})$ around stable toroidal solitons
+\item \textbf{Nonlinear threshold:} Emergent energy density threshold for soliton nucleation; \emph{not} imposed as a hard cutoff on amplitude or strain
+\item \textbf{Particle stability:} Toroidal solitons that self-confine via nonlinear elasticity; no explicit "particle glue" or confinement potential added
+\item \textbf{Spinor behavior:} $4\pi$ holonomy measured from phase transport around rotated configurations
 \end{itemize}
 
 \paragraph{No back-reaction from emergent fields.}
@@ -42,7 +42,7 @@ relativity, electromagnetism or quantum statistics is genuinely \emph{emergent}
 from the substrate dynamics.
 
 \paragraph{Photon field initialization (clarification):}
-When we refer to "implementing a photon field component" for the electron model (e.g., E2, E7), this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution $\bar{X}^4(\mathbf{x})$.
+When we refer to "implementing a photon field component" for the electron model, this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution $\bar{X}^4(\mathbf{x})$.
 
 \paragraph{Experimental workflow:}
 \begin{enumerate}
@@ -293,8 +293,8 @@ $\tfrac{1}{2}\sum_p m_p |\dot{R}_{p,4}|^2 + U_{\text{elastic}}(\{\mathbf R_p\})$
 matches $\hbar\omega$ (for a photon) or $m_e c^2$ (for an electron) to within a
 specified tolerance. Both calibration routes therefore determine not only the
 mechanical parameters $(\rho,K)$ but also the physically meaningful range of
-normal displacements $X^4$ to be used when setting up initial conditions in the
-experiments of Section~\ref{experiments}.
+normal displacements $X^4$ to be used when setting up initial conditions in
+numerical experiments.
 
 \subsubsection{Time integration and stability}\label{time-integration-and-stability}
 
@@ -346,52 +346,28 @@ Initialize small-amplitude plane waves $\mathbf R_p=\mathbf R^0_p+\boldsymbol\xi
 \]
 This demonstrates isotropic cones for internal observers in the linear regime.
 
-\subsubsection{Experiments}\label{experiments}
+\paragraph{Diagnostics and observables.}
+In numerical experiments we monitor (i) wave propagation and dispersion of
+photon-like excitations, (ii) localization and stability of soliton-like
+deformations, (iii) effective metric properties inferred from signal
+propagation, and (iv) coarse–grained energy densities that play the role of
+effective mass sources. All of these are computed diagnostically from
+$\mathbf X(x,t)$ and its time derivative; no emergent field is fed back into
+the microscopic dynamics.
 
-\begin{itemize}
-\item \textbf{E1 — Nonlinear localization near the elastic threshold:}
-  Launch a Gaussian disturbance with compact support and varying peak
-  amplitude, scanning across the onset of the geometric nonlinear regime.
-  Track the time evolution of the
-  energy density, center-of-energy position, and localization
-  functionals as a function of total energy and peak amplitude.
-
-  The goal is to determine whether the geometric nonlinearity alone
-  admits long-lived, self-localized lumps and whether there exists
-  an emergent threshold in energy density for such localization.
-  Diagnostics: peak amplitude, energy localization, lifetime.
-
-\item \textbf{E2 — Toroidal soliton (electron topology):} Seed a torus in 4D—i.e., initialize $\mathbf X$ so that the set of nodes with elevated normal offset forms a looped tube (major radius $R$, minor $r$). Add a compatible tangential phase pattern (as initial velocities) around the loop. Track confinement ratio, torus symmetry, robustness to perturbations.
-
-  The experiment probes whether the geometric nonlinearity of the
-  medium and the toroidal topology are sufficient to yield an emergent,
-  dynamically maintained soliton, without imposing any additional
-  strong-field cutoff or pair-creation rule.
-
-\item \textbf{E3 — Spinor holonomy ($4\pi$ test):} Rigidly rotate the toroidal configuration in 4D by $\Delta\theta$ while adiabatically transporting its internal phase marker (defined from a local orthonormal frame along the loop). Expect sign flip after $2\pi$, recovery after $4\pi$.
-
-\item \textbf{E4 — Geodesic bending:} Place a weak probe packet far from a localized bulge and ray-trace through $g$. Measure deflection vs. curvature intensity.
-
-\item \textbf{E5 — Emergent kinematics:} Propagate compact, small-amplitude packets; verify constant group speed $c$ and angular isotropy; quantify deviations as amplitude increases and geometric nonlinearity becomes significant.
-  Any breakdown of effective Lorentz invariance is treated as an emergent phenomenon of the medium.
-
-\item \textbf{E6 — Newtonian gravity recovery:} Place a localized, spherically symmetric amplitude bulge (representing a mass concentration) at rest in the brane. Initialize it with total energy $E_{\text{bulge}} \approx m_{\text{bulge}} c^2$ distributed over a compact volume $V_{\text{bulge}} \sim \lambda_{\text{bulge}}^3$. Compute the induced metric $g_{ij}$ by measuring local tangent vectors $\partial_i \mathbf{X}$ on a spherical shell at various radii $r$ from the bulge center. Extract the effective gravitational potential $\Phi_{\text{grav}}(\mathbf{x})$ from the effective emergent metric component $g_{00} \approx -(1 + 2\Phi_{\text{grav}}/c^2)$ and verify:
-\begin{itemize}
-\item At distances $r \gg \lambda_{\text{bulge}}$, the potential should approach $\Phi_{\text{grav}}(r) \propto -G m_{\text{bulge}}/r$ (inverse-square law).
-\item The effective gravitational constant $G_{\text{eff}}$ should be consistent across different bulge masses and probe distances.
-\item Ray-trace null geodesics past the bulge to measure light deflection and compare with the Newtonian prediction $\delta\theta \approx 2G m_{\text{bulge}}/(c^2 b)$ for impact parameter $b$.
-\end{itemize}
-\emph{Success criterion:} If the simulation reproduces $\Phi \propto -1/r$ with deviation $< 5\%$ over the range $2\lambda_{\text{bulge}} < r < 10\lambda_{\text{bulge}}$, this constitutes evidence that the brane framework can recover Newtonian gravity in the weak-field, static limit. Further tests with rotating or highly concentrated bulges would be needed to approach the Schwarzschild or Kerr solutions of general relativity.
-
-\item \textbf{E7 — Charge field of toroidal electron:} Initialize a stable toroidal soliton (as in E2) representing an electron with internal circulation defining chirality $\chi = +1$. Measure the coarse-grained amplitude displacement $\bar{X}^4(\mathbf{x})$ on a spherical shell of radius $r$ around the torus center by time-averaging $X^4(\mathbf{x}, t)$ over multiple internal oscillation periods (timescale $\sim 1/\omega_{\text{Compton}}$). Compute the effective scalar potential $\Phi(\mathbf{x}) = \kappa \bar{X}^4(\mathbf{x})$ and the resulting electric field $\mathbf{E}(\mathbf{x}) = -\nabla\Phi(\mathbf{x})$. Verify:
-\begin{itemize}
-\item Spherical symmetry: $|\mathbf{E}(r)|$ should depend only on radial distance $r$ for $r \gg \lambda_C$.
-\item Coulomb behavior: At large distances, $|\mathbf{E}(r)| \propto 1/r^2$ with relative deviation $< 10\%$ over $2\lambda_C < r < 10\lambda_C$.
-\item Sign reversal: Repeat with $\chi = -1$ (positron); verify $\Phi$ and $\mathbf{E}$ flip sign while $|\mathbf{E}(r)|$ remains unchanged.
-\item Near-field structure: Close to the torus ($r \lesssim \lambda_C$), document deviations from Coulomb law due to finite soliton size and internal structure.
-\end{itemize}
-\emph{Success criterion:} If the far-field $\mathbf{E}$-field reproduces $1/r^2$ scaling and reverses sign with chirality, this confirms that charge emerges as a signed amplitude deformation, as postulated in Sec.~\ref{sec:charge-amplitude}. Deviations in the near field would reveal the extended structure of the electron and provide testable predictions distinct from point-particle QED.
-\end{itemize}
+\paragraph{1D photon test with lateral distortion.}
+As a minimal check of the geometric nonlinearity in a realistic regime, we
+implemented a one–dimensional spring chain with Compton–calibrated lattice
+spacing, mass density and tension (fixing the wave speed to $c$). A
+Gaussian wave packet in the normal direction $X^4$ propagates across the
+chain with essentially unchanged shape and speed, reproducing the linear
+photon picture at realistic scales. Because the springs are slightly
+pre-tensioned ($L_0 < h$), the same run also exhibits a small, localized
+co–moving distortion in the lateral separation of nodes. This lateral
+``bulge'' is confined to the region of largest normal gradients and remains
+bounded over the simulation time, illustrating how the pre-tensioned
+Hookean brane generates a mild coupling between normal and lateral
+coordinates without destroying photon propagation.
 
 \subsubsection{Falsifiable criteria}\label{falsifiable-criteria}
 
