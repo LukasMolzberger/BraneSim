@@ -28,7 +28,6 @@ from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.simulation_config import PhysicalConstants
-from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.physics.electron_initialization import (
     calibrate_electron_init_params,
     init_electron_state,
@@ -37,6 +36,9 @@ from branesim.diagnostics.electron_stability import (
     compute_electron_stability_loss,
     build_electron_masks,
     StabilityMetrics,
+    compute_total_energy,
+    compute_total_momentum,
+    compute_total_spin,
 )
 
 
@@ -68,12 +70,22 @@ def setup_experiment():
     print(f"\nGrid size: {nx} × {ny} × {nz} = {nx*ny*nz} points")
     print(f"Grid spacing h = {h:.6e} m ({h/lambda_C:.4f} λ_C)")
 
-    # Brane parameters
-    # These should be calibrated from your Compton-scale requirements
-    # For now, use reasonable guesses
-    k = 1e3  # Spring constant (will be mapped to sim units)
+    # Brane parameters - Compton calibration
+    # Point mass from density: ρ_m h³ where ρ_m is chosen to give c = √(T/ρ_m)
+    # For our target c = 3×10⁸ m/s and tension T = k/h:
+    # ρ_m = T/c² = k/(h·c²)
+    # m_point = ρ_m h³ = k h²/c²
+    k = 1e3  # Spring constant [N/m]
     rest_length_frac = 0.9  # rest_length = rest_length_frac * h
-    m_point_frac = 1.0  # Point mass relative to reference
+
+    # Compton-calibrated point mass
+    m_point = k * h * h / (constants.c ** 2)
+
+    print(f"\nBrane parameters:")
+    print(f"  Spring constant k = {k:.6e} N/m")
+    print(f"  Rest length = {rest_length_frac:.2f} h")
+    print(f"  Point mass m_p = {m_point:.6e} kg")
+    print(f"  Expected wave speed c = sqrt(k/(h·ρ_m)) = {constants.c:.6e} m/s")
 
     # Time stepping
     # CFL condition: dt < η h / c
@@ -103,7 +115,7 @@ def setup_experiment():
         'h': h,
         'k': k,
         'rest_length_frac': rest_length_frac,
-        'm_point_frac': m_point_frac,
+        'm_point': m_point,
         'dt': dt,
         'n_steps': n_steps,
         'snapshot_interval': snapshot_interval,
@@ -154,6 +166,30 @@ def initialize_electron(state, grid, config):
 
     # Initialize electron state
     init_electron_state(state, params)
+
+    # Measure initial physical properties
+    m_point = config['m_point']
+    E_initial = compute_total_energy(state, m_point)
+    P_initial = compute_total_momentum(state, m_point)
+    S_initial = compute_total_spin(state, m_point, params.center)
+
+    # Compare with expected values
+    E_target = constants.m_e * constants.c ** 2
+    P_target = 0.0
+    S_target = 0.5 * constants.hbar
+
+    print(f"\n=== Initial Physical Properties ===")
+    print(f"  Total energy E:")
+    print(f"    Measured: {E_initial:.6e} J")
+    print(f"    Target (m_e c²): {E_target:.6e} J")
+    print(f"    Ratio E/E_target: {E_initial/E_target:.6f}")
+    print(f"\n  Total momentum |P|:")
+    print(f"    Measured: {torch.norm(P_initial[:3]).item():.6e} kg·m/s")
+    print(f"    Target: {P_target:.6e} kg·m/s")
+    print(f"\n  Spin magnitude |S|:")
+    print(f"    Measured: {torch.norm(S_initial).item():.6e} J·s")
+    print(f"    Target (ℏ/2): {S_target:.6e} J·s")
+    print(f"    Ratio |S|/(ℏ/2): {torch.norm(S_initial).item()/S_target:.6f}")
 
     return params
 
@@ -211,8 +247,7 @@ def analyze_stability(states, params, config):
 
     constants = config['constants']
     dt = config['dt']
-    h = config['h']
-    m_point = config['m_point_frac'] * 1e-30  # Placeholder mass
+    m_point = config['m_point']
 
     # Build masks
     tube_mask, core_mask = build_electron_masks(
@@ -223,9 +258,13 @@ def analyze_stability(states, params, config):
         core_radius_frac=0.5,
     )
 
+    total_points = tube_mask.numel()
+    tube_count = tube_mask.sum().item()
+    core_count = core_mask.sum().item()
+
     print(f"\n=== Mask Statistics ===")
-    print(f"  Tube points: {tube_mask.sum().item()}/{len(tube_mask)} ({100*tube_mask.sum().item()/len(tube_mask):.2f}%)")
-    print(f"  Core points: {core_mask.sum().item()}/{len(core_mask)} ({100*core_mask.sum().item()/len(core_mask):.2f}%)")
+    print(f"  Tube points: {tube_count}/{total_points} ({100*tube_count/total_points:.2f}%)")
+    print(f"  Core points: {core_count}/{total_points} ({100*core_count/total_points:.2f}%)")
 
     # Compute stability loss
     loss, metrics = compute_electron_stability_loss(
@@ -260,12 +299,12 @@ def visualize_results(states, params, config):
     print(f"{'='*60}")
 
     # Extract amplitude field at different times
-    times_to_plot = [0, len(states)//2, -1]  # Initial, middle, final
+    snapshot_indices = [0, len(states)//2, len(states)-1]  # Initial, middle, final
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    for idx, t_idx in enumerate(times_to_plot):
-        state = states[t_idx]
+    for idx, s_idx in enumerate(snapshot_indices):
+        state = states[s_idx]
         X4 = state.positions[:, 3].cpu().numpy()
 
         # For 3D data, take a slice through the center
@@ -283,7 +322,11 @@ def visualize_results(states, params, config):
         )
         ax.set_xlabel('X [pm]')
         ax.set_ylabel('Y [pm]')
-        ax.set_title(f"t = {t_idx * config['snapshot_interval'] * config['dt']:.6e} s")
+
+        # Compute time correctly
+        t = s_idx * config['snapshot_interval'] * config['dt']
+        ax.set_title(f"t = {t:.6e} s")
+
         plt.colorbar(im, ax=ax, label='X⁴ [m]')
 
     plt.tight_layout()
@@ -319,7 +362,7 @@ def main():
     state.initialize_flat_configuration(config['h'])
 
     # Create physics and solver
-    m_point = config['m_point_frac'] * 1e-30  # Placeholder
+    m_point = config['m_point']
     rest_length = config['rest_length_frac'] * config['h']
 
     physics = SpringForceComputer(
