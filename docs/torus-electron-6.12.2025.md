@@ -1094,3 +1094,1315 @@ If you like, next we can:
   * the Compton calibration,
   * the critical rest_length,
   * and the interpretation as a geometric analogue of the Schwinger limit in your brane.
+
+    
+Okay let's discuss another aspect of the W&vdM paper and see how it relates to these new insights. What I want to discuss is Louis de Broglies “harmony of phases”. In a moving reference frame for the electron de Broglies theory takes the relativistic effects of the Lorentz-contraction into account thought the Lorentz factor. But remember, we treat Lorenz-contraction as an emergent effect, not as fundamental. To be more precise, we assume, that the lateral movements of the brane points are responsible for the relativistic effects and the gravitational curvature of spacetime. What would be really interesting is to see if we can connect our lateral movements picture and our new analytic formulation of it with the formalized concepts of the Lorentz-contraction through de Broglies theory. I think that the section regarding de Broglie in the W&vdM paper might help us here.
+
+Short answer: we should **absolutely use** what we’ve learned to build a much better initialization—but a **purely analytic exact solution is unrealistic**. The right way is:
+
+> **Analytic, physics-based ansatz → small parameter vector → optimize that vector using the simulation.**
+
+So not “optimize arbitrary fields”, but “optimize a very constrained shape that already encodes W&vdM + Compton + tubular geometry”.
+
+Let me lay this out in a concrete way you can later feed to Claude.
+
+---
+
+## 1. Why not fully analytic?
+
+Given what we have now:
+
+* Nonlinear, tensioned brane with geometric nonlinearity.
+* Tubular coordinates ((z,x,y)) around the electron centerline.
+* Effective amplitude Lagrangian with curvature/torsion couplings.
+* Physical constraints: energy (m_ec^2), Compton frequency, charge, spin (\hbar/2), double-loop topology.
+
+The **“true” electron** in this model is a **nonlinear bound mode** of the full coupled field equations on a *discrete* lattice.
+
+Deriving that as a closed-form solution is basically “solve a nonlinear eigenvalue problem on a curved, tensioned waveguide with self-induced geometry” → not going to happen in closed form.
+
+But: we can **get very close** analytically if we:
+
+* Work in the **rest frame**,
+* Use the **tubular coordinate system** around a simple centerline (circle),
+* Build an ansatz that already:
+
+  * has the right Compton clock,
+  * has the W&vdM double-loop cross section,
+  * roughly satisfies your energy/charge/spin constraints.
+
+Then we let a small **parameter optimization** clean up what’s left (mostly: reduce radiation and drift).
+
+So: analytic ≈ “good initial guess”, optimization ≈ “relax into a nearby true bound state”.
+
+---
+
+## 2. Stage A: Analytic ansatz for the rest-frame electron
+
+Think in terms of a **world-tube** around a closed curve (C(z)) as in our tubular coordinates.
+
+### 2.1 Choose the centerline geometry
+
+Pick the simplest choice first:
+
+* Electron centerline = **circle** in the brane lateral space:
+  [
+  C(z) =
+  \begin{cases}
+  X^1 = R\cos(z/R),\
+  X^2 = R\sin(z/R),\
+  X^3 = 0,
+  \end{cases}
+  \quad z\in[0,L),\ L=2\pi R.
+  ]
+
+Double-loop constraint:
+
+* Along the **internal light path** the phase must do **two windings** per orbit.
+* That gives you a natural condition like
+  [
+  L_{\text{internal path}} \approx 2\lambda_C,
+  ]
+  so that one internal “photon” orbit at speed (c) covers two Compton wavelengths in phase.
+
+There’s some freedom here (e.g. internal path length could be (L= \lambda_C) with phase structure taking care of the double loop), but you can pick a concrete convention and stick to it, e.g.:
+
+* centerline circumference (L \approx \lambda_C),
+* internal phase structure provides the second loop.
+
+The point: **R is fixed by Compton scale**, not a free parameter.
+
+### 2.2 Cross-section / double-loop mode in ((x,y))
+
+In tubular coordinates ((z,x,y)), use polar coordinates in the cross-section: (\rho = \sqrt{x^2+y^2}, \phi = \arctan2(y,x)).
+
+We want **two lobes** in the cross-section (double loop), at some radius (\rho_0). A simple analytic shape:
+
+* radial envelope:
+  [
+  f_\rho(\rho) = \exp\Bigl[-\frac{(\rho-\rho_0)^2}{2\sigma_\rho^2}\Bigr],
+  ]
+* angular structure (two opposite lobes):
+  [
+  f_\phi(\phi) = \cos(2\phi),
+  ]
+* combined:
+  [
+  f(x,y) = f_\rho(\rho),f_\phi(\phi).
+  ]
+
+This gives you:
+
+* Two peaks at (\phi=0,\pi), radius (\rho_0).
+* Tunable thickness via (\sigma_\rho).
+
+(\rho_0,\sigma_\rho) will later become parameters in the optimization.
+
+### 2.3 Amplitude field (\xi) and velocities (the “photon”)
+
+In the **rest frame**, take the amplitude mode:
+
+[
+\xi(t,z,x,y)
+= A,f(x,y),\cos\bigl(\omega_C t - k_C z + \Phi_0(\phi)\bigr),
+]
+
+with:
+
+* (\omega_C = m_ec^2/\hbar),
+* (k_C = \omega_C / c),
+* (\Phi_0(\phi)) a phase pattern encoding how the two lobes are coupled (for a basic start, take (\Phi_0(\phi)=0) and refine later).
+
+At (t=0), your initial conditions for the embedding coordinate (X^4) are:
+
+* Displacement:
+  [
+  X^4\big|_{t=0} = \xi_0(z,x,y) = A,f(x,y),\cos(-k_C z + \Phi_0(\phi)),
+  ]
+* Velocity:
+  [
+  \dot{X}^4\big|*{t=0} = \partial_t \xi\big|*{t=0}
+  = -A,\omega_C,f(x,y),\sin(-k_C z + \Phi_0(\phi)).
+  ]
+
+These define your **initial amplitude field** in the brane.
+
+### 2.4 Lateral brane geometry: make the tunnel
+
+Your brane currently lives on a regular 3D grid ((i,j,k)) with some spacing (h). To imprint the **tubular geometry** inside that lattice:
+
+1. Select a set of grid points inside some radius of the desired centerline (a “tube region”).
+2. For each such grid point:
+
+   * Compute its closest point on the ideal circle (C(z)) and find the associated ((z,x,y)) in the tubular chart.
+   * Set the **lateral displacement** of that brane point (in (X^{1,2,3})) so that it matches (\mathbf{r}(z,x,y) = C(z) + x,\mathbf{n}(z)+y,\mathbf{b}(z)) instead of the flat grid location.
+   * Outside the tube, keep brane points flat (or with small smooth blending).
+
+This creates a **pre-deformed tunnel** in the brane: a static torus shape with a finite cross-sectional radius where the mode will live.
+
+At this point, lateral velocities (\dot{X}^{1,2,3}) can be initialized to 0 in the rest frame; the internal motion is purely in (X^4). Later you might add small tangential velocities to get spin/angular momentum right, but you can start without.
+
+### 2.5 Calibrate physical quantities analytically
+
+Now we connect to **actual electron properties**:
+
+1. **Charge**
+   You already have a relation “charge magnitude from internal energy density”. Use it to pick (A):
+
+   * Compute the effective charge functional (Q[A,\rho_0,\sigma_\rho,\dots]) for the ansatz,
+   * Solve (approximately) for (A) such that (Q = -e).
+
+   This uses only integrals over ((z,x,y)), no simulation.
+
+2. **Energy**
+   Use your energy functional (discrete or continuum) to compute:
+
+   [
+   E[A,\rho_0,\sigma_\rho,\dots] = E_{\text{kin}} + E_{\text{elastic}}.
+   ]
+
+   Enforce (E \approx m_ec^2) by adjusting, e.g., (\rho_0) or (\sigma_\rho) slightly (or treat mismatch as something for optimization to fix).
+
+3. **Spin**
+   If needed, define a **small tangential velocity field** along the tunnel to give an internal angular momentum (\approx \hbar/2). That can be as simple as:
+
+   * Define a tangential unit vector (\hat{t}_\text{loop}(z,\phi)) (direction of local circulation),
+   * Set
+     [
+     \dot{\mathbf{X}}*{\text{lat}}(z,x,y)\propto g(x,y),\hat{t}*\text{loop}
+     ]
+     with a radial profile (g) peaked at (\rho_0).
+
+   Then compute (S_z) and tune a single scale factor so that (|\mathbf{S}|=\hbar/2).
+
+4. **Rest frame / zero net momentum**
+
+   By construction, the geometry is symmetric, and if you choose symmetric phase patterns, the **net linear momentum** should be extremely small. You can enforce this by:
+
+   * Computing (\mathbf{P} = \sum m_i \dot{\mathbf{X}}_i),
+   * Subtracting a uniform velocity offset from all brane points to set (\mathbf{P}=0).
+
+At the end of Stage A, you have an **analytic initial electron** that:
+
+* Respects W&vdM topology (double loop in cross-section),
+* Confines the Compton-frequency internal mode to a toroidal tunnel,
+* Has approximately correct charge, energy, and spin,
+* Lives entirely in the **rest frame**.
+
+It will not be perfectly stable yet—but it’s massively closer than anything ad hoc.
+
+---
+
+## 3. Stage B: Make it truly stable via optimization
+
+Now we introduce a **small parameter vector** (\theta) capturing the remaining degrees of freedom:
+
+Examples:
+
+* (R) (centerline radius, i.e. circumference),
+* (\rho_0,\sigma_\rho) (cross-section radius and width),
+* shape parameters in (f_\phi(\phi)) beyond pure (\cos(2\phi)),
+* global amplitude rescaling of (\xi) (within charge/energy limits),
+* small correction fields (e.g. a few low-order Fourier modes along (z)).
+
+So (\theta) has maybe 10–30 components, not millions.
+
+### 3.1 Define “good electron” metrics
+
+For each (\theta):
+
+1. Build initial state using the analytic recipe above.
+
+2. Run the brane simulation for (N_T) Compton periods.
+
+3. Measure:
+
+   * **Energy leakage**: fraction of energy that left the tube region.
+   * **Shape drift**: change of cross-section profile vs initial (using tubular coordinates).
+   * **Topological integrity**: does the double loop survive (e.g. still two peaks in (f(x,y)))?
+   * **Frequency purity**: internal oscillation dominated by (\omega_C) (via FFT of (\xi) at some representative point/average).
+
+4. Combine these into a **loss** (\mathcal{J}(\theta)):
+
+   [
+   \mathcal{J} =
+   w_E,L_E + w_D,D_\text{shape} + w_M,M_\text{mode}
+
+   * \text{penalties for }|E-m_ec^2|,|\mathbf{P}|,||S|-\hbar/2|.
+     ]
+
+### 3.2 Optimization
+
+Because the entire pipeline “(\theta) → init → simulation → metrics” is already there, you can choose:
+
+* **Gradient-free** (simpler, robust): CMA-ES, Nelder–Mead, etc.
+* **Gradient-based**: if your PyTorch simulation is differentiable, you can backprop through time and optimize (\theta) with Adam or similar.
+
+Either way, you’re not searching arbitrary states; you’re fine-tuning a **physically-structured ansatz**.
+
+---
+
+## 4. Answering your question directly
+
+> Do you think we can use this knowledge to derive an initialization method for our brane model?
+
+Yes. The tubular-coordinate + W&vdM + Compton + geometric nonlinearity machinery is **exactly** what we need to define a **physics-driven ansatz**:
+
+* Centerline (C(z)) at Compton scale.
+* Double-loop cross-section (f(x,y)).
+* Compton-frequency internal mode (\xi) moving at (c).
+* Pre-deformed brane tunnel geometry from the tubular mapping.
+* Analytic calibration of charge, energy, spin in the rest frame.
+
+> Can we do that analytically or should we formulate it as an optimization problem?
+
+We should do **both**:
+
+* **Analytic**: to get a *structured*, physically correct ansatz and enforce the key constraints (topology, Compton frequency, charge, spin, rest frame).
+* **Optimization**: to refine a small set of parameters in that ansatz so that the configuration is truly stable under your **actual nonlinear discrete dynamics** (minimal radiation, stable shape, robust double loop).
+
+Trying to do it *purely* analytically is unrealistic. Trying to do it *purely* as a huge black-box optimization is intractable and likely to produce ugly, unphysical states. The hybrid approach is what makes this manageable.
+
+---
+
+If you want, next I can:
+
+* Turn this plan into a **step-by-step spec for Claude code**, including:
+
+  * how to implement the tubular mapping on your 3D grid,
+  * how to generate (\xi) and (\dot{\xi}) for each brane point,
+  * which parameters to expose as (\theta),
+  * and a skeleton of an optimization loop (e.g. with CMA-ES or PyTorch).
+
+
+Great, let’s nail this down in a way Claude code can actually implement.
+
+I’ll structure this as **concrete implementation instructions** for a new “electron initialization” module, with a clear split between:
+
+1. **Analytic, physics-based ansatz** (what you asked for now)
+2. A thin wrapper that turns this into an **optimization objective** (so you can later refine parameters)
+
+I’ll keep names generic enough that Claude can adapt to your current PyTorch codebase.
+
+---
+
+## 1. High-level design
+
+**Goal:** Provide a function
+
+```python
+init_electron_state(grid, params) -> (positions, velocities)
+```
+
+that:
+
+* Works in the **electron rest frame**
+* Initializes:
+
+  * amplitude displacement (X^4) and its velocity (\dot X^4) as a **Compton-frequency toroidal double-loop mode**
+  * optionally a lateral displacement field that pre-shapes a **tubular region** (the “tunnel”) where the mode lives
+* Uses a small **parameter struct** `ElectronInitParams` that can later be optimized.
+
+---
+
+## 2. New module: `electron_initialization.py`
+
+Claude code: **create a new module** (or file) in the brane simulation package, e.g.:
+
+**File:** `src/brane/electron_initialization.py` (or wherever your brane core lives)
+
+### 2.1 Parameter dataclass
+
+Add a small parameter container:
+
+```python
+# electron_initialization.py
+
+from dataclasses import dataclass
+from typing import Tuple
+import torch
+
+@dataclass
+class ElectronInitParams:
+    # Physical / geometric parameters
+    center: Tuple[float, float, float]  # physical coordinates of torus center (X1,X2,X3)
+    R: float                            # major radius of torus (centerline radius)
+    rho0: float                         # radius of double-loop lobes in cross-section
+    sigma_r: float                      # radial width of cross-section envelope
+    A: float                            # amplitude scale for X^4 Compton mode
+
+    # Orientation: for now fix torus in X1-X2 plane, X3 as binormal
+    # Later you can generalize orientation with a rotation matrix.
+
+    # Numerical controls
+    tube_max_radius: float              # maximum transverse distance from centerline to include in electron tube
+    compton_omega: float                # Compton frequency omega_C in simulation units
+    wave_speed: float                   # effective wave speed c in brane units
+    # Optional: additional knobs for spin / tangential lateral velocity
+    lateral_spin_scale: float = 0.0     # 0.0 = no lateral spin velocity initially
+```
+
+Later you can let an optimizer adjust `R, rho0, sigma_r, A, lateral_spin_scale` etc.
+
+---
+
+## 3. Tubular coordinates around a circular centerline
+
+We assume for now:
+
+* Electron centerline is a **circle** in the X1–X2 plane, centered at `params.center`, radius `R = params.R`.
+* X3 is “vertical” (binormal).
+* The circle parameter is angle (\phi), related to arclength (z = R\phi).
+
+Claude code: **implement a helper** that maps a brane grid point to tubular coordinates ((z,x,y)):
+
+```python
+def compute_tubular_coords_for_point(
+    pos: torch.Tensor,
+    center: torch.Tensor,
+    R: float,
+) -> Tuple[float, float, float]:
+    """
+    Map a 3D brane position pos (X1,X2,X3) to tubular coordinates (z,x,y)
+    around a circular centerline of radius R in the X1-X2 plane.
+
+    pos: shape (3,) tensor
+    center: shape (3,) tensor
+    Returns: (z, x, y) as Python floats (or small tensors)
+      - z: arclength along circle in [0, 2*pi*R)
+      - x: transverse coordinate in radial direction in plane
+      - y: transverse coordinate along binormal (X3)
+    """
+    # Shift into frame where center is origin
+    v = pos - center  # (3,)
+
+    # Project into X1-X2 plane
+    vx, vy, vz = v[0], v[1], v[2]
+    r_xy = torch.sqrt(vx * vx + vy * vy + 1e-30)
+
+    # Angular coordinate around circle
+    phi = torch.atan2(vy, vx)  # range (-pi, pi]
+    if phi < 0:
+        phi = phi + 2.0 * torch.pi  # optional, to get [0, 2pi)
+
+    # Centerline point on circle at this phi
+    cx = R * torch.cos(phi)
+    cy = R * torch.sin(phi)
+    cz = torch.tensor(0.0, dtype=pos.dtype, device=pos.device)
+    C = torch.stack((cx, cy, cz)) + center
+
+    # Frenet frame for circle:
+    # tangent t = dC/dz (up to normalization),
+    # but for tubular coords we just need normal n and binormal b.
+    # For circle in X1-X2 plane:
+    n = torch.stack((torch.cos(phi), torch.sin(phi), torch.tensor(0.0, device=pos.device)))
+    b = torch.tensor((0.0, 0.0, 1.0), dtype=pos.dtype, device=pos.device)
+
+    # Transverse vector from centerline to pos
+    delta = pos - C
+    # x = component along n (radial in-plane)
+    x = torch.dot(delta, n)
+    # y = component along binormal (X3)
+    y = torch.dot(delta, b)
+
+    # Arclength coordinate z = R * phi
+    z = R * phi
+
+    return z.item(), x.item(), y.item()
+```
+
+> Claude: you can later vectorize this over all brane points using tensor ops instead of looping per-point, but this scalar version is easier to read first.
+
+---
+
+## 4. Double-loop cross-section envelope (f(x,y))
+
+We want two lobes at radius `rho0`, opposite in angle.
+
+Claude code: **implement the cross-section profile**:
+
+```python
+def double_loop_envelope(x: torch.Tensor, y: torch.Tensor,
+                         rho0: float, sigma_r: float) -> torch.Tensor:
+    """
+    Cross-section envelope f(x,y) with two lobes at radius rho0, opposite in angle.
+
+    x, y: tensors of same shape (grid of transverse coords)
+    """
+    rho = torch.sqrt(x * x + y * y + 1e-30)
+    phi = torch.atan2(y, x)  # (-pi, pi]
+
+    # Radial Gaussian
+    radial = torch.exp(-0.5 * ((rho - rho0) / sigma_r) ** 2)
+
+    # Angular double-lobe: cos(2phi) gives peaks at phi=0 and phi=pi
+    angular = torch.cos(2.0 * phi)
+
+    return radial * angular
+```
+
+---
+
+## 5. Amplitude field (\xi) and its velocity at (t=0)
+
+In the rest frame:
+
+[
+\xi(t,z,x,y) = A f(x,y) \cos(\omega_C t - k_C z + \Phi_0(\phi)), \quad k_C = \omega_C/c.
+]
+
+At (t=0):
+
+* Displacement in amplitude dimension (X^4):
+
+  [
+  X^4(0,z,x,y) = A f(x,y) \cos(-k_C z + \Phi_0(\phi))
+  ]
+
+* Velocity (\dot X^4):
+
+  [
+  \dot X^4(0,z,x,y) = -A \omega_C f(x,y) \sin(-k_C z + \Phi_0(\phi))
+  ]
+
+For now, choose (\Phi_0(\phi) = 0). Later, you can encode more subtle internal phase structure.
+
+Claude code: **implement initialization of X^4 and its velocity**:
+
+Assumptions:
+
+* You have a `BraneState` or similar with:
+
+  * `positions`: tensor `(..., 4)` where last dim is (X1,X2,X3,X4).
+  * `velocities`: same shape for time derivatives.
+
+If names differ, adapt accordingly.
+
+```python
+def init_electron_amplitude(
+    positions: torch.Tensor,
+    velocities: torch.Tensor,
+    params: ElectronInitParams,
+    mask: torch.Tensor,
+):
+    """
+    Initialize X^4 (amplitude) and dX^4/dt for the electron region,
+    using the toroidal Compton double-loop ansatz.
+
+    positions, velocities: tensors of shape (..., 4)
+    mask: boolean tensor of shape (...) indicating which lattice points
+          belong to the electron tube region (within tube_max_radius)
+    """
+    center = torch.tensor(params.center, dtype=positions.dtype, device=positions.device)
+    R = params.R
+    rho0 = params.rho0
+    sigma_r = params.sigma_r
+    A = params.A
+    omega_C = params.compton_omega
+    c_eff = params.wave_speed
+    k_C = omega_C / c_eff
+
+    # Get lateral coordinates (X1,X2,X3) for all points
+    X_lat = positions[..., :3]  # shape (..., 3)
+
+    # Pre-allocate transverse coordinates
+    z = torch.zeros_like(positions[..., 0])
+    x = torch.zeros_like(z)
+    y = torch.zeros_like(z)
+
+    # Compute tubular coords for all masked points
+    # (Claude: vectorize this properly; here it's sketched with a loop for clarity.)
+    it = torch.nonzero(mask, as_tuple=False)
+    for idx in it:
+        pos = X_lat[tuple(idx.tolist())]
+        zi, xi, yi = compute_tubular_coords_for_point(pos, center, R)
+        z[tuple(idx.tolist())] = zi
+        x[tuple(idx.tolist())] = xi
+        y[tuple(idx.tolist())] = yi
+
+    # Build cross-section envelope f(x,y) on the full grid (zeros outside mask will be ignored)
+    f_xy = double_loop_envelope(x, y, rho0=rho0, sigma_r=sigma_r)
+
+    # Phase at t=0: phi = -k_C z (for now, Phi0(phi) = 0)
+    phase0 = -k_C * z
+
+    # Amplitude displacement X^4
+    xi0 = A * f_xy * torch.cos(phase0)
+    # Amplitude velocity dX^4/dt
+    dxi_dt0 = -A * omega_C * f_xy * torch.sin(phase0)
+
+    # Apply only on masked region
+    amp_idx = 3  # assuming positions[...,3] is X^4
+    positions[..., amp_idx] = torch.where(mask, xi0, positions[..., amp_idx])
+    velocities[..., amp_idx] = torch.where(mask, dxi_dt0, velocities[..., amp_idx])
+```
+
+---
+
+## 6. Optional: lateral tunnel deformation and spin
+
+If you want to also **pre-shape the brane** laterally (so the tunnel geometry is present at (t=0)), you can add:
+
+### 6.1 Lateral geometry
+
+Simplest version: small transverse displacement proportional to the envelope, pointing radially outward/inward:
+
+```python
+def init_electron_lateral_geometry(
+    positions: torch.Tensor,
+    velocities: torch.Tensor,
+    params: ElectronInitParams,
+    mask: torch.Tensor,
+):
+    """
+    Optionally imprint a tubular lateral deformation into X1..X3,
+    modulated by the same cross-section envelope.
+    """
+    center = torch.tensor(params.center, dtype=positions.dtype, device=positions.device)
+    R = params.R
+    rho0 = params.rho0
+    sigma_r = params.sigma_r
+
+    X_lat = positions[..., :3]
+    z = torch.zeros_like(positions[..., 0])
+    x = torch.zeros_like(z)
+    y = torch.zeros_like(z)
+
+    it = torch.nonzero(mask, as_tuple=False)
+    for idx in it:
+        pos = X_lat[tuple(idx.tolist())]
+        zi, xi, yi = compute_tubular_coords_for_point(pos, center, R)
+        z[tuple(idx.tolist())] = zi
+        x[tuple(idx.tolist())] = xi
+        y[tuple(idx.tolist())] = yi
+
+    # Cross-section envelope (reuse)
+    f_xy = double_loop_envelope(x, y, rho0=rho0, sigma_r=sigma_r)
+
+    # For a circle in X1-X2 plane, local radial direction n(phi)
+    vx = X_lat[..., 0] - center[0]
+    vy = X_lat[..., 1] - center[1]
+    phi = torch.atan2(vy, vx)
+    n_x = torch.cos(phi)
+    n_y = torch.sin(phi)
+    n_z = torch.zeros_like(n_x)
+    n_vec = torch.stack((n_x, n_y, n_z), dim=-1)  # (...,3)
+
+    # Choose a small lateral displacement scale alpha (could be tied to sigma_r or A)
+    alpha = params.sigma_r  # or a separate parameter
+
+    delta_lat = alpha * f_xy[..., None] * n_vec  # (...,3)
+    positions[..., :3] = torch.where(mask[..., None], X_lat + delta_lat, X_lat)
+```
+
+### 6.2 Lateral spin velocity (optional)
+
+To give the electron an internal angular momentum (\approx \hbar/2), you can add a **small tangential lateral velocity**:
+
+```python
+def init_electron_lateral_spin_velocity(
+    positions: torch.Tensor,
+    velocities: torch.Tensor,
+    params: ElectronInitParams,
+    mask: torch.Tensor,
+):
+    """
+    Optionally add a lateral spin velocity field inside the tube
+    to give the electron internal angular momentum.
+    """
+    if params.lateral_spin_scale == 0.0:
+        return
+
+    center = torch.tensor(params.center, dtype=positions.dtype, device=positions.device)
+    X_lat = positions[..., :3]
+
+    vx = X_lat[..., 0] - center[0]
+    vy = X_lat[..., 1] - center[1]
+    r_xy = torch.sqrt(vx * vx + vy * vy + 1e-30)
+    phi = torch.atan2(vy, vx)
+
+    # Tangent direction along the circle (azimuthal)
+    t_x = -torch.sin(phi)
+    t_y =  torch.cos(phi)
+    t_z = torch.zeros_like(t_x)
+    t_vec = torch.stack((t_x, t_y, t_z), dim=-1)  # (...,3)
+
+    # Same cross-section envelope to localize spin near rho0
+    # (Claude: if you have z,x,y already computed, reuse those)
+    # For simplicity, create a radial Gaussian based on r_xy - (centerline radius + rho0)
+    # but ideally reuse double_loop_envelope.
+    # Here we just give a rough sketch:
+    R = params.R
+    rho_shell = r_xy - R
+    radial = torch.exp(-0.5 * ((rho_shell - params.rho0) / params.sigma_r) ** 2)
+
+    spin_scale = params.lateral_spin_scale
+    v_spin = spin_scale * radial[..., None] * t_vec  # (...,3)
+
+    velocities[..., :3] = torch.where(mask[..., None], velocities[..., :3] + v_spin, velocities[..., :3])
+```
+
+You can later compute the resulting angular momentum and tune `lateral_spin_scale` analytically or via optimization.
+
+---
+
+## 7. Putting it together: high-level initialization function
+
+Claude code: define a convenient top-level function:
+
+```python
+def init_electron_state(
+    state,
+    params: ElectronInitParams,
+):
+    """
+    Initialize a single electron soliton in the given BraneState.
+
+    state: object with .positions and .velocities tensors, shape (..., 4)
+    params: ElectronInitParams
+    """
+    positions = state.positions
+    velocities = state.velocities
+
+    # Compute mask of points belonging to the tube region:
+    center = torch.tensor(params.center, dtype=positions.dtype, device=positions.device)
+    X_lat = positions[..., :3]
+    v = X_lat - center
+    # distance to circle center in X1-X2 plane
+    vx, vy, vz = v[..., 0], v[..., 1], v[..., 2]
+    r_xy = torch.sqrt(vx * vx + vy * vy + 1e-30)
+    # distance from circle centerline in XY plane:
+    R = params.R
+    radial_offset = r_xy - R
+    # transverse distance (radial in plane + vertical)
+    transverse = torch.sqrt(radial_offset * radial_offset + vz * vz)
+    mask = transverse <= params.tube_max_radius
+
+    # Initialize amplitude field and velocities
+    init_electron_amplitude(positions, velocities, params, mask)
+
+    # Optional: imprint lateral geometry
+    init_electron_lateral_geometry(positions, velocities, params, mask)
+
+    # Optional: add lateral spin
+    init_electron_lateral_spin_velocity(positions, velocities, params, mask)
+
+    # Optional: enforce net momentum ~ 0 by subtracting center-of-mass velocity
+    # if you added lateral spin
+    # (Claude: implement if needed)
+    return state
+```
+
+---
+
+## 8. Hook for optimization
+
+Later, to turn this into an **optimization problem**, write a wrapper:
+
+```python
+def electron_loss_for_params(theta_vector, base_state, sim_config) -> float:
+    """
+    Decode theta_vector into an ElectronInitParams,
+    initialize electron, run simulation, compute stability metrics, return scalar loss.
+    """
+    params = decode_theta_to_params(theta_vector)
+    state = base_state.clone()
+    init_electron_state(state, params)
+
+    # Run simulation for N_T Compton periods
+    state_t = run_simulation(state, sim_config)
+
+    # Compute metrics: energy leakage, shape drift, mode purity, etc.
+    loss = compute_electron_stability_loss(state_t, params)
+    return loss
+```
+
+Then you can plug this into CMA-ES, Adam, or any other optimizer.
+
+---
+
+If you want, next step we can:
+
+* Design the **stability-loss computation** (`compute_electron_stability_loss`) in detail (what to measure, how to use tubular coordinates to track the double loop, etc.),
+* Or refine the **parameter–physical-constraint calibration** (how to pick A, R, rho0 to get roughly correct (E = m c^2), charge, spin before optimization).
+
+Nice, let’s do both properly:
+
+1. **Design a stability loss** `compute_electron_stability_loss`
+2. **Design a calibration pipeline** that picks `R, rho0, sigma_r, A, lateral_spin_scale` from physical constraints (Compton, charge, mass, spin) before we start optimizing.
+
+I’ll keep everything in “Claude-implementable” form.
+
+---
+
+## 1. Stability loss for the toroidal electron
+
+We assume you have:
+
+* A simulation function like:
+
+  ```python
+  def run_simulation(initial_state, sim_config) -> List[BraneState]:
+      ...
+  ```
+
+  returning states at sample times (t_k), (k = 0…N-1).
+
+* Energy and maybe charge/spin measurement utilities (if not, Claude can add those too).
+
+We’ll build:
+
+```python
+def compute_electron_stability_loss(
+    states: list,
+    tube_mask: torch.Tensor,
+    core_mask: torch.Tensor,
+    params: ElectronInitParams,
+    physical: PhysicalConstants,
+) -> torch.Tensor:
+    ...
+```
+
+where
+
+* `tube_mask`: region that should contain the electron (the torus volume)
+* `core_mask`: inner “core” region where the double-loop max is located
+* `states[0]`: initial state
+
+### 1.1. Energy leakage metric
+
+**Idea:** The electron should keep most of its energy in the tube region. We want to penalize energy radiating away.
+
+Assume you have:
+
+```python
+def compute_energy_density(state) -> torch.Tensor:
+    # returns tensor with same shape as spatial grid
+    ...
+```
+
+Then:
+
+```python
+def compute_energy_leakage(states, tube_mask):
+    """
+    Returns scalar in [0,1+], fraction of energy that has left the tube region on average.
+    """
+    E0_density = compute_energy_density(states[0])  # (...,)
+    E0_total = E0_density.sum()
+
+    leakages = []
+    for state in states[1:]:
+        E_density = compute_energy_density(state)
+        E_tube = (E_density * tube_mask).sum()
+        # fraction of energy outside tube, normalized to initial total energy
+        frac_leaked = (E0_total - E_tube) / (E0_total + 1e-30)
+        leakages.append(frac_leaked)
+
+    # average leakage over time
+    L_E = torch.mean(torch.stack(leakages))
+    # clamp to sane range
+    return torch.clamp(L_E, 0.0, 1.0 + 1e6)
+```
+
+Interpretation:
+
+* `L_E ~ 0`: almost all energy stays in tube → good
+* Large `L_E`: lots of radiation → bad
+
+### 1.2. Shape drift metric
+
+We want the **internal structure** (double loop in cross-section) to stay roughly the same.
+
+Simplest robust measure: compare **envelope** of amplitude (or energy density) in the tube at later times to the initial one.
+
+Take amplitude coordinate (X^4):
+
+```python
+def compute_shape_drift(states, tube_mask, core_mask):
+    """
+    Compare |X^4| envelope over time to initial.
+    Returns scalar >= 0 (0 = perfect).
+    """
+    X4_0 = states[0].positions[..., 3]
+    # Use absolute value (envelope), restricted to tube
+    F0 = torch.abs(X4_0) * tube_mask
+    norm0 = torch.sqrt((F0 ** 2).sum() + 1e-30)
+
+    drifts = []
+    for state in states[1:]:
+        X4_t = state.positions[..., 3]
+        Ft = torch.abs(X4_t) * tube_mask
+        # normalized squared difference
+        diff = (Ft - F0)
+        D_t = (diff ** 2).sum() / (norm0 ** 2)
+        drifts.append(D_t)
+
+    D_shape = torch.mean(torch.stack(drifts))
+    return D_shape
+```
+
+* `D_shape ~ 0` means the envelope hardly changes.
+* Larger values mean the mode spreads, splits, or collapses.
+
+If you want to be more focused on the **inner core** of the double loop, you can weight with `core_mask` instead of `tube_mask`, or compute both and combine.
+
+### 1.3. Mode purity metric (Compton frequency stability)
+
+We want the internal oscillation to be **dominated by a single frequency** (\approx \omega_C).
+
+Take one representative observable, e.g. the **average amplitude in the core**:
+
+```python
+def compute_core_time_series(states, core_mask):
+    """
+    Return 1D tensor (T,) of average X^4 over core region vs time.
+    """
+    series = []
+    for state in states:
+        X4 = state.positions[..., 3]
+        # core average (could also use mean of |X4| or something else)
+        val = (X4 * core_mask).sum() / (core_mask.sum() + 1e-30)
+        series.append(val)
+    return torch.stack(series)  # (T,)
+```
+
+Then a simple FFT:
+
+```python
+def compute_mode_purity(states, core_mask, dt, target_omega):
+    """
+    Compute how much of the power spectrum of the core signal sits near target_omega.
+    Returns M in [0,1], where 0 is perfect (all power near omega_C).
+    """
+    signal = compute_core_time_series(states, core_mask)  # (T,)
+    T = signal.shape[0]
+
+    # Remove mean to avoid DC dominance
+    signal = signal - signal.mean()
+
+    # Real FFT
+    fft_vals = torch.fft.rfft(signal)
+    freqs = torch.fft.rfftfreq(T, d=dt)  # angular frequency = 2*pi*freq
+    omegas = 2.0 * torch.pi * freqs
+
+    power = (fft_vals.real ** 2 + fft_vals.imag ** 2)
+
+    # Define a small window around target_omega
+    # e.g. +- 10% or based on frequency resolution
+    window = 0.1 * target_omega
+    mask = (omegas >= target_omega - window) & (omegas <= target_omega + window)
+
+    P_main = power[mask].sum()
+    P_total = power.sum() + 1e-30
+
+    purity = P_main / P_total  # fraction of power near omega_C
+    M = 1.0 - purity  # loss: 0 = pure, 1 = totally spread
+    return M
+```
+
+You know `dt` and `target_omega = params.compton_omega`.
+
+### 1.4. Optional: topological integrity metric
+
+If you want to explicitly check the **double-loop** character, you can look at angular Fourier components in a fixed cross-section at some `z`:
+
+* Take a slice at `z ≈ 0` (or average over a small range of `z`).
+
+* Project amplitude envelope `F(x,y)` in that slice.
+
+* Compute:
+
+  [
+  F_m = \int F(\rho, \phi), e^{-i m\phi}, dA
+  ]
+
+* For a good double loop, `|F_2|` should dominate `|F_0|` and higher modes.
+
+In code, for now we can leave this as a TODO suggestion; `D_shape` already covers a lot.
+
+### 1.5. Constraint penalties: energy, momentum, spin, charge
+
+You probably want to **penalize** deviations from:
+
+* (E(t_0) \approx m_e c^2),
+* (\mathbf{P} \approx 0),
+* (|\mathbf{S}| \approx \hbar/2),
+* (Q \approx -e).
+
+Assume you have:
+
+```python
+def compute_total_energy(state) -> torch.Tensor: ...
+def compute_total_momentum(state) -> torch.Tensor:  # returns (3,)
+def compute_total_spin(state) -> torch.Tensor:      # returns (3,)
+def compute_effective_charge(state) -> torch.Tensor: ...
+```
+
+Then:
+
+```python
+def compute_constraint_penalties(state0, physical):
+    """
+    state0: initial state
+    physical: struct with m_e, c, hbar, e, etc.
+    """
+    E0 = compute_total_energy(state0)
+    P0 = compute_total_momentum(state0)      # (3,)
+    S0 = compute_total_spin(state0)          # (3,)
+    Q0 = compute_effective_charge(state0)
+
+    # Desired values
+    E_target = physical.m_e * physical.c ** 2
+    S_target = 0.5 * physical.hbar
+    Q_target = -physical.e
+
+    # Penalties (squared relative errors where possible)
+    L_E_const = ((E0 - E_target) / (E_target + 1e-30)) ** 2
+    L_P_const = (P0 ** 2).sum() / ( (physical.m_e * physical.c) ** 2 + 1e-30 )
+    L_S_const = ((S0.norm() - S_target) / (S_target + 1e-30)) ** 2
+    L_Q_const = ((Q0 - Q_target) / (abs(Q_target) + 1e-30)) ** 2
+
+    return L_E_const, L_P_const, L_S_const, L_Q_const
+```
+
+### 1.6. Combine into a single loss
+
+Now combine everything:
+
+```python
+def compute_electron_stability_loss(
+    states,
+    tube_mask,
+    core_mask,
+    params: ElectronInitParams,
+    physical: PhysicalConstants,
+    dt: float,
+    weights=None,
+):
+    """
+    states: list[BraneState] from t=0..T
+    tube_mask, core_mask: (...,) boolean or float masks
+    dt: time step between states
+    weights: optional dict of weighting factors
+    """
+    if weights is None:
+        weights = dict(
+            w_leak=1.0,
+            w_shape=1.0,
+            w_mode=0.5,
+            w_Ec=1.0,
+            w_Pc=0.5,
+            w_Sc=0.5,
+            w_Qc=1.0,
+        )
+
+    L_leak = compute_energy_leakage(states, tube_mask)
+    L_shape = compute_shape_drift(states, tube_mask, core_mask)
+    L_mode  = compute_mode_purity(states, core_mask, dt, params.compton_omega)
+
+    L_Ec, L_Pc, L_Sc, L_Qc = compute_constraint_penalties(states[0], physical)
+
+    loss = (
+        weights["w_leak"] * L_leak
+        + weights["w_shape"] * L_shape
+        + weights["w_mode"]  * L_mode
+        + weights["w_Ec"]    * L_Ec
+        + weights["w_Pc"]    * L_Pc
+        + weights["w_Sc"]    * L_Sc
+        + weights["w_Qc"]    * L_Qc
+    )
+    return loss
+```
+
+This gives you a **single scalar** to minimize over `params`.
+
+---
+
+## 2. Calibration of electron parameters from physical constraints
+
+Now: how to pick `R, rho0, sigma_r, A, lateral_spin_scale` so we start from a physically reasonable state *before* optimization.
+
+We can treat calibration as **cheap static diagnostics** (no time evolution).
+
+### 2.1. Calibrate geometry to Compton scale (R, maybe rho0)
+
+We assume your brane lattice is already **Compton-calibrated**:
+
+* Grid spacing `h` is fixed by your existing `compton_calibrated_brane_lattice_params`.
+* So the Compton wavelength (\lambda_C) corresponds to some number of grid steps (N_\lambda).
+
+For a first shot:
+
+* Choose torus circumference (L = 2\pi R \approx \lambda_C).
+
+* So
+
+  ```python
+  R = lambda_C / (2.0 * math.pi)
+  ```
+
+* Then in grid units:
+
+  ```python
+  R_lattice = R / h
+  ```
+
+You might also decide to have (L = n,\lambda_C) with small integer (n); treat that as a parameter.
+
+For the double-loop cross-section:
+
+* Choose `rho0` such that the lobes lie inside the tube but are not too close to centerline:
+
+  ```python
+  rho0 ~ 0.3 * R   # or 0.2 * R, etc.
+  sigma_r ~ 0.1 * R
+  ```
+
+In code, you can do something like:
+
+```python
+def default_electron_geometry(physical, lattice_params):
+    lambda_C = physical.hbar / (physical.m_e * physical.c)
+    h = lattice_params.dx  # assuming isotropic spacing
+
+    R_phys = lambda_C / (2.0 * math.pi)
+    R = R_phys             # store in physical units; positions already in SI-like units
+
+    rho0 = 0.3 * R_phys
+    sigma_r = 0.1 * R_phys
+
+    return R, rho0, sigma_r
+```
+
+You’ll later let optimization tweak these slightly.
+
+### 2.2. Calibrate amplitude A from charge (primary)
+
+You already have a relation “charge magnitude from internal energy density” in the paper. Numerically, let’s exploit the (approximate) scaling:
+
+* Internal energy density (\propto A^2),
+* Effective charge (Q \propto) some functional of energy density (\propto A^2).
+
+So **to first approximation**:
+
+[
+Q(A) \approx \alpha,A^2
+]
+
+Algorithm:
+
+```python
+def calibrate_amplitude_for_charge(base_state, params_geom, physical):
+    """
+    base_state: flat brane (no electron yet)
+    params_geom: object with R, rho0, sigma_r, other geo params
+    physical: e, etc.
+
+    Returns: A_calibrated
+    """
+    # Start with A = 1 and measure Q
+    params = ElectronInitParams(
+        center=params_geom.center,
+        R=params_geom.R,
+        rho0=params_geom.rho0,
+        sigma_r=params_geom.sigma_r,
+        A=1.0,
+        tube_max_radius=params_geom.tube_max_radius,
+        compton_omega=params_geom.compton_omega,
+        wave_speed=params_geom.wave_speed,
+        lateral_spin_scale=0.0,
+    )
+
+    state = base_state.clone()
+    init_electron_state(state, params)
+    Q1 = compute_effective_charge(state)  # numeric
+
+    # Avoid division by zero
+    if abs(Q1) < 1e-30:
+        raise RuntimeError("Charge for A=1 is ~0; check implementation.")
+
+    # Assume Q(A) ~ Q1 * A^2.
+    Q_target = -physical.e
+    A_est = math.sqrt(abs(Q_target / Q1))
+
+    # Choose sign convention (if needed)
+    if Q1 > 0 and Q_target < 0:
+        # If flipping the sign of A flips the sign of Q, do that here.
+        # If Q depends on A^2 only, sign may not matter.
+        pass
+
+    return A_est
+```
+
+If the `Q(A)` relation is slightly nonlinear, you can refine with 1–2 iterations:
+
+* Compute `Q(A_est)`
+* Update `A_est *= sqrt(Q_target/Q(A_est))`
+
+until close enough.
+
+### 2.3. Calibrate energy (secondary)
+
+After fixing `A`, check if total energy matches (m_ec^2):
+
+```python
+def check_energy_for_params(base_state, params, physical):
+    state = base_state.clone()
+    init_electron_state(state, params)
+    E0 = compute_total_energy(state)
+    E_target = physical.m_e * physical.c ** 2
+    return E0, E_target
+```
+
+If `E0` is within, say, 5–10% of `E_target`, you can accept it and let optimization iron out the difference.
+
+If you want to improve analytically, one strategy:
+
+* Keep `A` fixed (to preserve charge),
+* Adjust `rho0` or `sigma_r` slightly: a broader cross-section changes energy density and gradients.
+* Use a small 1D search:
+
+  ```python
+  # Very rough sketch:
+  rho0_values = np.linspace(0.2*R, 0.4*R, 5)
+  best_rho0 = None
+  best_err = None
+  for rho in rho0_values:
+      params_tmp = params.with_rho0(rho)
+      E0, E_target = check_energy_for_params(base_state, params_tmp, physical)
+      err = abs(E0 - E_target) / E_target
+      if best_err is None or err < best_err:
+          best_err = err
+          best_rho0 = rho
+  ```
+
+Use the best `rho0` as your calibrated value. This is cheap compared to full time evolution.
+
+### 2.4. Calibrate spin via lateral_spin_scale
+
+If you want internal spin (|\mathbf{S}| \approx \hbar/2):
+
+1. Start from calibrated `A, R, rho0, sigma_r`.
+
+2. Pick a small trial `lateral_spin_scale = s0`.
+
+3. Initialize electron, compute spin:
+
+   ```python
+   params = params_geom.with_A(A).with_lateral_spin_scale(s0)
+   state = base_state.clone()
+   init_electron_state(state, params)
+   S = compute_total_spin(state)  # (3,)
+   S_mag = S.norm()
+   ```
+
+4. Assuming roughly linear scaling `S(A,s) ≈ β s` for fixed `A`, get:
+
+   [
+   s_{\text{target}} \approx \frac{\hbar/2}{S_{\text{mag}}}
+   ]
+
+   In code:
+
+   ```python
+   def calibrate_spin_scale(base_state, params, physical, s0=1.0):
+       params_s0 = params
+       params_s0.lateral_spin_scale = s0
+
+       state = base_state.clone()
+       init_electron_state(state, params_s0)
+       S = compute_total_spin(state)
+       S_mag = S.norm().item()
+       S_target = 0.5 * physical.hbar
+
+       if S_mag < 1e-30:
+           return 0.0  # can't calibrate, leave spin off or handle separately
+
+       spin_scale = S_target / S_mag * s0
+       return spin_scale
+   ```
+
+You can check afterwards that spin is reasonably close and again leave any residual mismatch to the optimization.
+
+### 2.5. Glue it together: a calibration function
+
+Finally, wrap all this in something like:
+
+```python
+@dataclass
+class PhysicalConstants:
+    m_e: float
+    c: float
+    hbar: float
+    e: float
+    # maybe others
+
+def calibrate_electron_init_params(base_state, lattice_params, physical) -> ElectronInitParams:
+    # 1) Geometry from Compton scale
+    R, rho0, sigma_r = default_electron_geometry(physical, lattice_params)
+
+    # 2) Rough tube radius
+    tube_max_radius = 3.0 * sigma_r  # for example
+
+    # 3) Compton frequency and wave speed in simulation units
+    omega_C = physical.m_e * physical.c ** 2 / physical.hbar
+    c_eff = physical.c  # if your mapping sets c to 1, use that
+
+    # 4) Calibrate amplitude A from charge
+    geom = SimpleNamespace(
+        center=(0.0, 0.0, 0.0),
+        R=R,
+        rho0=rho0,
+        sigma_r=sigma_r,
+        tube_max_radius=tube_max_radius,
+        compton_omega=omega_C,
+        wave_speed=c_eff,
+    )
+    A_cal = calibrate_amplitude_for_charge(base_state, geom, physical)
+
+    # 5) Build params
+    params = ElectronInitParams(
+        center=(0.0, 0.0, 0.0),
+        R=R,
+        rho0=rho0,
+        sigma_r=sigma_r,
+        A=A_cal,
+        tube_max_radius=tube_max_radius,
+        compton_omega=omega_C,
+        wave_speed=c_eff,
+        lateral_spin_scale=0.0,
+    )
+
+    # 6) Optionally refine geometry based on energy
+    # (Simple search or leave for optimization)
+
+    # 7) Optionally calibrate spin_scale
+    spin_scale = calibrate_spin_scale(base_state, params, physical, s0=1.0)
+    params.lateral_spin_scale = spin_scale
+
+    return params
+```
+
+Now you have:
+
+* A **calibrated analytic ansatz** for the electron, in the rest frame.
+* A **stability loss** that tells you how close that ansatz is to a true nonlinear bound mode in your discrete simulation.
+
+From here, the optimization loop is straightforward:
+
+```python
+def electron_loss_for_theta(theta, base_state, lattice_params, physical, sim_config):
+    params = decode_theta_to_params(theta, lattice_params, physical)
+    state0 = base_state.clone()
+    init_electron_state(state0, params)
+
+    states = run_simulation(state0, sim_config)
+    tube_mask, core_mask = build_electron_masks(state0.positions, params)
+    loss = compute_electron_stability_loss(states, tube_mask, core_mask, params, physical, dt=sim_config.dt)
+    return loss
+```
+
+and you can plug `electron_loss_for_theta` into CMA-ES, Adam (if you differentiate through time), or any optimizer you like.
+
+If you want, next step we can refine **decode_theta_to_params** (which parameters to expose to the optimizer, sensible ranges, scaling) so you don’t end up searching in a weird space.
