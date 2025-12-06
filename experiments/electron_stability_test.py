@@ -20,8 +20,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import math
 import torch
-import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -42,7 +42,12 @@ from branesim.diagnostics.electron_stability import (
 )
 
 
-def setup_experiment():
+def setup_experiment(
+    grid_shape=(20, 20, 20),
+    N_periods=3.0,
+    eta_cfl=0.2,
+    amplitude_scale=1e-13,
+):
     """
     Set up experiment parameters.
 
@@ -64,11 +69,18 @@ def setup_experiment():
     grid_extent = 3.0 * lambda_C
     n_per_side = int(grid_extent / h) + 1
 
-    # For initial testing, use a smaller grid to make it faster
-    # You can increase this for production runs
-    nx, ny, nz = 20, 20, 20  # Smaller for testing
+    # Use configurable grid shape
+    nx, ny, nz = grid_shape
     print(f"\nGrid size: {nx} × {ny} × {nz} = {nx*ny*nz} points")
     print(f"Grid spacing h = {h:.6e} m ({h/lambda_C:.4f} λ_C)")
+
+    # Sanity check: electron should fit in grid
+    R_est = lambda_C / (2.0 * math.pi)
+    box_size = min(nx, ny, nz) * h
+    if box_size < 4 * R_est:
+        print(f"WARNING: Grid may be too small for electron torus!")
+        print(f"  Box size: {box_size:.6e} m")
+        print(f"  Electron diameter estimate: {2*R_est:.6e} m")
 
     # Brane parameters - Compton calibration
     # Point mass from density: ρ_m h³ where ρ_m is chosen to give c = √(T/ρ_m)
@@ -90,13 +102,10 @@ def setup_experiment():
     # Time stepping
     # CFL condition: dt < η h / c
     # For FCC lattice, η ≈ 0.33
-    # Use more conservative value for stability
-    eta_cfl = 0.2
     dt = eta_cfl * h / constants.c
 
     # Simulation duration: Run for N_periods Compton periods
     T_compton = 2 * math.pi / (constants.m_e * constants.c ** 2 / constants.hbar)
-    N_periods = 3  # Run for 3 Compton periods
     T_total = N_periods * T_compton
     n_steps = int(T_total / dt)
     snapshot_interval = max(1, n_steps // 20)  # 20 snapshots
@@ -111,7 +120,7 @@ def setup_experiment():
 
     config = {
         'constants': constants,
-        'grid_shape': (nx, ny, nz),
+        'grid_shape': grid_shape,
         'h': h,
         'k': k,
         'rest_length_frac': rest_length_frac,
@@ -120,6 +129,7 @@ def setup_experiment():
         'n_steps': n_steps,
         'snapshot_interval': snapshot_interval,
         'N_periods': N_periods,
+        'amplitude_scale': amplitude_scale,
     }
 
     return config
@@ -154,8 +164,8 @@ def initialize_electron(state, grid, config):
     print(f"{'='*60}")
 
     # Get calibrated parameters
-    # Start with a small amplitude scale - this should be refined
-    amplitude_scale = 1e-13  # meters (~ 0.1 pm)
+    # Use amplitude scale from config
+    amplitude_scale = config['amplitude_scale']
 
     params = calibrate_electron_init_params(
         constants=constants,
@@ -276,6 +286,7 @@ def analyze_stability(states, params, config):
         dt=dt * config['snapshot_interval'],
         target_omega=params.compton_omega,
         center=params.center,
+        spin_axis=params.spin_axis,
     )
 
     print(f"\n=== Stability Results ===")
@@ -338,12 +349,50 @@ def visualize_results(states, params, config):
 
 def main():
     """Main experiment runner."""
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(
+        description='Electron Stability Test Experiment',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        '--periods',
+        type=float,
+        default=3.0,
+        help='Number of Compton periods to simulate'
+    )
+    parser.add_argument(
+        '--amp',
+        type=float,
+        default=1e-13,
+        help='Amplitude scale in meters (e.g., 1e-13 for 0.1 pm)'
+    )
+    parser.add_argument(
+        '--grid',
+        type=int,
+        nargs=3,
+        default=[20, 20, 20],
+        metavar=('NX', 'NY', 'NZ'),
+        help='Grid dimensions'
+    )
+    parser.add_argument(
+        '--cfl',
+        type=float,
+        default=0.2,
+        help='CFL parameter (eta)'
+    )
+    args = parser.parse_args()
+
     print(f"\n{'='*60}")
     print(f"Electron Stability Test Experiment")
     print(f"{'='*60}")
 
-    # Setup
-    config = setup_experiment()
+    # Setup with command-line parameters
+    config = setup_experiment(
+        grid_shape=tuple(args.grid),
+        N_periods=args.periods,
+        eta_cfl=args.cfl,
+        amplitude_scale=args.amp,
+    )
 
     # Create grid and state
     grid = BraneGrid(
