@@ -228,7 +228,7 @@ def run_simulation(state, grid, physics, solver, config):
     states = [state.clone()]  # Store initial state
 
     for step in range(n_steps):
-        solver.step(state, grid, physics)
+        solver.step(state)
 
         # Collect snapshot
         if (step + 1) % snapshot_interval == 0:
@@ -395,10 +395,12 @@ def main():
     )
 
     # Create grid and state
+    device = torch.device('cpu')  # Use CPU for now
     grid = BraneGrid(
         grid_shape=config['grid_shape'],
         spacing=config['h'],
         dimension=Dimensionality.THREE_D,
+        device=device,
     )
 
     state = BraneState(
@@ -417,10 +419,18 @@ def main():
     physics = SpringForceComputer(
         spring_constant=config['k'],
         rest_length=rest_length,
-        mass_point=m_point,
     )
 
-    solver = VelocityVerletSolver()
+    # Convert point mass to mass density
+    h = config['h']
+    mass_density = m_point / (h ** 3)  # ρ_m = m_point / h³
+
+    solver = VelocityVerletSolver(
+        dt=config['dt'],
+        mass_density=mass_density,
+        physics=physics,
+        grid=grid,
+    )
 
     # Initialize electron
     params = initialize_electron(state, grid, config)
