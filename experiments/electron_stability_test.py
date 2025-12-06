@@ -49,10 +49,10 @@ from electron_visualization import (
 
 
 def setup_experiment(
-    grid_shape=(20, 20, 20),
+    grid_shape=(60, 60, 60),
     N_periods=3.0,
     eta_cfl=0.2,
-    amplitude_scale=1e-13,
+    amplitude_scale=3e-14,
 ):
     """
     Set up experiment parameters.
@@ -67,15 +67,11 @@ def setup_experiment(
     lambda_C = constants.lambda_C
     R_est = lambda_C / (2.0 * math.pi)  # Electron major radius
 
-    # FIX: Keep physical box size constant, vary resolution with grid_shape
-    # Box should contain electron + buffer
-    # Electron fits in box of ~2R = λ_C/π ≈ 0.32λ_C
-    # Add buffer for radiation: use 1.5λ_C box (tighter but still reasonable)
-    box_size_phys = 1.5 * lambda_C
-
-    # Now compute grid spacing from box size and grid dimensions
+    # Target grid spacing: h = λ_C/10 for better resolution
+    # Box size is derived from this and grid dimensions
     nx, ny, nz = grid_shape
-    h = box_size_phys / nx  # Grid spacing determined by resolution
+    h = lambda_C / 100.0  # Fixed target resolution
+    box_size_phys = nx * h  # Box size derived from grid spacing
 
     print(f"\n=== Grid Configuration ===")
     print(f"Grid size: {nx} × {ny} × {nz} = {nx*ny*nz:,} points")
@@ -111,7 +107,7 @@ def setup_experiment(
     # ρ_m = T/c² = k/(h·c²)
     # m_point = ρ_m h³ = k h²/c²
     k = 1e3  # Spring constant [N/m]
-    rest_length_frac = 0.9  # rest_length = rest_length_frac * h
+    rest_length_frac = 0.1  # rest_length = rest_length_frac * h (gentler nonlinearity)
 
     # Compton-calibrated point mass
     m_point = k * h * h / (constants.c ** 2)
@@ -386,14 +382,14 @@ def main():
     parser.add_argument(
         '--amp',
         type=float,
-        default=1e-13,
-        help='Amplitude scale in meters (e.g., 1e-13 for 0.1 pm)'
+        default=3e-14,
+        help='Amplitude scale in meters (e.g., 3e-14 for 0.03 pm)'
     )
     parser.add_argument(
         '--grid',
         type=int,
         nargs=3,
-        default=[20, 20, 20],
+        default=[60, 60, 60],
         metavar=('NX', 'NY', 'NZ'),
         help='Grid dimensions'
     )
