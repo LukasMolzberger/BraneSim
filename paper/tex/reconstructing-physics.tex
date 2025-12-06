@@ -577,6 +577,11 @@ a double-loop pattern. The internal oscillation frequency is therefore
 of order twice the Compton frequency, and from the viewpoint of any
 probe that cannot resolve such timescales the detailed field pattern is
 seen only through its time-averaged effect on the surrounding medium.
+A more detailed analysis of how de~Broglie's ``harmony of phases''
+appears in this brane-based toroidal electron model, and how the
+de~Broglie wavelength arises from internal lightlike propagation in
+the world-tube geometry, is given in
+Section~\ref{subsec:harmony-phases}.
 
 \subsubsection{Tubular coordinates around the toroidal electron}
 \label{subsec:tubular-electron}
@@ -843,6 +848,129 @@ different macroscopic manifestations of the same microscopic structure,
 without double-counting: gravity depends on metric curvature (quadratic
 in $\nabla X^4$), while electrostatics depends linearly on the Laplacian
 of $\bar{X}^4$.
+
+\subsubsection{De Broglie's harmony of phases in the brane picture}
+\label{subsec:harmony-phases}
+
+In the original work by de~Broglie and in its implementation by
+Williamson and van~der~Mark, the electron is associated with a
+localized internal ``Compton clock'' and an external guiding wave
+whose phases remain locked along the electron worldline, a relation
+de~Broglie called the ``harmony of phases''. In the toroidal photon
+model of Williamson and van~der~Mark the internal clock arises from a
+photon circulating at essentially the speed of light around a closed
+loop of length $S\sim\lambda_C$, while the guiding wave with
+de~Broglie wavelength emerges from the transformation of this
+circulating field into a moving frame.
+
+In our brane-based formulation this internal clock is represented by
+the microscopic amplitude mode $\xi(t,z,x,y)$ confined to the
+world-tube around the electron's centerline, as introduced in
+Section~\ref{subsec:tubular-electron}. In the electron rest frame the
+dynamics of this mode are dominated by a lightlike internal oscillation
+with Compton frequency $\omega_C$,
+%
+\begin{equation}
+  \xi(t,z,x,y)
+  \;\approx\;
+  A\,f(x,y)\,
+  \cos\!\bigl(\omega_C t - k_C z + \Phi(x,y)\bigr),
+  \qquad
+  k_C = \frac{\omega_C}{c},
+  \label{eq:xi-rest-compton-mode}
+\end{equation}
+%
+where $(z,x,y)$ are the tubular coordinates along and around the
+centerline, $f(x,y)$ is a localized cross-section profile encoding the
+double-loop structure in the $(x,y)$-plane, and $\Phi(x,y)$ is a
+relative phase between the two windings. To leading order the
+amplitude mode propagates along $z$ at the characteristic brane wave
+speed $c$, so that the phase of the internal oscillation can be
+written, in comoving coordinates $(\tau,\zeta)$ adapted to the
+world-tube,
+%
+\begin{equation}
+  \phi
+  \;=\;
+  \omega_C\,\tau - k_C\,\zeta,
+  \label{eq:xi-internal-phase}
+\end{equation}
+%
+with $\tau$ the proper time measured by the internal Compton clock and
+$\zeta$ a coordinate along the internal lightlike path in the tube.
+
+In the effective relativistic limit discussed in
+Section~\ref{sec:emergent-relativity} the brane dynamics induce an
+approximately Minkowskian line element for the coarse-grained
+geometry,
+%
+\begin{equation}
+  c^2\,d\tau^2
+  \;\approx\;
+  c^2\,dt^2 - d\mathbf x^2,
+  \label{eq:emergent-metric-line-element}
+\end{equation}
+%
+so that for an electron moving with velocity $v$ along, say, the
+$x$-direction we can express $\tau$ and $\zeta$ in terms of the lab
+coordinates $(t,x)$.
+To leading order one finds the familiar Lorentz relations
+%
+\begin{equation}
+  \tau
+  \;=\;
+  \gamma\Bigl(t - \frac{v x}{c^2}\Bigr),
+  \qquad
+  \gamma = \frac{1}{\sqrt{1 - v^2/c^2}},
+  \label{eq:proper-time-lab}
+\end{equation}
+%
+and an internal null propagation condition $d\zeta \approx c\,d\tau$.
+Substituting these into the phase
+\eqref{eq:xi-internal-phase} and eliminating $\zeta$ in favour of
+$(t,x)$ yields, up to an additive constant,
+%
+\begin{equation}
+  \phi(t,x)
+  \;\approx\;
+  \omega_C\,\gamma\Bigl(t - \frac{v x}{c^2}\Bigr),
+  \label{eq:harmony-phase-lab}
+\end{equation}
+%
+which has the standard de~Broglie form of a plane wave with frequency
+$\omega = \gamma\omega_C$ and spatial wavenumber
+$k = \gamma\omega_C v / c^2$, corresponding to a de~Broglie
+wavelength $\lambda_B = 2\pi/k = h/(\gamma m v)$.
+
+In this view the ``harmony of phases'' is no longer a postulate but a
+consequence of two ingredients of the brane model: (i) the internal
+amplitude mode $\xi$ always propagates along the electron's world-tube
+at the microscopic wave speed $c$ in the effective brane metric, and
+(ii) the toroidal soliton as a whole moves through the brane with
+velocity $v$ while maintaining a self-consistent tubular geometry.
+Because of this, the internal Compton phase $\omega_C\tau$ and the
+coarse-grained guiding wave phase $\phi(t,x)$ are automatically locked
+along the soliton worldline, reproducing de~Broglie's phase harmony.
+
+The tubular-coordinate analysis of Section~\ref{subsec:tubular-electron}
+makes the underlying mechanism more transparent.
+The induced metric $g_{ab}(z,x,y)$ in the world-tube contains explicit
+curvature- and torsion-dependent couplings, cf.
+Eq.~\eqref{eq:tubular-metric}, so that steep longitudinal gradients of
+$\xi$ along $z$ are geometrically coupled to transverse derivatives in
+$(x,y)$. The effective amplitude Lagrangian~\eqref{eq:xi-tubular-lagrangian}
+and gradient energy~\eqref{eq:xi-gradient-energy} then show that
+large Compton-scale gradients along the tube drive lateral
+deformations of the brane which confine the internal mode to a finite
+tubular region and adjust the local propagation speed relative to the
+coarse-grained brane geometry. The emergent Lorentz factor $\gamma$
+and the associated length contraction are thus encoded in the
+self-consistent balance between internal lightlike propagation of the
+amplitude mode and lateral motion of the brane points that maintains
+the toroidal geometry.\footnote{For a more detailed discussion of the
+geometric nonlinearity and its role in setting a critical amplitude
+threshold near the Compton scale, see the separate technical note
+submitted with this manuscript.}
 
 \subsubsection{Weak-field gravity and Newtonian limit}
 \label{subsec:weak_field_gravity}
