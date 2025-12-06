@@ -41,6 +41,12 @@ from branesim.diagnostics.electron_stability import (
     compute_total_spin,
 )
 
+# Import visualization functions
+from electron_visualization import (
+    visualize_initial_state,
+    create_all_animations,
+)
+
 
 def setup_experiment(
     grid_shape=(20, 20, 20),
@@ -58,28 +64,45 @@ def setup_experiment(
     constants = PhysicalConstants()
 
     # Grid parameters
-    # Use a smaller grid for faster testing
-    # Target: ~5 grid points per Compton wavelength in each dimension
     lambda_C = constants.lambda_C
-    h = lambda_C / 5.0  # Grid spacing
+    R_est = lambda_C / (2.0 * math.pi)  # Electron major radius
 
-    # Grid should be large enough to contain electron + some buffer
-    # Electron diameter ~ 2R ~ λ_C/π ~ 0.32 λ_C
-    # Use 3 λ_C in each dimension for buffer
-    grid_extent = 3.0 * lambda_C
-    n_per_side = int(grid_extent / h) + 1
+    # FIX: Keep physical box size constant, vary resolution with grid_shape
+    # Box should contain electron + buffer
+    # Electron fits in box of ~2R = λ_C/π ≈ 0.32λ_C
+    # Add buffer for radiation: use 1.5λ_C box (tighter but still reasonable)
+    box_size_phys = 1.5 * lambda_C
 
-    # Use configurable grid shape
+    # Now compute grid spacing from box size and grid dimensions
     nx, ny, nz = grid_shape
-    print(f"\nGrid size: {nx} × {ny} × {nz} = {nx*ny*nz} points")
-    print(f"Grid spacing h = {h:.6e} m ({h/lambda_C:.4f} λ_C)")
+    h = box_size_phys / nx  # Grid spacing determined by resolution
 
-    # Sanity check: electron should fit in grid
-    R_est = lambda_C / (2.0 * math.pi)
-    box_size = min(nx, ny, nz) * h
-    if box_size < 4 * R_est:
+    print(f"\n=== Grid Configuration ===")
+    print(f"Grid size: {nx} × {ny} × {nz} = {nx*ny*nz:,} points")
+    print(f"Physical box: {box_size_phys*1e12:.2f} pm = {box_size_phys/lambda_C:.1f} λ_C")
+    print(f"Grid spacing h = {h:.6e} m = {h*1e12:.3f} pm")
+    print(f"  h/λ_C = {h/lambda_C:.4f}")
+    print(f"  λ_C/h = {lambda_C/h:.1f} (points per λ_C)")
+
+    # Key metric: points around electron circumference
+    circumference = 2 * math.pi * R_est
+    points_around = circumference / h
+    print(f"\n=== Electron Resolution ===")
+    print(f"Electron major radius R = {R_est*1e12:.3f} pm")
+    print(f"R/h = {R_est/h:.2f} grid spacings")
+    print(f"Circumference = {circumference*1e12:.3f} pm")
+    print(f"Points around circumference: ~{points_around:.1f}")
+    if points_around < 10:
+        print(f"  ⚠️  WARNING: Need at least 10-20 points for minimal resolution!")
+    elif points_around < 20:
+        print(f"  ⚠️  Marginal resolution")
+    else:
+        print(f"  ✓ Good resolution")
+
+    # Sanity check
+    if box_size_phys < 4 * R_est:
         print(f"WARNING: Grid may be too small for electron torus!")
-        print(f"  Box size: {box_size:.6e} m")
+        print(f"  Box size: {box_size_phys:.6e} m")
         print(f"  Electron diameter estimate: {2*R_est:.6e} m")
 
     # Brane parameters - Compton calibration
@@ -435,6 +458,9 @@ def main():
     # Initialize electron
     params = initialize_electron(state, grid, config)
 
+    # Visualize initial state (3 orthogonal slices)
+    visualize_initial_state(state, params, config)
+
     # Run simulation
     states = run_simulation(state, grid, physics, solver, config)
 
@@ -443,6 +469,9 @@ def main():
 
     # Visualize
     visualize_results(states, params, config)
+
+    # Create animations (6 videos: 3 amplitude + 3 distortion)
+    create_all_animations(states, config)
 
     print(f"\n{'='*60}")
     print(f"Experiment Complete")
