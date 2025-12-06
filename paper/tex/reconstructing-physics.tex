@@ -578,6 +578,181 @@ of order twice the Compton frequency, and from the viewpoint of any
 probe that cannot resolve such timescales the detailed field pattern is
 seen only through its time-averaged effect on the surrounding medium.
 
+\subsubsection{Tubular coordinates around the toroidal electron}
+\label{subsec:tubular-electron}
+
+The qualitative Williamson--van der Mark picture --- a localized
+photon-like internal mode circulating at (essentially) the speed of
+light along a double-loop path confined to a torus --- can be made
+more explicit by introducing tubular coordinates around the soliton's
+centerline. This is the continuum analogue of the ``curved tunnel''
+or ``tape'' picture discussed in Section~\ref{conceptual-model}, and
+will be useful for analysing how geometric nonlinearity couples the
+internal Compton mode to lateral deformations of the brane.
+
+Let $\mathbf{C}(z)\in\mathbb R^3$ denote the spatial centerline of the
+toroidal electron in the brane's three lateral directions
+$X^1,X^2,X^3$, parametrized by arclength $z\in[0,L)$ in the electron
+rest frame, so that $|\partial_z\mathbf C(z)|=1$ and $\mathbf C(z+L)
+=\mathbf C(z)$. Along this closed curve we introduce the Frenet--Serret
+frame $(\mathbf t(z),\mathbf n(z),\mathbf b(z))$ with curvature
+$\kappa(z)$ and torsion $\tau(z)$,
+%
+\begin{equation}
+  \mathbf t'=\kappa\,\mathbf n,\qquad
+  \mathbf n'=-\kappa\,\mathbf t+\tau\,\mathbf b,\qquad
+  \mathbf b'=-\tau\,\mathbf n,
+  \label{eq:frenet-serret}
+\end{equation}
+%
+where $'=\partial_z$. A small tubular neighbourhood of the centerline
+is then parametrized by coordinates $(z,x,y)$ via
+%
+\begin{equation}
+  \mathbf r(z,x,y)
+  \;=\;
+  \mathbf C(z) + x\,\mathbf n(z) + y\,\mathbf b(z),
+  \label{eq:tubular-embedding}
+\end{equation}
+%
+with $(x,y)$ spanning the cross-section of the ``tunnel'' around the
+electron. The microscopic embedding field is still
+$\mathbf X=(X^1,X^2,X^3,X^4)$, but in these adapted coordinates the
+three lateral components $(X^1,X^2,X^3)$ are replaced by
+$\mathbf r(z,x,y)$, while the amplitude direction $X^4$ remains a
+separate normal coordinate. We denote the microscopic amplitude mode in
+this tubular neighbourhood by
+%
+\begin{equation}
+  \xi(t,z,x,y) \;:=\; X^4\bigl(t,\mathbf r(z,x,y)\bigr),
+  \label{eq:xi-from-X4}
+\end{equation}
+%
+so that $(t,z,x,y)$ serve as local coordinates on the world-tube of
+the electron, with the double-loop structure encoded in the internal
+mode pattern of $\xi$ across the cross-section $(x,y)$.
+
+The induced metric $g_{ab}$ on the brane in the coordinates
+$(z,x,y)$ is obtained by pulling back the flat ambient metric
+in the lateral directions:
+%
+\begin{equation}
+  g_{ab}(z,x,y)
+  \;=\;
+  \partial_a\mathbf r\cdot\partial_b\mathbf r,
+  \qquad a,b\in\{z,x,y\}.
+  \label{eq:tubular-metric-def}
+\end{equation}
+%
+Using the Frenet--Serret relations~\eqref{eq:frenet-serret} one finds
+to first order in the transverse distance $\rho=\sqrt{x^2+y^2}$ from
+the centerline,
+%
+\begin{equation}
+  g_{ab}
+  \;\approx\;
+  \begin{pmatrix}
+    1 - 2\kappa x & -\,\tau y & \;\;\tau x \\[0.4ex]
+    -\,\tau y & 1 & 0 \\[0.4ex]
+    \;\;\tau x & 0 & 1
+  \end{pmatrix},
+  \qquad
+  g^{ab}
+  \;\approx\;
+  \begin{pmatrix}
+    1 + 2\kappa x & \;\;\tau y & -\,\tau x \\[0.4ex]
+    \;\;\tau y & 1 & 0 \\[0.4ex]
+    -\,\tau x & 0 & 1
+  \end{pmatrix},
+  \label{eq:tubular-metric}
+\end{equation}
+%
+where $g^{ab}$ is the inverse metric, and we have neglected terms of
+order $\kappa^2\rho^2$ and $\tau^2\rho^2$. In these adapted
+coordinates the toroidal soliton appears, locally, as a straight tunnel
+aligned with the $z$-axis; the global curvature and double-loop
+structure are encoded entirely in the $z$-dependence of the frame
+$(\mathbf n,\mathbf b)$ and the metric coefficients $g_{ab}(z,x,y)$.
+The electromagnetic energy circulating along the double loop is then
+represented by a structured internal mode $\xi(t,z,x,y)$ living inside
+this world-tube and confined to a finite range of $(x,y)$ around the
+centerline.
+
+\paragraph{Effective amplitude dynamics in tubular coordinates.}
+
+Restricting attention to the dominant microscopic amplitude mode
+$\xi(t,z,x,y)$ inside the electron's world-tube, we can write a
+minimal effective Lagrangian density in the adapted coordinates
+$(t,z,x,y)$ of the form
+%
+\begin{equation}
+  \mathcal{L}_\xi
+  \;=\;
+  \frac{\rho_m}{2}\,(\partial_t \xi)^2
+  \;-\;
+  \frac{T_\mathrm{eff}}{2}\,g^{ab}\,\partial_a\xi\,\partial_b\xi
+  \;-\;
+  V_\mathrm{nl}(\xi,\partial\xi,\dots),
+  \label{eq:xi-tubular-lagrangian}
+\end{equation}
+%
+where $\rho_m$ is the effective mass density introduced in
+Section~\ref{sec:emergent-relativity}, $T_\mathrm{eff}$ is an effective
+tension along the tube that depends on the microscopic spring constant
+and rest length, and $V_\mathrm{nl}$ collects residual nonlinear
+corrections beyond the geometric contributions contained in the metric
+$g^{ab}$. Inserting the approximate inverse metric
+\eqref{eq:tubular-metric} yields, to first order in curvature and
+torsion,
+%
+\begin{align}
+  g^{ab}\,\partial_a\xi\,\partial_b\xi
+  \;\approx\;
+  &\bigl(1 + 2\kappa x\bigr)\,(\partial_z\xi)^2
+  + (\partial_x\xi)^2
+  + (\partial_y\xi)^2
+  \nonumber\\[0.5ex]
+  &\quad
+  + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
+  - 2\tau x\,(\partial_z\xi)(\partial_y\xi),
+  \label{eq:xi-gradient-tubular}
+\end{align}
+%
+so that the gradient energy density of the amplitude mode takes the
+schematic form
+%
+\begin{equation}
+  \mathcal{E}_{\mathrm{grad}}
+  \;\approx\;
+  \frac{T_\mathrm{eff}}{2}\Bigl[
+    \bigl(1+2\kappa x\bigr)(\partial_z\xi)^2
+    + (\partial_x\xi)^2
+    + (\partial_y\xi)^2
+    + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
+    - 2\tau x\,(\partial_z\xi)(\partial_y\xi)
+  \Bigr].
+  \label{eq:xi-gradient-energy}
+\end{equation}
+%
+Two features are worth emphasizing. First, the curvature term
+$\propto\kappa x(\partial_z\xi)^2$ implies that for sufficiently
+large longitudinal gradients of $\xi$ it becomes energetically
+favourable for the mode to shift its support away from the
+centerline in the transverse directions $(x,y)$, i.e.\ to develop a
+lateral ``bulge''. Second, the torsion terms
+$\propto\tau\,(\partial_z\xi)(\partial_x\xi)$ and
+$\propto\tau\,(\partial_z\xi)(\partial_y\xi)$ show that a purely
+longitudinal oscillation is not an eigenmode once the tube is twisted:
+steep variations along $z$ inevitably source transverse gradients
+$\partial_x\xi$ and $\partial_y\xi$. Together, these geometric
+couplings provide a concrete mechanism by which the strongly excited,
+Compton-frequency internal mode of the toroidal electron drives lateral
+deformations of the brane that confine the energy to a finite tubular
+region, while the microscopic spring rest length controls the relative
+cost of longitudinal stretching versus transverse bulging through the
+effective tension $T_\mathrm{eff}$ and thus sets the critical amplitude
+threshold for self-confinement.
+
 In the brane picture, this localized, circulating electromagnetic energy
 density produces a quasi-static amplitude deformation $\bar{X}^4$ in
 its vicinity. At the coarse-grained level we can thus treat the
@@ -2902,6 +3077,11 @@ We identify the emergent electrostatic potential as
 \end{equation}
 %
 where $\kappa_{\Phi}$ is the amplitude-to-potential coupling constant introduced in Section~\ref{subsec:charge-amplitude}.
+As discussed in Section~\ref{subsec:tubular-electron}, the microscopic
+structure of this bulge can be viewed as an internal Compton-frequency
+mode $\xi(t,z,x,y)$ circulating in a tubular neighbourhood around a
+closed centerline, with geometric nonlinearity and pre-tension
+conspiring to confine the energy to a finite toroidal region.
 In the far field
 %
 \begin{equation}
