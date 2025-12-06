@@ -270,7 +270,7 @@ def main():
     # Derive mass density from point mass: ρ_D = m_point / h^D
     rho_D = m_point / (h_phys ** D)  # kg/m (linear mass density)
     T_D = rho_D * constants.c**2  # N (tension - computed from c² = T_D/rho_D)
-    rest_length_phys = 0.0 * h_phys
+    rest_length_phys = 0.01 * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c
@@ -302,7 +302,7 @@ def main():
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size
-    nx = 400
+    nx = 2000
     domain_length_phys = nx * h_phys
     domain_length_sim = nx * h_sim  # = nx * 1.0 = nx
 
@@ -443,7 +443,7 @@ def main():
     print(f"  Wave center (phys) = {initial_center_phys:.6e} m")
 
     # Run simulation - fixed number of steps
-    num_steps = 4000
+    num_steps = 20000
     simulation_time_sim = num_steps * dt_sim
     simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys / constants.c

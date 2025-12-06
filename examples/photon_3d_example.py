@@ -287,9 +287,9 @@ def main():
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size - cubic geometry
-    nx = 200  # x dimension
-    ny = 200  # y dimension
-    nz = 200  # z dimension
+    nx = 100  # x dimension
+    ny = 100  # y dimension
+    nz = 100  # z dimension
     domain_length_phys_x = nx * h_phys
     domain_length_phys_y = ny * h_phys
     domain_length_phys_z = nz * h_phys
