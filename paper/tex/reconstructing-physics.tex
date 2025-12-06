@@ -2573,391 +2573,96 @@ In this model, however:
   \textbf{self-organizing resonance} in the field.
 \end{itemize}
 
-\subsubsection{Toroidal solitons and an emergent Dirac equation}
-\label{sec:emergent-dirac-from-torus}
+\subsubsection{Dirac equation as an effective constraint on the toroidal electron}
+\label{subsec:dirac-effective}
 
-The toy envelope construction of Sec.~\ref{sec:toy-envelope-schroedinger}
-treats a single gapped internal mode as a scalar field $\eta$ and leads,
-in the nonrelativistic limit, to a Schrödinger-like evolution equation
-for a complex envelope $\psi(\mathbf x,t)$. For electron-like excitations
-we must additionally account for (i) their relativistic kinematics and
-(ii) their internal spin-$\tfrac12$ structure. In the present framework
-both features are tied to the internal geometry of the toroidal soliton.
-
-As discussed in Secs.~\ref{sec:charge-amplitude}
-and~\ref{internal-structure-of-the-electron}, the toroidal soliton admits
-two discrete internal labels:
-\begin{itemize}
-  \item a chirality $\chi=\pm 1$ that distinguishes the orientation of the
-        circulating internal field and hence the sign of the effective charge;
-  \item a spin label $s=\pm\tfrac{1}{2}$ that encodes whether the internal
-        angular momentum is aligned or anti-aligned with a chosen axis.
-\end{itemize}
-At the classical level these data define four distinct internal
-configurations $(\chi,s)$. We now introduce slowly varying envelope
-amplitudes $\psi_{\chi,s}(x)$ on the emergent spacetime,
-\[
-  \psi_{\chi,s} : x^\mu \mapsto \psi_{\chi,s}(x),
-\]
-which describe the coarse-grained density and phase of solitons of type
-$(\chi,s)$ centred near the spacetime point $x^\mu$. Collecting them into
-a four-component object,
+In standard quantum field theory the Dirac equation
 \begin{equation}
-  \psi(x) \;=\;
+  (i\gamma^\mu\partial_\mu - m)\psi(x) \;=\; 0
+  \label{eq:dirac-equation}
+\end{equation}
+is usually interpreted as a relativistic wave equation for a spinor
+field $\psi(x)$ propagating in a fixed Minkowski background. In the
+present framework we take a different perspective. The microscopic
+dynamics are governed by the nonlinear brane action for the embedding
+fields $X^A(x)$, and the electron is realized as a localized toroidal
+soliton, described in terms of a tubular neighbourhood around a
+centerline as in Section~\ref{subsec:tubular-electron}. The Dirac
+equation is then viewed not as a fundamental microscopic equation of
+motion, but as an \emph{effective constraint} on the coarse-grained
+degrees of freedom associated with such a soliton.
+
+A Dirac spinor carries several gauge-invariant bilinear observables.
+The most important ones for the present discussion are the Dirac
+current
+\begin{equation}
+  j^\mu(x) \;=\; \bar\psi(x)\,\gamma^\mu\,\psi(x),
+  \qquad
+  \bar\psi \;=\; \psi^\dagger \gamma^0,
+  \label{eq:dirac-current}
+\end{equation}
+and the spin density encoded in the expectation value of the spin
+operator,
+\begin{equation}
+  \vec\Sigma \;=\;
+  \frac{1}{2}
   \begin{pmatrix}
-    \psi_{+,+}(x)\\[0.3em]
-    \psi_{+,-}(x)\\[0.3em]
-    \psi_{-,+}(x)\\[0.3em]
-    \psi_{-,-}(x)
+    \vec\sigma & 0 \\ 0 & \vec\sigma
   \end{pmatrix},
-  \label{eq:dirac-spinor-from-solitons}
+  \qquad
+  \vec S(x)
+  \;=\;
+  \frac{\psi^\dagger(x)\,\vec\Sigma\,\psi(x)}
+       {\psi^\dagger(x)\,\psi(x)}\,\frac{\hbar}{2}.
+  \label{eq:dirac-spin-density}
 \end{equation}
-one obtains an effective multi-component order parameter for the
-toroidal soliton sector.
+For a normalized positive-energy spinor in the electron rest frame
+one has, up to an overall density factor,
+\begin{equation}
+  j^\mu_{\text{rest}} \;\propto\; (1,0,0,0),
+  \qquad
+  \vec S_{\text{rest}} \;=\; \pm \frac{\hbar}{2}\,\hat{\mathbf z},
+  \label{eq:dirac-rest-bilinears}
+\end{equation}
+corresponding to nonzero charge density, vanishing net spatial
+current, and spin aligned or anti-aligned with a chosen quantization
+axis.
 
-\paragraph{Mechanical picture: four internal modes on the torus}
-
-Conceptually, the electron soliton is a localized toroidal deformation of
-the brane, on which the field has \textbf{fast internal motion} at
-(roughly) the Compton frequency $\omega_C$. There are \textbf{four nearly
-degenerate internal eigenmodes} of that motion, labeled by
-$(\chi,s)\in\{+1,-1\}\times\{+\tfrac12,-\tfrac12\}$, where:
+In the toroidal brane picture these bilinears are naturally
+interpreted as effective observables of the soliton. The coarse-grained
+four-velocity of the electron worldline is aligned with the Dirac
+current $j^\mu$, while the orientation of the torus axis and the
+handedness of the internal circulation determine a spin three-vector
+$\vec S_{\text{brane}}$ that is directly analogous to
+$\vec S(x)$ in~\eqref{eq:dirac-spin-density}. The discrete labels
+``electron versus positron'' and ``spin up versus spin down'' are then
+realized geometrically as different choices of
 \begin{itemize}
-  \item $\chi=\pm1$ is the \textbf{sense of circulation} of the double-loop
-        motion (right- vs.\ left-handed helical geodesics).
-  \item $s=\pm\frac12$ labels \textbf{two independent ways} to orient the
-        torus / internal momentum relative to the local brane frame (spin
-        up/down along some axis fixed by the soliton's rest frame).
+  \item the direction of the internal circulation of the Compton-scale
+  amplitude mode $\xi(t,z,x,y)$ around the torus, and
+  \item the orientation of the torus axis in the brane, i.e.\ the
+  alignment of the tubular coordinate system with respect to the
+  global brane coordinates.
 \end{itemize}
 
-Mechanically, we take torus coordinates $(u,v)\in[0,2\pi)^2$, with $u$
-around the \textbf{major circle} (centerline of the donut) and $v$ around
-the \textbf{minor circle} (cross-section). The Williamson \& van der
-Mark-like geodesics are \textbf{helical curves} on this torus, roughly of
-the form
-\[
-  \gamma_{\chi}(u) : (u,v(u))
-  \quad\text{with}\quad
-  v(u)\approx \chi\, u + \text{(small corrections)},
-\]
-each closed loop having length $\lambda_C$ and circulation at $\omega_C$.
-The four internal eigenmodes $\phi_{(\chi,s)}(u,v)$ are then:
-\begin{itemize}
-  \item localized in momentum space around \textbf{two opposite helical
-        directions} (chirality $\chi$),
-  \item and split into two modes that differ by how the internal momentum
-        pattern couples to the \textbf{external orientation} of the torus
-        (spin $s$).
-\end{itemize}
-
-One can think of the four modes as a \textbf{four-state internal ``fiber''}
-attached to each brane point, with a natural action of rotations (spin) and
-a flip of circulation (particle/antiparticle sector). The Dirac spinor will
-be exactly the \textbf{envelope} of these four internal modes.
-
-\paragraph{Mode expansion and projection: from brane PDE to envelope equations}
-
-We now make the statement ``Dirac spinor = envelope on four internal torus
-modes'' precise. Consider a single toroidal electron soliton in its rest
-frame. In a small neighbourhood of the soliton core, the transverse brane
-displacement in the extra dimension, $\xi_\perp(\mathbf{x},u,v,t)$, depends
-on the macroscopic brane coordinates $\mathbf{x}\in\mathbb{R}^3$, time $t$,
-and on internal torus coordinates $(u,v)\in[0,2\pi)^2$. Linearizing the
-microscopic brane equation around the static torus solution
-$\xi_{\perp,0}$, we obtain a linear operator $\mathcal{L}$ acting on small
-fluctuations $\delta\xi_\perp$,
-\begin{equation}
-  \mathcal{L}\,\delta\xi_\perp
-  \;=\;
-  \bigl(\partial_t^2 - c^2 \Delta_{\mathbf{x}} + \hat{\mathcal{L}}_{\rm int}\bigr)\,
-  \delta\xi_\perp
-  \;\approx\; 0,
-  \label{eq:brane-linearized-torus}
-\end{equation}
-where $\hat{\mathcal{L}}_{\rm int}$ is an elliptic operator capturing the
-dependence on the internal torus geometry $(u,v)$ and on the background
-soliton profile.
-
-On the internal torus, we define an eigenbasis of internal modes
-$\{\phi_{(\chi,s)}(u,v)\}$ by
-\begin{equation}
-  \hat{\mathcal{L}}_{\rm int}\,\phi_{(\chi,s)}(u,v)
-  \;=\;
-  -\,\Omega_{(\chi,s)}^2\,\phi_{(\chi,s)}(u,v),
-  \qquad
-  (\chi,s)\in\{+1,-1\}\times\{+\tfrac12,-\tfrac12\},
-  \label{eq:internal-mode-eigenvalue}
-\end{equation}
-with orthonormality
-\begin{equation}
-  \bigl\langle \phi_{(\chi,s)},\phi_{(\chi',s')}\bigr\rangle_{\rm T}
-  \;=\;
-  \int_{0}^{2\pi}\!\!\int_{0}^{2\pi}
-  \phi_{(\chi,s)}^*(u,v)\,\phi_{(\chi',s')}(u,v)\,\sqrt{g_{\rm int}}\,du\,dv
-  \;=\;\delta_{\chi\chi'}\delta_{ss'}.
-  \label{eq:internal-mode-orthonormality}
-\end{equation}
-We assume that the lowest nontrivial quartet of internal eigenmodes is
-(nearly) degenerate,
-\begin{equation}
-  \Omega_{(\chi,s)} \;\approx\; \omega_C,
-  \label{eq:mode-degeneracy}
-\end{equation}
-and that their spatial structure reflects the internal double-loop
-geodesics on the torus. Concretely, the label $\chi=\pm1$ distinguishes the
-two possible senses of circulation of the internal Compton loop, while
-$s=\pm\tfrac12$ distinguishes two orthogonal spin orientations relative to
-the local brane frame.
-
-We now expand the transverse displacement in this internal basis, making
-explicit the fast Compton-scale oscillation and slow spacetime envelopes:
-\begin{equation}
-  \delta\xi_\perp(\mathbf{x},u,v,t)
-  \;\approx\;
-  \sum_{(\chi,s)}
-  \bigl[
-    \psi_{\chi,s}(\mathbf{x},t)\,\phi_{(\chi,s)}(u,v)\,e^{-i\omega_C t}
-    + \psi_{\chi,s}^*(\mathbf{x},t)\,\phi_{(\chi,s)}^*(u,v)\,e^{+i\omega_C t}
-  \bigr].
-  \label{eq:torus_mode_expansion}
-\end{equation}
-Here $\psi_{\chi,s}(\mathbf{x},t)$ are slowly varying envelope fields in
-spacetime, satisfying
-\begin{equation}
-  \bigl|\partial_t \psi_{\chi,s}\bigr|\ll \omega_C\,|\psi_{\chi,s}|,
-  \qquad
-  \bigl|\nabla\psi_{\chi,s}\bigr|\ll \omega_C/c\,|\psi_{\chi,s}|.
-  \label{eq:slow-envelope-assumption}
-\end{equation}
-
-Inserting the ansatz~\eqref{eq:torus_mode_expansion} into the linearized
-brane equation and projecting onto each internal mode by
-$\langle\phi_{(\chi,s)},\cdot\rangle_{\rm T}$, we obtain coupled envelope
-equations. The dominant time derivatives act on the phase factor
-$e^{\mp i\omega_C t}$,
-\begin{equation}
-  \partial_t^2\bigl(\psi_{\chi,s} e^{-i\omega_C t}\bigr)
-  \;=\;
-  e^{-i\omega_C t}\bigl(-\omega_C^2 \psi_{\chi,s} - 2i\omega_C \partial_t\psi_{\chi,s}
-  + \partial_t^2\psi_{\chi,s}\bigr),
-  \label{eq:time-derivative-expansion}
-\end{equation}
-and the internal operator cancels the $-\omega_C^2$ term due to the
-eigenvalue condition~\eqref{eq:internal-mode-eigenvalue}. Neglecting the
-subleading $\partial_t^2\psi_{\chi,s}$ piece in the slowly varying
-approximation, the projected equation takes the schematic form
-\begin{equation}
-  2\,i\omega_C\,\partial_t \psi_{\chi,s}
-  \;\approx\;
-  c^2\,\Delta_{\mathbf{x}}\psi_{\chi,s}
-  \;+\;\text{(mode-mixing terms from internal geometry)}.
-  \label{eq:envelope_schematic}
-\end{equation}
-At this stage, one can either proceed in a non-relativistic fashion,
-leading to a Schr\"odinger-like equation for the envelopes, or restore a
-fully relativistic description by reintroducing the subleading time
-derivatives and collecting all four components into a multi-component
-field.
-
-\paragraph{Four-component envelope and emergent Klein--Gordon form}
-
-To obtain a relativistic envelope dynamics, we now keep the subleading
-$\partial_t^2\psi_{\chi,s}$ term and organize the four envelopes into the
-single four-component field $\psi(x)$ of
-Eq.~\eqref{eq:dirac-spinor-from-solitons}. Because all four internal modes
-share the same Compton frequency, the projected equations can be written,
-to leading order in gradients, as
-\begin{equation}
-  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\psi
-  \;+\;
-  \hat{\mathcal{M}}_{\mu\nu}\,\partial^\mu\partial^\nu\psi
-  \;+\;
-  \hat{\mathcal{N}}_{\mu}\,\partial^\mu\psi
-  \;\approx\; 0.
-  \label{eq:KG_with_mixings}
-\end{equation}
-Here $\hat{\mathcal{M}}_{\mu\nu}$ and $\hat{\mathcal{N}}_{\mu}$ are
-$4\times 4$ matrices acting in the internal mode space, generated by the
-overlap integrals of internal derivatives of the eigenmodes,
-\begin{equation}
-  \bigl(\hat{\mathcal{N}}_{\mu}\bigr)_{(\chi,s),(\chi',s')}
-  \;\sim\;
-  \Bigl\langle\phi_{(\chi,s)},\;\partial_\mu\phi_{(\chi',s')}\Bigr\rangle_{\rm T},
-  \qquad \mu=0,1,2,3,
-  \label{eq:overlap-coupling}
-\end{equation}
-and similarly for $\hat{\mathcal{M}}_{\mu\nu}$. Physically, these terms
-encode how slow changes in the soliton position and orientation in
-spacetime couple to its internal torus modes. Rotational invariance of the
-brane medium implies that the $4$-dimensional internal space carries a
-representation of spatial rotations, and hence admits an action of
-spin-$\tfrac12$ generators.
-
-In the simplest approximation, we may neglect $\hat{\mathcal{M}}_{\mu\nu}$
-and absorb $\hat{\mathcal{N}}_{\mu}$ into a redefinition of $\psi$ and its
-derivatives, recovering a Klein--Gordon-type equation with a single mass
-scale $m$. Thus each component $\psi_{\chi,s}$ inherits, at the linearized level, a gapped
-Klein--Gordon-type dispersion relation analogous to
-Eq.~\eqref{eq:toy-KG},
-\begin{equation}
-  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\,\psi_{\chi,s}(x)
-  \;\approx\; 0,
-  \label{eq:KG-for-components}
-\end{equation}
-where $\Box$ denotes the d'Alembertian associated with the emergent
-Lorentzian metric of Sec.~\ref{sec:emergent-relativity}, $m$ is the
-effective rest mass determined by the soliton's internal energy, and
-$\hbar_\text{eff}$ is the same effective action scale that appeared in
-Eq.~\eqref{eq:schroedinger-from-envelope}. In analogy with the standard
-relativistic construction, we can regard
-Eq.~\eqref{eq:KG-for-components} as arising from a first-order system
-obtained by ``taking the square root'' of the Klein--Gordon operator.
-
-\paragraph{Internal mode space as a Clifford module and Dirac factorization}
-
-The key step is to use the four-dimensional internal mode space to
-realize a representation of the Dirac gamma matrices. Concretely, we
-identify the internal mode space with a tensor product
-$\mathbb{C}^2_\chi \otimes \mathbb{C}^2_s$, where $\mathbb{C}^2_\chi$
-carries the chirality label $\chi=\pm1$ and $\mathbb{C}^2_s$ carries the
-spin label $s=\pm\tfrac12$. In this basis we introduce the internal
-operators
-\begin{equation}
-  \beta \;=\; \sigma_z \otimes \mathbb{I}_2,
-  \qquad
-  \alpha^k \;=\; \sigma_x \otimes \sigma^k,
-  \qquad k=1,2,3,
-  \label{eq:internal_alpha_beta}
-\end{equation}
-where $\sigma^k$ are the Pauli matrices and $\mathbb{I}_2$ the $2\times 2$
-identity. These operators satisfy
-\begin{equation}
-  \{\alpha^i,\alpha^j\} = 2\delta^{ij}\mathbb{I}_4,
-  \qquad
-  \{\alpha^i,\beta\} = 0,
-  \qquad
-  \beta^2 = \mathbb{I}_4,
-  \label{eq:alpha-beta-clifford}
-\end{equation}
-and hence generate a representation of the Clifford algebra associated
-with Minkowski spacetime. We can now assemble the standard Dirac matrices
-in the Dirac representation,
-\begin{equation}
-  \gamma^0 = \beta,
-  \qquad
-  \gamma^k = \beta\,\alpha^k,
-  \qquad k=1,2,3,
-  \label{eq:gamma-from-alpha-beta}
-\end{equation}
-which obey
-$\{\gamma^\mu,\gamma^\nu\} = 2\,\eta^{\mu\nu}\,\mathbb{I}_4$ with
-$\eta^{\mu\nu} = \mathrm{diag}(+1,-1,-1,-1)$.
-
-\paragraph{Status of the Dirac structure.}
-It is important to emphasize the epistemic status of the construction presented in this subsection. We do \emph{not} derive the specific form of the operators $\alpha^k$ and $\beta$ from a first-principles calculation of the overlap integrals $\langle\phi_{(\chi,s)},\partial_i\phi_{(\chi',s')}\rangle_{\rm T}$. Instead, we \emph{postulate} that the four-dimensional internal mode space carries a representation of the Clifford algebra with the standard structure given in Eqs.~\eqref{eq:internal_alpha_beta}--\eqref{eq:gamma-from-alpha-beta}. This postulate is motivated by the approximate degeneracy of the four internal modes and by symmetry considerations, but a complete verification would require explicit computation of the mode-coupling integrals for a concrete toroidal soliton profile. Such a calculation—while conceptually straightforward—is technically involved and is left as a high-priority target for future work (see Sec.~\ref{scope-and-limitations}).
-
-The fact that such operators exist in the internal mode space is a
-consequence of the degeneracy of the four lowest internal eigenmodes and
-of the approximate rotational isotropy of the toroidal soliton. Small
-translations and rotations of the soliton in the brane induce linear
-transformations on the internal mode amplitudes, and these transformations
-generate a representation of the Lorentz group on the four-component
-envelope $\psi$.
-
-To see how a Dirac-like first-order equation emerges, consider writing
-the Klein--Gordon operator acting on $\psi$ in a factored form,
-\begin{equation}
-  \bigl(\Box + m^2 c^2/\hbar_\text{eff}^2\bigr)\psi
-  \;\approx\;
-  -\,\bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)
-   \bigl(i\gamma^\nu\partial_\nu + m c/\hbar_\text{eff}\bigr)\psi.
-  \label{eq:Dirac_factorization}
-\end{equation}
-Using the Clifford algebra relations~\eqref{eq:alpha-beta-clifford}, one
-checks that
-\begin{equation}
-  \bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)
-  \bigl(i\gamma^\nu\partial_\nu + m c/\hbar_\text{eff}\bigr)
-  \;=\;
-  -\,\Box - m^2 c^2/\hbar_\text{eff}^2,
-  \label{eq:factor-check}
-\end{equation}
-so that any solution of the first-order equation
-\begin{equation}
-  \bigl(i\gamma^\mu\partial_\mu - m c/\hbar_\text{eff}\bigr)\psi
-  \;\approx\; 0
-  \label{eq:emergent-dirac-first-order}
-\end{equation}
-also solves the Klein--Gordon equation~\eqref{eq:KG-for-components}.
-
-Within our brane model, the identification of the gamma matrices with
-specific internal operators~\eqref{eq:internal_alpha_beta} reflects the
-following mechanical picture:
-\begin{itemize}
-  \item The chirality index $\chi$ distinguishes the two senses of
-        circulation of the Compton-scale double loop on the torus.
-        The operator $\beta$ acts as a ``particle/antiparticle''
-        grading between these sectors.
-  \item The spin index $s$ encodes the orientation of the internal
-        momentum circulation with respect to the local brane triad.
-        The Pauli matrices $\sigma^k$ acting in this space describe
-        how the internal pattern responds to rotations of the soliton
-        in the brane.
-  \item Spatial gradients of the soliton centre and orientation couple
-        linearly to these internal operators through overlap integrals
-        of the form $\langle\phi_{(\chi,s)},\partial_i\phi_{(\chi',s')}\rangle_{\rm T}$,
-        thereby generating effective terms proportional to
-        $\alpha^k \partial_k\psi$ in the envelope equation.
-\end{itemize}
-Collecting these contributions yields, to leading order in gradients,
-an effective envelope Lagrangian of the Dirac type,
-\begin{equation}
-  \mathcal{L}_{\rm eff}[\psi]
-  \;\approx\;
-  \bar{\psi}\,\bigl(i\hbar_\text{eff}\gamma^\mu\partial_\mu - m c\bigr)\psi,
-  \qquad
-  \bar{\psi} = \psi^\dagger\gamma^0,
-  \label{eq:dirac-lagrangian-eff}
-\end{equation}
-with
-$\psi = (\psi_{+,\uparrow},\psi_{+,\downarrow},\psi_{-,\uparrow},\psi_{-,\downarrow})^T$
-constructed from the internal torus modes via~\eqref{eq:torus_mode_expansion}.
-
-More concretely, in locally inertial coordinates on the brane (where the
-emergent metric is approximately Minkowskian with signature
-$(-,+,+,+)$), the slowly varying spinor
-field~\eqref{eq:dirac-spinor-from-solitons} obeys the effective Dirac
-equation
-\begin{equation}
-  \bigl(i\,\hbar_\text{eff}\,\gamma^\mu D_\mu - m c\bigr)\,\psi(x) \;=\; 0,
-  \label{eq:emergent-dirac}
-\end{equation}
-where the $\gamma^\mu$ are Dirac matrices satisfying
-$\{\gamma^\mu,\gamma^\nu\}=2\eta^{\mu\nu}$ with $\eta^{\mu\nu}$ the local
-Minkowski metric, and
-\begin{equation}
-  D_\mu \;=\; \partial_\mu + i\,\frac{q}{\hbar_\text{eff}}\,A_\mu(x)
-  \label{eq:dirac-covariant-derivative}
-\end{equation}
-is the covariant derivative associated with the emergent four-potential
-$A_\mu$ of Sec.~\ref{sec:em-from-motion}. The charge parameter $q$
-appearing here coincides with the coupling constant that enters the
-worldline interaction action~\eqref{eq:interaction-action}.
-
-Within the present interpretation,
-Eqs.~\eqref{eq:emergent-dirac}--\eqref{eq:dirac-covariant-derivative}
-do not introduce a new ontological ``electron field''. Instead, $\psi(x)$
-compactly encodes the coarse-grained configuration of toroidal solitons
-and their internal states in the emergent spacetime. Standard Dirac
-bilinears acquire a direct geometric meaning: the current
-$j^\mu = \bar\psi\gamma^\mu\psi$ describes the soliton number density and
-four-velocity field, while the axial current
-$s^\mu = \bar\psi\gamma^\mu\gamma^5\psi$ encodes the averaged orientation
-of the internal circulation (spin axis) of the torus. A fully covariant
-treatment in terms of spinor bundles on a curved effective spacetime
-would require a more systematic development of the brane's emergent
-geometry; here we restrict ourselves to this heuristic construction in
-weakly curved, approximately inertial regimes.
+The de~Broglie--Einstein ``harmony of phases'' discussed in
+Section~\ref{subsec:harmony-phases} ensures that the internal Compton
+clock of the toroidal soliton and the coarse-grained guiding wave
+remain phase locked along the electron worldline. The Dirac equation
+adds further structure on top of this: it constrains which combinations
+of worldline direction, spin axis and overall phase are dynamically
+consistent in the long-wavelength, coarse-grained limit. From the
+present viewpoint, a solution $\psi(x)$ of the free Dirac equation
+should therefore be interpreted as encoding the \emph{allowed macroscopic
+states} of a toroidal brane soliton: the local four-current
+$j^\mu(x)$ specifies the direction of motion of the electron, the spin
+density $\vec S(x)$ encodes the orientation of the torus axis and the
+handedness of the internal circulation, and the phase of $\psi(x)$
+reproduces the de~Broglie wave associated with the soliton's Compton
+clock. The underlying microscopic dynamics remain those of the
+nonlinear brane, while the Dirac equation provides an efficient
+linear description of the soliton's centre-of-mass and spin degrees of
+freedom.
 
 
 \subsection{Scope and Limitations}\label{scope-and-limitations}

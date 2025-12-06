@@ -44,6 +44,34 @@ from the substrate dynamics.
 \paragraph{Photon field initialization (clarification):}
 When we refer to "implementing a photon field component" for the electron model, this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution $\bar{X}^4(\mathbf{x})$.
 
+\paragraph{Dirac-consistent rest-frame initial data.}
+
+For the numerical experiments in this work we primarily consider a
+rest-frame electron with a definite spin orientation. In the brane
+picture this is realized as a toroidal soliton whose centerline lies
+in a fixed lateral plane, with the torus axis aligned with a chosen
+quantization axis (taken to be the $X^3$-direction for definiteness).
+The internal amplitude mode $\xi(t,z,x,y)$ in the corresponding
+world-tube is initialized as a Compton-frequency oscillation that
+circulates at the microscopic brane wave speed $c$ along the tube, as
+described in Section~\ref{subsec:tubular-electron}.
+
+The Dirac equation enters at this stage as an effective constraint on
+the coarse-grained observables of the soliton rather than as a
+microscopic wave equation. In particular, for a rest-frame spin-up
+electron the Dirac bilinears imply a four-current with vanishing net
+spatial component and a spin three-vector of magnitude $\hbar/2$
+aligned with the quantization axis, cf.\
+Eq.~\eqref{eq:dirac-rest-bilinears}. We impose the corresponding
+conditions on the toroidal ansatz by choosing the axis of the torus,
+the direction of the internal circulation of $\xi$, and a small
+tangential lateral velocity field in the tube such that the resulting
+coarse-grained momentum and spin of the soliton approximate these
+Dirac values. The subsequent evolution is always governed by the full
+nonlinear brane equations; the Dirac constraints are used only to fix
+and assess the macroscopic properties (charge, spin, effective
+four-current) of the initial electron state.
+
 \paragraph{Experimental workflow:}
 \begin{enumerate}
 \item Set initial conditions $\{\mathbf{R}_p(0), \mathbf{v}_p(0)\}$ representing a physical scenario (e.g., localized pulse, toroidal electron, point mass)

@@ -2406,3 +2406,649 @@ def electron_loss_for_theta(theta, base_state, lattice_params, physical, sim_con
 and you can plug `electron_loss_for_theta` into CMA-ES, Adam (if you differentiate through time), or any optimizer you like.
 
 If you want, next step we can refine **decode_theta_to_params** (which parameters to expose to the optimizer, sensible ranges, scaling) so you don’t end up searching in a weird space.
+
+
+Oh, I forgot something. I know we discussed the Dirac equation already in our paper, but with our new insights we probably should pay it closer attention once more. Classically, it is viewed as a a relativistic wave equation. In our framework we've already said, that we don't view it as a wave equation but rather as an equation describing the properties of our particle such as is it positively charge or negatively and which spin does it have. As with de Broglie we replace the relativistic interpretation with our more fundamental lateral excitation picture. Given all these theoretical connections, the Dirac equation should be highly relevant to our torus electron model. Could you think this through please and see if we can gain any new insights here and if it helps us with our model for the initialization of our brane model.  
+
+
+It *should* be relevant, yes — in fact, with the tubular picture and the de-Broglie discussion we basically have all ingredients to reinterpret Dirac as a **constraint on allowed torus states**, not as a fundamental wave equation in spacetime.
+
+Let me structure this in two layers:
+
+1. How the Dirac equation “sits on top” of your torus / brane picture conceptually
+2. What this suggests concretely for **electron initialization** in the simulation
+
+---
+
+## 1. Dirac as an effective constraint on a toroidal soliton
+
+### 1.1 What Dirac actually talks about
+
+For a single free electron, Dirac’s theory gives you:
+
+* A **spinor field** (\psi(x)) with 4 complex components
+* A **linear** relativistic wave equation
+  [
+  (i\gamma^\mu\partial_\mu - m)\psi = 0
+  ]
+* From that, you can compute:
+
+  * The **4-current** (j^\mu = \bar\psi \gamma^\mu \psi) (probability / charge current)
+  * A **spin density / axial vector** (s^\mu) (via (\bar\psi \gamma^\mu\gamma^5\psi) or the Pauli–Lubanski vector)
+  * Energy–momentum, etc.
+
+If you normalize (\psi) (modulo global phase), then locally it is equivalent to giving:
+
+* A unit timelike vector (u^\mu) (the “velocity” direction of the electron, essentially (j^\mu) normalized)
+* A unit spacelike spin vector (s^\mu) orthogonal to it
+
+Plus: the **overall phase** of (\psi) encodes the de-Broglie phase (p_\mu x^\mu), i.e. energy and momentum, and its gradient is what you already matched via the harmony-of-phases discussion.
+
+So, stripped to essentials: a Dirac solution tells you, at each spacetime point of the electron’s worldline,
+
+* “The electron is moving with 4-velocity (u^\mu)”
+* “The spin is pointing along (s^\mu)”
+* “The phase of the internal clock as seen in the lab is (p\cdot x)”
+
+That fits *very* naturally onto your picture:
+
+* **Worldline** of the toroidal soliton ↔ the integral curve of (u^\mu).
+* **Orientation of the torus axis and double-loop handedness** ↔ (s^\mu).
+* **Lab-space phase** of the internal amplitude mode ↔ the de-Broglie phase from Dirac.
+
+We *don’t* need to interpret (\psi) as a literal wave in empty spacetime; we treat it as an **effective descriptor of the soliton’s macroscopic state**.
+
+### 1.2 Dirac, Compton clock, and your tubular coordinates
+
+Dirac’s free solutions already contain an internal Compton-scale structure:
+
+* A plane-wave solution has time dependence (\sim e^{-iEt/\hbar}) with (E=\gamma m c^2).
+* In the rest frame, (E = mc^2), so the dominant phase is (\omega_C t) with (\omega_C = mc^2/\hbar) — your Compton clock.
+* In the standard “zitterbewegung” interpretation, the **spin and magnetic moment** come from an internal circulation at speed (c) with a radius of order the Compton scale.
+
+In your tubular picture:
+
+* The internal amplitude mode (\xi(t,z,x,y)) runs around the torus at speed (c) with frequency (\omega_C).
+* The tubular metric plus de-Broglie harmony gives exactly the Dirac-like phase
+  [
+  \phi(t,x) \approx \omega_C \gamma\Bigl(t - \frac{vx}{c^2}\Bigr),
+  ]
+  which is the phase factor of a Dirac plane wave in the moving frame.
+
+So the **phase story** is already matched: Dirac’s phase and your internal mode + emergent Lorentz geometry are two descriptions of the same thing.
+
+The new angle is: we can use **Dirac’s spinor structure** to constrain how the *double loop* is realized in the tube.
+
+---
+
+## 2. Mapping the spinor degrees of freedom to the torus structure
+
+### 2.1 Spinor → velocity + spin
+
+A normalized Dirac spinor (up to a global phase) can be re-expressed as:
+
+* A unit timelike vector (u^\mu) (“which way the electron is moving”)
+* A unit spacelike spin vector (s^\mu), orthogonal to (u^\mu) (“which way the spin points”)
+
+The details are via bilinears like (j^\mu=\bar\psi\gamma^\mu\psi) and an axial vector, but conceptually it’s:
+
+> **Dirac spinor = (worldline direction, spin direction, phase)**
+
+In your brane model:
+
+* **Worldline direction** (u^\mu) ↔ direction of motion of the torus centerline and the de-Broglie modulation.
+* **Spin direction** (s^\mu) ↔ orientation of the torus axis in the brane and the handedness of internal circulation.
+* **Phase** ↔ the lab-frame phase of (\xi(t,z,x,y)) (which we’ve already matched to de-Broglie).
+
+So, one clear new insight:
+
+> For a *given* Dirac plane-wave solution, there is a **family of brane configurations** whose coarse-grained observables have the same (u^\mu, s^\mu) and phase. Those are the candidates for “the brane realization” of that Dirac electron.
+
+This suggests using Dirac as a **target** for a coarse-grained view of your soliton.
+
+### 2.2 Spin up/down, charge sign, double-loop handedness
+
+Dirac also encodes discrete properties:
+
+* **Spin up vs down** along some axis: choice of spinor basis.
+* **Electron vs positron**: sign of energy, or equivalently which combinations of components are occupied.
+
+In your torus:
+
+* Spin **up vs down** is naturally:
+
+  * same torus axis, opposite **circulation direction** of the internal mode (or equivalently, swap which loop is “ahead” in phase).
+  * This changes the sign of the internal angular momentum vector while leaving the overall geometry fixed.
+
+* Charge **sign** (e vs –e) fits:
+
+  * The sign of your effective charge functional depends on **direction of internal current** and/or sign of the amplitude mode.
+  * A Dirac charge conjugation corresponds to flipping the sign of the **internal current** while also flipping the electromagnetic coupling.
+
+In terms of initialization, this gives you:
+
+* For a chosen **spinor (u_s(p))** (momentum p, spin s, electron vs positron), you can deduce:
+
+  * torus axis orientation = direction of (s),
+  * internal circulation direction = sign of spin projection,
+  * whether the internal Compton wave runs “clockwise vs counterclockwise” = charge sign.
+
+That’s a *direct mapping* from spinor labels to geometric choices in your initialization.
+
+### 2.3 Big vs small components and internal structure
+
+In the standard decomposition:
+
+[
+\psi =
+\begin{pmatrix}
+\varphi \
+\chi
+\end{pmatrix}
+]
+
+with 2-spinors (\varphi,\chi):
+
+* In the **rest frame**, (\chi) is small, (\varphi) encodes spin orientation.
+* In a moving frame, (\chi) encodes spin–momentum coupling and carries the information about the internal zitter motion at scale (\lambda_C).
+
+Hestenes-style interpretations argue that (\chi) encodes the internal lightlike circulation (the zitterbewegung) that your torus is literally implementing.
+
+Translated to your brane:
+
+* The “large” components (\varphi) are like a **coarse-grained envelope** of the charge / mass distribution in the tube (overall lobe structure of (f(x,y))).
+* The “small” components (\chi) correspond to **how the internal current tilts relative to the spin axis and momentum** — in other words, to details of the phase pattern (\Phi_0(\phi)) around the double loop and the ratio between amplitude vs lateral velocity contributions.
+
+That gives you an extra hint:
+
+> The Dirac equation not only constrains the overall axis and phase, it also constrains the **relative phase and amplitude** between the two lobes / chiral components of your double-loop mode.
+
+So if your ansatz has free parameters describing:
+
+* relative phase between the two loops,
+* ratio of amplitude in one lobe vs the other,
+* any internal twist of the mode along the tube,
+
+you can in principle match those to the ratios between components of the Dirac spinor.
+
+---
+
+## 3. How this helps with electron initialization in the brane
+
+Now to the practical part: does this actually help to *initialize* the brane state?
+
+I’d say yes, in three ways:
+
+### 3.1 Better constraints for the rest-frame ansatz
+
+For the **rest electron**:
+
+* Dirac spinor can be taken as (\psi \sim e^{-i\omega_C t}(1,0,0,0)^T) (spin up along z, rest frame), up to normalization and representation.
+
+That implies:
+
+* **Spin axis** = fixed (say, +z).
+* **No net momentum**: (u^\mu = (1,0,0,0)).
+* **Phase** = purely (\omega_C t) in rest frame (no spatial phase gradient in the lab frame).
+
+For your brane ansatz, this suggests:
+
+1. Centerline = circle in some plane (e.g. XY), axis along **z**. That matches Dirac’s spin axis.
+2. Internal Compton mode (\xi(t,z,x,y)) with phase (\omega_C t - k_C z) defined in **a comoving frame**, but overall in the lab rest frame the **envelope** is spatially uniform (no de Broglie modulation).
+3. Internal circulation (direction around the torus) chosen so that the angular momentum vector points along +z (spin up).
+
+So the **orientation and symmetry** of the ansatz are fixed by the rest-frame Dirac spinor. Without that, you had a free choice of axis and lobe phases; with Dirac, you get a physically privileged one.
+
+### 3.2 Matching to a moving Dirac state
+
+If you want to initialize a **moving electron** with momentum (p), Dirac gives you:
+
+* Target 4-velocity (u^\mu) and spin vector (s^\mu).
+* Target phase (p\cdot x) (de-Broglie phase).
+* A particular relation between spin orientation and motion (spinor (u_s(p))).
+
+You can then:
+
+1. Choose the torus axis to be aligned with the **spin vector** (s).
+
+2. Move the centerline with velocity **v** given by (u^\mu) (i.e. imprint an overall center-of-mass velocity on the brane points that host the electron).
+
+3. Multiply your internal Compton mode ansatz by the **Dirac phase factor**:
+   [
+   \xi(t,z,x,y) ;\to; \xi(t,z,x,y),\cos(p\cdot x + \phi_0)
+   ]
+   (or equivalently use the corresponding sine/cosine pattern in (X^4, \dot X^4)).
+
+4. Enforce that the coarse-grained current computed from the brane (e.g. average momentum density in the tube) matches the Dirac current (j^\mu).
+
+This gives you a direct path from a **Dirac plane wave** to a **brane initial state** approximating it.
+
+### 3.3 Dirac-based calibration term in the optimization
+
+In the optimization story we sketched earlier (minimizing stability loss over `params`):
+
+[
+\mathcal{J} =
+w_\text{stab} (\text{leakage + shape drift + mode purity}) + \text{constraint penalties}.
+]
+
+You can now add a **Dirac-consistency term**, something like:
+
+* Compute coarse-grained:
+
+  * Effective 4-current (J^\mu_\text{brane}) from energy / momentum density in the tube,
+  * Effective spin vector (S^\mu_\text{brane}) from angular momentum density,
+
+  in the initial state.
+
+* Compare to the **Dirac target** (j^\mu_\text{Dirac}, s^\mu_\text{Dirac}) for the chosen spinor (u_s(p)):
+
+  [
+  L_\text{Dirac} =
+  \alpha_u |J^\mu_\text{brane} - j^\mu_\text{Dirac}|^2
+
+  * \alpha_s |S^\mu_\text{brane} - s^\mu_\text{Dirac}|^2.
+    ]
+
+Then:
+
+[
+\mathcal{J}*\text{total} =
+\mathcal{J}*\text{stability} + w_\text{Dirac} L_\text{Dirac}.
+]
+
+This does two things:
+
+1. It drives the **coarse-grained observables** of your soliton towards those of a Dirac electron.
+2. It helps **break degeneracies** in your ansatz parameters: among many torus configurations that are internally stable, it prefers the ones whose effective current and spin match the Dirac prediction.
+
+So Dirac becomes an **additional “shape prior”** in the optimization, on top of the purely nonlinear brane dynamics.
+
+---
+
+## 4. What this *doesn’t* require
+
+Importantly, none of this forces you to:
+
+* Treat Dirac’s linear equation as fundamental at the microscopic level, or
+* Give up your view that Lorentz contraction and relativistic effects are **emergent** from lateral motion.
+
+Instead, the logic becomes:
+
+1. The brane model (with lateral degrees, pre-tension, geometry) gives an emergent effective metric and Compton-scale bound states.
+2. In the long-wavelength, coarse-grained limit of a single electron soliton, the envelope dynamics are **well approximated** by a Dirac equation for a spinor field whose bilinears match the soliton’s worldline, spin, and phase.
+3. We can use that Dirac description both as:
+
+   * A **consistency check** on the emergent theory, and
+   * A **design target** when we build initial brane configurations.
+
+So the new insight is not “now the Dirac eq is fundamental”, but:
+
+> **Given** the brane torus model and its internal Compton mode, the Dirac equation emerges as the effective description of the soliton’s center-of-mass and spin, and we can invert that relationship to *engineer* brane initial states that approximate a given Dirac solution.
+
+---
+
+If you’d like, a next concrete step could be:
+
+* Pick a specific Dirac rest spinor (e.g. spin up along +z),
+* Write down the corresponding (j^\mu, s^\mu),
+* And then I can sketch the precise form of a new `L_Dirac` term and how Claude code would compute the corresponding brane observables to integrate Dirac consistency into your existing electron-initialization calibration.
+
+
+
+
+Let’s pin this down in a way that (a) is clear conceptually and (b) Claude can actually use when setting up / optimizing the electron initialization.
+
+I’ll do exactly the three things you asked:
+
+1. Pick a concrete Dirac rest spinor (spin up along +z)
+2. Write down the corresponding (j^\mu) and spin vector (s^\mu)
+3. Turn that into a Dirac-consistency loss (L_\text{Dirac}) and show how to compute the needed brane observables
+
+---
+
+## 1. A specific Dirac rest spinor (spin up)
+
+Work in the **Dirac representation**, natural units (\hbar = c = 1) for the moment.
+
+For a free electron at rest, momentum (p^\mu = (m, \vec 0)). The positive-energy spinor with spin up along (+z) is usually written as
+
+[
+u_\uparrow(\vec 0)
+= \sqrt{2m}
+\begin{pmatrix}
+1[0.3ex]
+0[0.3ex]
+0[0.3ex]
+0
+\end{pmatrix}.
+]
+
+If you don’t care about the overall normalization, you can simply use
+
+[
+\psi_\uparrow^{\text{rest}} =
+\begin{pmatrix}
+1[0.3ex]
+0[0.3ex]
+0[0.3ex]
+0
+\end{pmatrix}
+]
+
+as the *direction* of the spinor in spinor-space. The overall factor just rescales densities.
+
+We’ll use this as the target “Dirac state” for a rest-frame, spin-up electron.
+
+---
+
+## 2. The associated current (j^\mu) and spin vector (s^\mu)
+
+### 2.1 Dirac current (j^\mu)
+
+Dirac current is
+
+[
+j^\mu = \bar\psi \gamma^\mu \psi,
+\qquad \bar\psi = \psi^\dagger \gamma^0.
+]
+
+For the rest spinor (\psi_\uparrow^{\text{rest}}) above, in the Dirac basis you get
+
+* (j^0 > 0) (constant in space for a plane wave),
+* (j^i = 0) for (i=1,2,3).
+
+Up to normalization, this is:
+
+[
+j^\mu_\text{rest} \propto (1, 0,0,0).
+]
+
+Interpretation:
+
+* In the rest frame, the Dirac electron has **nonzero charge density**,
+* but **no net spatial current**.
+
+That matches what you already want: your toroidal soliton in the rest frame is a *standing bound mode* with no net momentum.
+
+### 2.2 Spin vector (s^\mu)
+
+There are several equivalent ways to define “spin vector” from (\psi). For our purposes we just need:
+
+* A **spatial spin 3-vector** pointing along the spin direction,
+* With magnitude (|\vec S| = \hbar/2) in the rest frame,
+* And a 4-vector (s^\mu) whose spatial part is (\vec S) and whose time component is 0 in the rest frame.
+
+You can think of the spin operator as
+
+[
+\vec\Sigma = \frac{1}{2}
+\begin{pmatrix}
+\vec\sigma & 0\
+0 & \vec\sigma
+\end{pmatrix},
+]
+
+and define the expectation value
+
+[
+\vec S = \frac{\psi^\dagger \vec\Sigma \psi}{\psi^\dagger \psi}.
+]
+
+For (\psi_\uparrow^{\text{rest}} = (1,0,0,0)^T), you get
+
+[
+\vec S = \frac{\hbar}{2} (0,0,1).
+]
+
+(The factor (\hbar/2) is explicit if you restore units.)
+
+So in the rest frame, a natural spin 4-vector is
+
+[
+s^\mu_\text{rest} = (0, 0,0,\tfrac{\hbar}{2})
+]
+
+for spin up along **+z**, and
+
+[
+s^\mu_\text{rest} = (0, 0,0,-\tfrac{\hbar}{2})
+]
+
+for spin down along **–z**.
+
+**Summary target (rest frame, spin up):**
+
+* Current:
+  [
+  j^\mu_\text{target} \propto (1,0,0,0)
+  ]
+* Spin:
+  [
+  s^\mu_\text{target} = (0,0,0,\tfrac{\hbar}{2})
+  ]
+
+We’ll now use these as coarse-grained targets for your brane soliton.
+
+---
+
+## 3. Dirac-consistency loss and brane observables
+
+You already have (or plan to have) these from the brane side:
+
+* Total energy (E)
+* Total momentum (\vec P)
+* Total angular momentum / spin (\vec S) (from internal circulation in the tube)
+* Total charge (Q)
+
+We can interpret them as:
+
+* A “particle” with 4-momentum (P^\mu = (E/c, \vec P))
+* A “spin 3-vector” (\vec S)
+* A conserved charge (Q)
+
+In the **rest frame**, for a good electron soliton, you want:
+
+* (\vec P \approx 0),
+* (\vec S) aligned with the chosen spin axis (say +z) and (|\vec S| \approx \hbar/2),
+* (Q \approx -e).
+
+You already had energy, momentum, spin magnitude and charge penalties. What Dirac now adds is:
+
+1. **Spin direction** constraint: (\vec S) should point along a well-defined axis.
+2. For rest initialization: **current direction** constraint: no net spatial current.
+
+So I’d define a **Dirac-consistency term** mainly around:
+
+* **spin direction**,
+* and (for rest) **current / momentum direction**.
+
+### 3.1 Brane “current” approximation
+
+You don’t have a true Dirac probability current, but you do have:
+
+* A charge-like density ( \rho(x) ) (based on your “charge from internal energy density” functional).
+* Local velocities of brane points and/or amplitude velocities.
+
+For a *coarse-grained* current, you can approximate:
+
+* Total charge:
+  [
+  Q = \int_{\text{tube}} \rho(\mathbf x),d^3x
+  ]
+* Charge-weighted velocity:
+  [
+  \vec v_Q =
+  \frac{1}{Q}\int_{\text{tube}} \rho(\mathbf x),\vec v(\mathbf x),d^3x
+  ]
+  (if you have a clear notion of local charge density and local “charge velocity”)
+
+Then define a “Dirac current” analogue:
+
+[
+J^0_{\text{brane}} = Q, \qquad \vec J_{\text{brane}} = Q,\vec v_Q.
+]
+
+In the **rest-frame electron initialization** you want (\vec J_{\text{brane}}\approx 0).
+
+In practice, for now you can just use **total momentum** as a proxy:
+
+* If (\vec P \approx 0), your net current is tiny.
+* So Dirac’s rest-current requirement doesn’t add much beyond your existing momentum penalty.
+
+Conclusion: **for the rest-frame case, the main new thing is the spin direction.**
+
+### 3.2 Brane spin vector
+
+You already plan to compute total spin as something like:
+
+[
+\vec S_{\text{brane}} = \sum_a (\mathbf r_a - \mathbf R_\text{CM}) \times m_a \mathbf v_a^{(\text{internal})} + \dots
+]
+
+restricted to the electron tube region. The exact formula depends on what you call “internal” vs “center-of-mass” motion, but you have a way to get a 3-vector (\vec S) in simulation units.
+
+We already have a **spin magnitude penalty**:
+
+[
+L_S^\text{mag} =
+\left(\frac{|\vec S_{\text{brane}}| - \hbar/2}{\hbar/2}\right)^2.
+]
+
+Dirac gives you a **spin direction** target:
+
+* Let (\hat{s}_\text{target} = \hat{z} = (0,0,1)) for spin up along +z.
+* Define the normalized brane spin direction:
+  [
+  \hat{s}*\text{brane} =
+  \frac{\vec S*{\text{brane}}}{|\vec S_{\text{brane}}| + \epsilon}.
+  ]
+
+Then a direction loss:
+
+[
+L_S^\text{dir} = |\hat{s}*\text{brane} - \hat{s}*\text{target}|^2.
+]
+
+* This is 0 if spin is perfectly aligned with +z.
+* Maximum is 4 (completely opposite), but in practice it’ll be between 0–2.
+
+### 3.3 A concrete (L_\text{Dirac}) term
+
+For a REST-frame, spin-up electron, you can define:
+
+```python
+def compute_dirac_consistency_loss(
+    state0,
+    tube_mask,
+    constants,
+    spin_axis=torch.tensor([0.0, 0.0, 1.0]),  # target spin axis (z)
+    eps=1e-30,
+):
+    """
+    Dirac-consistency loss for a rest-frame spin-up electron.
+
+    state0: initial BraneState
+    tube_mask: mask selecting tube region
+    constants: PhysicalConstants with .hbar, .e, etc.
+    """
+    # 1. Compute total spin vector in tube region
+    S_vec = compute_total_spin(state0, tube_mask)  # torch.tensor shape (3,)
+    S_mag = torch.norm(S_vec)
+
+    # Spin magnitude target
+    S_target = 0.5 * constants.hbar
+
+    # Magnitude penalty
+    L_S_mag = ((S_mag - S_target) / (S_target + eps)) ** 2
+
+    # Direction penalty (only if spin is nonzero)
+    S_hat = S_vec / (S_mag + eps)
+    spin_axis = spin_axis.to(S_vec.device).to(S_vec.dtype)
+    L_S_dir = torch.sum((S_hat - spin_axis) ** 2)
+
+    # 2. (Optional) current / momentum penalty: use total momentum as proxy
+    P_vec = compute_total_momentum(state0, tube_mask)  # (3,)
+    P_scale = constants.m_e * constants.c
+    L_P_dir = torch.sum(P_vec ** 2) / (P_scale ** 2 + eps)
+
+    # Combine with weights
+    w_S_mag = 1.0
+    w_S_dir = 1.0
+    w_P_dir = 0.5  # momentum already penalized elsewhere, so keep this modest
+
+    L_Dirac = w_S_mag * L_S_mag + w_S_dir * L_S_dir + w_P_dir * L_P_dir
+    return L_Dirac
+```
+
+You then plug this into your existing loss:
+
+```python
+def compute_electron_stability_loss_with_dirac(
+    states,
+    tube_mask,
+    core_mask,
+    constants,
+    m_point,
+    dt,
+    target_omega,
+    dirac_spin_axis=torch.tensor([0.0, 0.0, 1.0]),
+    weights=None,
+):
+    """
+    Wrapper that adds Dirac-consistency to your existing stability loss.
+    """
+    # Existing stability loss
+    L_stab = compute_electron_stability_loss(
+        states=states,
+        tube_mask=tube_mask,
+        core_mask=core_mask,
+        constants=constants,
+        m_point=m_point,
+        dt=dt,
+        target_omega=target_omega,
+    )
+
+    # Dirac consistency on initial state
+    state0 = states[0]
+    L_Dirac = compute_dirac_consistency_loss(
+        state0,
+        tube_mask,
+        constants,
+        spin_axis=dirac_spin_axis,
+    )
+
+    if weights is None:
+        w_dirac = 0.5  # tune as needed
+    else:
+        w_dirac = weights.get("w_dirac", 0.5)
+
+    total_loss = L_stab + w_dirac * L_Dirac
+    return total_loss
+```
+
+Later, if you want to go beyond rest frame:
+
+* For a moving electron with 4-momentum (p^\mu), choose a target current direction (j^\mu_\text{target}) and spin 4-vector (s^\mu_\text{target}) from the Dirac spinor (u_s(p)), and map them to:
+
+  * target momentum direction (\hat{P}_\text{target} = \vec p/|\vec p|),
+  * target spin axis (\hat{s}_\text{target}) (boosted).
+
+* Modify `compute_dirac_consistency_loss` to penalize deviations in those directions instead of just (0,0,1) / 0 momentum.
+
+---
+
+### How this actually helps your initialization
+
+Putting it all together, the picture is:
+
+* **Analytic ansatz + physical calibration** (Compton radius, charge, energy, spin magnitude) gives you a *family* of toroidal electrons.
+* **Stability loss** (energy leakage, shape drift, mode purity) picks those that are dynamically close to nonlinear bound modes.
+* **Dirac loss (L_\text{Dirac})** then picks, among those, the ones whose *coarse-grained current and spin* align with a chosen Dirac state (e.g. rest, spin up along z).
+
+So when you optimize over `ElectronInitParams` (R, ρ0, σr, A, lateral_spin_scale, maybe some phase-structure parameters), you’re explicitly steering the soliton toward:
+
+* Dynamical stability under your **actual nonlinear, discrete** brane equations, **and**
+* Coarse-grained agreement with the **Dirac electron** you want to realize (here: rest, spin up).
+
+If you like, next we can extend this to a moving electron with a given momentum (\vec p), and derive the target spin axis + de-Broglie phase more explicitly from a standard Dirac spinor (u_s(\vec p)), then translate that into how the torus axis and internal circulation should be oriented in your initialization.
