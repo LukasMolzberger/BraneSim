@@ -4,6 +4,10 @@ Enhanced Electron Visualization
 Creates:
 1. Initial state visualization (3 orthogonal slices)
 2. 6 videos: 3 amplitude evolution + 3 lateral distortion evolution
+
+IMPORTANT: Lateral distortion is computed RELATIVE TO A BASELINE configuration,
+not as absolute distance from origin. This ensures we see only the electron's
+effect on the brane geometry, not static grid artifacts.
 """
 
 import sys
@@ -15,7 +19,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
-def visualize_initial_state(state, params, config):
+from branesim.physics.baseline_state import (
+    compute_flat_baseline_positions,
+    compute_lateral_distortion_grid,
+)
+
+def visualize_initial_state(state, params, config, baseline_positions=None):
     """
     Visualize initial electron state in 3 orthogonal slices.
 
@@ -23,6 +32,7 @@ def visualize_initial_state(state, params, config):
         state: BraneState after initialization
         params: ElectronInitParams
         config: Configuration dictionary
+        baseline_positions: [N, 3] tensor of baseline positions. If None, computed from config.
     """
     print(f"\n{'='*60}")
     print(f"Creating Initial State Visualization")
@@ -35,21 +45,32 @@ def visualize_initial_state(state, params, config):
     X4 = state.positions[:, 3].cpu().numpy()
     X4_grid = X4.reshape((nx, ny, nz))
 
-    # Get lateral positions for distortion visualization
-    X_lat = state.positions[:, :3].cpu().numpy()
+    # Compute baseline if not provided
+    if baseline_positions is None:
+        print("  Computing baseline positions for distortion measurement...")
+        baseline_positions = compute_flat_baseline_positions(
+            grid_shape=config['grid_shape'],
+            h=h,
+            center=config.get('center', None),
+            device=str(state.device),
+            dtype=state.dtype,
+        )
 
-    # Create flat grid for comparison
-    x = np.arange(nx) * h
-    y = np.arange(ny) * h
-    z = np.arange(nz) * h
-    X_flat, Y_flat, Z_flat = np.meshgrid(x, y, z, indexing='ij')
+    # Compute lateral distortion relative to baseline
+    print("  Computing lateral distortion relative to baseline...")
+    distortion_mag_grid = compute_lateral_distortion_grid(
+        state.positions,
+        baseline_positions,
+        config['grid_shape']
+    )
 
-    # Compute lateral distortion
-    X_lat_grid = X_lat.reshape((nx, ny, nz, 3))
-    distortion_x = X_lat_grid[:, :, :, 0] - X_flat
-    distortion_y = X_lat_grid[:, :, :, 1] - Y_flat
-    distortion_z = X_lat_grid[:, :, :, 2] - Z_flat
-    distortion_mag = np.sqrt(distortion_x**2 + distortion_y**2 + distortion_z**2)
+    # Validate baseline (should be ~zero at t=0 if no lateral initialization)
+    max_distortion = distortion_mag_grid.max()
+    print(f"  Max lateral distortion: {max_distortion:.6e} m")
+    if max_distortion < 1e-12:
+        print(f"  ✓ Lateral positions match baseline (no lateral initialization)")
+    else:
+        print(f"  → Lateral geometry has been modified from flat baseline")
 
     # Center indices
     cx, cy, cz = nx//2, ny//2, nz//2
@@ -68,11 +89,11 @@ def visualize_initial_state(state, params, config):
     plt.colorbar(im, ax=ax, label='X⁴ [m]')
 
     ax = axes[1, 0]
-    im = ax.imshow(distortion_mag[:, :, cz].T, origin='lower', cmap='hot',
+    im = ax.imshow(distortion_mag_grid[:, :, cz].T, origin='lower', cmap='hot',
                    extent=[0, nx*h*1e12, 0, ny*h*1e12])
     ax.set_xlabel('X [pm]')
     ax.set_ylabel('Y [pm]')
-    ax.set_title('XY Slice - Lateral Distortion')
+    ax.set_title('XY Slice - Lateral Distortion (vs baseline)')
     plt.colorbar(im, ax=ax, label='|Δr| [m]')
 
     # XZ slice (through center in y)
@@ -85,11 +106,11 @@ def visualize_initial_state(state, params, config):
     plt.colorbar(im, ax=ax, label='X⁴ [m]')
 
     ax = axes[1, 1]
-    im = ax.imshow(distortion_mag[:, cy, :].T, origin='lower', cmap='hot',
+    im = ax.imshow(distortion_mag_grid[:, cy, :].T, origin='lower', cmap='hot',
                    extent=[0, nx*h*1e12, 0, nz*h*1e12])
     ax.set_xlabel('X [pm]')
     ax.set_ylabel('Z [pm]')
-    ax.set_title('XZ Slice - Lateral Distortion')
+    ax.set_title('XZ Slice - Lateral Distortion (vs baseline)')
     plt.colorbar(im, ax=ax, label='|Δr| [m]')
 
     # YZ slice (through center in x)
@@ -102,11 +123,11 @@ def visualize_initial_state(state, params, config):
     plt.colorbar(im, ax=ax, label='X⁴ [m]')
 
     ax = axes[1, 2]
-    im = ax.imshow(distortion_mag[cx, :, :].T, origin='lower', cmap='hot',
+    im = ax.imshow(distortion_mag_grid[cx, :, :].T, origin='lower', cmap='hot',
                    extent=[0, ny*h*1e12, 0, nz*h*1e12])
     ax.set_xlabel('Y [pm]')
     ax.set_ylabel('Z [pm]')
-    ax.set_title('YZ Slice - Lateral Distortion')
+    ax.set_title('YZ Slice - Lateral Distortion (vs baseline)')
     plt.colorbar(im, ax=ax, label='|Δr| [m]')
 
     plt.tight_layout()
@@ -115,13 +136,14 @@ def visualize_initial_state(state, params, config):
     plt.close()
 
 
-def collect_animation_frames(states, config):
+def collect_animation_frames(states, config, baseline_positions=None):
     """
     Collect animation frames from simulation states.
 
     Args:
         states: List of BraneState snapshots
         config: Configuration dictionary
+        baseline_positions: [N, 3] tensor of baseline positions. If None, computed from config.
 
     Returns:
         Dictionary with frames for each slice and type
@@ -136,11 +158,16 @@ def collect_animation_frames(states, config):
     # Center indices
     cx, cy, cz = nx//2, ny//2, nz//2
 
-    # Create flat grid for distortion calculation
-    x = np.arange(nx) * h
-    y = np.arange(ny) * h
-    z = np.arange(nz) * h
-    X_flat, Y_flat, Z_flat = np.meshgrid(x, y, z, indexing='ij')
+    # Compute baseline if not provided
+    if baseline_positions is None:
+        print("  Computing baseline positions...")
+        baseline_positions = compute_flat_baseline_positions(
+            grid_shape=config['grid_shape'],
+            h=h,
+            center=config.get('center', None),
+            device='cpu',  # Use CPU for offline processing
+            dtype=torch.float32,
+        )
 
     frames = {
         'amplitude_xy': [],
@@ -161,17 +188,16 @@ def collect_animation_frames(states, config):
         frames['amplitude_xz'].append(X4_grid[:, cy, :])
         frames['amplitude_yz'].append(X4_grid[cx, :, :])
 
-        # Lateral distortion
-        X_lat = state.positions[:, :3].cpu().numpy()
-        X_lat_grid = X_lat.reshape((nx, ny, nz, 3))
-        distortion_x = X_lat_grid[:, :, :, 0] - X_flat
-        distortion_y = X_lat_grid[:, :, :, 1] - Y_flat
-        distortion_z = X_lat_grid[:, :, :, 2] - Z_flat
-        distortion_mag = np.sqrt(distortion_x**2 + distortion_y**2 + distortion_z**2)
+        # Lateral distortion relative to baseline
+        distortion_mag_grid = compute_lateral_distortion_grid(
+            state.positions.cpu(),
+            baseline_positions.cpu(),
+            config['grid_shape']
+        )
 
-        frames['distortion_xy'].append(distortion_mag[:, :, cz])
-        frames['distortion_xz'].append(distortion_mag[:, cy, :])
-        frames['distortion_yz'].append(distortion_mag[cx, :, :])
+        frames['distortion_xy'].append(distortion_mag_grid[:, :, cz])
+        frames['distortion_xz'].append(distortion_mag_grid[:, cy, :])
+        frames['distortion_yz'].append(distortion_mag_grid[cx, :, :])
 
         # Time
         t = idx * config['snapshot_interval'] * config['dt']
@@ -257,13 +283,14 @@ def create_animation(frames, slice_name, field_type, config, filename):
 # Store frames globally for animate function
 frames_dict = {}
 
-def create_all_animations(states, config):
+def create_all_animations(states, config, baseline_positions=None):
     """
     Create all 6 animations (3 amplitude + 3 distortion).
 
     Args:
         states: List of BraneState snapshots
         config: Configuration dictionary
+        baseline_positions: [N, 3] tensor of baseline positions. If None, computed from config.
     """
     global frames_dict
 
@@ -272,7 +299,7 @@ def create_all_animations(states, config):
     print(f"{'='*60}")
 
     # Collect frames
-    frames_dict = collect_animation_frames(states, config)
+    frames_dict = collect_animation_frames(states, config, baseline_positions)
 
     # Create amplitude animations
     create_animation(frames_dict['amplitude_xy'], 'xy', 'amplitude', config, 'electron_amplitude_xy.mp4')

@@ -545,6 +545,158 @@ def default_electron_geometry(
     return R_phys, rho0, sigma_r
 
 
+def plot_cross_section_envelope_debug(
+    params: ElectronInitParams,
+    n_points: int = 200,
+    save_path: str = 'debug_cross_section.png'
+) -> None:
+    """
+    Debug plot: visualize the cross-section envelope f(x, y).
+
+    This should show a clean dumbbell shape with two lobes separated
+    along the y (binormal) axis.
+
+    Args:
+        params: ElectronInitParams with geometry
+        n_points: Resolution for plotting
+        save_path: Path to save the figure
+    """
+    import matplotlib.pyplot as plt
+
+    # Create grid in transverse (x, y) plane
+    extent = 3.0 * max(params.rho0, params.sigma_r)  # Plot ±3σ range
+    x = np.linspace(-extent, extent, n_points)
+    y = np.linspace(-extent, extent, n_points)
+    X, Y = np.meshgrid(x, y)
+
+    # Convert to tensors
+    X_t = torch.from_numpy(X).float()
+    Y_t = torch.from_numpy(Y).float()
+
+    # Compute envelope
+    envelope = double_loop_envelope(X_t, Y_t, params.rho0, params.sigma_r)
+    envelope_np = envelope.numpy()
+
+    # Plot
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # 2D heatmap
+    ax = axes[0]
+    im = ax.contourf(X * 1e12, Y * 1e12, envelope_np, levels=20, cmap='viridis')
+    ax.set_xlabel('x (radial) [pm]')
+    ax.set_ylabel('y (binormal) [pm]')
+    ax.set_title('Cross-Section Envelope f(x, y)')
+    ax.axhline(y=params.rho0 * 1e12, color='r', linestyle='--', alpha=0.5, label=f'y = +ρ₀')
+    ax.axhline(y=-params.rho0 * 1e12, color='r', linestyle='--', alpha=0.5, label=f'y = -ρ₀')
+    ax.axvline(x=0, color='w', linestyle='--', alpha=0.3)
+    ax.legend()
+    plt.colorbar(im, ax=ax)
+    ax.set_aspect('equal')
+
+    # 1D cuts
+    ax = axes[1]
+    # Cut along y axis (x=0)
+    y_cut = envelope_np[n_points//2, :]
+    ax.plot(y * 1e12, y_cut, 'b-', linewidth=2, label='Cut along y (x=0)')
+
+    # Cut along x axis (y=0)
+    x_cut = envelope_np[:, n_points//2]
+    ax.plot(x * 1e12, x_cut, 'r-', linewidth=2, label='Cut along x (y=0)')
+
+    ax.set_xlabel('Coordinate [pm]')
+    ax.set_ylabel('Envelope amplitude')
+    ax.set_title('1D Cuts Through Center')
+    ax.axvline(x=params.rho0 * 1e12, color='b', linestyle='--', alpha=0.3)
+    ax.axvline(x=-params.rho0 * 1e12, color='b', linestyle='--', alpha=0.3)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    print(f"\n  ✓ Debug plot saved: {save_path}")
+    print(f"    Expected: Two lobes at y = ±{params.rho0:.2e} m = ±{params.rho0*1e12:.2f} pm")
+    plt.close()
+
+
+def plot_phase_along_centerline_debug(
+    params: ElectronInitParams,
+    n_points: int = 500,
+    save_path: str = 'debug_phase_centerline.png'
+) -> None:
+    """
+    Debug plot: visualize the phase pattern along the torus centerline.
+
+    This should show a smooth cos(m*φ) pattern with NO discontinuity,
+    where m is the winding number.
+
+    Args:
+        params: ElectronInitParams with geometry and wave parameters
+        n_points: Number of points around the torus
+        save_path: Path to save the figure
+    """
+    import matplotlib.pyplot as plt
+
+    # Angular coordinate around torus
+    phi = np.linspace(0, 2 * np.pi, n_points)
+
+    # Arclength coordinate
+    z = params.R * phi
+
+    # Wave number
+    k_C = params.compton_omega / params.wave_speed
+
+    # Phase with m-fold winding
+    m = params.winding_number
+    phase = -m * k_C * z + params.phase_offset
+
+    # Field amplitude at centerline (x=0, y=0) at t=0
+    # Envelope at centerline depends on cross-section shape
+    # For double-lobe at y=±rho0, centerline (x=0, y=0) has intermediate envelope value
+    x_center = torch.zeros(n_points)
+    y_center = torch.zeros(n_points)
+    envelope_center = double_loop_envelope(x_center, y_center, params.rho0, params.sigma_r)
+    envelope_np = envelope_center.numpy()
+
+    xi = params.A * envelope_np * np.cos(phase)
+
+    # Plot
+    fig, axes = plt.subplots(2, 1, figsize=(12, 8))
+
+    # Phase vs angle
+    ax = axes[0]
+    ax.plot(phi, phase, 'b-', linewidth=2)
+    ax.set_xlabel('φ [rad]')
+    ax.set_ylabel('Phase [rad]')
+    ax.set_title(f'Phase Pattern (m={m} winding) - Should be smooth, no jumps')
+    ax.axhline(y=0, color='k', linestyle='--', alpha=0.3)
+    ax.grid(True, alpha=0.3)
+
+    # Expected: m cycles of 2π
+    expected_phase_range = m * 2 * np.pi
+    ax.text(0.02, 0.95, f'Expected phase range: {expected_phase_range/np.pi:.1f}π',
+            transform=ax.transAxes, fontsize=10, verticalalignment='top',
+            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    # Field amplitude vs angle
+    ax = axes[1]
+    ax.plot(phi, xi * 1e14, 'r-', linewidth=2)
+    ax.set_xlabel('φ [rad]')
+    ax.set_ylabel('ξ [×10⁻¹⁴ m]')
+    ax.set_title(f'Amplitude Field Along Centerline - Should show {m} complete cycles')
+    ax.axhline(y=0, color='k', linestyle='--', alpha=0.3)
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    print(f"\n  ✓ Debug plot saved: {save_path}")
+    print(f"    Expected: {m} complete oscillations, smooth everywhere")
+    print(f"    Phase range: {phase.min():.2f} to {phase.max():.2f} rad")
+    print(f"    Phase jump check: max(|Δφ|) = {np.abs(np.diff(phase)).max():.2e} rad")
+    if np.abs(np.diff(phase)).max() > 0.1:
+        print(f"    ⚠ WARNING: Large phase jump detected! Check φ wrapping.")
+    plt.close()
+
+
 def calibrate_electron_init_params(
     constants: PhysicalConstants,
     grid_spacing: float,
