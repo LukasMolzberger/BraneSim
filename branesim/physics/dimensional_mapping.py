@@ -154,6 +154,51 @@ class DimensionalMapper:
         return k_sim * k_scale
 
     # ========================================================================
+    # BENDING STIFFNESS conversions (energy × length = mass × length³/time²)
+    # ========================================================================
+
+    def to_sim_bending_stiffness(self, kappa_phys: ScalarOrArray) -> ScalarOrArray:
+        """
+        Convert physical bending stiffness [J·m] to simulation units.
+
+        Bending stiffness has dimensions [energy × length] = [kg·m³/s²].
+        """
+        kappa_scale = self.mass_scale * (self.length_scale ** 3) / (self.time_scale ** 2)
+        return kappa_phys / kappa_scale
+
+    def to_phys_bending_stiffness(self, kappa_sim: ScalarOrArray) -> ScalarOrArray:
+        """
+        Convert simulation bending stiffness to physical units [J·m].
+
+        Bending stiffness has dimensions [energy × length] = [kg·m³/s²].
+        """
+        kappa_scale = self.mass_scale * (self.length_scale ** 3) / (self.time_scale ** 2)
+        return kappa_sim * kappa_scale
+
+    # ========================================================================
+    # TENSION conversions (force/length = mass/time²)
+    # ========================================================================
+
+    def to_sim_tension(self, T_phys: ScalarOrArray) -> ScalarOrArray:
+        """
+        Convert physical tension [N/m] to simulation units.
+
+        Tension has dimensions [force/length] = [mass/time²].
+        Note: This has the same dimensions as spring constant k.
+        """
+        T_scale = self.mass_scale / (self.time_scale ** 2)
+        return T_phys / T_scale
+
+    def to_phys_tension(self, T_sim: ScalarOrArray) -> ScalarOrArray:
+        """
+        Convert simulation tension to physical units [N/m].
+
+        Tension has dimensions [force/length] = [mass/time²].
+        """
+        T_scale = self.mass_scale / (self.time_scale ** 2)
+        return T_sim * T_scale
+
+    # ========================================================================
     # Convenience methods for common conversions
     # ========================================================================
 
