@@ -37,6 +37,7 @@ env/
 *.mp4
 *.avi
 *.mov
+*.log
 output/
 
 # OS
