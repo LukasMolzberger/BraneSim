@@ -40,6 +40,7 @@ from branesim.diagnostics.electron_stability import (
     compute_total_momentum,
     compute_total_spin,
 )
+from branesim.physics.baseline_state import initialize_baseline_state
 
 # Import visualization functions
 from electron_visualization import (
@@ -141,6 +142,7 @@ def setup_experiment(
         'constants': constants,
         'grid_shape': grid_shape,
         'h': h,
+        'center': None,  # Grid uses corner-at-origin (no centering)
         'k': k,
         'rest_length_frac': rest_length_frac,
         'm_point': m_point,
@@ -431,6 +433,16 @@ def main():
     # Initialize flat configuration
     state.initialize_flat_configuration(config['h'])
 
+    # Create baseline positions for lateral distortion measurement
+    # CRITICAL: Must use same centering as actual grid (corner-at-origin)
+    print(f"\n{'='*60}")
+    print(f"Creating Baseline Reference State")
+    print(f"{'='*60}")
+    baseline_info = initialize_baseline_state(config)
+    baseline_positions = baseline_info['positions']
+    print(f"  Baseline positions created: {baseline_positions.shape}")
+    print(f"  Grid centering: corner-at-origin (center=None)")
+
     # Create physics and solver
     m_point = config['m_point']
     rest_length = config['rest_length_frac'] * config['h']
@@ -455,7 +467,8 @@ def main():
     params = initialize_electron(state, grid, config)
 
     # Visualize initial state (3 orthogonal slices)
-    visualize_initial_state(state, params, config)
+    # Pass baseline_positions to compute lateral distortion correctly
+    visualize_initial_state(state, params, config, baseline_positions=baseline_positions)
 
     # Run simulation
     states = run_simulation(state, grid, physics, solver, config)
@@ -467,7 +480,8 @@ def main():
     visualize_results(states, params, config)
 
     # Create animations (6 videos: 3 amplitude + 3 distortion)
-    create_all_animations(states, config)
+    # Pass baseline_positions for correct lateral distortion measurement
+    create_all_animations(states, config, baseline_positions=baseline_positions)
 
     print(f"\n{'='*60}")
     print(f"Experiment Complete")
