@@ -581,8 +581,13 @@ the electromagnetic field is confined to nested toroidal surfaces of
 characteristic size on the order of the Compton wavelength. On each
 surface the field follows closed geodesics of Compton length, with the
 energy and momentum circulating at (essentially) the speed of light in
-a double-loop pattern. The internal oscillation frequency is therefore
-of order twice the Compton frequency, and from the viewpoint of any
+a double-loop pattern. In the W\&vdM picture the internal circulation
+along the double loop is naturally associated with the Compton frequency
+$\omega_C = m_e c^2/\hbar$, with an additional integer winding number
+$m$ accounting for multiple loops around the torus. In the present work
+we keep $\omega_{\text{int}} = \omega_C$ and represent the double loop
+via $m=2$ in the longitudinal phase factor of the tubular ansatz
+\eqref{eq:xi-rest-compton-mode}. From the viewpoint of any
 probe that cannot resolve such timescales the detailed field pattern is
 seen only through its time-averaged effect on the surrounding medium.
 A more detailed analysis of how de~Broglie's ``harmony of phases''
@@ -640,26 +645,92 @@ the microscopic amplitude mode $\xi(t,z,x,y)$ confined to the
 world-tube around the electron's centerline, as introduced in
 Section~\ref{subsec:tubular-electron}. In the electron rest frame the
 dynamics of this mode are dominated by a lightlike internal oscillation
-with Compton frequency $\omega_C$,
+with Compton frequency $\omega_C$. The amplitude field in these coordinates
+is then described by a Compton-frequency internal mode of the form
 %
 \begin{equation}
   \xi(t,z,x,y)
   \;\approx\;
   A\,f(x,y)\,
-  \cos\!\bigl(\omega_C t - k_C z + \Phi(x,y)\bigr),
+  \cos\!\bigl(\omega_{\text{int}} t - m\,k_C z + \Phi(x,y)\bigr),
   \qquad
   k_C = \frac{\omega_C}{c},
   \label{eq:xi-rest-compton-mode}
 \end{equation}
 %
-where $(z,x,y)$ are the tubular coordinates along and around the
-centerline, $f(x,y)$ is a localized cross-section profile encoding the
-double-loop structure in the $(x,y)$-plane, and $\Phi(x,y)$ is a
-relative phase between the two windings. To leading order the
-amplitude mode propagates along $z$ at the characteristic brane wave
-speed $c$, so that the phase of the internal oscillation can be
-written, in comoving coordinates $(\tau,\zeta)$ adapted to the
-world-tube,
+where
+\begin{itemize}
+  \item $f(x,y)$ is a localized cross-section profile in the transverse
+  $(x,y)$-plane,
+  \item $\Phi(x,y)$ is an internal phase pattern across the
+  cross-section,
+  \item $k_C = \omega_C/c$ is the Compton wavenumber, and
+  \item $m\in\mathbb{Z}$ is an integer winding number counting how many
+  times the internal mode winds around the torus per revolution of the
+  centerline.
+\end{itemize}
+For the electron we are primarily interested in an $m=2$ mode,
+corresponding to a double-loop pattern around the torus. The precise
+choice of the internal phase $\Phi(x,y)$ determines how this double
+loop is realized geometrically (for instance, whether the two lobes in
+the cross-section are simply in phase or form an intertwined
+torus-knot-like pattern).
+
+In the numerical experiments reported below we adopt a W\&vdM-inspired
+profile in which the brane's amplitude field is localized along two
+narrow ridges of high energy density that wrap through a toroidal region
+at Compton scale. For intuition we will colloquially refer to these
+ridges as energy ``tunnels'', but they are \emph{not} separate material
+tubes: they are simply the loci of maximal $|\xi|$ within the single
+brane deformation. To describe this structure we work in polar
+coordinates $(\rho,\theta)$ on each cross-section, with
+$\rho = \sqrt{x^2+y^2}$ and $\theta = \mathrm{atan2}(y,x)$. The
+cross-section profile is then
+%
+\begin{equation}
+  f(\rho,\theta;z)
+  \;=\;
+  G(\rho)\,\Bigl[
+    e^{-(\theta-\alpha(z))^2/(2\sigma_\theta^2)}
+    +
+    e^{-(\theta-\alpha(z)-\pi)^2/(2\sigma_\theta^2)}
+  \Bigr],
+  \label{eq:double-tunnel-profile}
+\end{equation}
+%
+where $G(\rho) = \exp\bigl(-(\rho-\rho_0)^2/(2\sigma_r^2)\bigr)$ is a
+radial envelope peaked at $\rho=\rho_0$, $\sigma_\theta$ sets the angular
+width of each ridge, and $\alpha(z)$ controls their orientation as one
+moves along the torus.
+
+For the electron ansatz we choose an intertwined W\&vdM-like double loop
+by setting $\alpha(z) = \phi(z) = z/R$, where $\phi(z)$ is the angular
+coordinate along the torus centreline. In this case each ridge (the
+``tunnel'' of large $|\xi|$) executes a single twist as the torus is
+traversed once, producing a $(2,1)$-type torus-knot pattern in which the
+two ridges wiggle around each other inside the toroidal hull. This
+realizes the geometric picture of the W\&vdM model within the brane
+framework. The longitudinal phase factor with $m=2$ encodes that the
+internal Compton mode winds twice around the torus per revolution. The amplitude field in the rest frame
+is then
+%
+\begin{equation}
+  \xi(t,z,\rho,\theta)
+  \;=\;
+  A\,f(\rho,\theta;z)\,
+  \cos\!\bigl(\omega_C t - 2\,k_C z\bigr),
+  \label{eq:xi-electron-init}
+\end{equation}
+%
+with $\Phi(\rho,\theta;z)=0$. In the present implementation we adopt
+$\alpha(z)=\phi(z)$ ($\ell=1$) so that the two tunnels form an
+intertwined double-loop pattern inside the toroidal hull, closely
+mirroring the W\&vdM picture.
+
+To leading order the amplitude mode propagates along $z$ at the
+characteristic brane wave speed $c$, so that the phase of the internal
+oscillation can be written, in comoving coordinates $(\tau,\zeta)$
+adapted to the world-tube,
 %
 \begin{equation}
   \phi

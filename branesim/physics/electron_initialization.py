@@ -41,8 +41,15 @@ class ElectronInitParams:
     Geometric Parameters:
         center: (x, y, z) coordinates of torus center in physical units [m]
         R: Major radius of torus (centerline radius) [m]
-        rho0: Radius of double-loop lobes in cross-section [m]
+        rho0: Peak radius for cross-section envelope [m]
         sigma_r: Radial width of cross-section envelope [m]
+        sigma_theta: Angular width of each tunnel [rad]
+
+    Twist Parameters:
+        l_twist: Twist winding number (ℓ ∈ ℤ).
+                 ℓ=0 → symmetric double lobe (no twist)
+                 ℓ=1 → W&vdM intertwined double loop (one rotation per torus revolution)
+        alpha0: Initial twist angle offset [rad]
 
     Field Parameters:
         A: Amplitude scale for X⁴ Compton mode [m]
@@ -74,10 +81,13 @@ class ElectronInitParams:
     tube_max_radius: float
 
     # Fields with defaults (must come last in dataclass)
+    sigma_theta: float = 0.5  # Angular width in radians (default ~30°)
+    l_twist: int = 1  # Twist winding number (ℓ=1 for W&vdM-like)
+    alpha0: float = 0.0  # Initial twist angle offset
     phase_offset: float = 0.0
     lateral_spin_scale: float = 0.0
     spin_axis: Tuple[float, float, float] = (0.0, 0.0, 1.0)
-    winding_number: int = 2  # m=2 for double loop (2,1) torus knot
+    winding_number: int = 2  # m=2 for longitudinal winding
 
     def __repr__(self) -> str:
         return (
@@ -209,6 +219,80 @@ def compute_tubular_coords_vectorized(
     return z, x, y
 
 
+def twisted_tunnel_envelope(
+    x: torch.Tensor,
+    y: torch.Tensor,
+    z: torch.Tensor,
+    R: float,
+    rho0: float,
+    sigma_r: float,
+    sigma_theta: float,
+    l_twist: int,
+    alpha0: float,
+) -> torch.Tensor:
+    """
+    Unified twisted-tunnel cross-section envelope f(ρ,θ;z) implementing the
+    W&vdM model with adjustable twist parameter.
+
+    This implements the unified tubular ansatz:
+        f(ρ,θ;z) = G(ρ) · [exp(-(θ-α(z))²/(2σ_θ²)) + exp(-(θ-α(z)-π)²/(2σ_θ²))]
+
+    where:
+        - (ρ,θ) are polar coordinates on the cross-section
+        - G(ρ) = exp(-(ρ-ρ₀)²/(2σ_r²)) is the radial envelope
+        - α(z) = α₀ + ℓ·φ(z) = α₀ + ℓ·(z/R) controls tunnel twist
+
+    The electron ansatz in this work uses ℓ=1 (W&vdM intertwined double loop),
+    so that the ridges rotate once per torus revolution. Other integer ℓ are
+    allowed in principle (ℓ=0 would correspond to a symmetric double-lobe
+    profile) but are used only for low-level tests, not for the physical
+    electron model.
+
+    The two ridges are located at angular positions θ = α(z) and θ = α(z)+π.
+
+    Args:
+        x: Transverse coordinate (radial from centerline) [N] or [*grid_shape]
+        y: Transverse coordinate (binormal, vertical) [N] or [*grid_shape]
+        z: Arclength coordinate along torus [N] or [*grid_shape]
+        R: Major radius of torus [m]
+        rho0: Peak radius for radial envelope [m]
+        sigma_r: Radial width of envelope [m]
+        sigma_theta: Angular width of each tunnel [rad]
+        l_twist: Twist winding number ℓ ∈ ℤ
+        alpha0: Initial twist angle offset α₀ [rad]
+
+    Returns:
+        Envelope f(ρ,θ;z) with same shape as input
+    """
+    # Convert Cartesian (x, y) to polar (ρ, θ) on cross-section
+    rho = torch.sqrt(x ** 2 + y ** 2 + 1e-30)
+    theta = torch.atan2(y, x)  # range (-π, π]
+
+    # Radial envelope G(ρ) = exp(-(ρ-ρ₀)²/(2σ_r²))
+    G_rho = torch.exp(-0.5 * ((rho - rho0) / sigma_r) ** 2)
+
+    # Twist angle α(z) = α₀ + ℓ·φ(z) where φ(z) = z/R
+    phi = z / R
+    alpha = alpha0 + l_twist * phi
+
+    # Angular envelope with two tunnels at θ = α(z) and θ = α(z)+π
+    # Need to handle angular wrapping: use cos distance for periodicity
+    # Angular deviation from tunnel 1 at θ = α(z)
+    delta_theta_1 = theta - alpha
+    # Wrap to [-π, π]
+    delta_theta_1 = torch.atan2(torch.sin(delta_theta_1), torch.cos(delta_theta_1))
+    tunnel_1 = torch.exp(-0.5 * (delta_theta_1 / sigma_theta) ** 2)
+
+    # Angular deviation from tunnel 2 at θ = α(z)+π
+    delta_theta_2 = theta - (alpha + torch.pi)
+    # Wrap to [-π, π]
+    delta_theta_2 = torch.atan2(torch.sin(delta_theta_2), torch.cos(delta_theta_2))
+    tunnel_2 = torch.exp(-0.5 * (delta_theta_2 / sigma_theta) ** 2)
+
+    # Combine: f(ρ,θ;z) = G(ρ) · [tunnel_1 + tunnel_2]
+    return G_rho * (tunnel_1 + tunnel_2)
+
+
 def double_loop_envelope(
     x: torch.Tensor,
     y: torch.Tensor,
@@ -216,16 +300,13 @@ def double_loop_envelope(
     sigma_r: float
 ) -> torch.Tensor:
     """
+    Legacy symmetric double-lobe envelope (ℓ=0 case of twisted_tunnel_envelope).
+
+    This is kept for backward compatibility with existing test code.
+    New code should use twisted_tunnel_envelope with l_twist=0.
+
     Cross-section envelope f(x, y) with two lobes along the binormal (y) direction.
-
-    This implements the W&vdM double-loop structure in the cross-section:
-    - Two Gaussian peaks separated along the y-axis (binormal direction)
-    - Peaks at y = ±rho0
-    - Both lobes at the same radial distance from the torus centerline (x ≈ 0)
-    - This creates a "dumbbell" shape in the cross-section, not two radii
-
-    NOTE: Previous version used rho=sqrt(x²+y²) and cos(2φ), which created
-    two radial rings at R±rho0. This version keeps both lobes at radius R.
+    Two Gaussian peaks separated along the y-axis at y = ±rho0.
 
     Args:
         x: Transverse coordinate (radial from centerline) [N] or [*grid_shape]
@@ -251,15 +332,16 @@ def init_electron_amplitude(
 ) -> None:
     """
     Initialize X⁴ (amplitude) and dX⁴/dt for the electron region using the
-    toroidal Compton double-loop ansatz.
+    unified twisted-tunnel W&vdM ansatz.
 
     The field is initialized as:
-        ξ(z, x, y, t=0) = A · f(x, y) · cos(k_C z + φ₀)
-        ∂_t ξ|_{t=0} = -A · ω_C · f(x, y) · sin(k_C z + φ₀)
+        ξ(z, x, y, t=0) = A · f(ρ,θ;z) · cos(m·k_C·z + φ₀)
+        ∂_t ξ|_{t=0} = -A · ω_C · f(ρ,θ;z) · sin(m·k_C·z + φ₀)
 
     where:
-        - f(x, y) is the double-loop cross-section envelope
+        - f(ρ,θ;z) is the twisted-tunnel cross-section envelope
         - k_C = ω_C / c is the Compton wave number
+        - m is the longitudinal winding number
         - z is the arclength coordinate along the torus
 
     Args:
@@ -271,6 +353,9 @@ def init_electron_amplitude(
     R = params.R
     rho0 = params.rho0
     sigma_r = params.sigma_r
+    sigma_theta = params.sigma_theta
+    l_twist = params.l_twist
+    alpha0 = params.alpha0
     A = params.A
     omega_C = params.compton_omega
     c_eff = params.wave_speed
@@ -283,32 +368,47 @@ def init_electron_amplitude(
     # Compute tubular coordinates for all points (vectorized)
     z, x, y = compute_tubular_coords_vectorized(X_lat, center, R)
 
-    # Build cross-section envelope f(x, y)
-    f_xy = double_loop_envelope(x, y, rho0=rho0, sigma_r=sigma_r)
+    # Build twisted-tunnel cross-section envelope f(ρ,θ;z)
+    f_xyz = twisted_tunnel_envelope(
+        x, y, z, R, rho0, sigma_r, sigma_theta, l_twist, alpha0
+    )
 
     # Phase at t=0 with m-fold winding: φ = -m * k_C * z + φ₀
     # For m=2 (double loop), phase completes TWO cycles around torus
-    # This implements the (2,1) torus knot structure
+    # Combined with l_twist, this creates the (m,ℓ) torus-knot pattern
     m = params.winding_number
     phase0 = -m * k_C * z + phase_offset
 
     # Amplitude displacement X⁴
-    xi0 = A * f_xy * torch.cos(phase0)
+    xi0 = A * f_xyz * torch.cos(phase0)
 
     # Amplitude velocity dX⁴/dt
-    dxi_dt0 = -A * omega_C * f_xy * torch.sin(phase0)
+    dxi_dt0 = -A * omega_C * f_xyz * torch.sin(phase0)
 
     # Apply only on masked region
     amp_idx = 3  # X⁴ is the 4th component (index 3)
     state.positions[:, amp_idx] = torch.where(mask, xi0, state.positions[:, amp_idx])
     state.velocities[:, amp_idx] = torch.where(mask, dxi_dt0, state.velocities[:, amp_idx])
 
+    # Determine twist description
+    if l_twist == 0:
+        twist_desc = "symmetric (no twist)"
+    elif l_twist == 1:
+        twist_desc = "W&vdM intertwined (one rotation per revolution)"
+    else:
+        twist_desc = f"{l_twist} rotations per revolution"
+
     print(f"\n=== Initialized Electron Amplitude Field ===")
+    print(f"  Model: Unified twisted-tunnel W&vdM ansatz")
     print(f"  Torus major radius R = {R:.6e} m")
-    print(f"  Cross-section radius rho0 = {rho0:.6e} m")
-    print(f"  Cross-section width sigma_r = {sigma_r:.6e} m")
+    print(f"  Cross-section peak radius ρ₀ = {rho0:.6e} m")
+    print(f"  Radial width σ_r = {sigma_r:.6e} m")
+    print(f"  Angular width σ_θ = {sigma_theta:.3f} rad")
+    print(f"  Twist winding ℓ = {l_twist} ({twist_desc})")
+    print(f"  Twist offset α₀ = {alpha0:.3f} rad")
+    print(f"  Longitudinal winding m = {m} (Compton phase cycles)")
+    print(f"  Torus-knot pattern: ({m},{l_twist})-type")
     print(f"  Amplitude scale A = {A:.6e} m")
-    print(f"  Winding number m = {m} (loops around torus)")
     print(f"  Compton frequency ω_C = {omega_C:.6e} rad/s")
     print(f"  Wave number k_C = {k_C:.6e} rad/m")
     print(f"  Effective wave number m*k_C = {m*k_C:.6e} rad/m")
