@@ -229,37 +229,39 @@ def twisted_tunnel_envelope(
     sigma_theta: float,
     l_twist: int,
     alpha0: float,
+    m: int = 2,
 ) -> torch.Tensor:
     """
-    Unified twisted-tunnel cross-section envelope f(ρ,θ;z) implementing the
-    W&vdM model with adjustable twist parameter.
+    Single-path double-loop cross-section envelope f(ρ,θ;z) for W&vdM (m,ℓ) torus knot.
 
-    This implements the unified tubular ansatz:
+    This implements a SINGLE continuous path that wraps m times around the torus
+    centerline while rotating ℓ times in the cross-section, forming an (m,ℓ) torus knot.
+
+    The envelope shows where this single path passes through each cross-section:
         f(ρ,θ;z) = G(ρ) · [exp(-(θ-α(z))²/(2σ_θ²)) + exp(-(θ-α(z)-π)²/(2σ_θ²))]
 
     where:
         - (ρ,θ) are polar coordinates on the cross-section
         - G(ρ) = exp(-(ρ-ρ₀)²/(2σ_r²)) is the radial envelope
-        - α(z) = α₀ + ℓ·φ(z) = α₀ + ℓ·(z/R) controls tunnel twist
+        - α(z) = α₀ + (ℓ/m)·φ(z) with φ(z) = z/R
+        - The two Gaussian terms represent the two passes of the single path
+          through this cross-section (because it wraps around m times)
 
-    The electron ansatz in this work uses ℓ=1 (W&vdM intertwined double loop),
-    so that the ridges rotate once per torus revolution. Other integer ℓ are
-    allowed in principle (ℓ=0 would correspond to a symmetric double-lobe
-    profile) but are used only for low-level tests, not for the physical
-    electron model.
-
-    The two ridges are located at angular positions θ = α(z) and θ = α(z)+π.
+    For W&vdM electron: (m,ℓ) = (2,1) creates a (2,1) torus knot where the single
+    path makes 2 toroidal windings and 1 poloidal winding. After 4π rotation
+    around the torus, the path closes and we're back at the start.
 
     Args:
         x: Transverse coordinate (radial from centerline) [N] or [*grid_shape]
         y: Transverse coordinate (binormal, vertical) [N] or [*grid_shape]
-        z: Arclength coordinate along torus [N] or [*grid_shape]
+        z: Arclength coordinate along torus centerline [N] or [*grid_shape]
         R: Major radius of torus [m]
         rho0: Peak radius for radial envelope [m]
         sigma_r: Radial width of envelope [m]
-        sigma_theta: Angular width of each tunnel [rad]
-        l_twist: Twist winding number ℓ ∈ ℤ
+        sigma_theta: Angular width of path [rad]
+        l_twist: Poloidal winding number ℓ ∈ ℤ (ℓ=1 for W&vdM)
         alpha0: Initial twist angle offset α₀ [rad]
+        m: Toroidal winding number (m=2 for W&vdM double loop)
 
     Returns:
         Envelope f(ρ,θ;z) with same shape as input
@@ -271,26 +273,31 @@ def twisted_tunnel_envelope(
     # Radial envelope G(ρ) = exp(-(ρ-ρ₀)²/(2σ_r²))
     G_rho = torch.exp(-0.5 * ((rho - rho0) / sigma_r) ** 2)
 
-    # Twist angle α(z) = α₀ + ℓ·φ(z) where φ(z) = z/R
+    # Twist angle for (m,ℓ) torus knot: α(z) = α₀ + (ℓ/m)·φ(z) where φ(z) = z/R
+    # For W&vdM (2,1) knot: m=2, ℓ=1, so α increases by π per torus revolution
+    # The single continuous path wraps around the major circle m=2 times (4π total)
+    # But our grid only covers φ ∈ [0,2π), so we see the path TWICE at each φ
     phi = z / R
-    alpha = alpha0 + l_twist * phi
+    alpha = alpha0 + (l_twist / m) * phi
 
-    # Angular envelope with two tunnels at θ = α(z) and θ = α(z)+π
-    # Need to handle angular wrapping: use cos distance for periodicity
-    # Angular deviation from tunnel 1 at θ = α(z)
+    # SINGLE continuous path crossing each cross-section at TWO angles:
+    # - First pass (φ ∈ [0,2π)): θ = α(φ) = φ/2
+    # - Second pass (φ ∈ [2π,4π)): θ = α(φ) = φ/2 + π = α(φ-2π) + π
+    # These two Gaussians represent the SAME path at its two crossings
+
+    # First crossing: θ = α(z)
     delta_theta_1 = theta - alpha
-    # Wrap to [-π, π]
     delta_theta_1 = torch.atan2(torch.sin(delta_theta_1), torch.cos(delta_theta_1))
-    tunnel_1 = torch.exp(-0.5 * (delta_theta_1 / sigma_theta) ** 2)
+    crossing_1 = torch.exp(-0.5 * (delta_theta_1 / sigma_theta) ** 2)
 
-    # Angular deviation from tunnel 2 at θ = α(z)+π
+    # Second crossing: θ = α(z) + π  (same path, second time through)
     delta_theta_2 = theta - (alpha + torch.pi)
-    # Wrap to [-π, π]
     delta_theta_2 = torch.atan2(torch.sin(delta_theta_2), torch.cos(delta_theta_2))
-    tunnel_2 = torch.exp(-0.5 * (delta_theta_2 / sigma_theta) ** 2)
+    crossing_2 = torch.exp(-0.5 * (delta_theta_2 / sigma_theta) ** 2)
 
-    # Combine: f(ρ,θ;z) = G(ρ) · [tunnel_1 + tunnel_2]
-    return G_rho * (tunnel_1 + tunnel_2)
+    # Combine: f(ρ,θ;z) = G(ρ) · [exp(...) + exp(...)]
+    # This is ONE continuous closed loop appearing twice per cross-section!
+    return G_rho * (crossing_1 + crossing_2)
 
 
 def double_loop_envelope(
@@ -332,7 +339,7 @@ def init_electron_amplitude(
 ) -> None:
     """
     Initialize X⁴ (amplitude) and dX⁴/dt for the electron region using the
-    unified twisted-tunnel W&vdM ansatz.
+    W&vdM twisted-tunnel ansatz.
 
     The field is initialized as:
         ξ(z, x, y, t=0) = A · f(ρ,θ;z) · cos(m·k_C·z + φ₀)
@@ -369,15 +376,37 @@ def init_electron_amplitude(
     z, x, y = compute_tubular_coords_vectorized(X_lat, center, R)
 
     # Build twisted-tunnel cross-section envelope f(ρ,θ;z)
+    # For (m,ℓ) torus knot with m=winding_number, ℓ=l_twist
+    m = params.winding_number
     f_xyz = twisted_tunnel_envelope(
-        x, y, z, R, rho0, sigma_r, sigma_theta, l_twist, alpha0
+        x, y, z, R, rho0, sigma_r, sigma_theta, l_twist, alpha0, m
     )
 
-    # Phase at t=0 with m-fold winding: φ = -m * k_C * z + φ₀
-    # For m=2 (double loop), phase completes TWO cycles around torus
-    # Combined with l_twist, this creates the (m,ℓ) torus-knot pattern
+    # Phase at t=0 with m-fold winding along the continuous path
+    # The single path crosses each φ twice, with different phases
+    # We need to compute which crossing each point is closer to and assign phase accordingly
+
     m = params.winding_number
-    phase0 = -m * k_C * z + phase_offset
+    rho = torch.sqrt(x ** 2 + y ** 2 + 1e-30)
+    theta = torch.atan2(y, x)
+    phi = z / R
+    alpha = alpha0 + (l_twist / m) * phi
+
+    # Determine which crossing each point belongs to
+    # First crossing: θ ≈ α(φ), phase parameter s = φ
+    # Second crossing: θ ≈ α(φ)+π, phase parameter s = φ + 2π
+    delta_1 = torch.atan2(torch.sin(theta - alpha), torch.cos(theta - alpha))
+    delta_2 = torch.atan2(torch.sin(theta - alpha - torch.pi), torch.cos(theta - alpha - torch.pi))
+
+    # Use the crossing with smaller angular distance
+    is_first_crossing = torch.abs(delta_1) < torch.abs(delta_2)
+
+    # Compute phases for both crossings
+    phase_1 = -m * k_C * z + phase_offset  # First loop
+    phase_2 = -m * k_C * (z + 2*torch.pi*R) + phase_offset  # Second loop (advanced by 2π)
+
+    # Select the appropriate phase for each point
+    phase0 = torch.where(is_first_crossing, phase_1, phase_2)
 
     # Amplitude displacement X⁴
     xi0 = A * f_xyz * torch.cos(phase0)
@@ -399,7 +428,7 @@ def init_electron_amplitude(
         twist_desc = f"{l_twist} rotations per revolution"
 
     print(f"\n=== Initialized Electron Amplitude Field ===")
-    print(f"  Model: Unified twisted-tunnel W&vdM ansatz")
+    print(f"  Model: W&vdM twisted-tunnel ansatz")
     print(f"  Torus major radius R = {R:.6e} m")
     print(f"  Cross-section peak radius ρ₀ = {rho0:.6e} m")
     print(f"  Radial width σ_r = {sigma_r:.6e} m")
@@ -569,25 +598,28 @@ def init_electron_state(
     center = torch.tensor(params.center, dtype=state.dtype, device=state.device)
     X_lat = state.positions[:, :3]  # [N, 3]
 
-    # Compute mask of points belonging to the tube region:
-    # Points within tube_max_radius of the circular centerline
-    v = X_lat - center
-    vx, vy, vz = v[:, 0], v[:, 1], v[:, 2]
-    r_xy = torch.sqrt(vx * vx + vy * vy + 1e-30)
+    # Compute tubular coordinates for all points to evaluate the twisted envelope
+    z, x, y = compute_tubular_coords_vectorized(X_lat, center, params.R)
 
-    # Distance from circle centerline in XY plane
-    R = params.R
-    radial_offset = r_xy - R
+    # Compute the twisted-tunnel cross-section envelope f(ρ,θ;z)
+    # For (m,ℓ) = (2,1) torus knot: single path wraps around twice
+    f_xyz = twisted_tunnel_envelope(
+        x, y, z, params.R, params.rho0, params.sigma_r,
+        params.sigma_theta, params.l_twist, params.alpha0, params.winding_number
+    )
 
-    # Transverse distance (radial in plane + vertical)
-    transverse = torch.sqrt(radial_offset * radial_offset + vz * vz)
-    mask = transverse <= params.tube_max_radius
+    # Create mask based on where the twisted envelope is non-negligible
+    # This follows the actual twisted ridges, not a simple circular tube
+    envelope_threshold = 0.01  # Points where envelope > 1% of maximum
+    mask = f_xyz > envelope_threshold
 
     num_electron = mask.sum().item()
     num_total = state.num_points
-    print(f"\n=== Electron Tube Region ===")
-    print(f"  Tube max radius = {params.tube_max_radius:.6e} m")
+    print(f"\n=== Electron Region (Following W&vdM Double-Loop Path) ===")
+    print(f"  Envelope threshold = {envelope_threshold:.3f} (relative to peak)")
     print(f"  Points in electron region: {num_electron}/{num_total} ({100*num_electron/num_total:.2f}%)")
+    print(f"  Note: Single path wraps around torus twice, passing through each"
+          f"\n        cross-section at two angles: θ=α(z) and θ=α(z)+π")
 
     # Initialize amplitude field and velocities
     init_electron_amplitude(state, params, mask)
