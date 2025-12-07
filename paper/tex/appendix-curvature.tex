@@ -1,0 +1,58 @@
+\section{Curvature induced by a spherical bulge}
+\label{app:curvature-bulge}
+
+To make the connection between extrinsic bending and intrinsic scalar
+curvature more explicit, consider a localized spherically symmetric
+deformation of a planar brane. Let the undeformed brane lie in the
+$(x,y,z)$-hyperplane of $\mathbb{R}^4$, and suppose a Gaussian bump
+is added in the fourth direction,
+\begin{equation}
+X^4(x,y,z) \;=\; A\,\exp\!\Bigl(-\frac{x^2+y^2+z^2}{2\sigma^2}\Bigr),
+\label{eq:gaussian-bulge}
+\end{equation}
+with amplitude $A$ and width $\sigma$. For small amplitude
+$A\ll\sigma$, the induced metric on the brane is approximately
+\begin{equation}
+g_{ij} \;=\; \delta_{ij} \;+\; \partial_i X^4\,\partial_j X^4
+\;\approx\; \delta_{ij} \;+\; \mathcal{O}\bigl((A/\sigma)^2\bigr).
+\end{equation}
+The second fundamental form (extrinsic curvature) is, to leading
+order in $A/\sigma$,
+\begin{equation}
+b_{ij} \;=\; -\,\partial_i\partial_j X^4
+\;=\; \frac{A}{\sigma^2}\,\exp\!\Bigl(-\frac{r^2}{2\sigma^2}\Bigr)
+\Bigl(\delta_{ij} \;-\; \frac{x_i x_j}{\sigma^2}\Bigr),
+\end{equation}
+where $r^2=x^2+y^2+z^2$. The mean curvature (trace) is
+\begin{equation}
+K \;=\; \tr(b)
+\;=\; \frac{A}{\sigma^2}\,\exp\!\Bigl(-\frac{r^2}{2\sigma^2}\Bigr)
+\Bigl(3 - \frac{r^2}{\sigma^2}\Bigr),
+\end{equation}
+and the squared norm is
+\begin{equation}
+|b|^2 \;=\; \frac{A^2}{\sigma^4}\,\exp\!\Bigl(-\frac{r^2}{\sigma^2}\Bigr)
+\Bigl(3 + \frac{r^4}{\sigma^4} - 2\,\frac{r^2}{\sigma^2}\Bigr)
+\;+\; \mathcal{O}\bigl((A/\sigma)^3\bigr).
+\end{equation}
+By the Gauss--Codazzi relation~\eqref{eq:gauss-codazzi-3d}, the
+three-dimensional scalar curvature is
+\begin{equation}
+R_3 \;=\; K^2 \;-\; |b|^2
+\;=\; \frac{A^2}{\sigma^4}\,\exp\!\Bigl(-\frac{r^2}{\sigma^2}\Bigr)
+\Bigl[
+\Bigl(3 - \frac{r^2}{\sigma^2}\Bigr)^2
+\;-\; \Bigl(3 + \frac{r^4}{\sigma^4} - 2\,\frac{r^2}{\sigma^2}\Bigr)
+\Bigr]
+\;+\; \mathcal{O}\bigl((A/\sigma)^3\bigr).
+\end{equation}
+At the center ($r=0$), one obtains
+\begin{equation}
+R_3(0) \;=\; \frac{6\,A^2}{\sigma^4},
+\end{equation}
+confirming that a localized out-of-brane bulge of characteristic size
+$\sigma$ and amplitude $A$ induces intrinsic curvature of order
+$A^2/\sigma^4$ in the brane. This quadratic scaling in amplitude
+reflects the geometric origin of $R_3$ as the difference between the
+square of the mean curvature and the squared Frobenius norm of the
+second fundamental form.
