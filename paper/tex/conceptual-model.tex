@@ -39,6 +39,13 @@ g_{ij}(x,t)=\partial_i\mathbf{X}\cdot\partial_j\mathbf{X}\quad (i,j=1,2,3),
 \end{equation}
 with reference (unstressed) metric $g^0_{ij}=\delta_{ij}$. The single unit normal $\mathbf{n}\in\mathbb{R}^4$ is defined by $\mathbf{n}\cdot\partial_i\mathbf{X}=0$ and $|\mathbf{n}|=1$. The second fundamental form (extrinsic curvature) is $b_{ij}=\partial_i\partial_j\mathbf{X}\cdot\mathbf{n}$.
 
+\paragraph{Static gauge and index conventions.}
+We work throughout in a static gauge. Spatial brane coordinates are denoted by $x^a$ with indices $a,b=1,2,3$, and time is a separate absolute coordinate $t$. In this gauge we set
+\begin{equation}
+X^a(x,t) = x^a, \qquad X^4(x,t) = \xi(x,t),
+\end{equation}
+so that all deformations occur in the fourth (lateral) direction. Latin indices $i,j$ are used for spatial indices $1,2,3$, while time derivatives are written explicitly as $\partial_t$.
+
 \paragraph{Normal displacement and amplitude.}
 We fix a reference embedding
 \[
@@ -145,7 +152,7 @@ Large slopes and large curvatures therefore produce nonlinear
 behavior purely from the geometry of the brane.
 A compact quantitative estimate of when this geometric nonlinearity
 becomes important for photon-like modes is given in
-Sec.~\ref{threshold-localization}, where a discrete spring-chain
+Sec.~\ref{subsec:geom-threshold}, where a discrete spring-chain
 analogue leads to a dimensionless parameter
 $\eta \sim \tfrac{1}{2}(kA)^2$ whose order-unity value marks the
 breakdown of the linear regime.
@@ -170,36 +177,20 @@ where $\nabla_i$ is the material covariant derivative built from $g$, $\Delta_g$
 \]
 Here $E^{ij}=g^{ik}g^{j\ell}E_{k\ell}$ denotes the raised-index strain. (Exact closed forms are standard in thin-shell/branes; we keep the compact tensor form for clarity.)
 
-\subsubsection{Threshold localization}\label{threshold-localization}
-
-Define the local energy density
-\begin{equation}
-\mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
-+\frac{T}{2}\mathrm{tr}(E)
-+\mu|E|^2
-+\frac{\kappa}{2}|b|^2.
-\label{eq:energy-density}
-\end{equation}
-Soliton nucleation occurs when coarse-grained energy within a Compton-scale material volume reaches the electron rest energy:
-\begin{equation}
-\big\langle \mathcal{E} \big\rangle_{V_c}V_c \ge m_e c^2,\qquad
-V_c=\Big(\frac{\lambda_C}{2\pi}\Big)^3.
-\label{eq:threshold-criterion}
-\end{equation}
-Above threshold, the geometric nonlinearity inherent in the full
-strain and curvature tensors can naturally lock in localized
-high-curvature 4D bulges, turning a propagating photon-like mode
-into a self-confined, particle-like soliton.
-
 \subsubsection{Linear wave regime and isotropy}\label{linear-wave-regime-and-isotropy}
 
-Linearize about a flat embedding $\mathbf X_0(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_0+\boldsymbol\xi$, and retain leading order. Then $g_{ij}\approx\delta_{ij}$, $E\approx \tfrac12(\partial_i\xi_j+\partial_j\xi_i)$. With $\mu\to 0$ and $\kappa\to 0$, one obtains
+Linearize about a flat embedding $\mathbf X_0(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_0+\boldsymbol\xi$, and retain leading order. Then $g_{ij}\approx\delta_{ij}$, $E\approx \tfrac12(\partial_i\xi_j+\partial_j\xi_i)$. With $\mu\to 0$ and $\kappa\to 0$, one obtains a linear wave equation of the form
 \begin{equation}
-\partial_{tt}\boldsymbol\xi = c^2\Delta\boldsymbol\xi,\qquad
-c=\sqrt{T/\rho_m}.
+\partial_{tt}\boldsymbol\xi = c^2\Delta\boldsymbol\xi,
 \label{eq:linear-wave-equation}
 \end{equation}
-All \textbf{four components} of $\boldsymbol\xi$ (including the 4th coordinate) obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed $c=\sqrt{T/\rho_m}$ is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large slopes and curvature) introduce deviations from this ideal isotropic behavior.
+where the effective wave speed is
+\begin{equation}
+c^2 = \frac{T}{\rho_m}.
+\end{equation}
+Throughout this work we identify this emergent wave speed with the physical speed of light $c$.
+
+All \textbf{four components} of $\boldsymbol\xi$ (including the 4th coordinate) obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large slopes and curvature) introduce deviations from this ideal isotropic behavior.
 
 \paragraph{Explicit derivation:} In the homogeneous, small-strain limit, the Lagrangian reduces to
 \begin{equation}
@@ -225,6 +216,33 @@ wave speed $c=\sqrt{T/\rho_m}$ is approximately constant and independent of
 direction. This linear, isotropic propagation behaviour underlies the emergent
 Lorentz symmetry discussed in
 Section~\ref{emergent-relativity-and-lorentz-invariance}.
+
+\subsubsection{Geometric nonlinearity and localization threshold}\label{subsec:geom-threshold}
+
+Define the local energy density
+\begin{equation}
+\mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
++\frac{T}{2}\mathrm{tr}(E)
++\mu|E|^2
++\frac{\kappa}{2}|b|^2.
+\label{eq:energy-density}
+\end{equation}
+Soliton nucleation occurs when coarse-grained energy within a Compton-scale material volume reaches the electron rest energy:
+\begin{equation}
+\big\langle \mathcal{E} \big\rangle_{V_c}V_c \ge m_e c^2,\qquad
+V_c=\Big(\frac{\lambda_C}{2\pi}\Big)^3.
+\label{eq:threshold-criterion}
+\end{equation}
+Above threshold, the geometric nonlinearity inherent in the full
+strain and curvature tensors can naturally lock in localized
+high-curvature 4D bulges, turning a propagating photon-like mode
+into a self-confined, particle-like soliton.
+
+As a concrete example of this geometric nonlinearity, Appendix~\ref{app:bulge-curvature} shows that a Gaussian bulge of amplitude $A$ and width $\sigma$ in the fourth direction induces a three-dimensional scalar curvature at its center that scales as
+\begin{equation}
+R_3(0) \propto \frac{A^2}{\sigma^4}.
+\end{equation}
+This illustrates how high local curvature (or, equivalently, large amplitude gradients on Compton scales) can act as a geometric threshold for localization.
 
 \subsubsection{"Gravity" as effective metric}\label{gravity-as-effective-metric}
 

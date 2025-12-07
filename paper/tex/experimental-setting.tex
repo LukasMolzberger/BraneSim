@@ -223,18 +223,18 @@ In code we distinguish multiple nonlinearity modes via a
         computed from the exact 4D Euclidean distance
         $\ell=|\mathbf R_q-\mathbf R_p|$, so lateral contraction from
         normal displacements arises purely from metric changes. This is
-        the primary mode for all emergent-field experiments.
+        the primary mode for all emergent-field experiments and
+        corresponds exactly to the theoretical model developed in
+        Section~\ref{conceptual-model}.
   \item \texttt{SCHWINGER\_LIMIT}, \texttt{HUYGENS\_ELASTIC},
-        \texttt{HIGGS\_MEXICAN\_HAT}, \texttt{CUSTOM}: Optional
-        exploratory extensions that introduce additional strong-field
-        or material-nonlinearity potentials beyond the purely geometric
-        effect. These are not required for the core model and should be
-        viewed as experimental overlays for probing robustness and
-        strong-field regimes.
+        \texttt{HIGGS\_MEXICAN\_HAT}, \texttt{CUSTOM}: \emph{Purely
+        exploratory} extensions for future robustness tests. These modes
+        introduce additional material-nonlinearity potentials beyond the
+        geometric coupling and are \textbf{not part of the core theoretical
+        framework}. They are not used in any results presented in this paper.
 \end{itemize}
-Unless otherwise stated, all experiments use
-\texttt{PURE\_GEOMETRY}. The mathematical model in
-Section~\ref{conceptual-model} corresponds exactly to this mode.
+Unless explicitly stated otherwise, all simulations and numerical experiments
+reported in this work use \texttt{PURE\_GEOMETRY}.
 
   The derivative (useful for force implementation) is
   \[
@@ -324,6 +324,37 @@ mechanical parameters $(\rho,K)$ but also the physically meaningful range of
 normal displacements $X^4$ to be used when setting up initial conditions in
 numerical experiments.
 
+\paragraph{SI units to dimensionless lattice units.}
+The discrete simulation operates in dimensionless units internally, with all
+physical quantities scaled by characteristic Compton-scale parameters. The
+mapping from SI units to simulation units proceeds as follows:
+\begin{itemize}
+  \item \textbf{Length:} $[x]_{\text{sim}} = x/\lambda_C$, so that one lattice
+    spacing $h \sim 0.1$--$1.0$ in simulation units corresponds to
+    $h_{\text{SI}} \sim 0.1\lambda_C$--$1.0\lambda_C$ physically
+    ($\lambda_C \approx 3.86 \times 10^{-13}$\,m for the electron).
+  \item \textbf{Time:} $[t]_{\text{sim}} = t\,\omega_C = t c/\lambda_C$, where
+    $\omega_C = m_e c^2/\hbar$ is the Compton angular frequency. One Compton
+    period $2\pi/\omega_C \approx 1.29 \times 10^{-21}$\,s maps to
+    $[t]_{\text{sim}} = 2\pi$.
+  \item \textbf{Mass density:} $[\rho]_{\text{sim}} = \rho\,\lambda_C^3/m_e$,
+    normalized such that a Compton-scale cell carries one electron mass. The
+    continuum calibration $\rho\,\lambda_C^3 \approx m_e$ corresponds to
+    $[\rho]_{\text{sim}} \approx 1$.
+  \item \textbf{Energy:} $[E]_{\text{sim}} = E/(m_e c^2)$, so that a rest
+    electron carries $[E]_{\text{sim}} = 1$ and a photon with frequency
+    $\omega_C$ carries $[E]_{\text{sim}} = 1$. In SI units, $m_e c^2 \approx
+    8.19 \times 10^{-14}$\,J.
+\end{itemize}
+With these scalings, the wave speed $c$ becomes $[c]_{\text{sim}} = 1$
+(measured in lattice spacings per Compton period), and $\hbar$ is implicitly
+set to unity in natural units. All forces, energies, and velocities in the code
+are computed in these dimensionless units; conversion back to SI units for
+comparison with experiment requires multiplying by the appropriate power of
+$(\lambda_C, \omega_C^{-1}, m_e)$. This Compton-based scaling makes the
+simulation independent of the absolute physical scale while preserving all
+relevant dimensionless ratios.
+
 \subsubsection{Time integration and stability}\label{time-integration-and-stability}
 
 \begin{itemize}
@@ -411,9 +442,9 @@ coordinates without destroying photon propagation.
 \subsection{Interpretation layers (clarity note)}\label{interpretation-layers}
 
 \begin{itemize}
-\item \textbf{Substrate:} a single geometric object $\mathbf X(x,t)\in\mathbb R^4$ with dynamics from $\mathcal L(\mathbf X,\partial\mathbf X)$.
-\item \textbf{Effective physics for internal observers:} built from the induced metric $g_{ij}$ and wave kinematics on the brane; no extra fields are postulated. The familiar EM interpretation can be treated phenomenologically elsewhere; it is not required here.
-\item \textbf{Threshold phenomena:} The localization thresholds and confinement scales discussed in this work (e.g., the energy density criterion $\langle\mathcal E\rangle_{V_c}V_c \ge m_e c^2$) are not imposed as external cutoffs or quantum rules, but emerge dynamically from the geometric nonlinearity of the medium. The simulations test whether this purely geometric-tensional framework is sufficient to produce soliton stability and pair confinement without additional ad-hoc mechanisms.
+\item \textbf{Substrate:} single geometric object $\mathbf X(x,t)\in\mathbb R^4$ with dynamics from $\mathcal L(\mathbf X,\partial\mathbf X)$.
+\item \textbf{Emergent effective physics:} induced metric $g_{ij}$ and wave kinematics; no extra fields postulated.
+\item \textbf{Threshold phenomena:} energy density criterion $\langle\mathcal E\rangle_{V_c}V_c \ge m_e c^2$ emerges from geometric nonlinearity, not imposed as external cutoff.
 \end{itemize}
 
 \textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice with geometric nonlinearity and velocity-Verlet integration, providing better isotropy and numerical stability.

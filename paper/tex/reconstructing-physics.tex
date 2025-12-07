@@ -8,8 +8,8 @@ Throughout this section we keep fixed the microscopic Lagrangian
 macroscopic constructs defined as functionals of the brane configuration
 $\mathbf X(x,t)$ and never replace or modify the underlying equations of motion.
 
-\subsection{Emergent Relativity and Lorentz
-Invariance}\label{emergent-relativity-and-lorentz-invariance}\label{sec:emergent-relativity}
+\subsection{Emergent special relativity}
+\label{sec:emergent-relativity}\label{emergent-relativity-and-lorentz-invariance}
 
 In this model, relativistic behavior --- such as the constancy of the
 speed of light and Lorentz transformations --- is not taken as a
@@ -161,8 +161,8 @@ as a fundamental property of spacetime, but as a \textbf{macroscopic
 symmetry of wave-based physics} within a tensioned medium.
 \end{quote}
 
-\subsection{Wave Mechanics and Quantum
-Behavior}\label{wave-mechanics-and-quantum-behavior}\label{sec:wave-mechanics}
+\subsection{Quantum sector: envelope and Schr\"odinger limit}
+\label{sec:quantum-envelope}\label{wave-mechanics-and-quantum-behavior}\label{sec:wave-mechanics}
 
 In the brane picture, the objects that quantum theory calls
 ``particles'' are modeled as \textbf{localized wave packets} or soliton-like
@@ -413,10 +413,13 @@ irrelevant real part symbol)
   +\omega_C^2\psi
   \;=\; 0.
 \end{equation}
-The mass-gap terms $-\omega_C^2\psi$ and $+\omega_C^2\psi$ cancel. For
-a slowly varying envelope we have
+The mass-gap terms $-\omega_C^2\psi$ and $+\omega_C^2\psi$ cancel.
+The slowly varying envelope approximation is valid when the envelope
+evolves on timescales much longer than the Compton period $1/\omega_C$,
+that is, when
 $|\partial_t\psi|\ll \omega_C|\psi|$ and
-$|\partial_{tt}\psi|\ll \omega_C|\partial_t\psi|$, so the
+$|\partial_{tt}\psi|\ll \omega_C|\partial_t\psi|$.
+Under these conditions, the
 $\partial_{tt}\psi$ term can be neglected at leading order. The
 remaining terms yield
 \begin{equation}
@@ -437,7 +440,12 @@ the Compton frequency $\omega_C$ with an effective mass via
 \begin{equation}
   \omega_C = \frac{m c^2}{\hbar_\text{eff}},
 \end{equation}
-which gives
+where $\hbar_\text{eff}$ is an effective constant with the dimension
+of action (J$\cdot$s), introduced here to make the notation parallel
+to standard quantum mechanics. In the full brane model this constant
+is determined by the soliton's internal energy scale and oscillation
+frequency (cf. Section~\ref{sec:param-matching}).
+This gives
 \begin{equation}
   i\,\hbar_\text{eff}\,\partial_t\psi
   \;\approx\;
@@ -460,7 +468,7 @@ function $\psi$ naturally arises from the brane's internal dynamics,
 without postulating $\psi$ as a fundamental, purely probabilistic
 object.
 
-\subsection{Charge as Amplitude Deformation}
+\subsection{Electromagnetic sector: charge from amplitude}
 \label{sec:charge-amplitude}
 
 \paragraph{Dictionary for amplitude-based effective fields.}
@@ -590,264 +598,28 @@ The qualitative Williamson--van der Mark picture --- a localized
 photon-like internal mode circulating at (essentially) the speed of
 light along a double-loop path confined to a torus --- can be made
 more explicit by introducing tubular coordinates around the soliton's
-centerline. This is the continuum analogue of the ``curved tunnel''
-or ``tape'' picture discussed in Section~\ref{conceptual-model}, and
-will be useful for analysing how geometric nonlinearity couples the
-internal Compton mode to lateral deformations of the brane.
-
-Let $\mathbf{C}(z)\in\mathbb R^3$ denote the spatial centerline of the
-toroidal electron in the brane's three lateral directions
-$X^1,X^2,X^3$, parametrized by arclength $z\in[0,L)$ in the electron
-rest frame, so that $|\partial_z\mathbf C(z)|=1$ and $\mathbf C(z+L)
-=\mathbf C(z)$. Along this closed curve we introduce the Frenet--Serret
-frame $(\mathbf t(z),\mathbf n(z),\mathbf b(z))$ with curvature
-$\kappa(z)$ and torsion $\tau(z)$,
-%
-\begin{equation}
-  \mathbf t'=\kappa\,\mathbf n,\qquad
-  \mathbf n'=-\kappa\,\mathbf t+\tau\,\mathbf b,\qquad
-  \mathbf b'=-\tau\,\mathbf n,
-  \label{eq:frenet-serret}
-\end{equation}
-%
-where $'=\partial_z$. A small tubular neighbourhood of the centerline
-is then parametrized by coordinates $(z,x,y)$ via
-%
-\begin{equation}
-  \mathbf r(z,x,y)
-  \;=\;
-  \mathbf C(z) + x\,\mathbf n(z) + y\,\mathbf b(z),
-  \label{eq:tubular-embedding}
-\end{equation}
-%
-with $(x,y)$ spanning the cross-section of the ``tunnel'' around the
-electron. The microscopic embedding field is still
-$\mathbf X=(X^1,X^2,X^3,X^4)$, but in these adapted coordinates the
-three lateral components $(X^1,X^2,X^3)$ are replaced by
-$\mathbf r(z,x,y)$, while the amplitude direction $X^4$ remains a
-separate normal coordinate. We denote the microscopic amplitude mode in
-this tubular neighbourhood by
-%
-\begin{equation}
-  \xi(t,z,x,y) \;:=\; X^4\bigl(t,\mathbf r(z,x,y)\bigr),
-  \label{eq:xi-from-X4}
-\end{equation}
-%
-so that $(t,z,x,y)$ serve as local coordinates on the world-tube of
-the electron, with the double-loop structure encoded in the internal
-mode pattern of $\xi$ across the cross-section $(x,y)$.
-
-The induced metric $g_{ab}$ on the brane in the coordinates
-$(z,x,y)$ is obtained by pulling back the flat ambient metric
-in the lateral directions:
-%
-\begin{equation}
-  g_{ab}(z,x,y)
-  \;=\;
-  \partial_a\mathbf r\cdot\partial_b\mathbf r,
-  \qquad a,b\in\{z,x,y\}.
-  \label{eq:tubular-metric-def}
-\end{equation}
-%
-Using the Frenet--Serret relations~\eqref{eq:frenet-serret} one finds
-to first order in the transverse distance $\rho=\sqrt{x^2+y^2}$ from
-the centerline,
-%
-\begin{equation}
-  g_{ab}
-  \;\approx\;
-  \begin{pmatrix}
-    1 - 2\kappa x & -\,\tau y & \;\;\tau x \\[0.4ex]
-    -\,\tau y & 1 & 0 \\[0.4ex]
-    \;\;\tau x & 0 & 1
-  \end{pmatrix},
-  \qquad
-  g^{ab}
-  \;\approx\;
-  \begin{pmatrix}
-    1 + 2\kappa x & \;\;\tau y & -\,\tau x \\[0.4ex]
-    \;\;\tau y & 1 & 0 \\[0.4ex]
-    -\,\tau x & 0 & 1
-  \end{pmatrix},
-  \label{eq:tubular-metric}
-\end{equation}
-%
-where $g^{ab}$ is the inverse metric, and we have neglected terms of
-order $\kappa^2\rho^2$ and $\tau^2\rho^2$. In these adapted
-coordinates the toroidal soliton appears, locally, as a straight tunnel
-aligned with the $z$-axis; the global curvature and double-loop
-structure are encoded entirely in the $z$-dependence of the frame
-$(\mathbf n,\mathbf b)$ and the metric coefficients $g_{ab}(z,x,y)$.
-The electromagnetic energy circulating along the double loop is then
-represented by a structured internal mode $\xi(t,z,x,y)$ living inside
-this world-tube and confined to a finite range of $(x,y)$ around the
-centerline.
-
-\paragraph{Effective amplitude dynamics in tubular coordinates.}
-
-Restricting attention to the dominant microscopic amplitude mode
-$\xi(t,z,x,y)$ inside the electron's world-tube, we can write a
-minimal effective Lagrangian density in the adapted coordinates
-$(t,z,x,y)$ of the form
-%
-\begin{equation}
-  \mathcal{L}_\xi
-  \;=\;
-  \frac{\rho_m}{2}\,(\partial_t \xi)^2
-  \;-\;
-  \frac{T_\mathrm{eff}}{2}\,g^{ab}\,\partial_a\xi\,\partial_b\xi
-  \;-\;
-  V_\mathrm{nl}(\xi,\partial\xi,\dots),
-  \label{eq:xi-tubular-lagrangian}
-\end{equation}
-%
-where $\rho_m$ is the effective mass density introduced in
-Section~\ref{sec:emergent-relativity}, $T_\mathrm{eff}$ is an effective
-tension along the tube that depends on the microscopic spring constant
-and rest length, and $V_\mathrm{nl}$ collects residual nonlinear
-corrections beyond the geometric contributions contained in the metric
-$g^{ab}$. Inserting the approximate inverse metric
-\eqref{eq:tubular-metric} yields, to first order in curvature and
-torsion,
-%
-\begin{align}
-  g^{ab}\,\partial_a\xi\,\partial_b\xi
-  \;\approx\;
-  &\bigl(1 + 2\kappa x\bigr)\,(\partial_z\xi)^2
-  + (\partial_x\xi)^2
-  + (\partial_y\xi)^2
-  \nonumber\\[0.5ex]
-  &\quad
-  + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
-  - 2\tau x\,(\partial_z\xi)(\partial_y\xi),
-  \label{eq:xi-gradient-tubular}
-\end{align}
-%
-so that the gradient energy density of the amplitude mode takes the
-schematic form
-%
-\begin{equation}
-  \mathcal{E}_{\mathrm{grad}}
-  \;\approx\;
-  \frac{T_\mathrm{eff}}{2}\Bigl[
-    \bigl(1+2\kappa x\bigr)(\partial_z\xi)^2
-    + (\partial_x\xi)^2
-    + (\partial_y\xi)^2
-    + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
-    - 2\tau x\,(\partial_z\xi)(\partial_y\xi)
-  \Bigr].
-  \label{eq:xi-gradient-energy}
-\end{equation}
-%
-Two features are worth emphasizing. First, the curvature term
-$\propto\kappa x(\partial_z\xi)^2$ implies that for sufficiently
-large longitudinal gradients of $\xi$ it becomes energetically
-favourable for the mode to shift its support away from the
-centerline in the transverse directions $(x,y)$, i.e.\ to develop a
-lateral ``bulge''. Second, the torsion terms
-$\propto\tau\,(\partial_z\xi)(\partial_x\xi)$ and
-$\propto\tau\,(\partial_z\xi)(\partial_y\xi)$ show that a purely
-longitudinal oscillation is not an eigenmode once the tube is twisted:
-steep variations along $z$ inevitably source transverse gradients
-$\partial_x\xi$ and $\partial_y\xi$. Together, these geometric
-couplings provide a concrete mechanism by which the strongly excited,
-Compton-frequency internal mode of the toroidal electron drives lateral
-deformations of the brane that confine the energy to a finite tubular
-region, while the microscopic spring rest length controls the relative
-cost of longitudinal stretching versus transverse bulging through the
-effective tension $T_\mathrm{eff}$ and thus sets the critical amplitude
-threshold for self-confinement.
-
-In the brane picture, this localized, circulating electromagnetic energy
-density produces a quasi-static amplitude deformation $\bar{X}^4$ in
-its vicinity. At the coarse-grained level we can thus treat the
-effective charge density $\rho(\mathbf{x})$ as a functional of the
-time-averaged internal energy distribution,
-\begin{equation}
-  \rho(\mathbf{x})
-  \;\propto\;
-  \chi\,\big\langle u_{\text{EM}}(\mathbf{x},t)\big\rangle_{\text{fast}},
-  \label{eq:rho-from-u}
-\end{equation}
-where $u_{\text{EM}}$ denotes the electromagnetic energy density of the
-confined toroidal mode and $\chi=\pm 1$ encodes the orientation
-(chirality) of the internal field configuration. The sign of $\chi$
-distinguishes electron and positron: reversing the direction of the
-internal circulation flips the sign of the induced amplitude deformation
-and hence of $\Phi(\mathbf{x})$, while leaving the absolute charge
-magnitude and magnetic dipole moment unchanged, in agreement with
-experiment.
-
-Far outside the Compton-scale core, the rapid internal precession of
-the toroidal configuration renders the time-averaged deformation
-$\bar{X}^4(\mathbf{x})$ effectively spherically symmetric. In this
-regime the scalar potential defined in Eq.~\eqref{eq:phi-from-xi4}
-obeys a Poisson-type equation on the brane,
-\begin{equation}
-  \nabla^2 \Phi(\mathbf{x})
-  \;=\;
-  -\,\frac{\rho_{\text{free}}(\mathbf{x})}{\varepsilon_{\mathrm{eff}}},
-  \label{eq:poisson-from-brane}
-\end{equation}
-with an effective permittivity $\varepsilon_{\mathrm{eff}}$ determined
-by the elastic response of the medium. Here $\rho_{\text{free}}$ denotes
-the net (monopole) free charge density: bound, polarization-like
-patterns of $X^4$ that cancel on scales larger than the Compton
-wavelength do not contribute to this source term.
-
-\paragraph{Effective Poisson closure.}
-Equation~\eqref{eq:poisson-from-brane} is, at this stage, an \emph{effective closure}: we impose a phenomenological constitutive law that links the coarse-grained amplitude $\bar X^4$ to an electrostatic potential $\Phi_{\text{EM}}$ satisfying a Poisson equation. This closure is chosen such that localized brane deformations give rise to Coulomb-like fields at large distances, in agreement with observed electrostatic behavior. A microscopic derivation of \eqref{eq:poisson-from-brane} directly from the brane Lagrangian $L[\mathbf X]$---for instance via a systematic multipole analysis of static solutions---is left as future work.
-
-Combining Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}
-yields the local geometric relation
-\begin{equation}
-  \rho_{\text{free}}(\mathbf{x})
-  = -\,\varepsilon_{\mathrm{eff}}\kappa\,\nabla^2 \bar{X}^4(\mathbf{x}),
-\end{equation}
-so that net charge is associated not with the absolute value of the
-amplitude displacement, but with its curvature pattern on the brane.
-
-The resulting field
-\[
-  \mathbf{E}(\mathbf{x}) = -\nabla\Phi(\mathbf{x})
-  = -\,\kappa\,\nabla \bar{X}^4(\mathbf{x})
-\]
-reproduces the familiar Coulomb behavior of a point charge at large
-distances, even though microscopically the source is an extended,
-toroidal soliton of finite size. In the static rest frame of the
-soliton, and for this effective free charge component, the electric
-field is literally proportional to the gradient of the brane surface in
-the fourth (amplitude) dimension. From this perspective, regions of
-positive and negative free charge correspond to peaks and troughs of the
-brane surface in the amplitude direction, with the sign of the gradient
-fixing the sign of the observed electric field.
-
-It is important to emphasize that the same amplitude deformation that
-encodes electric charge also participates in the emergent gravitational
-response of the brane. However, these are distinct effects arising from
-different aspects of the deformation field $X^4$:
-
-\begin{itemize}
-\item \textbf{Gravitational sector:} responds to the induced metric
-  $g_{ij}[\mathbf{X}]$, which is roughly quadratic in gradients of $X^4$.
-  The isotropic component of the induced strain pattern---set by the total
-  internal energy of the toroidal mode---contributes to curvature and
-  inertial mass.
-
-\item \textbf{Electromagnetic sector:} couples directly to the time-averaged
-  amplitude $\bar{X}^4$ and its Laplacian via
-  Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}. The signed
-  component associated with the orientation $\chi$ encodes the electric
-  interaction in the rest frame.
-\end{itemize}
-
-Thus, the same underlying amplitude deformation yields two distinct
-effective fields. In this way, a single localized brane deformation
-unifies mass, charge, and the external electromagnetic potential as
-different macroscopic manifestations of the same microscopic structure,
-without double-counting: gravity depends on metric curvature (quadratic
-in $\nabla X^4$), while electrostatics depends linearly on the Laplacian
-of $\bar{X}^4$.
+centerline. We parametrize a tubular neighbourhood of the toroidal
+centerline using Frenet--Serret coordinates $(z,x,y)$, where $z$ is
+arclength along the closed centerline and $(x,y)$ span the
+cross-section. The amplitude mode $\xi(t,z,x,y)$ in this adapted frame
+obeys an effective wave equation with an induced metric that encodes
+the curvature and torsion of the tube. Curvature terms
+$\propto\kappa x(\partial_z\xi)^2$ energetically favor lateral bulging
+when longitudinal gradients are large, while torsion terms couple
+longitudinal and transverse oscillations. These geometric couplings
+provide a concrete mechanism by which the Compton-frequency internal
+mode drives lateral deformations that confine the energy to a finite
+tubular region, with the microscopic spring rest length setting the
+critical amplitude threshold for self-confinement. The resulting
+time-averaged amplitude deformation $\bar{X}^4(\mathbf{x})$ yields a
+spherically symmetric Coulomb field at distances large compared to the
+Compton wavelength, while the charge-to-mass distinction arises from
+different functional dependences on $X^4$: gravity couples to metric
+curvature (quadratic in $\nabla X^4$), while electrostatics couples
+linearly to $\nabla^2 \bar{X}^4$. A detailed derivation of the tubular
+coordinate formalism, the Frenet--Serret frame, the induced metric, and
+the effective amplitude Lagrangian is given in
+Appendix~\ref{app:tubular-electron}.
 
 \subsubsection{De Broglie's harmony of phases in the brane picture}
 \label{subsec:harmony-phases}
@@ -1099,6 +871,13 @@ of spatial brane coordinates relative to the ambient flat background.
 In this way the standard Newtonian limit is recovered from the induced
 metric of the deformed brane, rather than postulating a metric
 dependence on a specific scalar such as $|\nabla X^4|^2$.
+
+For completeness, we record the explicit relation between $\Phi_G$ and the amplitude deformation:
+\begin{equation}
+  \Phi_G(\mathbf x) = \zeta_G c^2 \bigl(X^4(\mathbf x) - X^4_0\bigr),
+  \label{eq:PhiG_from_gradX4}
+\end{equation}
+where $\zeta_G$ is a dimensionless coupling constant encoding how amplitude displacement couples to the effective gravitational potential, and $X^4_0$ is a reference value. This relation makes explicit that gravitational effects arise from deformations of the brane into the fourth embedding direction, though the precise functional form and the value of $\zeta_G$ must be derived from the full nonlinear brane dynamics.
 
 \paragraph{Geodesic equation and Newtonian limit}
 
@@ -2349,8 +2128,8 @@ The above does not yet amount to a full derivation of the Born rule from the mic
 All three questions can be addressed first in reduced toy models and then in the full three-dimensional simulator.
 Even partial confirmation (or falsification) would significantly sharpen the status of the present interpretation.
 
-\subsection{Internal Structure of the
-Electron}\label{internal-structure-of-the-electron}
+\subsection{Matter sector: toroidal electron soliton}
+\label{internal-structure-of-the-electron}
 
 Our framework is conceptually compatible with the toroidal self-confinement picture
 of Williamson and van der Mark, but replaces the purely electromagnetic substrate by
@@ -2911,7 +2690,7 @@ We identify the emergent electrostatic potential as
   \mathbf{E} = -\nabla \Phi,
 \end{equation}
 %
-where $\kappa_{\Phi}$ is the amplitude-to-potential coupling constant introduced in Section~\ref{subsec:charge-amplitude}.
+where $\kappa_{\Phi}$ is the amplitude-to-potential coupling constant introduced in Section~\ref{sec:charge-amplitude}.
 As discussed in Section~\ref{subsec:tubular-electron}, the microscopic
 structure of this bulge can be viewed as an internal Compton-frequency
 mode $\xi(t,z,x,y)$ circulating in a tubular neighbourhood around a
