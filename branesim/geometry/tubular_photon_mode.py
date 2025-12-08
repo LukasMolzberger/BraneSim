@@ -13,31 +13,34 @@ class PhotonModeParameters:
     The electric field E is circularly polarized in the (n, b) plane.
 
     Along the path we introduce a longitudinal wave amplitude that varies like
-        A_long(z) ~ cos(phi(z)),
+        A_long(z) ~ cos(phi_wave(z)),
     while the transverse profile is a Gaussian in the (n, b) directions.
 
-    The internal phase phi(z) runs from 0 to total_phase (default 4π) once
-    around the closed loop. This guarantees that both amplitude and orientation
-    match continuously at the "ends" of the strip.
+    The internal phase phi_internal(z) runs from 0 to total_phase (default 4π)
+    once around the closed loop. This drives the polarization orientation.
+    A higher-frequency phase phi_wave(z) gives multiple crests along the loop.
     """
     peak_amplitude: float = 1.0
 
     # Gaussian widths in local transverse coordinates
-    sigma_n: float = 0.08
-    sigma_b: float = 0.08
+    sigma_n: float = 0.12
+    sigma_b: float = 0.12
 
     # How far we sample the Gaussian envelope (in units of σ)
-    extent_sigma: float = 3.0
+    extent_sigma: float = 3.5
 
     # Polar sampling resolution of the cross section
-    num_radial_samples: int = 6
-    num_angular_samples: int = 24
+    num_radial_samples: int = 8
+    num_angular_samples: int = 32
 
-    # Total internal phase advance along the loop
+    # Total internal phase advance along the loop (for polarization orientation)
     total_phase: float = 4.0 * np.pi
 
     # Optional global phase offset
     phase_offset: float = 0.0
+
+    # Number of longitudinal wave cycles along one closed loop
+    wave_cycles: int = 8
 
     # Relative magnitude of B compared to E (for visualization scaling)
     B_over_E: float = 1.0
@@ -56,26 +59,30 @@ def compute_circular_polarization_EB(
     normals: np.ndarray,
     binormals: np.ndarray,
     params: PhotonModeParameters,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Compute circularly polarized electric and magnetic field vectors
     along the closed centerline C(z).
 
-    We use a single internal phase φ(z) ∈ [0, total_phase) and define
+    Internal polarization phase (spinor-like):
+        phi_internal(z) ∈ [0, total_phase),
+        e_pol(z) = cos(phi_internal) * n(z) + sin(phi_internal) * b(z).
 
-        e_pol(z) = cos φ(z) * n(z) + sin φ(z) * b(z)   (unit polarization dir)
-        A_long(z) = cos φ(z)                           (longitudinal amplitude)
+    Longitudinal wave amplitude:
+        phi_wave(z) = 0.5 * wave_cycles * phi_internal(z),
+        A_long(z) = cos(phi_wave(z)),
 
-    so that the *orientation* rotates in the (n, b) plane and the *magnitude*
-    of the wave oscillates along the path.
+    so we get 'wave_cycles' full cos-oscillations along the loop, while
+    ensuring A_long(z) matches at the ends because phi_internal runs
+    from 0 to 4π and cos is 2π-periodic.
 
-    The electric field is
-        E(z) = peak_amplitude * A_long(z) * e_pol(z),
+    Electric field:
+        E(z) = peak_amplitude * A_long(z) * e_pol(z).
 
-    and the magnetic field is constructed as
+    Magnetic field:
         B(z) ∝ t(z) × E_hat(z),
 
-    which ensures E, B and t are mutually orthogonal.
+    so that E, B and t are mutually orthogonal.
 
     Parameters
     ----------
@@ -90,9 +97,10 @@ def compute_circular_polarization_EB(
         Electric field vectors at each centerline point.
     B : (N, 3) np.ndarray
         Magnetic field vectors at each centerline point.
-    phase : (N,) np.ndarray
-        Internal phase values φ(z) ∈ [0, total_phase).
-        The longitudinal amplitude is A_long(z) = cos(phase[z]).
+    phase_internal : (N,) np.ndarray
+        Internal polarization phase φ_internal(z) ∈ [0, total_phase).
+    A_long : (N,) np.ndarray
+        Longitudinal wave amplitude A_long(z).
     """
     t = _normalize(tangents, axis=-1)
     n = _normalize(normals, axis=-1)
@@ -104,23 +112,23 @@ def compute_circular_polarization_EB(
     N = t.shape[0]
 
     # Internal phase along the loop: [0, total_phase)
-    phase = np.linspace(
+    phase_internal = np.linspace(
         0.0,
         params.total_phase,
         N,
         endpoint=False,
         dtype=float,
     )
-    phase = phase + params.phase_offset
+    phase_internal = phase_internal + params.phase_offset
 
-    cos_phi = np.cos(phase)
-    sin_phi = np.sin(phase)
-
-    # Polarization direction in (n, b) plane
+    # Polarization orientation in (n, b) plane (driven by 4π phase)
+    cos_phi = np.cos(phase_internal)
+    sin_phi = np.sin(phase_internal)
     pol_dir = n * cos_phi[:, np.newaxis] + b * sin_phi[:, np.newaxis]
 
-    # Longitudinal amplitude: actual wave crests/troughs along the path
-    A_long = np.cos(phase)  # same phase → 2 full wavelengths for total_phase = 4π
+    # Longitudinal amplitude: higher-frequency wave along the loop
+    phase_wave = 0.5 * params.wave_cycles * phase_internal
+    A_long = np.cos(phase_wave)  # 'wave_cycles' cos periods along the loop
 
     E = params.peak_amplitude * A_long[:, np.newaxis] * pol_dir
 
@@ -129,7 +137,7 @@ def compute_circular_polarization_EB(
     B_dir = _normalize(np.cross(t, E_hat), axis=-1)
     B = params.B_over_E * params.peak_amplitude * A_long[:, np.newaxis] * B_dir
 
-    return E, B, phase
+    return E, B, phase_internal, A_long
 
 
 def sample_gaussian_envelope(
@@ -151,27 +159,8 @@ def sample_gaussian_envelope(
         A_long(z) = longitudinal_modulation[z]  (if provided),
         otherwise A_long(z) = 1.
 
-    The total amplitude is then
+    Total amplitude:
         A_total(z, r) = peak_amplitude * A_long(z) * A_trans(r).
-
-    Parameters
-    ----------
-    centerline : (N, 3) np.ndarray
-        Points C(z_i) along the closed curve in R^3.
-    normals, binormals : (N, 3) np.ndarray
-        Local orthonormal frame vectors at each centerline point.
-    params : PhotonModeParameters
-        Controls peak amplitude, Gaussian widths and sampling resolution.
-    longitudinal_modulation : (N,) np.ndarray or None
-        Optional longitudinal amplitude A_long(z). If None, a constant
-        factor A_long(z) = 1 is used for all z.
-
-    Returns
-    -------
-    field_points : (N * Nr * Nθ, 3) np.ndarray
-        3D sample points in space.
-    amplitudes : (N * Nr * Nθ,) np.ndarray
-        Field amplitude A_total at each sample point.
     """
     pts = np.asarray(centerline, dtype=float)
     n = _normalize(normals, axis=-1)

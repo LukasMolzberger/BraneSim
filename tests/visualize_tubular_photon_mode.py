@@ -30,7 +30,7 @@ def _plot_torus_hull(ax, R: float, r: float, num_phi: int = 64, num_theta: int =
         rstride=2,
         cstride=2,
         linewidth=0.2,
-        alpha=0.1,
+        alpha=0.06,   # slightly thicker but still subtle
         edgecolor="k",
     )
 
@@ -57,9 +57,9 @@ def visualize_tubular_photon_mode():
 
     - Uses the torus-knot centerline and Frenet frame from the geometry module.
     - Builds a circularly polarized E-field in the local (n, b) plane, with
-      total internal phase advance 4π along the loop.
-    - Introduces a longitudinal wave amplitude A_long(z) ~ cos(phase(z)), so
-      you see actual crests/troughs along the path.
+      total internal phase advance 4π along the loop (spinor-like orientation).
+    - Introduces a higher-frequency longitudinal amplitude with 'wave_cycles'
+      cos oscillations along the loop (more crests).
     - Constructs a B-field via B ∝ t × E.
     - Samples a 2D Gaussian envelope in the transverse directions and maps
       amplitude to transparency: weak field = transparent, strong = opaque.
@@ -70,38 +70,39 @@ def visualize_tubular_photon_mode():
     # --- Outer geometry (unchanged) -----------------------------------
     torus_params = TorusKnotParameters(
         major_radius=1.0,
-        minor_radius=0.3,
+        minor_radius=0.36,  # slightly thicker torus
         core_windings=2,
         tube_windings=1,
     )
 
-    num_samples = 800
+    num_samples = 900
     centerline = sample_torus_knot_centerline(torus_params, num_samples=num_samples)
     t, n, b = compute_frenet_frames(centerline)
 
     # --- Photon mode parameters ---------------------------------------
     photon_params = PhotonModeParameters(
         peak_amplitude=1.0,
-        sigma_n=0.08,
-        sigma_b=0.08,
-        extent_sigma=3.0,
-        num_radial_samples=6,
-        num_angular_samples=24,
+        sigma_n=0.12,
+        sigma_b=0.12,
+        extent_sigma=3.5,
+        num_radial_samples=8,
+        num_angular_samples=32,
         total_phase=4.0 * np.pi,
         phase_offset=0.0,
+        wave_cycles=8,   # higher frequency: 8 crests along the loop
         B_over_E=1.0,
     )
 
     # Electric and magnetic field vectors along the centerline
-    E_vectors, B_vectors, phase = compute_circular_polarization_EB(
+    e_vectors, b_vectors, phase_internal, a_long = compute_circular_polarization_EB(
         t,
         n,
         b,
         photon_params,
     )
 
-    # Longitudinal modulation: use |cos(phase)| so intensity is positive
-    longitudinal_modulation = np.abs(np.cos(phase))
+    # Longitudinal modulation for intensity: use |A_long|
+    longitudinal_modulation = np.abs(a_long)
 
     # Gaussian envelope in transverse (n, b) directions, modulated along the path
     field_points, amplitudes = sample_gaussian_envelope(
@@ -122,7 +123,6 @@ def visualize_tubular_photon_mode():
         amp_norm = amplitudes
 
     # Map amplitude to RGBA colors with amplitude-dependent alpha
-    # (weak field → nearly transparent, strong field → opaque)
     cmap = plt.get_cmap()  # fixes MatplotlibDeprecationWarning
     colors = cmap(amp_norm)  # (N, 4)
     gamma = 1.5             # controls how fast opacity rises with amplitude
@@ -141,9 +141,9 @@ def visualize_tubular_photon_mode():
     ]
 
     # Subsample for drawing E and B vectors
-    N = centerline.shape[0]
-    step = max(1, N // 50)
-    arrow_len = 1.2 * min(photon_params.sigma_n, photon_params.sigma_b)
+    num = centerline.shape[0]
+    step = max(1, num // 40)  # slightly denser arrows
+    arrow_len = 1.8 * min(photon_params.sigma_n, photon_params.sigma_b)
 
     for i, view in enumerate(views, start=1):
         ax = fig.add_subplot(1, 3, i, projection="3d")
@@ -152,7 +152,7 @@ def visualize_tubular_photon_mode():
         _plot_torus_hull(
             ax,
             R=torus_params.major_radius,
-            r=torus_params.minor_radius + 0.05,
+            r=torus_params.minor_radius + 0.04,
         )
 
         # Photon "cloud" with amplitude-dependent transparency
@@ -160,7 +160,7 @@ def visualize_tubular_photon_mode():
             field_points[:, 0],
             field_points[:, 1],
             field_points[:, 2],
-            s=4,
+            s=5,
             c=colors,
             marker="o",
         )
@@ -170,36 +170,36 @@ def visualize_tubular_photon_mode():
             centerline[:, 0],
             centerline[:, 1],
             centerline[:, 2],
-            linewidth=1.5,
+            linewidth=1.7,
             color="k",
         )
 
         # Polarization vectors (E and B) at a subset of points
-        for idx in range(0, N, step):
+        for idx in range(0, num, step):
             p = centerline[idx]
 
-            # Electric field arrow (dark blue)
-            e = E_vectors[idx]
-            qE = p + arrow_len * e
+            # Electric field arrow (blue)
+            e = e_vectors[idx]
+            q_e = p + arrow_len * e
             ax.plot(
-                [p[0], qE[0]],
-                [p[1], qE[1]],
-                [p[2], qE[2]],
-                linewidth=1.2,
-                color="C0",
+                [p[0], q_e[0]],
+                [p[1], q_e[1]],
+                [p[2], q_e[2]],
+                linewidth=1.7,
+                color="C0",  # blue
             )
 
             # Magnetic field arrow (orange), offset slightly along t to avoid overlap
-            b_vec = B_vectors[idx]
+            b_vec = b_vectors[idx]
             t_vec = t[idx]
-            pB = p + 0.4 * arrow_len * t_vec
-            qB = pB + arrow_len * b_vec
+            p_b = p + 0.4 * arrow_len * t_vec
+            q_b = p_b + arrow_len * b_vec
             ax.plot(
-                [pB[0], qB[0]],
-                [pB[1], qB[1]],
-                [pB[2], qB[2]],
-                linewidth=1.2,
-                color="C1",
+                [p_b[0], q_b[0]],
+                [p_b[1], q_b[1]],
+                [p_b[2], q_b[2]],
+                linewidth=1.7,
+                color="C1",  # orange
             )
 
         _set_equal_aspect_3d(ax, all_x, all_y, all_z)
