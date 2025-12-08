@@ -13,6 +13,10 @@ from branesim.geometry.tubular_photon_mode import (
 )
 
 
+# Set this to False if you temporarily want to see ONLY the E/B arrows.
+DRAW_CLOUD = False
+
+
 def _plot_torus_hull(ax, R: float, r: float, num_phi: int = 64, num_theta: int = 32):
     """Draw a semi-transparent torus hull for geometric reference."""
     phi = np.linspace(0.0, 2.0 * np.pi, num_phi)
@@ -30,7 +34,7 @@ def _plot_torus_hull(ax, R: float, r: float, num_phi: int = 64, num_theta: int =
         rstride=2,
         cstride=2,
         linewidth=0.2,
-        alpha=0.06,   # slightly thicker but still subtle
+        alpha=0.06,
         edgecolor="k",
     )
 
@@ -155,15 +159,16 @@ def visualize_tubular_photon_mode():
             r=torus_params.minor_radius + 0.04,
         )
 
-        # Photon "cloud" with amplitude-dependent transparency
-        ax.scatter(
-            field_points[:, 0],
-            field_points[:, 1],
-            field_points[:, 2],
-            s=5,
-            c=colors,
-            marker="o",
-        )
+        # Photon cloud
+        if DRAW_CLOUD:
+            ax.scatter(
+                field_points[:, 0],
+                field_points[:, 1],
+                field_points[:, 2],
+                s=4,
+                c=colors,
+                marker="o",
+            )
 
         # Centerline (path of the photon)
         ax.plot(
