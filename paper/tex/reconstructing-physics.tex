@@ -596,19 +596,47 @@ de~Broglie wavelength arises from internal lightlike propagation in
 the world-tube geometry, is given in
 Section~\ref{subsec:harmony-phases}.
 
+In the original Williamson--van der Mark construction this internal mode
+is visualized not as a filled cylindrical tube but as a narrow
+\emph{strip} of electromagnetic energy. One begins with a flat strip
+carrying one wavelength of a circularly polarised photon (their
+Fig.~1a), then bends and joins the strip to form a closed band inside a
+toroidal hull (Fig.~1b). The band is glued with a half twist and arranged
+so that it winds twice around the torus core before joining smoothly
+back onto itself. A path that stays on the ``same side'' of the strip
+therefore returns to its starting point only after two full revolutions
+around the core, i.e.\ after a $4\pi$ rotation, while a single $2\pi$
+circuit maps the configuration to its negative. This double-wound,
+twisted strip realizes a spin-$\tfrac12$--like topology: the internal
+field configuration is anti-periodic under $2\pi$ rotations and only
+single-valued after $4\pi$.
+
+In our brane formulation we adopt exactly this geometry: the electron is
+modelled as a Compton-frequency internal mode confined to such a
+double-wound strip inside a toroidal hull. For technical calculations we
+thicken this strip to a narrow tubular neighbourhood of its centreline
+and introduce adapted coordinates on that neighbourhood, as described
+next.
+
 \subsubsection{Tubular coordinates around the toroidal electron}
 \label{subsec:tubular-electron}
 
-The qualitative Williamson--van der Mark picture --- a localized
-photon-like internal mode circulating at (essentially) the speed of
-light along a double-loop path confined to a torus --- can be made
-more explicit by introducing tubular coordinates around the soliton's
-centerline. We parametrize a tubular neighbourhood of the toroidal
-centerline using Frenet--Serret coordinates $(z,x,y)$, where $z$ is
-arclength along the closed centerline and $(x,y)$ span the
-cross-section. The amplitude mode $\xi(t,z,x,y)$ in this adapted frame
-obeys an effective wave equation with an induced metric that encodes
-the curvature and torsion of the tube. Curvature terms
+The twisted-strip picture just described can be formalized by specifying
+a closed centreline $\mathbf{C}(z)$ that lies on a torus and winds twice
+around its core before closing. For concreteness one may think of
+$\mathbf{C}(z)$ as a $(2,1)$ torus-knot geodesic, but the detailed
+shape will not matter here; only its double-winding toroidal topology is
+important. We then introduce Frenet--Serret coordinates $(z,x,y)$ in a
+tubular neighbourhood of $\mathbf{C}(z)$, where $z$ is arclength along
+the closed curve and $(x,y)$ span the normal plane. In the following,
+the terms ``tube'' and ``tubular coordinates'' refer solely to this
+coordinate patch, while the physical support of the internal mode is
+concentrated on a narrow strip within it. In these adapted coordinates
+the amplitude mode $\xi(t,z,x,y)$ obeys an effective wave equation with
+an induced metric that encodes the curvature and torsion of the
+strip's centreline.
+
+Curvature terms
 $\propto\kappa x(\partial_z\xi)^2$ energetically favor lateral bulging
 when longitudinal gradients are large, while torsion terms couple
 longitudinal and transverse oscillations. These geometric couplings
@@ -679,11 +707,11 @@ torus-knot-like pattern).
 In the numerical experiments reported below we adopt a W\&vdM-inspired
 profile in which the brane's amplitude field is localized along two
 narrow ridges of high energy density that wrap through a toroidal region
-at Compton scale. For intuition we will colloquially refer to these
-ridges as energy ``tunnels'', but they are \emph{not} separate material
-tubes: they are simply the loci of maximal $|\xi|$ within the single
-brane deformation. To describe this structure we work in polar
-coordinates $(\rho,\theta)$ on each cross-section, with
+at Compton scale. For intuition we picture these ridges as the two edges
+of a twisted strip of high energy density inside the toroidal hull; they
+are \emph{not} separate material tubes, but simply the loci of maximal
+$|\xi|$ within the single brane deformation. To describe this structure
+we work in polar coordinates $(\rho,\theta)$ on each cross-section, with
 $\rho = \sqrt{x^2+y^2}$ and $\theta = \mathrm{atan2}(y,x)$. The
 cross-section profile is then
 %
@@ -703,16 +731,21 @@ radial envelope peaked at $\rho=\rho_0$, $\sigma_\theta$ sets the angular
 width of each ridge, and $\alpha(z)$ controls their orientation as one
 moves along the torus.
 
-For the electron ansatz we choose an intertwined W\&vdM-like double loop
-by setting $\alpha(z) = \phi(z) = z/R$, where $\phi(z)$ is the angular
-coordinate along the torus centreline. In this case each ridge (the
-``tunnel'' of large $|\xi|$) executes a single twist as the torus is
-traversed once, producing a $(2,1)$-type torus-knot pattern in which the
-two ridges wiggle around each other inside the toroidal hull. This
-realizes the geometric picture of the W\&vdM model within the brane
-framework. The longitudinal phase factor with $m=2$ encodes that the
-internal Compton mode winds twice around the torus per revolution. The amplitude field in the rest frame
-is then
+For the electron ansatz we set $\alpha(z) = \phi(z) = z/R$, where
+$\phi(z)$ is the angular coordinate along the torus centreline. With this
+choice each strip edge executes a single twist as one circuit is
+completed, so that the two edges of the strip trace out a
+$(2,1)$-type torus-knot pattern as they wind around the toroidal hull.
+A path that stays on the ``same side'' of the strip (i.e.\ following one
+edge) must therefore traverse the torus twice---through a full $4\pi$
+rotation of the $(\rho,\theta)$ cross-section---before returning to its
+starting point, while a single $2\pi$ circuit maps the internal field
+configuration to its negative. This is the geometric origin of the
+spin-$\tfrac12$--like $4\pi$ periodicity built into the model. The
+longitudinal phase factor $m=2$ in the internal mode matches this spatial
+structure: the Compton-frequency oscillation winds twice around the torus
+per revolution, consistent with the double-wound strip. The amplitude
+field in the rest frame is then
 %
 \begin{equation}
   \xi(t,z,\rho,\theta)
@@ -722,10 +755,7 @@ is then
   \label{eq:xi-electron-init}
 \end{equation}
 %
-with $\Phi(\rho,\theta;z)=0$. In the present implementation we adopt
-$\alpha(z)=\phi(z)$ ($\ell=1$) so that the two tunnels form an
-intertwined double-loop pattern inside the toroidal hull, closely
-mirroring the W\&vdM picture.
+with $\Phi(\rho,\theta;z)=0$.
 
 To leading order the amplitude mode propagates along $z$ at the
 characteristic brane wave speed $c$, so that the phase of the internal
