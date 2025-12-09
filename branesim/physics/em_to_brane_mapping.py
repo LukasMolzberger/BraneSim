@@ -184,11 +184,26 @@ def initialize_brane_from_em_fields(
     # Convert amplitude to simulation units
     A_sim = mapper.to_sim_length(A_phys)
 
-    # 4) Write amplitude to 4th coordinate (field_component = 3)
-    #    For now, we use phase φ = 0 everywhere (pure cosine snapshot)
-    #    This gives positions = A at t=0
+    # 4) Extract spatial phase from EM fields (for wave structure)
+    #    For circularly/linearly polarized waves, extract phase from field direction
+    #    Use the first non-zero transverse component to get spatial phase
+    E_magnitudes = torch.linalg.norm(E_field_phys, dim=-1)
+    max_E_mag = E_magnitudes.max()
+
+    if max_E_mag > 1e-10:  # If fields are non-trivial
+        # Find dominant transverse components (not aligned with propagation)
+        # Assume propagation along x (could be generalized)
+        # For circular polarization: E_y = E₀ cos(kx), E_z = E₀ sin(kx)
+        # Extract phase: φ = atan2(E_z, E_y) gives kx modulo 2π
+        phase = torch.atan2(E_field_phys[:, 2], E_field_phys[:, 1] + 1e-30)
+        spatial_modulation = torch.cos(phase)
+    else:
+        spatial_modulation = torch.ones_like(A_sim)
+
+    # 5) Write amplitude with spatial phase modulation to 4th coordinate
+    #    Position = A(r) * cos(φ(x)) captures both envelope and wave structure
     with torch.no_grad():
-        state.positions[:, field_component] = A_sim
+        state.positions[:, field_component] = A_sim * spatial_modulation
 
     # 5) Compute lateral velocities from Poynting flow
     #    Energy transport velocity: v_energy = S / u
