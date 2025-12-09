@@ -27,7 +27,7 @@ from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
-from branesim.config.simulation_config import PhysicalConstants
+from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
@@ -260,7 +260,10 @@ def main():
     # Derive mass density from point mass: ρ_D = m_point / h^D
     rho_D = m_point / (h_phys ** D)  # kg/m³ (volume mass density)
     T_D = rho_D * constants.c**2  # Pa (elastic modulus - computed from c² = T_D/rho_D)
-    rest_length_phys = 0.0 * h_phys
+
+    # Rest length from physically calibrated constant
+    # L0 = rest_length_frac × a, where rest_length_frac is from continuum calibration
+    rest_length_phys = constants.rest_length_frac * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c

@@ -26,7 +26,7 @@ from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
-from branesim.config.simulation_config import PhysicalConstants
+from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import initialize_right_moving_velocities_time_reversed
 from branesim.diagnostics.lateralization import LateralizationMeasurement, LateralizationConfig
@@ -256,7 +256,10 @@ def run_amplitude_simulation(amplitude_fraction, constants, h_phys, wavelength_p
     D = 1
     rho_D = 2.3590e-14  # kg/m
     T_D = rho_D * constants.c**2
-    rest_length_phys = 0.00001 * h_phys
+
+    # Rest length from physically calibrated constant
+    # L0 = rest_length_frac × a, where rest_length_frac is from continuum calibration
+    rest_length_phys = constants.rest_length_frac * h_phys
     c_wave = constants.c
     m_point = rho_D * (h_phys ** D)
     k_spring = T_D * (h_phys ** (D - 2))

@@ -172,7 +172,7 @@ class VelocityVerletSolver:
                 computed_c = wave speed from current parameters
                 relative_error = |computed_c - expected_c| / expected_c
         """
-        from branesim.config.simulation_config import PhysicalConstants
+        from branesim.config.physical_constants import PhysicalConstants
 
         constants = PhysicalConstants()
         expected_c = constants.c

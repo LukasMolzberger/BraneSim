@@ -142,7 +142,7 @@ Where:
 ### 3.1 Physical Constants (SI units)
 
 ```python
-from branesim.config.simulation_config import PhysicalConstants
+from branesim.config.physical_constants import PhysicalConstants
 
 constants = PhysicalConstants()
 # m_e = 9.1093837015e-31 kg (electron mass)
@@ -285,7 +285,7 @@ branesim/
 ├── diagnostics/
 │   └── electron_stability.py # Stability metrics and loss functions
 └── config/
-    └── simulation_config.py  # PhysicalConstants, SimulationConfig
+    └── physical_constants.py  # PhysicalConstants with calibrated parameters
 
 experiments/
 ├── electron_stability_test.py       # Main experiment runner
@@ -623,7 +623,7 @@ branesim/
 │   └── electron_stability.py
 └── config/
     ├── __init__.py
-    └── simulation_config.py
+    └── physical_constants.py
 
 experiments/
 ├── __init__.py
