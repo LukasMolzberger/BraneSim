@@ -173,6 +173,9 @@ def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
     hsv = np.stack([hue, saturation, value], axis=-1)
     rgb = hsv_to_rgb(hsv)
 
+    # Clip to valid range [0, 1] to avoid matplotlib warnings
+    rgb = np.clip(rgb, 0.0, 1.0)
+
     return rgb, magnitude, angle
 
 
@@ -317,13 +320,16 @@ def main():
     omega_phys = 2.0 * np.pi * constants.c / wavelength_phys
     sigma_transverse = 3.0 * wavelength_phys  # Transverse Gaussian width
 
-    # Peak E field magnitude (arbitrary, will be scaled by energy matching)
-    # Choose something reasonable: corresponds to ~1 photon worth of energy
-    photon_energy = constants.hbar * omega_phys  # Energy of 1 photon [J]
-    waveguide_volume = domain_length_phys_x * (np.pi * sigma_transverse**2)  # Approximate volume
-    energy_density_target = photon_energy / waveguide_volume  # [J/m³]
-    # For EM: u ≈ ε₀ E²  →  E ≈ √(u/ε₀)
-    peak_E_field = np.sqrt(2.0 * energy_density_target / constants.epsilon0)  # [V/m]
+    # Peak E field magnitude
+    # We want the resulting amplitude to be ~0.1 × h_phys (10% of lattice spacing)
+    # From energy matching: A = √(2u/(ρω²)) where u = (1/2)ε₀E²
+    # So: E = ω√(ρ) × A_target
+    # This ensures visible amplitude in the simulation
+    A_target = 0.05 * h_phys  # Target 5% of lattice spacing for amplitude
+    peak_E_field = omega_phys * np.sqrt(rho_D) * A_target  # [V/m]
+
+    print(f"  Target amplitude: {A_target*1e12:.3f} pm ({A_target/h_phys:.3f} × h)")
+    print(f"  Corresponding E-field: {peak_E_field:.6e} V/m")
 
     print(f"\nPhoton Mode Parameters:")
     print(f"  Wavelength: {wavelength_phys:.6e} m (= λ_C)")
@@ -499,11 +505,11 @@ def main():
                                             y_coords[0], y_coords[-1]],
                                      cmap='RdBu_r',
                                      vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                     aspect='auto')
+                                     aspect='equal')
 
             axes_xy[idx].set_ylabel('y [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_xy[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_xy[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                              transform=axes_xy[idx].transAxes,
                              fontsize=12, verticalalignment='top',
                              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -537,11 +543,11 @@ def main():
                                             z_coords[0], z_coords[-1]],
                                      cmap='RdBu_r',
                                      vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                     aspect='auto')
+                                     aspect='equal')
 
             axes_xz[idx].set_ylabel('z [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_xz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_xz[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                              transform=axes_xz[idx].transAxes,
                              fontsize=12, verticalalignment='top',
                              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -579,7 +585,7 @@ def main():
 
             axes_yz[idx].set_ylabel('z [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_yz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_yz[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                              transform=axes_yz[idx].transAxes,
                              fontsize=12, verticalalignment='top',
                              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -629,11 +635,11 @@ def main():
             axes_lat_xy[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
                                     extent=[x_coords[0], x_coords[-1],
                                            y_coords[0], y_coords[-1]],
-                                    aspect='auto')
+                                    aspect='equal')
 
             axes_lat_xy[idx].set_ylabel('y [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_lat_xy[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_lat_xy[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                                  transform=axes_lat_xy[idx].transAxes,
                                  fontsize=12, verticalalignment='top',
                                  bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -684,11 +690,11 @@ def main():
             axes_lat_xz[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
                                     extent=[x_coords[0], x_coords[-1],
                                            z_coords[0], z_coords[-1]],
-                                    aspect='auto')
+                                    aspect='equal')
 
             axes_lat_xz[idx].set_ylabel('z [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_lat_xz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_lat_xz[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                                  transform=axes_lat_xz[idx].transAxes,
                                  fontsize=12, verticalalignment='top',
                                  bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -743,7 +749,7 @@ def main():
 
             axes_lat_yz[idx].set_ylabel('z [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_lat_yz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            axes_lat_yz[idx].text(0.02, 0.95, f't = {t_fs:.6f} fs',
                                  transform=axes_lat_yz[idx].transAxes,
                                  fontsize=12, verticalalignment='top',
                                  bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -794,7 +800,7 @@ def main():
                              extent=[x_coords[0], x_coords[-1],
                                     y_coords[0], y_coords[-1]],
                              cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                             aspect='auto', animated=True)
+                             aspect='equal', animated=True)
 
     ax_anim.set_xlabel('x [nm]', fontsize=12)
     ax_anim.set_ylabel('y [nm]', fontsize=12)
@@ -815,7 +821,7 @@ def main():
         im_anim.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
-        time_text.set_text(f't = {t_fs:.3f} fs')
+        time_text.set_text(f't = {t_fs:.6f} fs')
         return [im_anim, time_text]
 
     anim = FuncAnimation(fig_anim, animate, frames=len(animation_frames),
@@ -841,7 +847,7 @@ def main():
                                      extent=[x_coords[0], x_coords[-1],
                                             z_coords[0], z_coords[-1]],
                                      cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                     aspect='auto', animated=True)
+                                     aspect='equal', animated=True)
 
     ax_anim_xz.set_xlabel('x [nm]', fontsize=12)
     ax_anim_xz.set_ylabel('z [nm]', fontsize=12)
@@ -861,7 +867,7 @@ def main():
         im_anim_xz.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15
-        time_text_xz.set_text(f't = {t_fs:.3f} fs')
+        time_text_xz.set_text(f't = {t_fs:.6f} fs')
         return [im_anim_xz, time_text_xz]
 
     anim_xz = FuncAnimation(fig_anim_xz, animate_xz, frames=len(animation_frames),
@@ -904,7 +910,7 @@ def main():
         im_anim_yz.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15
-        time_text_yz.set_text(f't = {t_fs:.3f} fs')
+        time_text_yz.set_text(f't = {t_fs:.6f} fs')
         return [im_anim_yz, time_text_yz]
 
     anim_yz = FuncAnimation(fig_anim_yz, animate_yz, frames=len(animation_frames),
@@ -930,7 +936,7 @@ def main():
     im_anim_lat_xy = ax_anim_lat_xy.imshow(np.transpose(rgb_init, (1, 0, 2)), origin='lower',
                                              extent=[x_coords[0], x_coords[-1],
                                                     y_coords[0], y_coords[-1]],
-                                             aspect='auto', animated=True)
+                                             aspect='equal', animated=True)
 
     ax_anim_lat_xy.set_xlabel('x [nm]', fontsize=12)
     ax_anim_lat_xy.set_ylabel('y [nm]', fontsize=12)
@@ -949,7 +955,7 @@ def main():
         im_anim_lat_xy.set_array(np.transpose(rgb, (1, 0, 2)))
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15
-        time_text_lat_xy.set_text(f't = {t_fs:.3f} fs')
+        time_text_lat_xy.set_text(f't = {t_fs:.6f} fs')
         return [im_anim_lat_xy, time_text_lat_xy]
 
     anim_lat_xy = FuncAnimation(fig_anim_lat_xy, animate_lat_xy, frames=len(animation_frames),
@@ -975,7 +981,7 @@ def main():
     im_anim_lat_xz = ax_anim_lat_xz.imshow(np.transpose(rgb_init_xz, (1, 0, 2)), origin='lower',
                                              extent=[x_coords[0], x_coords[-1],
                                                     z_coords[0], z_coords[-1]],
-                                             aspect='auto', animated=True)
+                                             aspect='equal', animated=True)
 
     ax_anim_lat_xz.set_xlabel('x [nm]', fontsize=12)
     ax_anim_lat_xz.set_ylabel('z [nm]', fontsize=12)
@@ -994,7 +1000,7 @@ def main():
         im_anim_lat_xz.set_array(np.transpose(rgb, (1, 0, 2)))
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15
-        time_text_lat_xz.set_text(f't = {t_fs:.3f} fs')
+        time_text_lat_xz.set_text(f't = {t_fs:.6f} fs')
         return [im_anim_lat_xz, time_text_lat_xz]
 
     anim_lat_xz = FuncAnimation(fig_anim_lat_xz, animate_lat_xz, frames=len(animation_frames),
@@ -1039,7 +1045,7 @@ def main():
         im_anim_lat_yz.set_array(np.transpose(rgb, (1, 0, 2)))
         t_sim = animation_times[frame_idx]
         t_fs = mapper.to_phys_time(t_sim) * 1e15
-        time_text_lat_yz.set_text(f't = {t_fs:.3f} fs')
+        time_text_lat_yz.set_text(f't = {t_fs:.6f} fs')
         return [im_anim_lat_yz, time_text_lat_yz]
 
     anim_lat_yz = FuncAnimation(fig_anim_lat_yz, animate_lat_yz, frames=len(animation_frames),
@@ -1049,12 +1055,18 @@ def main():
     print(f"  ✓ Saved: polarized_photon_lateral_yz.mp4")
     plt.close(fig_anim_lat_yz)
 
+    # Calculate overall maximum displacement across all slices
+    max_disp_mag_phys = max(max_disp_mag_phys_xy, max_disp_mag_phys_xz, max_disp_mag_phys_yz)
+
     print(f"\n{'=' * 70}")
     print("Experiment Complete!")
     print(f"{'=' * 70}")
     print(f"\nKey Results:")
     print(f"  Maximum amplitude: {amplitude_nm:.3f} nm")
-    print(f"  Maximum lateral displacement: {max_disp_mag_phys*1e12:.3f} pm")
+    print(f"  Maximum lateral displacement (XY): {max_disp_mag_phys_xy*1e12:.3f} pm")
+    print(f"  Maximum lateral displacement (XZ): {max_disp_mag_phys_xz*1e12:.3f} pm")
+    print(f"  Maximum lateral displacement (YZ): {max_disp_mag_phys_yz*1e12:.3f} pm")
+    print(f"  Maximum lateral displacement (overall): {max_disp_mag_phys*1e12:.3f} pm")
     print(f"  Energy drift: {energy_drift*100:.6f}%")
 
     print(f"\nPhysical Interpretation:")
