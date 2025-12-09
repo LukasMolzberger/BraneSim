@@ -405,6 +405,7 @@ def main():
     animation_frames = []
     animation_frames_lateral_x = []
     animation_frames_lateral_y = []
+    animation_frames_lateral_z = []
     animation_times = []
     frame_interval = max(1, num_steps // 200)
 
@@ -428,8 +429,10 @@ def main():
 
             lateral_disp_x = (state.positions[:, 0] - initial_positions[:, 0]).cpu().numpy()
             lateral_disp_y = (state.positions[:, 1] - initial_positions[:, 1]).cpu().numpy()
+            lateral_disp_z = (state.positions[:, 2] - initial_positions[:, 2]).cpu().numpy()
             animation_frames_lateral_x.append(lateral_disp_x.copy())
             animation_frames_lateral_y.append(lateral_disp_y.copy())
+            animation_frames_lateral_z.append(lateral_disp_z.copy())
             animation_times.append(solver.time)
 
         if step % max(1, num_steps // 100) == 0:
@@ -479,54 +482,138 @@ def main():
     amplitude_phys = mapper.to_phys_length(state.positions[:, 3].max().item())
     amplitude_nm = amplitude_phys * 1e9
 
-    # 1. Amplitude field snapshots (XY slice)
-    fig, axes = plt.subplots(num_snapshots, 1, figsize=(14, 12))
-    fig.suptitle(f'Polarized Photon - Amplitude Field (XY slice, z={nz//2})',
-                 fontsize=16, fontweight='bold')
+    # ========================================================================
+    # 1. AMPLITUDE FIELD SNAPSHOTS - XY SLICE
+    # ========================================================================
+    fig_xy, axes_xy = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_xy.suptitle(f'Polarized Photon - Amplitude Field (XY slice, z={nz//2})',
+                    fontsize=16, fontweight='bold')
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots:
             field_slice_sim = extract_slice_xy(snapshots[t], (nx, ny, nz))
             field_slice_nm = mapper.to_phys_length(field_slice_sim) * 1e9
 
-            im = axes[idx].imshow(field_slice_nm.T, origin='lower',
-                                 extent=[x_coords[0], x_coords[-1],
-                                        y_coords[0], y_coords[-1]],
-                                 cmap='RdBu_r',
-                                 vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                 aspect='auto')
+            im = axes_xy[idx].imshow(field_slice_nm.T, origin='lower',
+                                     extent=[x_coords[0], x_coords[-1],
+                                            y_coords[0], y_coords[-1]],
+                                     cmap='RdBu_r',
+                                     vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                                     aspect='auto')
 
-            axes[idx].set_ylabel('y [nm]', fontsize=11)
+            axes_xy[idx].set_ylabel('y [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
-                          transform=axes[idx].transAxes,
-                          fontsize=12, verticalalignment='top',
-                          bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            axes_xy[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                             transform=axes_xy[idx].transAxes,
+                             fontsize=12, verticalalignment='top',
+                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
-            divider = make_axes_locatable(axes[idx])
+            divider = make_axes_locatable(axes_xy[idx])
             cax = divider.append_axes("right", size="3%", pad=0.05)
             plt.colorbar(im, cax=cax, label='ξ [nm]')
 
             if idx == num_snapshots - 1:
-                axes[idx].set_xlabel('x [nm]', fontsize=12)
+                axes_xy[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
     plt.savefig('polarized_photon_amplitude_xy.png', dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_amplitude_xy.png")
+    plt.close(fig_xy)
 
-    # 2. Lateral distortion (XY slice)
-    max_disp_mag_phys = 0
+    # ========================================================================
+    # 2. AMPLITUDE FIELD SNAPSHOTS - XZ SLICE
+    # ========================================================================
+    fig_xz, axes_xz = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_xz.suptitle(f'Polarized Photon - Amplitude Field (XZ slice, y={ny//2})',
+                    fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots:
+            field_slice_sim = extract_slice_xz(snapshots[t], (nx, ny, nz))
+            field_slice_nm = mapper.to_phys_length(field_slice_sim) * 1e9
+
+            im = axes_xz[idx].imshow(field_slice_nm.T, origin='lower',
+                                     extent=[x_coords[0], x_coords[-1],
+                                            z_coords[0], z_coords[-1]],
+                                     cmap='RdBu_r',
+                                     vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                                     aspect='auto')
+
+            axes_xz[idx].set_ylabel('z [nm]', fontsize=11)
+            t_fs = t * 1e15
+            axes_xz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                             transform=axes_xz[idx].transAxes,
+                             fontsize=12, verticalalignment='top',
+                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            divider = make_axes_locatable(axes_xz[idx])
+            cax = divider.append_axes("right", size="3%", pad=0.05)
+            plt.colorbar(im, cax=cax, label='ξ [nm]')
+
+            if idx == num_snapshots - 1:
+                axes_xz[idx].set_xlabel('x [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('polarized_photon_amplitude_xz.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: polarized_photon_amplitude_xz.png")
+    plt.close(fig_xz)
+
+    # ========================================================================
+    # 3. AMPLITUDE FIELD SNAPSHOTS - YZ SLICE
+    # ========================================================================
+    fig_yz, axes_yz = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_yz.suptitle(f'Polarized Photon - Amplitude Field (YZ slice, x={nx//2})',
+                    fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots:
+            field_slice_sim = extract_slice_yz(snapshots[t], (nx, ny, nz))
+            field_slice_nm = mapper.to_phys_length(field_slice_sim) * 1e9
+
+            im = axes_yz[idx].imshow(field_slice_nm.T, origin='lower',
+                                     extent=[y_coords[0], y_coords[-1],
+                                            z_coords[0], z_coords[-1]],
+                                     cmap='RdBu_r',
+                                     vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                                     aspect='equal')
+
+            axes_yz[idx].set_ylabel('z [nm]', fontsize=11)
+            t_fs = t * 1e15
+            axes_yz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                             transform=axes_yz[idx].transAxes,
+                             fontsize=12, verticalalignment='top',
+                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            divider = make_axes_locatable(axes_yz[idx])
+            cax = divider.append_axes("right", size="3%", pad=0.05)
+            plt.colorbar(im, cax=cax, label='ξ [nm]')
+
+            if idx == num_snapshots - 1:
+                axes_yz[idx].set_xlabel('y [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('polarized_photon_amplitude_yz.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: polarized_photon_amplitude_yz.png")
+    plt.close(fig_yz)
+
+    # ========================================================================
+    # 4. LATERAL DISTORTION - XY SLICE
+    # ========================================================================
+    print(f"\nCreating lateral distortion plots...")
+
+    # Find max magnitude for XY slice
+    max_disp_mag_phys_xy = 0
     for t in snapshots_lateral_x.keys():
         disp_x_slice_sim = extract_slice_xy(snapshots_lateral_x[t], (nx, ny, nz))
         disp_y_slice_sim = extract_slice_xy(snapshots_lateral_y[t], (nx, ny, nz))
         disp_x_slice_phys = mapper.to_phys_length(disp_x_slice_sim)
         disp_y_slice_phys = mapper.to_phys_length(disp_y_slice_sim)
         mag = np.sqrt(disp_x_slice_phys**2 + disp_y_slice_phys**2).max()
-        max_disp_mag_phys = max(max_disp_mag_phys, mag)
+        max_disp_mag_phys_xy = max(max_disp_mag_phys_xy, mag)
 
-    fig_lat, axes_lat = plt.subplots(num_snapshots, 1, figsize=(14, 12))
-    fig_lat.suptitle(f'Polarized Photon - Lateral Distortion (Color=Direction, Brightness=Magnitude)',
-                     fontsize=16, fontweight='bold')
+    fig_lat_xy, axes_lat_xy = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_lat_xy.suptitle(f'Polarized Photon - Lateral Distortion XY (z={nz//2})',
+                        fontsize=16, fontweight='bold')
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
         if t in snapshots_lateral_x:
@@ -536,36 +623,149 @@ def main():
             disp_y_slice_phys = mapper.to_phys_length(disp_y_slice_sim)
 
             rgb_image, magnitude, angle = displacement_to_rgb_3d(
-                disp_x_slice_phys, disp_y_slice_phys, max_disp_mag_phys
+                disp_x_slice_phys, disp_y_slice_phys, max_disp_mag_phys_xy
             )
 
-            axes_lat[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
-                                extent=[x_coords[0], x_coords[-1],
-                                       y_coords[0], y_coords[-1]],
-                                aspect='auto')
+            axes_lat_xy[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
+                                    extent=[x_coords[0], x_coords[-1],
+                                           y_coords[0], y_coords[-1]],
+                                    aspect='auto')
 
-            axes_lat[idx].set_ylabel('y [nm]', fontsize=11)
+            axes_lat_xy[idx].set_ylabel('y [nm]', fontsize=11)
             t_fs = t * 1e15
-            axes_lat[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
-                              transform=axes_lat[idx].transAxes,
-                              fontsize=12, verticalalignment='top',
-                              bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+            axes_lat_xy[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                                 transform=axes_lat_xy[idx].transAxes,
+                                 fontsize=12, verticalalignment='top',
+                                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
-            max_mag_pm = max_disp_mag_phys * 1e12
-            axes_lat[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
-                              transform=axes_lat[idx].transAxes,
-                              fontsize=10, verticalalignment='top',
-                              horizontalalignment='right',
-                              bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+            max_mag_pm = max_disp_mag_phys_xy * 1e12
+            axes_lat_xy[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
+                                 transform=axes_lat_xy[idx].transAxes,
+                                 fontsize=10, verticalalignment='top',
+                                 horizontalalignment='right',
+                                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
 
             if idx == num_snapshots - 1:
-                axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
+                axes_lat_xy[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_lateral_distortion.png', dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: polarized_photon_lateral_distortion.png")
+    plt.savefig('polarized_photon_lateral_xy.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: polarized_photon_lateral_xy.png")
+    plt.close(fig_lat_xy)
 
-    # 3. Energy conservation
+    # ========================================================================
+    # 5. LATERAL DISTORTION - XZ SLICE
+    # ========================================================================
+    # Find max magnitude for XZ slice
+    max_disp_mag_phys_xz = 0
+    for t in snapshots_lateral_x.keys():
+        disp_x_slice_sim = extract_slice_xz(snapshots_lateral_x[t], (nx, ny, nz))
+        disp_z_slice_sim = extract_slice_xz(snapshots_lateral_z[t], (nx, ny, nz))
+        disp_x_slice_phys = mapper.to_phys_length(disp_x_slice_sim)
+        disp_z_slice_phys = mapper.to_phys_length(disp_z_slice_sim)
+        mag = np.sqrt(disp_x_slice_phys**2 + disp_z_slice_phys**2).max()
+        max_disp_mag_phys_xz = max(max_disp_mag_phys_xz, mag)
+
+    fig_lat_xz, axes_lat_xz = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_lat_xz.suptitle(f'Polarized Photon - Lateral Distortion XZ (y={ny//2})',
+                        fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_lateral_x:
+            disp_x_slice_sim = extract_slice_xz(snapshots_lateral_x[t], (nx, ny, nz))
+            disp_z_slice_sim = extract_slice_xz(snapshots_lateral_z[t], (nx, ny, nz))
+            disp_x_slice_phys = mapper.to_phys_length(disp_x_slice_sim)
+            disp_z_slice_phys = mapper.to_phys_length(disp_z_slice_sim)
+
+            rgb_image, magnitude, angle = displacement_to_rgb_3d(
+                disp_x_slice_phys, disp_z_slice_phys, max_disp_mag_phys_xz
+            )
+
+            axes_lat_xz[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
+                                    extent=[x_coords[0], x_coords[-1],
+                                           z_coords[0], z_coords[-1]],
+                                    aspect='auto')
+
+            axes_lat_xz[idx].set_ylabel('z [nm]', fontsize=11)
+            t_fs = t * 1e15
+            axes_lat_xz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                                 transform=axes_lat_xz[idx].transAxes,
+                                 fontsize=12, verticalalignment='top',
+                                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            max_mag_pm = max_disp_mag_phys_xz * 1e12
+            axes_lat_xz[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
+                                 transform=axes_lat_xz[idx].transAxes,
+                                 fontsize=10, verticalalignment='top',
+                                 horizontalalignment='right',
+                                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+
+            if idx == num_snapshots - 1:
+                axes_lat_xz[idx].set_xlabel('x [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('polarized_photon_lateral_xz.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: polarized_photon_lateral_xz.png")
+    plt.close(fig_lat_xz)
+
+    # ========================================================================
+    # 6. LATERAL DISTORTION - YZ SLICE
+    # ========================================================================
+    # Find max magnitude for YZ slice
+    max_disp_mag_phys_yz = 0
+    for t in snapshots_lateral_y.keys():
+        disp_y_slice_sim = extract_slice_yz(snapshots_lateral_y[t], (nx, ny, nz))
+        disp_z_slice_sim = extract_slice_yz(snapshots_lateral_z[t], (nx, ny, nz))
+        disp_y_slice_phys = mapper.to_phys_length(disp_y_slice_sim)
+        disp_z_slice_phys = mapper.to_phys_length(disp_z_slice_sim)
+        mag = np.sqrt(disp_y_slice_phys**2 + disp_z_slice_phys**2).max()
+        max_disp_mag_phys_yz = max(max_disp_mag_phys_yz, mag)
+
+    fig_lat_yz, axes_lat_yz = plt.subplots(num_snapshots, 1, figsize=(14, 12))
+    fig_lat_yz.suptitle(f'Polarized Photon - Lateral Distortion YZ (x={nx//2})',
+                        fontsize=16, fontweight='bold')
+
+    for idx, (step, t) in enumerate(snapshot_steps.items()):
+        if t in snapshots_lateral_y:
+            disp_y_slice_sim = extract_slice_yz(snapshots_lateral_y[t], (nx, ny, nz))
+            disp_z_slice_sim = extract_slice_yz(snapshots_lateral_z[t], (nx, ny, nz))
+            disp_y_slice_phys = mapper.to_phys_length(disp_y_slice_sim)
+            disp_z_slice_phys = mapper.to_phys_length(disp_z_slice_sim)
+
+            rgb_image, magnitude, angle = displacement_to_rgb_3d(
+                disp_y_slice_phys, disp_z_slice_phys, max_disp_mag_phys_yz
+            )
+
+            axes_lat_yz[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
+                                    extent=[y_coords[0], y_coords[-1],
+                                           z_coords[0], z_coords[-1]],
+                                    aspect='equal')
+
+            axes_lat_yz[idx].set_ylabel('z [nm]', fontsize=11)
+            t_fs = t * 1e15
+            axes_lat_yz[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                                 transform=axes_lat_yz[idx].transAxes,
+                                 fontsize=12, verticalalignment='top',
+                                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+            max_mag_pm = max_disp_mag_phys_yz * 1e12
+            axes_lat_yz[idx].text(0.98, 0.95, f'max: {max_mag_pm:.2f} pm',
+                                 transform=axes_lat_yz[idx].transAxes,
+                                 fontsize=10, verticalalignment='top',
+                                 horizontalalignment='right',
+                                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+
+            if idx == num_snapshots - 1:
+                axes_lat_yz[idx].set_xlabel('y [nm]', fontsize=12)
+
+    plt.tight_layout()
+    plt.savefig('polarized_photon_lateral_yz.png', dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: polarized_photon_lateral_yz.png")
+    plt.close(fig_lat_yz)
+
+    # ========================================================================
+    # 4. ENERGY CONSERVATION PLOT
+    # ========================================================================
     fig3, ax = plt.subplots(figsize=(10, 6))
     times_fs = np.array(times_phys) * 1e15
     energy_array = np.array(energies)
@@ -579,6 +779,276 @@ def main():
     plt.savefig('polarized_photon_energy.png', dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_energy.png")
 
+    # ========================================================================
+    # 5. ANIMATION (XY slice)
+    # ========================================================================
+    print(f"\nCreating animation...")
+    print(f"  Total frames: {len(animation_frames)}")
+
+    fig_anim, ax_anim = plt.subplots(figsize=(12, 4))
+
+    # Initial frame (convert sim → nm)
+    field_init_sim = extract_slice_xy(animation_frames[0], (nx, ny, nz))
+    field_init_nm = mapper.to_phys_length(field_init_sim) * 1e9  # Convert sim → phys → nm
+    im_anim = ax_anim.imshow(field_init_nm.T, origin='lower',
+                             extent=[x_coords[0], x_coords[-1],
+                                    y_coords[0], y_coords[-1]],
+                             cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                             aspect='auto', animated=True)
+
+    ax_anim.set_xlabel('x [nm]', fontsize=12)
+    ax_anim.set_ylabel('y [nm]', fontsize=12)
+    time_text = ax_anim.text(0.02, 0.95, '', transform=ax_anim.transAxes,
+                            fontsize=12, verticalalignment='top',
+                            bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    divider = make_axes_locatable(ax_anim)
+    cax = divider.append_axes("right", size="3%", pad=0.05)
+    plt.colorbar(im_anim, cax=cax, label='ξ [nm]')
+    ax_anim.set_title('Polarized Photon - Tubular Mode (XY slice, z=middle)',
+                     fontsize=14, fontweight='bold')
+
+    def animate(frame_idx):
+        """Update function for animation."""
+        field_sim = extract_slice_xy(animation_frames[frame_idx], (nx, ny, nz))
+        field_nm = mapper.to_phys_length(field_sim) * 1e9  # Convert sim → phys → nm
+        im_anim.set_array(field_nm.T)
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
+        time_text.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim, time_text]
+
+    anim = FuncAnimation(fig_anim, animate, frames=len(animation_frames),
+                        interval=50, blit=True, repeat=True)
+
+    # Save animation
+    writer = FFMpegWriter(fps=20, bitrate=2000)
+    anim.save('polarized_photon_amplitude_xy.mp4', writer=writer, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_amplitude_xy.mp4")
+
+    plt.close(fig_anim)
+
+    # ========================================================================
+    # ANIMATION - AMPLITUDE XZ SLICE
+    # ========================================================================
+    print(f"\nCreating amplitude XZ animation...")
+
+    fig_anim_xz, ax_anim_xz = plt.subplots(figsize=(12, 4))
+
+    field_init_sim_xz = extract_slice_xz(animation_frames[0], (nx, ny, nz))
+    field_init_nm_xz = mapper.to_phys_length(field_init_sim_xz) * 1e9
+    im_anim_xz = ax_anim_xz.imshow(field_init_nm_xz.T, origin='lower',
+                                     extent=[x_coords[0], x_coords[-1],
+                                            z_coords[0], z_coords[-1]],
+                                     cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                                     aspect='auto', animated=True)
+
+    ax_anim_xz.set_xlabel('x [nm]', fontsize=12)
+    ax_anim_xz.set_ylabel('z [nm]', fontsize=12)
+    time_text_xz = ax_anim_xz.text(0.02, 0.95, '', transform=ax_anim_xz.transAxes,
+                                     fontsize=12, verticalalignment='top',
+                                     bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    divider_xz = make_axes_locatable(ax_anim_xz)
+    cax_xz = divider_xz.append_axes("right", size="3%", pad=0.05)
+    plt.colorbar(im_anim_xz, cax=cax_xz, label='ξ [nm]')
+    ax_anim_xz.set_title('Polarized Photon - Amplitude (XZ slice, y=middle)',
+                          fontsize=14, fontweight='bold')
+
+    def animate_xz(frame_idx):
+        field_sim = extract_slice_xz(animation_frames[frame_idx], (nx, ny, nz))
+        field_nm = mapper.to_phys_length(field_sim) * 1e9
+        im_anim_xz.set_array(field_nm.T)
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15
+        time_text_xz.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_xz, time_text_xz]
+
+    anim_xz = FuncAnimation(fig_anim_xz, animate_xz, frames=len(animation_frames),
+                             interval=50, blit=True, repeat=True)
+    writer_xz = FFMpegWriter(fps=20, bitrate=2000)
+    anim_xz.save('polarized_photon_amplitude_xz.mp4', writer=writer_xz, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_amplitude_xz.mp4")
+    plt.close(fig_anim_xz)
+
+    # ========================================================================
+    # ANIMATION - AMPLITUDE YZ SLICE
+    # ========================================================================
+    print(f"\nCreating amplitude YZ animation...")
+
+    fig_anim_yz, ax_anim_yz = plt.subplots(figsize=(8, 6))
+
+    field_init_sim_yz = extract_slice_yz(animation_frames[0], (nx, ny, nz))
+    field_init_nm_yz = mapper.to_phys_length(field_init_sim_yz) * 1e9
+    im_anim_yz = ax_anim_yz.imshow(field_init_nm_yz.T, origin='lower',
+                                     extent=[y_coords[0], y_coords[-1],
+                                            z_coords[0], z_coords[-1]],
+                                     cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
+                                     aspect='equal', animated=True)
+
+    ax_anim_yz.set_xlabel('y [nm]', fontsize=12)
+    ax_anim_yz.set_ylabel('z [nm]', fontsize=12)
+    time_text_yz = ax_anim_yz.text(0.02, 0.95, '', transform=ax_anim_yz.transAxes,
+                                     fontsize=12, verticalalignment='top',
+                                     bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    divider_yz = make_axes_locatable(ax_anim_yz)
+    cax_yz = divider_yz.append_axes("right", size="3%", pad=0.05)
+    plt.colorbar(im_anim_yz, cax=cax_yz, label='ξ [nm]')
+    ax_anim_yz.set_title('Polarized Photon - Amplitude (YZ slice, x=middle)',
+                          fontsize=14, fontweight='bold')
+
+    def animate_yz(frame_idx):
+        field_sim = extract_slice_yz(animation_frames[frame_idx], (nx, ny, nz))
+        field_nm = mapper.to_phys_length(field_sim) * 1e9
+        im_anim_yz.set_array(field_nm.T)
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15
+        time_text_yz.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_yz, time_text_yz]
+
+    anim_yz = FuncAnimation(fig_anim_yz, animate_yz, frames=len(animation_frames),
+                             interval=50, blit=True, repeat=True)
+    writer_yz = FFMpegWriter(fps=20, bitrate=2000)
+    anim_yz.save('polarized_photon_amplitude_yz.mp4', writer=writer_yz, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_amplitude_yz.mp4")
+    plt.close(fig_anim_yz)
+
+    # ========================================================================
+    # ANIMATION - LATERAL XY SLICE
+    # ========================================================================
+    print(f"\nCreating lateral XY animation...")
+
+    fig_anim_lat_xy, ax_anim_lat_xy = plt.subplots(figsize=(12, 4))
+
+    disp_x_init = extract_slice_xy(animation_frames_lateral_x[0], (nx, ny, nz))
+    disp_y_init = extract_slice_xy(animation_frames_lateral_y[0], (nx, ny, nz))
+    disp_x_init_phys = mapper.to_phys_length(disp_x_init)
+    disp_y_init_phys = mapper.to_phys_length(disp_y_init)
+    rgb_init, _, _ = displacement_to_rgb_3d(disp_x_init_phys, disp_y_init_phys, max_disp_mag_phys_xy)
+
+    im_anim_lat_xy = ax_anim_lat_xy.imshow(np.transpose(rgb_init, (1, 0, 2)), origin='lower',
+                                             extent=[x_coords[0], x_coords[-1],
+                                                    y_coords[0], y_coords[-1]],
+                                             aspect='auto', animated=True)
+
+    ax_anim_lat_xy.set_xlabel('x [nm]', fontsize=12)
+    ax_anim_lat_xy.set_ylabel('y [nm]', fontsize=12)
+    time_text_lat_xy = ax_anim_lat_xy.text(0.02, 0.95, '', transform=ax_anim_lat_xy.transAxes,
+                                             fontsize=12, verticalalignment='top',
+                                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    ax_anim_lat_xy.set_title('Polarized Photon - Lateral Distortion (XY slice, z=middle)',
+                              fontsize=14, fontweight='bold')
+
+    def animate_lat_xy(frame_idx):
+        disp_x = extract_slice_xy(animation_frames_lateral_x[frame_idx], (nx, ny, nz))
+        disp_y = extract_slice_xy(animation_frames_lateral_y[frame_idx], (nx, ny, nz))
+        disp_x_phys = mapper.to_phys_length(disp_x)
+        disp_y_phys = mapper.to_phys_length(disp_y)
+        rgb, _, _ = displacement_to_rgb_3d(disp_x_phys, disp_y_phys, max_disp_mag_phys_xy)
+        im_anim_lat_xy.set_array(np.transpose(rgb, (1, 0, 2)))
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15
+        time_text_lat_xy.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_lat_xy, time_text_lat_xy]
+
+    anim_lat_xy = FuncAnimation(fig_anim_lat_xy, animate_lat_xy, frames=len(animation_frames),
+                                 interval=50, blit=True, repeat=True)
+    writer_lat_xy = FFMpegWriter(fps=20, bitrate=2000)
+    anim_lat_xy.save('polarized_photon_lateral_xy.mp4', writer=writer_lat_xy, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_lateral_xy.mp4")
+    plt.close(fig_anim_lat_xy)
+
+    # ========================================================================
+    # ANIMATION - LATERAL XZ SLICE
+    # ========================================================================
+    print(f"\nCreating lateral XZ animation...")
+
+    fig_anim_lat_xz, ax_anim_lat_xz = plt.subplots(figsize=(12, 4))
+
+    disp_x_init_xz = extract_slice_xz(animation_frames_lateral_x[0], (nx, ny, nz))
+    disp_z_init_xz = extract_slice_xz(animation_frames_lateral_z[0], (nx, ny, nz))
+    disp_x_init_phys_xz = mapper.to_phys_length(disp_x_init_xz)
+    disp_z_init_phys_xz = mapper.to_phys_length(disp_z_init_xz)
+    rgb_init_xz, _, _ = displacement_to_rgb_3d(disp_x_init_phys_xz, disp_z_init_phys_xz, max_disp_mag_phys_xz)
+
+    im_anim_lat_xz = ax_anim_lat_xz.imshow(np.transpose(rgb_init_xz, (1, 0, 2)), origin='lower',
+                                             extent=[x_coords[0], x_coords[-1],
+                                                    z_coords[0], z_coords[-1]],
+                                             aspect='auto', animated=True)
+
+    ax_anim_lat_xz.set_xlabel('x [nm]', fontsize=12)
+    ax_anim_lat_xz.set_ylabel('z [nm]', fontsize=12)
+    time_text_lat_xz = ax_anim_lat_xz.text(0.02, 0.95, '', transform=ax_anim_lat_xz.transAxes,
+                                             fontsize=12, verticalalignment='top',
+                                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    ax_anim_lat_xz.set_title('Polarized Photon - Lateral Distortion (XZ slice, y=middle)',
+                              fontsize=14, fontweight='bold')
+
+    def animate_lat_xz(frame_idx):
+        disp_x = extract_slice_xz(animation_frames_lateral_x[frame_idx], (nx, ny, nz))
+        disp_z = extract_slice_xz(animation_frames_lateral_z[frame_idx], (nx, ny, nz))
+        disp_x_phys = mapper.to_phys_length(disp_x)
+        disp_z_phys = mapper.to_phys_length(disp_z)
+        rgb, _, _ = displacement_to_rgb_3d(disp_x_phys, disp_z_phys, max_disp_mag_phys_xz)
+        im_anim_lat_xz.set_array(np.transpose(rgb, (1, 0, 2)))
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15
+        time_text_lat_xz.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_lat_xz, time_text_lat_xz]
+
+    anim_lat_xz = FuncAnimation(fig_anim_lat_xz, animate_lat_xz, frames=len(animation_frames),
+                                 interval=50, blit=True, repeat=True)
+    writer_lat_xz = FFMpegWriter(fps=20, bitrate=2000)
+    anim_lat_xz.save('polarized_photon_lateral_xz.mp4', writer=writer_lat_xz, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_lateral_xz.mp4")
+    plt.close(fig_anim_lat_xz)
+
+    # ========================================================================
+    # ANIMATION - LATERAL YZ SLICE
+    # ========================================================================
+    print(f"\nCreating lateral YZ animation...")
+
+    fig_anim_lat_yz, ax_anim_lat_yz = plt.subplots(figsize=(8, 6))
+
+    disp_y_init_yz = extract_slice_yz(animation_frames_lateral_y[0], (nx, ny, nz))
+    disp_z_init_yz = extract_slice_yz(animation_frames_lateral_z[0], (nx, ny, nz))
+    disp_y_init_phys_yz = mapper.to_phys_length(disp_y_init_yz)
+    disp_z_init_phys_yz = mapper.to_phys_length(disp_z_init_yz)
+    rgb_init_yz, _, _ = displacement_to_rgb_3d(disp_y_init_phys_yz, disp_z_init_phys_yz, max_disp_mag_phys_yz)
+
+    im_anim_lat_yz = ax_anim_lat_yz.imshow(np.transpose(rgb_init_yz, (1, 0, 2)), origin='lower',
+                                             extent=[y_coords[0], y_coords[-1],
+                                                    z_coords[0], z_coords[-1]],
+                                             aspect='equal', animated=True)
+
+    ax_anim_lat_yz.set_xlabel('y [nm]', fontsize=12)
+    ax_anim_lat_yz.set_ylabel('z [nm]', fontsize=12)
+    time_text_lat_yz = ax_anim_lat_yz.text(0.02, 0.95, '', transform=ax_anim_lat_yz.transAxes,
+                                             fontsize=12, verticalalignment='top',
+                                             bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+    ax_anim_lat_yz.set_title('Polarized Photon - Lateral Distortion (YZ slice, x=middle)',
+                              fontsize=14, fontweight='bold')
+
+    def animate_lat_yz(frame_idx):
+        disp_y = extract_slice_yz(animation_frames_lateral_y[frame_idx], (nx, ny, nz))
+        disp_z = extract_slice_yz(animation_frames_lateral_z[frame_idx], (nx, ny, nz))
+        disp_y_phys = mapper.to_phys_length(disp_y)
+        disp_z_phys = mapper.to_phys_length(disp_z)
+        rgb, _, _ = displacement_to_rgb_3d(disp_y_phys, disp_z_phys, max_disp_mag_phys_yz)
+        im_anim_lat_yz.set_array(np.transpose(rgb, (1, 0, 2)))
+        t_sim = animation_times[frame_idx]
+        t_fs = mapper.to_phys_time(t_sim) * 1e15
+        time_text_lat_yz.set_text(f't = {t_fs:.3f} fs')
+        return [im_anim_lat_yz, time_text_lat_yz]
+
+    anim_lat_yz = FuncAnimation(fig_anim_lat_yz, animate_lat_yz, frames=len(animation_frames),
+                                 interval=50, blit=True, repeat=True)
+    writer_lat_yz = FFMpegWriter(fps=20, bitrate=2000)
+    anim_lat_yz.save('polarized_photon_lateral_yz.mp4', writer=writer_lat_yz, dpi=100)
+    print(f"  ✓ Saved: polarized_photon_lateral_yz.mp4")
+    plt.close(fig_anim_lat_yz)
+
     print(f"\n{'=' * 70}")
     print("Experiment Complete!")
     print(f"{'=' * 70}")
@@ -586,10 +1056,23 @@ def main():
     print(f"  Maximum amplitude: {amplitude_nm:.3f} nm")
     print(f"  Maximum lateral displacement: {max_disp_mag_phys*1e12:.3f} pm")
     print(f"  Energy drift: {energy_drift*100:.6f}%")
+
+    print(f"\nPhysical Interpretation:")
+    print(f"  Domain size: {domain_length_phys_x*1e9:.3f} × {domain_length_phys_y*1e9:.3f} × {domain_length_phys_z*1e9:.3f} nm")
+    print(f"  Domain size: {domain_length_phys_x/constants.lambda_C:.0f} × {domain_length_phys_y/constants.lambda_C:.0f} × {domain_length_phys_z/constants.lambda_C:.0f} λ_C")
+    print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm")
+    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
+
     print(f"\nInterpretation:")
     print(f"  • Amplitude encodes EM energy density via u = (1/2)ρω²A²")
     print(f"  • Lateral velocities encode Poynting vector S/u")
     print(f"  • Circular polarization should appear as rotating displacement pattern")
+
+    print(f"\nVisualization Notes:")
+    print(f"  • Primary plots show XY slice at z = {nz//2} (middle of waveguide)")
+    print(f"  • Orthogonal slices show XZ and YZ planes")
+    print(f"  • Lateral distortion uses color to encode direction (hue) and brightness for magnitude")
+    print(f"  • Wave propagates along x-axis in tubular mode")
 
 
 if __name__ == '__main__':
