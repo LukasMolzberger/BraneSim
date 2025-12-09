@@ -29,7 +29,7 @@ from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.physics.forces import SpringForceComputer
-from branesim.config.simulation_config import PhysicalConstants
+from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.physics.em_to_brane_mapping import initialize_brane_from_em_fields
 from branesim.geometry.tubular_photon_mode import (
@@ -231,7 +231,11 @@ def main():
     # 3D brane parameters
     rho_D = m_point / (h_phys ** D)
     T_D = rho_D * constants.c**2
-    rest_length_phys = 0.0 * h_phys
+
+    # Rest length from physically calibrated constant
+    # L0 = rest_length_frac × a, where rest_length_frac is from continuum calibration
+    rest_length_phys = constants.rest_length_frac * h_phys
+
     c_wave = constants.c
     k_spring = T_D * (h_phys ** (D - 2))
 
