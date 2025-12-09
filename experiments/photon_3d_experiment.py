@@ -34,6 +34,7 @@ from branesim.core.initial_conditions import (
     verify_wave_propagation,
 )
 from branesim.utils import TestRunManager
+from branesim.visualization.brane_state_viz import visualize_brane_state
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -420,6 +421,21 @@ def main():
 
     print(f"\nInitial State:")
     print(f"  Energy = {initial_energy['total']:.6e} J")
+
+    # ========================================================================
+    # EXPORT INITIAL STATE DIAGRAMS
+    # ========================================================================
+    print(f"\nExporting initial state diagrams...")
+    visualize_brane_state(
+        state=state,
+        grid=grid,
+        mapper=mapper,
+        output_dir=run_manager.plots_dir,
+        filename_prefix="initial",
+        initial_positions=initial_positions,
+        print_stats=True,
+        dpi=150
+    )
 
     # Run simulation - fixed number of steps
     num_steps = 1000
