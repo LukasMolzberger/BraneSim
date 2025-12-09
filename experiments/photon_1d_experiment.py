@@ -29,6 +29,7 @@ from branesim.diagnostics.lateralization import (
     LateralizationMeasurement,
     LateralizationConfig,
 )
+from branesim.utils import TestRunManager
 
 
 def initialize_wave_shape_1d(state, grid, wavelength, amplitude, center):
@@ -244,6 +245,10 @@ def main():
     print("=" * 70)
     print("1D Photon - Experiment")
     print("=" * 70)
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="photon_1d_experiment")
+    print(run_manager.get_summary())
 
     # Physical constants
     constants = PhysicalConstants()
@@ -626,7 +631,7 @@ def main():
                 axes[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_propagation.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_propagation.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_propagation.png")
 
     # Analysis plots
@@ -654,7 +659,7 @@ def main():
     axes2[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_analysis.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_analysis.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_analysis.png")
 
     # Lateral distortion visualization
@@ -700,7 +705,7 @@ def main():
                 axes3[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_lateral_distortion.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateral_distortion.png")
 
     # Amplitude velocity visualization
@@ -745,7 +750,7 @@ def main():
                 axes4[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_amplitude_velocity.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_amplitude_velocity.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_amplitude_velocity.png")
 
     # Lateral velocity visualization
@@ -790,7 +795,7 @@ def main():
                 axes5[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_lateral_velocity.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_lateral_velocity.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateral_velocity.png")
 
     # Lateralization ratio visualization
@@ -824,7 +829,7 @@ def main():
                 axes6[idx].set_xlabel('Position [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_lateralization.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_lateralization.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateralization.png")
 
     # Global lateralization ratio vs time
@@ -842,7 +847,7 @@ def main():
     ax7.legend(fontsize=10)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_example_lateralization_global.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_example_lateralization_global.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_example_lateralization_global.png")
 
     print(f"\n{'=' * 70}")
@@ -854,6 +859,16 @@ def main():
     print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
     print(f"  Distance traveled: {distance_traveled_phys*1e9:.3f} nm")
     print(f"  Number of reflections: ~{int(distance_traveled_phys / domain_length_phys)}")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Photon 1D Experiment",
+        "device": str(device),
+    })
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
+    print(f"{'=' * 70}")
 
 
 if __name__ == '__main__':

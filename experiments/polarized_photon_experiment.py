@@ -36,6 +36,7 @@ from branesim.geometry.tubular_photon_mode import (
     PhotonModeParameters,
     compute_circular_polarization_EB,
 )
+from branesim.utils import TestRunManager
 
 
 def compute_straight_waveguide_em_fields(
@@ -211,6 +212,11 @@ def main():
     print("=" * 70)
     print("Polarized Photon Experiment - Tubular Mode, Straight Waveguide")
     print("=" * 70)
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="polarized_photon_experiment")
+    print(run_manager.get_summary())
+
 
     constants = PhysicalConstants()
     print(f"\nPhysical Constants:")
@@ -522,7 +528,7 @@ def main():
                 axes_xy[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_amplitude_xy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_amplitude_xy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_amplitude_xy.png")
     plt.close(fig_xy)
 
@@ -560,7 +566,7 @@ def main():
                 axes_xz[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_amplitude_xz.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_amplitude_xz.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_amplitude_xz.png")
     plt.close(fig_xz)
 
@@ -598,7 +604,7 @@ def main():
                 axes_yz[idx].set_xlabel('y [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_amplitude_yz.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_amplitude_yz.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_amplitude_yz.png")
     plt.close(fig_yz)
 
@@ -655,7 +661,7 @@ def main():
                 axes_lat_xy[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_lateral_xy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_lateral_xy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_lateral_xy.png")
     plt.close(fig_lat_xy)
 
@@ -710,7 +716,7 @@ def main():
                 axes_lat_xz[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_lateral_xz.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_lateral_xz.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_lateral_xz.png")
     plt.close(fig_lat_xz)
 
@@ -765,7 +771,7 @@ def main():
                 axes_lat_yz[idx].set_xlabel('y [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('polarized_photon_lateral_yz.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_lateral_yz.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_lateral_yz.png")
     plt.close(fig_lat_yz)
 
@@ -782,7 +788,7 @@ def main():
     ax.set_title('Energy Conservation', fontsize=14, fontweight='bold')
     ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig('polarized_photon_energy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('polarized_photon_energy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: polarized_photon_energy.png")
 
     # ========================================================================
@@ -829,7 +835,7 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save('polarized_photon_amplitude_xy.mp4', writer=writer, dpi=100)
+    anim.save(run_manager.get_plot_path('polarized_photon_amplitude_xy.mp4'), writer=writer, dpi=100)
     print(f"  ✓ Saved: polarized_photon_amplitude_xy.mp4")
 
     plt.close(fig_anim)
@@ -873,7 +879,7 @@ def main():
     anim_xz = FuncAnimation(fig_anim_xz, animate_xz, frames=len(animation_frames),
                              interval=50, blit=True, repeat=True)
     writer_xz = FFMpegWriter(fps=20, bitrate=2000)
-    anim_xz.save('polarized_photon_amplitude_xz.mp4', writer=writer_xz, dpi=100)
+    anim_xz.save(run_manager.get_plot_path('polarized_photon_amplitude_xz.mp4'), writer=writer_xz, dpi=100)
     print(f"  ✓ Saved: polarized_photon_amplitude_xz.mp4")
     plt.close(fig_anim_xz)
 
@@ -916,7 +922,7 @@ def main():
     anim_yz = FuncAnimation(fig_anim_yz, animate_yz, frames=len(animation_frames),
                              interval=50, blit=True, repeat=True)
     writer_yz = FFMpegWriter(fps=20, bitrate=2000)
-    anim_yz.save('polarized_photon_amplitude_yz.mp4', writer=writer_yz, dpi=100)
+    anim_yz.save(run_manager.get_plot_path('polarized_photon_amplitude_yz.mp4'), writer=writer_yz, dpi=100)
     print(f"  ✓ Saved: polarized_photon_amplitude_yz.mp4")
     plt.close(fig_anim_yz)
 
@@ -961,7 +967,7 @@ def main():
     anim_lat_xy = FuncAnimation(fig_anim_lat_xy, animate_lat_xy, frames=len(animation_frames),
                                  interval=50, blit=True, repeat=True)
     writer_lat_xy = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat_xy.save('polarized_photon_lateral_xy.mp4', writer=writer_lat_xy, dpi=100)
+    anim_lat_xy.save(run_manager.get_plot_path('polarized_photon_lateral_xy.mp4'), writer=writer_lat_xy, dpi=100)
     print(f"  ✓ Saved: polarized_photon_lateral_xy.mp4")
     plt.close(fig_anim_lat_xy)
 
@@ -1006,7 +1012,7 @@ def main():
     anim_lat_xz = FuncAnimation(fig_anim_lat_xz, animate_lat_xz, frames=len(animation_frames),
                                  interval=50, blit=True, repeat=True)
     writer_lat_xz = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat_xz.save('polarized_photon_lateral_xz.mp4', writer=writer_lat_xz, dpi=100)
+    anim_lat_xz.save(run_manager.get_plot_path('polarized_photon_lateral_xz.mp4'), writer=writer_lat_xz, dpi=100)
     print(f"  ✓ Saved: polarized_photon_lateral_xz.mp4")
     plt.close(fig_anim_lat_xz)
 
@@ -1051,7 +1057,7 @@ def main():
     anim_lat_yz = FuncAnimation(fig_anim_lat_yz, animate_lat_yz, frames=len(animation_frames),
                                  interval=50, blit=True, repeat=True)
     writer_lat_yz = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat_yz.save('polarized_photon_lateral_yz.mp4', writer=writer_lat_yz, dpi=100)
+    anim_lat_yz.save(run_manager.get_plot_path('polarized_photon_lateral_yz.mp4'), writer=writer_lat_yz, dpi=100)
     print(f"  ✓ Saved: polarized_photon_lateral_yz.mp4")
     plt.close(fig_anim_lat_yz)
 
@@ -1085,6 +1091,23 @@ def main():
     print(f"  • Orthogonal slices show XZ and YZ planes")
     print(f"  • Lateral distortion uses color to encode direction (hue) and brightness for magnitude")
     print(f"  • Wave propagates along x-axis in tubular mode")
+
+    # Save configuration
+    config = {
+        "experiment": "Polarized Photon Experiment",
+        "grid_size": f"{nx}×{ny}×{nz}",
+        "num_steps": num_steps,
+        "dt_phys": f"{dt_phys:.6e} s",
+        "wavelength": f"{wavelength_phys*1e9:.3f} nm",
+        "target_amplitude": f"{A_target*1e12:.3f} pm",
+        "peak_E_field": f"{peak_E_field:.6e} V/m",
+        "energy_drift": f"{energy_drift*100:.6f}%",
+        "device": str(device),
+    }
+    run_manager.save_config(config)
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
 
 
 if __name__ == '__main__':

@@ -33,6 +33,7 @@ from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
     verify_wave_propagation,
 )
+from branesim.utils import TestRunManager
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -234,6 +235,10 @@ def main():
     print("=" * 70)
     print("3D Photon in Waveguide - Realistic Physical Scales")
     print("=" * 70)
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="photon_3d_experiment")
+    print(run_manager.get_summary())
 
     # Physical constants
     constants = PhysicalConstants()
@@ -568,7 +573,7 @@ def main():
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_3d_example_propagation_xy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_3d_example_propagation_xy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_3d_example_propagation_xy.png")
 
     # ========================================================================
@@ -610,7 +615,7 @@ def main():
             axes2[1, idx].set_xlabel('y [nm]', fontsize=9)
 
     plt.tight_layout()
-    plt.savefig('photon_3d_example_orthogonal_slices.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_3d_example_orthogonal_slices.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_3d_example_orthogonal_slices.png")
 
     # ========================================================================
@@ -628,7 +633,7 @@ def main():
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('photon_3d_example_energy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_3d_example_energy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_3d_example_energy.png")
 
     # ========================================================================
@@ -694,7 +699,7 @@ def main():
                 axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_3d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_3d_example_lateral_distortion.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_3d_example_lateral_distortion.png")
 
     # ========================================================================
@@ -741,7 +746,7 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save('photon_3d_example.mp4', writer=writer, dpi=100)
+    anim.save(run_manager.get_plot_path('photon_3d_example.mp4'), writer=writer, dpi=100)
     print(f"  ✓ Saved: photon_3d_example.mp4")
 
     plt.close(fig_anim)
@@ -760,6 +765,16 @@ def main():
     print(f"  • Orthogonal slices show XZ and YZ planes")
     print(f"  • Lateral distortion uses color to encode direction (hue) and brightness for magnitude")
     print(f"  • Wave propagates along x-axis in waveguide mode")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Photon 3D Experiment",
+        "device": str(device),
+    })
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
+    print(f"{'=' * 70}")
 
 
 if __name__ == '__main__':

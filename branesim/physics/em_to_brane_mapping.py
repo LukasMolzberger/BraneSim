@@ -83,7 +83,7 @@ def compute_brane_amplitude_from_em_energy(
         ⟨u_EM⟩ = u_em
 
     Solving for amplitude:
-        A = √(2 u_em / (ρ ω²))
+        A = √(2 u_em / (ρ ω²)) = √(2 u_em / ρ) / ω
 
     Args:
         u_em: (N,) EM energy density [J/m³]
@@ -95,10 +95,11 @@ def compute_brane_amplitude_from_em_energy(
         A: (N,) Amplitude magnitude [m]
     """
     # Avoid division by zero
-    denom = max(rho_mass * (omega_phys ** 2), 1e-60)
+    rho_safe = max(rho_mass, 1e-60)
+    omega_safe = max(omega_phys, 1e-60)
 
-    # A = √(2u / (ρω²))
-    A = torch.sqrt(2.0 * u_em / denom)
+    # A = √(2u/ρ) / ω  (rewritten to avoid ω² overflow in float32)
+    A = torch.sqrt(2.0 * u_em / rho_safe) / omega_safe
 
     # Optional clamping to maximum amplitude
     if max_amplitude is not None:

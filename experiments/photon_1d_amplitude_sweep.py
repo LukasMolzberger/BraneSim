@@ -30,6 +30,7 @@ from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.core.initial_conditions import initialize_right_moving_velocities_time_reversed
 from branesim.diagnostics.lateralization import LateralizationMeasurement, LateralizationConfig
+from branesim.utils import TestRunManager
 
 
 def initialize_wave_shape_1d(state, grid, wavelength, amplitude, center):
@@ -530,7 +531,7 @@ def main():
     ax4.legend(fontsize=9)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_amplitude_sweep.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_amplitude_sweep.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_amplitude_sweep.png")
 
     # Find thresholds
@@ -618,7 +619,7 @@ def main():
             axes_amp[idx].set_xlabel('Position [nm]', fontsize=11)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_amplitude_sweep_fields.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_amplitude_sweep_fields.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_amplitude_sweep_fields.png")
 
     # 2. Lateral displacement Δx(x) for different amplitudes
@@ -654,12 +655,22 @@ def main():
             axes_lat[idx].set_xlabel('Position [nm]', fontsize=11)
 
     plt.tight_layout()
-    plt.savefig('photon_1d_amplitude_sweep_lateral.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_1d_amplitude_sweep_lateral.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_1d_amplitude_sweep_lateral.png")
 
     print(f"\n{'='*70}")
     print("Experiment Complete!")
     print(f"{'='*70}")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Photon 1D Amplitude Sweep",
+        "device": str(device),
+    })
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
+    print(f"{'=' * 70}")
 
 
 if __name__ == '__main__':

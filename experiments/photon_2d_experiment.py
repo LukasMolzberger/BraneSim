@@ -26,6 +26,7 @@ from branesim.core.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
     verify_wave_propagation,
 )
+from branesim.utils import TestRunManager
 
 
 def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
@@ -150,6 +151,10 @@ def main():
     print("=" * 70)
     print("2D Photon in Tunnel - Realistic Physical Scales")
     print("=" * 70)
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="photon_2d_experiment")
+    print(run_manager.get_summary())
 
     # Physical constants
     constants = PhysicalConstants()
@@ -470,7 +475,7 @@ def main():
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_example_propagation.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_2d_example_propagation.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_2d_example_propagation.png")
 
     # Energy conservation plot
@@ -486,7 +491,7 @@ def main():
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_example_energy.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_2d_example_energy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_2d_example_energy.png")
 
     # Create animation
@@ -526,7 +531,7 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save('photon_2d_example.mp4', writer=writer, dpi=100)
+    anim.save(run_manager.get_plot_path('photon_2d_example.mp4'), writer=writer, dpi=100)
     print(f"  ✓ Saved: photon_2d_example.mp4")
 
     plt.close(fig_anim)
@@ -589,7 +594,7 @@ def main():
                 axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig('photon_2d_example_lateral_distortion.png', dpi=150, bbox_inches='tight')
+    plt.savefig(run_manager.get_plot_path('photon_2d_example_lateral_distortion.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: photon_2d_example_lateral_distortion.png")
 
     # Create lateral distortion animation
@@ -648,7 +653,7 @@ def main():
 
     # Save animation
     writer_lat = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat.save('photon_2d_example_lateral_distortion.mp4', writer=writer_lat, dpi=100)
+    anim_lat.save(run_manager.get_plot_path('photon_2d_example_lateral_distortion.mp4'), writer=writer_lat, dpi=100)
     print(f"  ✓ Saved: photon_2d_example_lateral_distortion.mp4")
 
     plt.close(fig_anim_lat)
@@ -661,6 +666,16 @@ def main():
     print(f"  Domain size: {domain_length_phys/constants.lambda_C:.0f} × {domain_length_phys * ny / nx / constants.lambda_C:.0f} λ_C")
     print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm")
     print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Photon 2D Experiment",
+        "device": str(device),
+    })
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
+    print(f"{'=' * 70}")
 
 
 if __name__ == '__main__':
