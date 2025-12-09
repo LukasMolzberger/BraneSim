@@ -120,9 +120,105 @@ The last term couples amplitude to in-brane metric, causing:
 - Large-strain: gradual saturation
 - **NOT MANDATORY** - modeling option for strong-field regimes
 
-## 5. Implementation Philosophy: Substrate-Only Evolution
+## 5. Component Architecture and Separation of Concerns
 
-### 5.1 What is Implemented (Explicit in Code)
+### 5.1 Component Structure Overview
+The project maintains a clear component structure that separates specific concerns of the model. Understanding which components to update under which circumstances is critical to avoid unwanted side effects.
+
+**Key Components:**
+1. **Simulation Core** (dimensionless)
+   - Substrate dynamics: node positions, forces, integration
+   - Pure geometric calculations
+
+2. **Dimensional Mapping** (wrapper)
+   - Converts between SI units (physical world) and dimensionless simulation
+   - **Purpose:** Avoid numerical problems ONLY (not fundamental physics)
+   - Acts as interface layer
+
+3. **Initialization Components** (setup)
+   - W&vdM electron model components (see 5.4)
+   - EM-to-brane mapping
+   - Initial condition generators
+
+4. **Diagnostic/Measurement Components** (post-hoc)
+   - Emergent field calculators (g_ij, Φ_EM, E, etc.)
+   - Analysis and visualization tools
+
+### 5.2 Information Flow: Simulation vs Initialization
+
+**During Simulation (Unidirectional - STRICT):**
+```
+Microscopic Substrate → Emergent Phenomena (ONE-WAY ONLY)
+     R_p(t) evolution  →  measure g_ij, Φ_EM, E, etc.
+                       →  NO FEEDBACK ALLOWED
+```
+
+**During Initialization (Bidirectional - ALLOWED):**
+```
+Emergent Phenomena ⇄ Microscopic Substrate (BIDIRECTIONAL OK)
+Classical EM fields  →  em_to_brane_mapping.py  →  R_p(0), v_p(0)
+Toroidal electron    →  tubular geometry        →  brane configuration
+```
+
+**Critical Distinction:**
+- Initialization sets up R_p(0) and v_p(0) from high-level descriptions (EM fields, particles)
+- Once simulation starts, ONLY substrate dynamics govern evolution
+- This allows physically intuitive initial conditions without violating substrate-only evolution
+
+### 5.3 Hierarchy Within Emergent Phenomena
+
+Even among emergent concepts, there is a dependency hierarchy:
+
+```
+Lorentz Invariance (most fundamental emergent property)
+    ↓
+Electric Field E (from ∇X̄⁴)
+    ↓
+Magnetic Field B (from Lorentz transformations of E)
+    ↓
+Toroidal Electron (soliton with EM structure)
+    ↓
+Dirac Equation / Spinor Behavior (from 4π holonomy)
+```
+
+**Implications:**
+- Lower levels depend on higher levels
+- Testing should proceed top-down: verify Lorentz invariance before EM, EM before particles
+- When debugging, check dependencies from top of hierarchy downward
+
+### 5.4 W&vdM Electron Model: Component Decomposition
+
+The Williamson & van der Mark toroidal electron model has been split into separate, linked components:
+
+**Component 1: `tubular_electron_geometry.py`**
+- Describes torus knot topology
+- Defines twisted strip shape within the torus
+- Geometric/topological structure only
+- Coordinate system and parametrization
+
+**Component 2: `tubular_photon_mode.py`**
+- Describes circularly polarized photon
+- Photon moves along a path (the torus)
+- Wave/oscillation dynamics
+- Phase and amplitude patterns
+
+**Together:** These form the complete W&vdM electron model (classical EM description)
+
+**Component 3: `em_to_brane_mapping.py`**
+- **Purpose:** Bridge from classical EM to brane substrate
+- Maps EM fields (from W&vdM model) → brane node positions R_p
+- **Required because:** W&vdM model lives in classical EM field theory, but simulation needs brane configurations
+- **Used during:** Initialization only
+- Creates initial conditions {R_p(0), v_p(0)} that encode the electron structure
+
+**Coordinate System Mapping:**
+- Tubular geometry defines (s, θ, φ) coordinates along torus
+- Photon mode defines field values in these coordinates
+- EM-to-brane mapping converts to discrete R_p positions on brane grid
+
+### 5.5 Implementation Philosophy: Substrate-Only Evolution
+
+**What is Implemented (Explicit in Code):**
 - 4D embedding X(x,t) ∈ ℝ⁴ discretized as node positions R_p(t)
 - Elastic energy: U_str (stretching with saturation) + U_bend (bending)
 - Time evolution: F_p = -∂U/∂R_p, m_p R̈_p = F_p
@@ -130,7 +226,7 @@ The last term couples amplitude to in-brane metric, causing:
 - Boundary conditions (periodic, free, or clamped)
 - Initial conditions only
 
-### 5.2 What Must Emerge (Measured, NOT Coded)
+### 5.6 What Must Emerge (Measured, NOT Coded)
 - **Lorentz invariance**: isotropic dispersion ω(|k|) from wave tests
 - **Gravity**: induced metric g_ij = ∂_i X · ∂_j X computed post-hoc
 - **Electromagnetism**: Coulomb 1/r² from time-averaged X̄⁴
@@ -138,7 +234,7 @@ The last term couples amplitude to in-brane metric, causing:
 - **Particle stability**: toroidal solitons self-confine via nonlinear elasticity
 - **Spinor behavior**: 4π holonomy from phase transport
 
-### 5.3 CRITICAL: No Back-Reaction from Emergent Fields
+### 5.7 CRITICAL: No Back-Reaction from Emergent Fields
 **ARCHITECTURAL CONSTRAINT:**
 - Even when we visualize/analyze g_ij, E, Φ_EM, etc., these are PURELY DIAGNOSTIC
 - Read out from brane state for measurement and comparison
@@ -150,7 +246,7 @@ The last term couples amplitude to in-brane metric, causing:
 
 This ensures agreement with physics is genuinely emergent, not imposed.
 
-### 5.4 One-Way Information Flow
+### 5.8 One-Way Information Flow During Simulation
 ```
 Microscopic Solver              Diagnostic Measurements
 (Only substrate)                (Emergent fields)
@@ -160,6 +256,8 @@ F = -∂U/∂R                 Compare with known physics
      ↓                                ↑
 Integration                    No feedback
 ```
+
+**Note:** This strict one-way flow applies ONLY during simulation. During initialization (see 5.2), bidirectional mapping is permitted to construct initial conditions.
 
 ## 6. Nonlinearity Modes in Code
 
