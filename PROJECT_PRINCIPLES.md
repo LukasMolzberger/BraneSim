@@ -26,7 +26,7 @@ This document captures the fundamental theoretical framework of the BraneSim pro
 ### 2.1 The ONLY Fundamental Entity
 The brane substrate with its Lagrangian:
 ```
-L = (ρ_m/2)|∂_t X|² - (T/2)tr(E) - μ|E|² - (κ/2)|b|² - W_sat(E)
+L = (ρ_m/2)|∂_t X|² - (T/2)tr(E) - μ|E|² - (κ/2)|b|²
 ```
 
 Where:
@@ -37,7 +37,6 @@ Where:
 - ρ_m is mass density of the brane substrate
 - κ ≥ 0 penalizes curvature (optional but stabilizing)
 - μ ≥ 0 adds shear stiffness (optional)
-- W_sat is optional smooth saturation potential
 
 ### 2.2 Emergent Phenomena (NOT Fundamental)
 All of the following are EMERGENT from the brane dynamics:
@@ -60,7 +59,7 @@ All of the following are EMERGENT from the brane dynamics:
    - Mass, spin, and charge arise from solitonic geometry
 
 4. **Electromagnetism**
-   - Effective potential: Φ_EM(x) = κ_Φ X̄⁴(x)
+   - Effective potential: Φ_EM(x) = κ_EM X̄⁴(x)
    - X̄⁴ is time-averaged amplitude displacement
    - Electric field: E = -∇Φ_EM
    - Charge = signed amplitude deformation with chirality
@@ -111,14 +110,6 @@ The last term couples amplitude to in-brane metric, causing:
 - g_ij, E_ij, b_ij are nonlinear functionals of X
 - Large slopes and curvatures produce nonlinear behavior from geometry alone
 - **This is the core mechanism** - sufficient for emergent fields and solitons
-
-### 4.2 Secondary: Optional Material Nonlinearity
-- Smooth saturation potential W_sat (exploratory extension)
-- Critical strain scale ε_cr
-- Example: W_sat = (k ε_cr²/2) ln(1 + tr(E²)/ε_cr²)
-- Small-strain: W_sat ≈ (k/2)tr(E²)
-- Large-strain: gradual saturation
-- **NOT MANDATORY** - modeling option for strong-field regimes
 
 ## 5. Component Architecture and Separation of Concerns
 
@@ -267,13 +258,7 @@ Integration                    No feedback
 - Lateral contraction from normal displacements arises purely from metric changes
 - This is what the mathematical model in Section 2 (Conceptual Model) describes
 
-### 6.2 Other Modes (Exploratory)
-- NONE: linearized small-displacement approximation
-- SCHWINGER_LIMIT, HUYGENS_ELASTIC, HIGGS_MEXICAN_HAT, CUSTOM: optional strong-field overlays
-- **NOT required for core model**
-- Should be viewed as experimental extensions
-
-### 6.3 No Artificial Cutoffs
+### 6.2 No Artificial Cutoffs
 - No hard cutoffs on amplitude or strain
 - No explicit amplitude clamps during integration
 - No piecewise "clamps"
@@ -288,11 +273,11 @@ Integration                    No feedback
 - Alternative: cubic 26-stencil with isotropic weights
 
 ### 7.2 Energies
-**Stretching energy (with saturation):**
+**Stretching energy (Hooke-like):**
 ```
 U_str = Σ_(p,q) φ((|R_q - R_p| - h)/h)
-φ(ε) = (k ε_cr²/2) ln(1 + (ε/ε_cr)²)
-φ'(ε) = k ε / (1 + (ε/ε_cr)²)
+φ(ε) = (1/2) k ε²
+φ'(ε) = k ε
 ```
 
 **Bending energy (optional, stabilizing):**
@@ -325,7 +310,6 @@ U_bend = (κ/2) Σ_p Σ_(q<r∈N(p)) (1 - ê_pq · ê_pr)
 - **λ_C**: Compton wavelength (electron) ≈ 2.43×10⁻¹² m
 - **ω_C**: Compton frequency = c/λ_C
 - **m_e c²**: electron rest energy ≈ 511 keV
-- **ε_cr**: critical strain scale (material nonlinearity threshold)
 
 ### 8.2 Threshold Criterion
 Soliton nucleation when coarse-grained energy reaches electron rest energy:
@@ -334,7 +318,10 @@ Soliton nucleation when coarse-grained energy reaches electron rest energy:
 V_c = (λ_C/2π)³
 ```
 
-This threshold **emerges** from saturation W_sat locking in high-curvature structures, NOT imposed as external cutoff.
+Here ⟨E⟩_V_c denotes the coarse-grained elastic energy density defined by the
+brane Lagrangian. In the current model this threshold is intended to emerge
+from the geometric nonlinearity of the full strain and curvature tensors,
+not from any explicit saturation potential or hard cutoff.
 
 ## 9. Measurement Procedures
 
@@ -342,15 +329,15 @@ This threshold **emerges** from saturation W_sat locking in high-curvature struc
 1. Extract X⁴_p(t) from node positions
 2. Time-average over Δt_avg >> 2π/ω_C: X̄⁴_p
 3. Spatial interpolation to continuous field X̄⁴(x)
-4. Potential: Φ_EM(x) = κ_Φ X̄⁴(x)
+4. Potential: Φ_EM(x) = κ_EM X̄⁴(x)
 5. Field: E(x) = -∇Φ_EM(x)
 
-**Epistemic status:** κ_Φ is phenomenological, calibrated to reproduce Coulomb magnitude at r >> λ_C
+**Epistemic status:** κ_EM is phenomenological, calibrated to reproduce Coulomb magnitude at r >> λ_C
 
 ### 9.2 Gravitational Field
 1. Compute tangent vectors: ∂_i X|_x_p ≈ (R_{p+î} - R_{p-î})/(2h)
 2. Build induced metric: g_ij(x_p) = ∂_i X · ∂_j X
-3. Weak-field potential: g_00 ≈ -(1 + 2Φ_grav/c²)
+3. Weak-field potential: g_00 ≈ -(1 + 2Φ_G/c²)
 4. Ray-trace geodesics through g_μν
 
 **Epistemic status:** Metric ansatz phenomenological, tests whether it reproduces GR weak-field predictions
