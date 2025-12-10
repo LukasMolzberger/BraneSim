@@ -35,6 +35,11 @@ from branesim.core.initial_conditions import (
 )
 from branesim.utils import TestRunManager
 from branesim.visualization.brane_state_viz import visualize_brane_state
+from branesim.visualization.brane_3d_viz import (
+    subsample_3d_field,
+    create_3d_animation,
+    camera_orbit,
+)
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -470,6 +475,12 @@ def main():
     animation_times = []
     frame_interval = max(1, num_steps // 200)  # ~200 frames total
 
+    # For 3D point cloud animation (subsample more aggressively for performance)
+    animation_frames_3d = []
+    animation_times_3d = []
+    frame_interval_3d = max(1, num_steps // 100)  # ~100 frames for 3D
+    subsample_factor_3d = 2  # Take every 2nd point along each axis
+
     print_interval = max(1, num_steps // 20)
 
     for step in range(num_steps + 1):
@@ -497,6 +508,18 @@ def main():
             animation_frames_lateral_y.append(lateral_disp_y.copy())
 
             animation_times.append(solver.time)
+
+        # Save frames for 3D point cloud animation (subsampled)
+        if step % frame_interval_3d == 0:
+            field = state.get_field_component(3).cpu().numpy()
+            coords_3d, values_3d = subsample_3d_field(
+                field,
+                (nx, ny, nz),
+                h_phys,
+                subsample_factor=subsample_factor_3d
+            )
+            animation_frames_3d.append((coords_3d, values_3d))
+            animation_times_3d.append(solver.time)
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             energy = solver.compute_energy(state)
@@ -767,6 +790,57 @@ def main():
     print(f"  ✓ Saved: photon_3d_example.mp4")
 
     plt.close(fig_anim)
+
+    # ========================================================================
+    # 6. 3D POINT CLOUD ANIMATION
+    # ========================================================================
+    print(f"\nCreating 3D point cloud animation...")
+    print(f"  Total 3D frames: {len(animation_frames_3d)}")
+    print(f"  Subsampling factor: {subsample_factor_3d} (every {subsample_factor_3d} points)")
+
+    # Convert physical times for 3D frames
+    times_3d_phys = [mapper.to_phys_time(t) for t in animation_times_3d]
+
+    # Convert coordinates to nanometers for all frames
+    frames_data_nm = []
+    for coords, values in animation_frames_3d:
+        # Convert to nm
+        coords_nm = coords * 1e9
+        # Convert values to nm
+        values_nm = mapper.to_phys_length(values) * 1e9
+        frames_data_nm.append((coords_nm, values_nm))
+
+    # Define camera motion: orbit around the brane with slight elevation change
+    def camera_motion_func(frame_idx, num_frames):
+        return camera_orbit(
+            frame_idx,
+            num_frames,
+            elev_start=15,
+            elev_end=35,
+            azim_start=-60,
+            azim_revolutions=0.75,  # 0.75 full rotations during animation (slower)
+        )
+
+    # Create 3D animation with orbiting camera
+    output_path_3d = run_manager.get_plot_path('photon_3d_point_cloud.mp4')
+    create_3d_animation(
+        frames_data=frames_data_nm,
+        times=times_3d_phys,
+        output_path=output_path_3d,
+        cmap_name='RdBu_r',
+        point_size=5.0,  # Larger points for better visibility
+        gamma=1.5,  # Lower gamma = less transparent low-amplitude regions
+        alpha_scale=0.75,  # Higher opacity for more intense appearance
+        xlabel='x [nm]',
+        ylabel='y [nm]',
+        zlabel='z [nm]',
+        title_template='3D Photon (t = {:.2f} fs)',
+        fps=20,
+        dpi=100,
+        camera_motion=camera_motion_func,
+        figsize=(10, 8),
+    )
+    print(f"  ✓ Saved: photon_3d_point_cloud.mp4")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")
