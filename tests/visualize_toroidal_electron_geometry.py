@@ -47,7 +47,7 @@ def _set_equal_aspect_3d(ax, X, Y, Z):
     ax.set_zlim(z_mid - max_range / 2.0, z_mid + max_range / 2.0)
 
 
-def visualize_tubular_electron_geometry():
+def visualize_toroidal_electron_geometry():
     """
     Visual test: double-loop strip inside a torus.
 
@@ -128,4 +128,4 @@ def visualize_tubular_electron_geometry():
 
 
 if __name__ == "__main__":
-    visualize_tubular_electron_geometry()
+    visualize_toroidal_electron_geometry()
