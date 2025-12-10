@@ -218,11 +218,12 @@ def main():
         state=state,
         grid=grid,
         mapper=mapper,
-        output_dir=run_manager.get_plot_path(""),  # Use plots directory
+        output_dir=run_manager.plots_dir,  # Use plots directory
         filename_prefix="polarized_photon",
         initial_positions=initial_positions,
         print_stats=True,
-        dpi=150
+        dpi=150,
+        csv_output_dir=run_manager.data_dir  # Use data directory for CSV files
     )
 
     print(f"\nExpectations:")
