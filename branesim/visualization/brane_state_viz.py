@@ -125,7 +125,9 @@ class BraneStateVisualizer:
         self,
         output_dir: str = ".",
         filename_prefix: str = "brane_state",
-        dpi: int = 150
+        dpi: int = 150,
+        export_csv: bool = True,
+        csv_output_dir: str = None
     ) -> List[str]:
         """
         Generate all 24 component plots (3 slices × 4 components × 2 quantities).
@@ -134,12 +136,20 @@ class BraneStateVisualizer:
             output_dir: Directory to save plots
             filename_prefix: Prefix for filenames
             dpi: DPI for saved images
+            export_csv: Whether to export CSV files alongside plots
+            csv_output_dir: Directory for CSV files (if None, uses output_dir)
 
         Returns:
-            List of saved filenames
+            List of saved filenames (both PNG and CSV if enabled)
         """
         import os
         os.makedirs(output_dir, exist_ok=True)
+
+        # Use separate directory for CSV files if specified
+        if csv_output_dir is None:
+            csv_output_dir = output_dir
+        else:
+            os.makedirs(csv_output_dir, exist_ok=True)
 
         component_names = ['x', 'y', 'z', 'amplitude']
         slice_names = ['xy', 'xz', 'yz']
@@ -158,6 +168,13 @@ class BraneStateVisualizer:
                 )
                 saved_files.append(filename)
 
+                # Export CSV
+                if export_csv:
+                    csv_filename = f"{filename_prefix}_position_{comp_name}_{slice_name}.csv"
+                    csv_filepath = os.path.join(csv_output_dir, csv_filename)
+                    self._export_csv(data, slice_name.upper(), csv_filepath)
+                    saved_files.append(csv_filename)
+
         # Velocity plots
         vel_data = [self.vel_x_phys, self.vel_y_phys, self.vel_z_phys, self.vel_ampl_phys]
         for comp_name, data in zip(component_names, vel_data):
@@ -169,6 +186,13 @@ class BraneStateVisualizer:
                     "Velocity", "c", filepath, dpi
                 )
                 saved_files.append(filename)
+
+                # Export CSV
+                if export_csv:
+                    csv_filename = f"{filename_prefix}_velocity_{comp_name}_{slice_name}.csv"
+                    csv_filepath = os.path.join(csv_output_dir, csv_filename)
+                    self._export_csv(data, slice_name.upper(), csv_filepath)
+                    saved_files.append(csv_filename)
 
         return saved_files
 
@@ -230,6 +254,48 @@ class BraneStateVisualizer:
         plt.savefig(filepath, dpi=dpi, bbox_inches='tight')
         plt.close(fig)
 
+    def _export_csv(
+        self,
+        data: np.ndarray,
+        slice_name: str,
+        filepath: str
+    ):
+        """Export a single component slice as CSV."""
+        import csv
+
+        # Extract slice
+        if slice_name == 'XY':
+            slice_data = extract_slice_xy(data, (self.nx, self.ny, self.nz))
+            row_coords = self.x_coords
+            col_coords = self.y_coords
+            row_label = 'x[nm]'
+            col_label = 'y[nm]'
+        elif slice_name == 'XZ':
+            slice_data = extract_slice_xz(data, (self.nx, self.ny, self.nz))
+            row_coords = self.x_coords
+            col_coords = self.z_coords
+            row_label = 'x[nm]'
+            col_label = 'z[nm]'
+        else:  # YZ
+            slice_data = extract_slice_yz(data, (self.nx, self.ny, self.nz))
+            row_coords = self.y_coords
+            col_coords = self.z_coords
+            row_label = 'y[nm]'
+            col_label = 'z[nm]'
+
+        # Write CSV file
+        with open(filepath, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+
+            # Header row: first column is row coordinate label, then all column coordinates
+            header = [f'{row_label}\\{col_label}'] + [f'{coord:.6f}' for coord in col_coords]
+            writer.writerow(header)
+
+            # Data rows: first column is row coordinate, then all data values
+            for i, row_coord in enumerate(row_coords):
+                row = [f'{row_coord:.6f}'] + [f'{slice_data[i, j]:.6e}' for j in range(len(col_coords))]
+                writer.writerow(row)
+
     def print_statistics(self):
         """Print statistics for all components."""
         print(f"\n{'=' * 70}")
@@ -265,7 +331,9 @@ def visualize_brane_state(
     filename_prefix: str = "brane_state",
     initial_positions: Optional[torch.Tensor] = None,
     print_stats: bool = True,
-    dpi: int = 150
+    dpi: int = 150,
+    export_csv: bool = True,
+    csv_output_dir: str = None
 ) -> List[str]:
     """
     Convenience function to visualize a brane state.
@@ -274,22 +342,31 @@ def visualize_brane_state(
         state: BraneState to visualize
         grid: BraneGrid
         mapper: DimensionalMapper
-        output_dir: Directory for output files
+        output_dir: Directory for plot files
         filename_prefix: Prefix for filenames
         initial_positions: Initial positions (for displacement calculation)
         print_stats: Whether to print statistics
         dpi: DPI for saved images
+        export_csv: Whether to export CSV files alongside plots
+        csv_output_dir: Directory for CSV files (if None, uses output_dir)
 
     Returns:
-        List of saved filenames
+        List of saved filenames (both PNG and CSV if enabled)
     """
     viz = BraneStateVisualizer(state, grid, mapper, initial_positions)
 
     if print_stats:
         viz.print_statistics()
 
-    saved_files = viz.plot_all_components(output_dir, filename_prefix, dpi)
+    saved_files = viz.plot_all_components(output_dir, filename_prefix, dpi, export_csv, csv_output_dir)
 
-    print(f"\n✓ Saved {len(saved_files)} plots to {output_dir}")
+    num_plots = len([f for f in saved_files if f.endswith('.png')])
+    num_csvs = len([f for f in saved_files if f.endswith('.csv')])
+
+    if csv_output_dir and csv_output_dir != output_dir:
+        print(f"\n✓ Saved {num_plots} plots to {output_dir}")
+        print(f"✓ Saved {num_csvs} CSV files to {csv_output_dir}")
+    else:
+        print(f"\n✓ Saved {num_plots} plots and {num_csvs} CSV files to {output_dir}")
 
     return saved_files

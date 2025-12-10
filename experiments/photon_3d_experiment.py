@@ -434,7 +434,8 @@ def main():
         filename_prefix="initial",
         initial_positions=initial_positions,
         print_stats=True,
-        dpi=150
+        dpi=150,
+        csv_output_dir=run_manager.data_dir
     )
 
     # Run simulation - fixed number of steps
