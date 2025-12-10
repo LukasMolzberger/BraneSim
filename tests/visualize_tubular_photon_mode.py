@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -11,6 +15,8 @@ from branesim.geometry.tubular_photon_mode import (
     compute_circular_polarization_EB,
     sample_gaussian_envelope,
 )
+from branesim.visualization.em_field_viz import visualize_em_fields_along_centerline
+from branesim.utils import TestRunManager
 
 
 # Set this to False if you temporarily want to see ONLY the E/B arrows.
@@ -65,12 +71,18 @@ def visualize_tubular_photon_mode():
     - Introduces a higher-frequency longitudinal amplitude with 'wave_cycles'
       cos oscillations along the loop (more crests).
     - Constructs a B-field via B ∝ t × E.
-    - Samples a 2D Gaussian envelope in the transverse directions and maps
-      amplitude to transparency: weak field = transparent, strong = opaque.
+    - Saves visualizations to organized test run directory.
 
     The Möbius / double-loop geometry is present only as the path; the strip
     itself is not drawn here.
     """
+    print("=" * 70)
+    print("Tubular Photon Mode Visualization")
+    print("=" * 70)
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="visualize_tubular_photon_mode")
+    print(run_manager.get_summary())
     # --- Outer geometry (unchanged) -----------------------------------
     torus_params = TorusKnotParameters(
         major_radius=1.0,
@@ -105,10 +117,25 @@ def visualize_tubular_photon_mode():
         photon_params,
     )
 
-    # Longitudinal modulation for intensity: use |A_long|
-    longitudinal_modulation = np.abs(a_long)
+    print(f"\nGenerating EM field visualizations...")
+    print(f"  Centerline points: {centerline.shape[0]}")
+    print(f"  Total phase advance: {photon_params.total_phase / np.pi:.1f}π")
+    print(f"  Wave cycles: {photon_params.wave_cycles}")
 
-    # Gaussian envelope in transverse (n, b) directions, modulated along the path
+    # Define views
+    views = [
+        dict(elev=25, azim=-60, title="Photon mode - oblique view", filename="tubular_photon_oblique.png"),
+        dict(elev=10, azim=30, title="Photon mode - nearly in-plane", filename="tubular_photon_side.png"),
+        dict(elev=80, azim=-90, title="Photon mode - top view", filename="tubular_photon_top.png"),
+    ]
+
+    # Subsample for drawing E and B vectors
+    num = centerline.shape[0]
+    step = max(1, num // 40)
+    arrow_len = 1.8 * min(photon_params.sigma_n, photon_params.sigma_b)
+
+    # Longitudinal modulation for intensity (for potential cloud drawing)
+    longitudinal_modulation = np.abs(a_long)
     field_points, amplitudes = sample_gaussian_envelope(
         centerline,
         n,
@@ -118,39 +145,39 @@ def visualize_tubular_photon_mode():
     )
 
     # Normalize amplitudes for color/opacity mapping
-    if amplitudes.size > 0:
+    colors = None
+    if amplitudes.size > 0 and DRAW_CLOUD:
         amp_min = float(np.min(amplitudes))
         amp_max = float(np.max(amplitudes))
         denom = max(amp_max - amp_min, 1e-12)
         amp_norm = (amplitudes - amp_min) / denom
-    else:
-        amp_norm = amplitudes
+        cmap = plt.get_cmap()
+        colors = cmap(amp_norm)
+        gamma = 1.5
+        colors[:, 3] = amp_norm ** gamma
 
-    # Map amplitude to RGBA colors with amplitude-dependent alpha
-    cmap = plt.get_cmap()  # fixes MatplotlibDeprecationWarning
-    colors = cmap(amp_norm)  # (N, 4)
-    gamma = 1.5             # controls how fast opacity rises with amplitude
-    colors[:, 3] = amp_norm ** gamma
+    # Compute extent for aspect ratio (add margin for torus hull)
+    # Use torus outer radius for extent calculation
+    torus_outer_radius = torus_params.major_radius + torus_params.minor_radius + 0.04
+    all_x = centerline[:, 0]
+    all_y = centerline[:, 1]
+    all_z = centerline[:, 2]
 
-    all_x = np.concatenate([field_points[:, 0], centerline[:, 0]])
-    all_y = np.concatenate([field_points[:, 1], centerline[:, 1]])
-    all_z = np.concatenate([field_points[:, 2], centerline[:, 2]])
+    # Extend by torus radius to ensure hull fits
+    extent_margin = torus_outer_radius * 1.1
 
-    fig = plt.figure(figsize=(15, 5))
-
-    views = [
-        dict(elev=25, azim=-60, title="Photon mode - oblique view"),
-        dict(elev=10, azim=30, title="Photon mode - nearly in-plane"),
-        dict(elev=80, azim=-90, title="Photon mode - top view"),
+    # Create legend elements once
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color='k', linewidth=2.0, label='Centerline'),
+        Line2D([0], [0], color='C0', linewidth=1.7, label='E-field'),
+        Line2D([0], [0], color='C1', linewidth=1.7, label='B-field'),
     ]
 
-    # Subsample for drawing E and B vectors
-    num = centerline.shape[0]
-    step = max(1, num // 40)  # slightly denser arrows
-    arrow_len = 1.8 * min(photon_params.sigma_n, photon_params.sigma_b)
-
-    for i, view in enumerate(views, start=1):
-        ax = fig.add_subplot(1, 3, i, projection="3d")
+    # Generate separate figure for each view
+    for view in views:
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111, projection="3d")
 
         # Outer torus hull for context
         _plot_torus_hull(
@@ -159,8 +186,8 @@ def visualize_tubular_photon_mode():
             r=torus_params.minor_radius + 0.04,
         )
 
-        # Photon cloud
-        if DRAW_CLOUD:
+        # Photon cloud (optional)
+        if DRAW_CLOUD and colors is not None:
             ax.scatter(
                 field_points[:, 0],
                 field_points[:, 1],
@@ -175,48 +202,90 @@ def visualize_tubular_photon_mode():
             centerline[:, 0],
             centerline[:, 1],
             centerline[:, 2],
-            linewidth=1.7,
+            linewidth=2.0,
             color="k",
+            label="Centerline"
         )
 
-        # Polarization vectors (E and B) at a subset of points
+        # E and B field arrows
         for idx in range(0, num, step):
             p = centerline[idx]
 
             # Electric field arrow (blue)
             e = e_vectors[idx]
-            q_e = p + arrow_len * e
-            ax.plot(
-                [p[0], q_e[0]],
-                [p[1], q_e[1]],
-                [p[2], q_e[2]],
-                linewidth=1.7,
-                color="C0",  # blue
-            )
+            e_norm = np.linalg.norm(e)
+            if e_norm > 1e-12:
+                e_normalized = e / e_norm
+                q_e = p + arrow_len * e_normalized
+                ax.plot(
+                    [p[0], q_e[0]],
+                    [p[1], q_e[1]],
+                    [p[2], q_e[2]],
+                    linewidth=1.7,
+                    color="C0",  # blue
+                    alpha=0.8
+                )
 
             # Magnetic field arrow (orange), offset slightly along t to avoid overlap
             b_vec = b_vectors[idx]
-            t_vec = t[idx]
-            p_b = p + 0.4 * arrow_len * t_vec
-            q_b = p_b + arrow_len * b_vec
-            ax.plot(
-                [p_b[0], q_b[0]],
-                [p_b[1], q_b[1]],
-                [p_b[2], q_b[2]],
-                linewidth=1.7,
-                color="C1",  # orange
-            )
+            b_norm = np.linalg.norm(b_vec)
+            if b_norm > 1e-12:
+                b_normalized = b_vec / b_norm
+                t_vec = t[idx]
+                p_b = p + 0.4 * arrow_len * t_vec
+                q_b = p_b + arrow_len * b_normalized
+                ax.plot(
+                    [p_b[0], q_b[0]],
+                    [p_b[1], q_b[1]],
+                    [p_b[2], q_b[2]],
+                    linewidth=1.7,
+                    color="C1",  # orange
+                    alpha=0.8
+                )
 
-        _set_equal_aspect_3d(ax, all_x, all_y, all_z)
+        # Set limits with margin to ensure torus hull fits
+        ax.set_xlim(-extent_margin, extent_margin)
+        ax.set_ylim(-extent_margin, extent_margin)
+        ax.set_zlim(-extent_margin, extent_margin)
+
+        # Set equal aspect ratio
+        ax.set_box_aspect([1, 1, 1])
 
         ax.view_init(elev=view["elev"], azim=view["azim"])
-        ax.set_title(view["title"])
-        ax.set_xlabel("X¹ (brane)")
-        ax.set_ylabel("X² (brane)")
-        ax.set_zlabel("X³ (brane)")
+        ax.set_title(view["title"], fontsize=14, fontweight='bold')
+        ax.set_xlabel("X¹ (brane)", fontsize=12)
+        ax.set_ylabel("X² (brane)", fontsize=12)
+        ax.set_zlabel("X³ (brane)", fontsize=12)
 
-    fig.tight_layout()
-    plt.show()
+        # Add legend
+        ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
+        plt.tight_layout()
+
+        # Save to plots directory
+        output_path = run_manager.get_plot_path(view["filename"])
+        plt.savefig(output_path, dpi=150, bbox_inches='tight')
+        print(f"  ✓ Saved: {view['filename']}")
+        plt.close(fig)
+
+    # Save configuration
+    config = {
+        "experiment": "Tubular Photon Mode Visualization",
+        "torus_major_radius": torus_params.major_radius,
+        "torus_minor_radius": torus_params.minor_radius,
+        "core_windings": torus_params.core_windings,
+        "tube_windings": torus_params.tube_windings,
+        "photon_sigma_n": photon_params.sigma_n,
+        "photon_sigma_b": photon_params.sigma_b,
+        "total_phase": f"{photon_params.total_phase / np.pi:.1f}π",
+        "wave_cycles": photon_params.wave_cycles,
+        "num_samples": num_samples,
+    }
+    run_manager.save_config(config)
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
+    print(f"{'=' * 70}")
 
 
 if __name__ == "__main__":
