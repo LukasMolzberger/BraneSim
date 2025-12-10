@@ -61,9 +61,9 @@ def _set_equal_aspect_3d(ax, xs, ys, zs):
     ax.set_zlim(z_mid - max_range / 2.0, z_mid + max_range / 2.0)
 
 
-def visualize_tubular_photon_mode():
+def visualize_circular_photon_toroidal():
     """
-    Visual test: circularly polarized photon mode along the toroidal path.
+    Visual test: circularly polarized photon mode along a toroidal path.
 
     - Uses the torus-knot centerline and Frenet frame from the geometry module.
     - Builds a circularly polarized E-field in the local (n, b) plane, with
@@ -77,11 +77,11 @@ def visualize_tubular_photon_mode():
     itself is not drawn here.
     """
     print("=" * 70)
-    print("Tubular Photon Mode Visualization")
+    print("Circularly Polarized Photon - Toroidal Path Visualization")
     print("=" * 70)
 
     # Initialize test run manager
-    run_manager = TestRunManager(experiment_name="visualize_tubular_photon_mode")
+    run_manager = TestRunManager(experiment_name="visualize_circular_photon_toroidal")
     print(run_manager.get_summary())
     # --- Outer geometry (unchanged) -----------------------------------
     torus_params = TorusKnotParameters(
@@ -270,7 +270,7 @@ def visualize_tubular_photon_mode():
 
     # Save configuration
     config = {
-        "experiment": "Tubular Photon Mode Visualization",
+        "experiment": "Circularly Polarized Photon - Toroidal Path",
         "torus_major_radius": torus_params.major_radius,
         "torus_minor_radius": torus_params.minor_radius,
         "core_windings": torus_params.core_windings,
@@ -289,4 +289,4 @@ def visualize_tubular_photon_mode():
 
 
 if __name__ == "__main__":
-    visualize_tubular_photon_mode()
+    visualize_circular_photon_toroidal()

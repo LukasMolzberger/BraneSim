@@ -1,8 +1,8 @@
 """
-Visualize Polarized Photon Initialization
+Visualize Circularly Polarized Photon on Straight Path
 
 This test visualizes the initial brane state created from EM→brane mapping
-for a circularly polarized photon in a straight tubular waveguide.
+for a circularly polarized photon propagating along a straight line.
 
 Creates 24 2D plots showing:
 - 3 slices (XY, XZ, YZ)
@@ -99,13 +99,13 @@ def compute_straight_waveguide_em_fields(
 
 
 def main():
-    """Visualize polarized photon initialization."""
+    """Visualize circularly polarized photon on straight path."""
     print("=" * 70)
-    print("Polarized Photon Initialization Visualization")
+    print("Circularly Polarized Photon - Straight Path Visualization")
     print("=" * 70)
 
     # Initialize test run manager
-    run_manager = TestRunManager(experiment_name="visualize_polarized_photon")
+    run_manager = TestRunManager(experiment_name="visualize_circular_photon_straight")
     print(run_manager.get_summary())
 
     constants = PhysicalConstants()
@@ -270,7 +270,7 @@ def main():
 
     # Save configuration
     config = {
-        "experiment": "Polarized Photon Visualization",
+        "experiment": "Circularly Polarized Photon - Straight Path",
         "grid_size": f"{nx}×{ny}×{nz}",
         "lattice_spacing": f"{h_phys*1e12:.3f} pm",
         "wavelength": f"{wavelength_phys*1e9:.3f} nm",
