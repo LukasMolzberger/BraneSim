@@ -1,39 +1,37 @@
-\section{Inverse mapping from guided electromagnetic modes to brane initial data}
+\section{Inverse mapping from electromagnetic fields to brane initial data}
 \label{app:inverse-em-mapping}
 
 In the main text, the electromagnetic sector is constructed in a
 \emph{forward} direction: coarse-grained amplitude deformations of the
 brane substrate source an effective scalar potential
 $\Phi(\mathbf x) = \kappa\,\bar X^4(\mathbf x)$
-(Eq.~\eqref{eq:phi-from-xi4}), which in the static far field obeys a
-Poisson equation~\eqref{eq:poisson-from-brane} and is then promoted to
-the time component of a four-potential $A_\mu$ in the Maxwell-type
-wave equation~\eqref{eq:maxwell-wave}. In that construction the spatial
-components of $A_\mu$ and the effective current are introduced
-phenomenologically, and the brane $\to$ EM map is regarded as primary.
+(Eq.~\eqref{eq:phi-from-xi4}), which obeys a Poisson equation in the
+quasi-static regime and is then promoted to the time component of a
+four-potential $A_\mu$ in the Maxwell-type wave
+equation~\eqref{eq:maxwell-wave}. In that construction the brane $\to$
+EM map is regarded as primary.
 
-For the purposes of initializing numerical experiments with guided
-photon modes (both in a straight waveguide and on the toroidal strip of
-Appendix~\ref{app:tubular-electron}) it is useful to have a
-\emph{restricted inverse mapping} in the opposite direction: a recipe
-that takes a given classical guided mode
-$(\mathbf E,\mathbf B)$ in an effective medium and constructs
-corresponding microscopic initial data for the brane embedding
-$\mathbf X(x,t)$. This appendix spells out such a mapping for a single,
-monochromatic guided photon mode. It is \emph{not} intended as a general
-inversion of Maxwell's equations, but as a physically motivated closure
-for a specific class of states used as initial data in the simulations.
+For the purposes of initializing numerical experiments we require a
+\emph{restricted inverse mapping} in the opposite direction: a local
+dictionary that takes a classical electromagnetic field configuration
+$(\mathbf E,\mathbf B)$ on the simulation patch and assigns compatible
+microscopic initial data $(\mathbf X,\partial_t\mathbf X)$ for the
+brane embedding. This appendix spells out such a mapping for the class
+of approximately null, wave-like configurations used in the simulations.
+It is \emph{not} a general inversion of Maxwell's equations, but a
+physically motivated closure that matches local energy density and
+energy flow between the EM and brane descriptions.
 
-\subsection{Guided photon mode and effective-medium quantities}
+\subsection{Electromagnetic field configuration and effective-medium quantities}
 
-We consider a straight waveguide oriented along the $x$-axis, with
+We consider electromagnetic field configurations on a spatial patch,
+which in the simplest case may be oriented along the $x$-axis with
 transverse coordinates $(y,z)$ and spatial position
-$\mathbf x = (x,y,z)$. In the effective electromagnetic description the
-guided mode is represented by fields
+$\mathbf x = (x,y,z)$. The electromagnetic fields
 \begin{equation}
   \mathbf E(\mathbf x,t), \qquad \mathbf B(\mathbf x,t),
 \end{equation}
-propagating in a homogeneous medium characterized by effective
+are described in a homogeneous effective medium characterized by
 parameters $\varepsilon_{\mathrm{eff}}$ and $\mu_{\mathrm{eff}}$.
 Consistency with the emergent Maxwell wave equation
 (Eq.~\eqref{eq:maxwell-wave}) and the static Poisson limit fixes the
@@ -115,82 +113,86 @@ with local energy density
   \label{eq:app-u-brane}
 \end{equation}
 
-For a monochromatic traveling wave at angular frequency $\omega$,
+In the linear regime the normal displacement $\xi_\perp$ obeys the
+massless one-dimensional wave equation~\eqref{eq:app-1d-wave}. Any
+solution can locally be decomposed into left- and right-moving wave
+packets $\xi_\perp(s,t) = f(s-ct) + g(s+ct)$. For such traveling waves
+one has the local relation
 \begin{equation}
-  \xi_\perp(s,t)
-  = A(s)\,\cos\!\bigl(ks - \omega t + \phi(s)\bigr),
-  \qquad
-  \omega = c k,
-  \label{eq:app-xi-traveling}
+  \partial_t\xi_\perp = \mp c\,\partial_s\xi_\perp,
 \end{equation}
-one finds
-\begin{equation}
-  \partial_t\xi_\perp
-    = \omega A(s)\,\sin(\dots),
-  \qquad
-  \partial_s\xi_\perp
-    = -kA(s)\,\sin(\dots),
-\end{equation}
-and the corresponding energy density becomes
+so that the energy density~\eqref{eq:app-u-brane} simplifies to
 \begin{equation}
   u_{\mathrm{brane}}(s,t)
-  =
-  \frac{1}{2}\rho_m\omega^2 A^2(s)\sin^2(\dots)
-  + \frac{1}{2}T k^2 A^2(s)\sin^2(\dots)
-  =
-  \rho_m\omega^2 A^2(s)\sin^2(\dots),
+  = \rho_m c^2\bigl(\partial_s\xi_\perp\bigr)^2
+  = \frac{\rho_m}{c^2}\bigl(\partial_t\xi_\perp\bigr)^2.
 \end{equation}
-where we used $T k^2 = \rho_m\omega^2$. Averaging over one temporal
-period of the internal oscillation yields
-\begin{equation}
-  \bigl\langle u_{\mathrm{brane}}(s)\bigr\rangle_t
-  = \frac{1}{2}\rho_m\omega^2 A^2(s).
-  \label{eq:app-u-brane-avg}
-\end{equation}
+This shows that in the traveling-wave regime the brane energy density
+is a quadratic form in the spatial or temporal derivative of
+$\xi_\perp$, without reference to a particle picture or a specific
+oscillation phase.
 
-The inverse mapping for the amplitude is now obtained by demanding
-\emph{local energy matching} between the effective electromagnetic
-description and the microscopic brane mode: at each point on the
-waveguide we impose
+For the purposes of the inverse mapping we compress the above relation
+into a single effective calibration constant $K_{\mathrm{eff}}$ and
+write, schematically,
 \begin{equation}
-  \bigl\langle u_{\mathrm{brane}}(s)\bigr\rangle_t
+  u_{\mathrm{brane}}(s,t)
   \;\approx\;
-  \bigl\langle u_{\mathrm{EM}}(\mathbf x(s))\bigr\rangle_t.
+  \frac{1}{2} K_{\mathrm{eff}}\,\Xi^2(s,t),
 \end{equation}
-For a monochromatic guided mode the time-averaged electromagnetic
-energy density is
-\begin{equation}
-  \bigl\langle u_{\mathrm{EM}}(\mathbf x)\bigr\rangle_t
-  = \frac{1}{2}\varepsilon_{\mathrm{eff}}\,E_0^2(\mathbf x)
-  = \frac{1}{2}\frac{B_0^2(\mathbf x)}{\mu_{\mathrm{eff}}},
-\end{equation}
-with $E_0(\mathbf x)$ and $B_0(\mathbf x)$ the field amplitudes at
-$\mathbf x$. Equating this with Eq.~\eqref{eq:app-u-brane-avg} gives the
-amplitude magnitude
-\begin{equation}
-  A(\mathbf x)
-  =
-  \sqrt{\frac{2\,u_{\mathrm{EM}}(\mathbf x)}{\rho_m\,\omega^2}}
-  \,.
-  \label{eq:app-A-from-uEM}
-\end{equation}
-This relation is the core of the amplitude part of the inverse mapping:
-it assigns a normal-displacement amplitude $A(\mathbf x)$ to each point
-along the waveguide in such a way that the microscopic brane mode
-carries the same local energy density as the effective electromagnetic
-guided mode.
+where $\Xi$ is some chosen local combination of $\partial_t\xi_\perp$
+and $\partial_s\xi_\perp$ (for instance the derivative along the
+propagation direction). The constant $K_{\mathrm{eff}}$ is determined
+once and for all from the microscopic brane parameters $(\rho_m,T,\dots)$
+and the Compton-scale calibration discussed in the main text. It is not
+an additional dynamical parameter and in particular it does not encode
+any ``photon frequency''.
 
-Given $A(\mathbf x)$ and the electromagnetic phase
-$\phi_{\mathrm{EM}}(\mathbf x)$ of the guided mode, we can choose
-initial conditions for $\xi_\perp$ at $t=0$ as
+We now demand local energy matching between the EM and brane
+descriptions on the patch,
+\begin{equation}
+  u_{\mathrm{brane}}(\mathbf x,0)
+  \;\approx\;
+  u_{\mathrm{EM}}(\mathbf x,0),
+\end{equation}
+where
+\begin{equation}
+  u_{\mathrm{EM}}(\mathbf x,0)
+  = \frac{1}{2}\Bigl(
+      \varepsilon_{\mathrm{eff}}\,|\mathbf E(\mathbf x,0)|^2
+      + \frac{|\mathbf B(\mathbf x,0)|^2}{\mu_{\mathrm{eff}}}
+    \Bigr)
+  \label{eq:app-u-EM}
+\end{equation}
+is the usual electromagnetic energy density.
+
+Using the effective quadratic form for the brane energy we write
+\begin{equation}
+  u_{\mathrm{brane}}(\mathbf x,0)
+  = \frac{1}{2} K_{\mathrm{eff}}\,\Xi^2(\mathbf x,0),
+\end{equation}
+and choose a simple gauge in which all the energy is initially stored
+in the ``potential'' part of the normal deformation. Concretely we set
+\begin{equation}
+  \partial_t\xi_\perp(\mathbf x,0) = 0,
+\end{equation}
+and define
 \begin{equation}
   \xi_\perp(\mathbf x,0)
-  = A(\mathbf x)\,\cos\phi_{\mathrm{EM}}(\mathbf x),
-  \qquad
-  \partial_t\xi_\perp(\mathbf x,0)
-  = -\,\omega\,A(\mathbf x)\,\sin\phi_{\mathrm{EM}}(\mathbf x).
+  = A(\mathbf x)
+  = \sqrt{\frac{2\,u_{\mathrm{EM}}(\mathbf x,0)}{K_{\mathrm{eff}}}}.
   \label{eq:app-xi-initial}
 \end{equation}
+
+The choice $\partial_t\xi_\perp(\mathbf x,0)=0$ fixes a convenient
+phase convention for the microscopic brane field. It does not affect
+the coarse-grained electromagnetic configuration, which depends only on
+the combination of derivatives entering $u_{\mathrm{brane}}$ and the
+emergent Maxwell sector. In particular, no additional ``oscillator
+phase'' field is introduced in the inverse mapping; the only inputs
+from the EM side are the classical fields $\mathbf E$ and $\mathbf B$
+via $u_{\mathrm{EM}}$.
+
 In numerical experiments we typically identify $\xi_\perp$ with the
 fourth embedding component $X^4$ in the small-slope regime,
 $\xi_\perp\approx X^4$, and restrict $A$ to remain within the linear
@@ -198,7 +200,7 @@ elastic range, so that higher-order geometric nonlinearities are
 controlled by the subsequent evolution rather than the initial
 conditions.
 
-\subsection{Poynting vector and lateral velocities}
+\subsection{Energy--momentum matching and lateral velocities}
 \label{app:poynting-lateral}
 
 In the ontology of this model, magnetic effects are not independent
@@ -208,41 +210,31 @@ description this is encoded in the field tensor $F_{\mu\nu}$ and the
 Lorentz transformation properties of $(\mathbf E,\mathbf B)$. At the
 microscopic level we instead interpret the energy flow associated with
 $\mathbf B$ as a statement about the \emph{lateral motion} of brane
-material along the waveguide.
+material.
 
-For any electromagnetic configuration described by
-Eq.~\eqref{eq:app-u-S} we can define an energy-transport velocity
-\begin{equation}
-  \mathbf v_{\mathrm{energy}}(\mathbf x,t)
-  \;:=\;
-  \frac{\mathbf S(\mathbf x,t)}{u_{\mathrm{EM}}(\mathbf x,t)}.
-  \label{eq:app-v-energy}
-\end{equation}
-For a null guided mode this satisfies
-$|\mathbf v_{\mathrm{energy}}|\approx c$ and is directed along the
-waveguide axis. We identify this velocity with the tangential velocity
-of brane elements in the embedding space. In the static gauge where the
-spatial embedding coordinates are
-$\mathbf X_\parallel(x,t) = (X^1,X^2,X^3)$, the initial lateral
-velocities at $t=0$ are therefore chosen as
+At the level of the energy--momentum tensor, the electromagnetic
+momentum density is $T^{0i}_{\mathrm{EM}} = S^i/c^2$. In our brane
+model, lateral motion of the embedding carries momentum. For the class
+of null, wave-like configurations considered here we therefore identify
+the lateral velocity of the brane with the local energy-flow velocity
+of the electromagnetic field,
 \begin{equation}
   \partial_t\mathbf X_\parallel(\mathbf x,0)
-  =
-  \mathbf v_{\mathrm{lat}}(\mathbf x)
-  :=
-  \mathbf v_{\mathrm{energy}}(\mathbf x,0)
-  =
-  \frac{\mathbf S(\mathbf x,0)}{u_{\mathrm{EM}}(\mathbf x,0)}.
+  = \mathbf v_{\mathrm{energy}}(\mathbf x,0)
+  = \frac{\mathbf S(\mathbf x,0)}{u_{\mathrm{EM}}(\mathbf x,0)}.
   \label{eq:app-Xparallel-initial}
 \end{equation}
+This identification is formulated at the level of fields and their
+energy--momentum tensors and does not invoke a particle interpretation.
 The normal velocity $\partial_t X^4(\mathbf x,0)$ is already fixed by
-Eq.~\eqref{eq:app-xi-initial}. In regions where $u_{\mathrm{EM}}$ is
-negligible, the ratio in Eq.~\eqref{eq:app-Xparallel-initial} is
-suppressed and the brane remains approximately at rest in the tangential
-directions, as expected for vacuum regions outside the guided mode.
+Eq.~\eqref{eq:app-xi-initial} to be zero in our gauge choice. In regions
+where $u_{\mathrm{EM}}$ is negligible, the ratio in
+Eq.~\eqref{eq:app-Xparallel-initial} is suppressed and the brane remains
+approximately at rest in the tangential directions, as expected for
+vacuum regions outside the wave packet.
 
 In a Lorentz-covariant language one may view this prescription as
-selecting, at each point along the waveguide, a local frame in which the
+selecting, at each point on the patch, a local frame in which the
 field is predominantly electric and relating the observed magnetic
 component to the lateral motion of the underlying amplitude deformation.
 Here we bypass the explicit frame transformation and use the Poynting
@@ -251,32 +243,40 @@ vector directly as a proxy for the microscopic energy flow.
 \subsection{Extension to the toroidal double loop and limitations}
 
 The construction above is local in $\mathbf x$ and does not rely on the
-global geometry of the waveguide. It therefore carries over to the
-toroidal electron picture of Appendix~\ref{app:tubular-electron} without
-modification: one replaces the straight waveguide coordinate $s$ by the
-longitudinal coordinate $z$ along the centerline $\mathbf C(z)$ of the
-double loop, uses the tubular embedding
+global geometry of the underlying configuration. It therefore carries
+over to the toroidal electron picture of
+Appendix~\ref{app:tubular-electron} without modification: one replaces
+the coordinate $s$ by the longitudinal coordinate $z$ along the
+centerline $\mathbf C(z)$ of the double loop, uses the tubular embedding
 $\mathbf r(z,x,y)$ of Eq.~\eqref{eq:tubular-embedding}, and applies
-Eqs.~\eqref{eq:app-A-from-uEM}--\eqref{eq:app-Xparallel-initial}
+Eqs.~\eqref{eq:app-xi-initial}--\eqref{eq:app-Xparallel-initial}
 pointwise along the strip. The only additional requirement is that the
-local curvature of the strip remain small compared to the wavelength of
-the guided mode, so that the local plane-wave approximation leading to
-Eq.~\eqref{eq:app-1d-wave} remains valid.
+local curvature of the strip remain small compared to characteristic
+length scales of field variation, so that the local plane-wave
+approximation leading to Eq.~\eqref{eq:app-1d-wave} remains valid.
 
 It is important to emphasize the limited scope of this inverse mapping:
 
 \begin{itemize}
-  \item It applies to single, monochromatic guided modes in an effective
-    medium characterized by $\varepsilon_{\mathrm{eff}}$ and
-    $\mu_{\mathrm{eff}}$ obeying Eq.~\eqref{eq:app-c2}. It is not
-    intended as a general inversion procedure for arbitrary
-    electromagnetic field configurations or superpositions.
+  \item It applies to approximately null, wave-like field configurations
+    in an effective medium characterized by
+    $\varepsilon_{\mathrm{eff}}$ and $\mu_{\mathrm{eff}}$ obeying
+    Eq.~\eqref{eq:app-c2}. It is not intended as a general inversion
+    procedure for arbitrary electromagnetic field configurations or
+    superpositions.
 
-  \item The parameters $\rho_m$, $T$ and $\omega$ entering
-    Eq.~\eqref{eq:app-A-from-uEM} are those of the microscopic brane
-    model, not free continuum fit parameters. In practice they are fixed
-    by the Compton-scale calibration and the elastic constants entering
-    Eq.~\eqref{eq:brane-lagrangian}.
+  \item On the electromagnetic side, the only inputs to the inverse
+    mapping are the fields $\mathbf E(\mathbf x,0)$ and
+    $\mathbf B(\mathbf x,0)$ via the derived quantities
+    $u_{\mathrm{EM}}$ and $\mathbf S$ in Eq.~\eqref{eq:app-u-S}. No
+    additional parameters such as a prescribed ``photon frequency'' or
+    guided-mode index are required.
+
+  \item On the brane side, the mapping depends only on the microscopic
+    material parameters $(\rho_m,T,\dots)$ through the effective constant
+    $K_{\mathrm{eff}}$. These are fixed once by calibration and are not
+    interpreted as external control parameters of the electromagnetic
+    configuration.
 
   \item The mapping is used as a \emph{closure prescription} for
     constructing initial brane configurations in numerical experiments.
@@ -286,7 +286,8 @@ It is important to emphasize the limited scope of this inverse mapping:
     equation~\eqref{eq:maxwell-wave}.
 \end{itemize}
 
-Within these limitations, the inverse mapping of this appendix provides
-a concrete and internally consistent way to embed classical guided
-photon modes into the microscopic brane dynamics, allowing direct
-comparisons between simulations and the familiar Maxwellian description.
+Within these limitations, the inverse mapping provides a concrete and
+internally consistent way to embed classical electromagnetic field
+configurations (such as localized null wave packets) into the
+microscopic brane dynamics, using only field-theoretic quantities and
+without invoking a particle ontology at the mapping level.
