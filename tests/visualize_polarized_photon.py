@@ -25,6 +25,10 @@ from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.physics.em_to_brane_mapping import initialize_brane_from_em_fields
 from branesim.visualization import visualize_brane_state
+from branesim.visualization.em_field_viz import (
+    visualize_em_fields_along_centerline,
+    visualize_em_field_components_2d
+)
 from branesim.utils import TestRunManager
 
 
@@ -179,6 +183,70 @@ def main():
         constants=constants,
     )
 
+    # ========================================================================
+    # VISUALIZE EM FIELDS ALONG CENTERLINE (BEFORE MAPPING)
+    # ========================================================================
+    print(f"\nGenerating EM field visualizations...")
+
+    # Extract centerline: points along x-axis at center of domain (y=0, z=0)
+    domain_length_x = nx * h_phys
+    domain_length_y = ny * h_phys
+    domain_length_z = nz * h_phys
+
+    # Sample centerline at center of transverse directions
+    num_centerline_points = 200
+    x_centerline = np.linspace(0, domain_length_x, num_centerline_points)
+    y_centerline = np.full(num_centerline_points, domain_length_y / 2.0)
+    z_centerline = np.full(num_centerline_points, domain_length_z / 2.0)
+
+    centerline_coords = np.stack([x_centerline, y_centerline, z_centerline], axis=1)
+    centerline_coords_torch = torch.from_numpy(centerline_coords).to(
+        device=device, dtype=dtype
+    )
+
+    # Compute E and B fields along centerline
+    E_field_centerline, B_field_centerline = compute_straight_waveguide_em_fields(
+        coords_phys=centerline_coords_torch,
+        wavelength=wavelength_phys,
+        sigma_transverse=sigma_transverse,
+        peak_E_field=peak_E_field,
+        propagation_axis=0,
+        constants=constants,
+    )
+
+    # Convert to numpy for visualization
+    E_field_np = E_field_centerline.cpu().numpy()
+    B_field_np = B_field_centerline.cpu().numpy()
+
+    # Generate 3D visualization of EM fields
+    em_3d_path = run_manager.get_plot_path("em_fields_3d_views.png")
+    visualize_em_fields_along_centerline(
+        centerline=centerline_coords,
+        E_field=E_field_np,
+        B_field=B_field_np,
+        output_path=em_3d_path,
+        title="EM Fields: Circularly Polarized Photon (Straight Waveguide)",
+        arrow_scale=1.5,
+        subsample_step=5,
+        figsize=(15, 5),
+        dpi=150
+    )
+    print(f"  ✓ Saved EM 3D views: em_fields_3d_views.png")
+
+    # Generate 2D component plots
+    em_2d_path = run_manager.get_plot_path("em_field_components.png")
+    visualize_em_field_components_2d(
+        centerline=centerline_coords,
+        E_field=E_field_np,
+        B_field=B_field_np,
+        output_path=em_2d_path,
+        propagation_axis=0,
+        title="EM Field Components Along Propagation (X-axis)",
+        figsize=(12, 8),
+        dpi=150
+    )
+    print(f"  ✓ Saved EM components: em_field_components.png")
+
     # Apply EM → Brane mapping
     print(f"\nApplying EM → Brane mapping...")
     initialize_brane_from_em_fields(
@@ -212,8 +280,10 @@ def main():
     }
     run_manager.save_config(config)
 
-    # Visualize using centralized visualization system
-    print(f"\nGenerating visualizations...")
+    # ========================================================================
+    # VISUALIZE BRANE STATE
+    # ========================================================================
+    print(f"\nGenerating brane state visualizations...")
     saved_files = visualize_brane_state(
         state=state,
         grid=grid,
