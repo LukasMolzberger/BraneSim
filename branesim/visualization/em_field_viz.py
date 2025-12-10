@@ -21,7 +21,9 @@ def visualize_em_fields_along_centerline(
     arrow_scale: float = 1.0,
     subsample_step: Optional[int] = None,
     figsize: Tuple[int, int] = (15, 5),
-    dpi: int = 150
+    dpi: int = 150,
+    background_draw_func: Optional[callable] = None,
+    separate_files: bool = False
 ) -> str:
     """
     Visualize E and B field vectors along a centerline in 3D.
@@ -33,14 +35,16 @@ def visualize_em_fields_along_centerline(
         output_path: Path to save the output figure
         title: Figure title
         views: List of view dictionaries with 'elev', 'azim', 'title' keys
-               If None, uses default 3-view layout
+               If None, uses default 3-view layout. Can include 'filename' key for separate files
         arrow_scale: Scale factor for arrow lengths (relative to centerline extent)
         subsample_step: Step size for subsampling arrows (if None, auto-computed)
         figsize: Figure size in inches
         dpi: DPI for saved figure
+        background_draw_func: Optional function(ax) to draw custom background elements
+        separate_files: If True, save each view as a separate file (requires 'filename' in views)
 
     Returns:
-        Path to saved figure
+        Path to saved figure (or first file if separate_files=True)
     """
     num_points = centerline.shape[0]
 
@@ -65,12 +69,26 @@ def visualize_em_fields_along_centerline(
     # Arrow length as fraction of domain extent
     arrow_len = arrow_scale * max_extent * 0.05
 
-    # Create figure with multiple views
-    fig = plt.figure(figsize=figsize)
-    fig.suptitle(title, fontsize=16, fontweight='bold')
+    # Determine if we're making separate files or one combined figure
+    if separate_files:
+        saved_paths = []
 
-    for i, view in enumerate(views, start=1):
-        ax = fig.add_subplot(1, len(views), i, projection="3d")
+    # Create figure(s) with multiple views
+    for view_idx, view in enumerate(views):
+        if separate_files:
+            fig = plt.figure(figsize=(8, 8) if separate_files else figsize)
+            ax = fig.add_subplot(111, projection="3d")
+            subplot_idx = 1
+        else:
+            if view_idx == 0:
+                fig = plt.figure(figsize=figsize)
+                fig.suptitle(title, fontsize=16, fontweight='bold')
+            ax = fig.add_subplot(1, len(views), view_idx + 1, projection="3d")
+            subplot_idx = view_idx + 1
+
+        # Draw custom background elements (e.g., torus hull)
+        if background_draw_func is not None:
+            background_draw_func(ax)
 
         # Draw centerline
         ax.plot(
@@ -116,18 +134,23 @@ def visualize_em_fields_along_centerline(
                     alpha=0.8
                 )
 
-        # Set equal aspect ratio
-        _set_equal_aspect_3d(ax, centerline[:, 0], centerline[:, 1], centerline[:, 2])
+        # Set equal aspect ratio (unless background function handles it)
+        if background_draw_func is None:
+            _set_equal_aspect_3d(ax, centerline[:, 0], centerline[:, 1], centerline[:, 2])
 
         # Set view angle
         ax.view_init(elev=view["elev"], azim=view["azim"])
-        ax.set_title(view["title"], fontsize=12)
-        ax.set_xlabel("X [m]", fontsize=10)
-        ax.set_ylabel("Y [m]", fontsize=10)
-        ax.set_zlabel("Z [m]", fontsize=10)
+        ax.set_title(view["title"], fontsize=14 if separate_files else 12,
+                    fontweight='bold' if separate_files else 'normal')
+        ax.set_xlabel("X¹ (brane)" if separate_files else "X [m]",
+                     fontsize=12 if separate_files else 10)
+        ax.set_ylabel("X² (brane)" if separate_files else "Y [m]",
+                     fontsize=12 if separate_files else 10)
+        ax.set_zlabel("X³ (brane)" if separate_files else "Z [m]",
+                     fontsize=12 if separate_files else 10)
 
-        # Add legend on first subplot
-        if i == 1:
+        # Add legend
+        if subplot_idx == 1 or separate_files:
             # Create proxy artists for legend
             from matplotlib.lines import Line2D
             legend_elements = [
@@ -135,13 +158,31 @@ def visualize_em_fields_along_centerline(
                 Line2D([0], [0], color='C0', linewidth=1.7, label='E-field'),
                 Line2D([0], [0], color='C1', linewidth=1.7, label='B-field'),
             ]
-            ax.legend(handles=legend_elements, loc='upper right', fontsize=9)
+            ax.legend(handles=legend_elements, loc='upper right',
+                     fontsize=10 if separate_files else 9)
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
+        # Save separate files or continue building combined figure
+        if separate_files:
+            plt.tight_layout()
+            # If output_path is a directory, join with filename from view
+            import os
+            if os.path.isdir(output_path):
+                file_path = os.path.join(output_path, view.get('filename', f"view_{view_idx}.png"))
+            else:
+                # output_path is a file path, use it as base for numbered files
+                file_path = view.get('filename', f"{output_path}_{view_idx}.png")
+            plt.savefig(file_path, dpi=dpi, bbox_inches='tight')
+            plt.close(fig)
+            saved_paths.append(file_path)
 
-    return output_path
+    # Save combined figure if not separate files
+    if not separate_files:
+        plt.tight_layout()
+        plt.savefig(output_path, dpi=dpi, bbox_inches='tight')
+        plt.close(fig)
+        return output_path
+    else:
+        return saved_paths[0] if saved_paths else output_path
 
 
 def visualize_em_field_components_2d(

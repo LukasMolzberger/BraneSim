@@ -45,22 +45,6 @@ def _plot_torus_hull(ax, R: float, r: float, num_phi: int = 64, num_theta: int =
     )
 
 
-def _set_equal_aspect_3d(ax, xs, ys, zs):
-    """Set equal aspect ratio for 3D axes based on data ranges."""
-    x_min, x_max = np.min(xs), np.max(xs)
-    y_min, y_max = np.min(ys), np.max(ys)
-    z_min, z_max = np.min(zs), np.max(zs)
-
-    max_range = max(x_max - x_min, y_max - y_min, z_max - z_min)
-    x_mid = 0.5 * (x_max + x_min)
-    y_mid = 0.5 * (y_max + y_min)
-    z_mid = 0.5 * (z_max + z_min)
-
-    ax.set_xlim(x_mid - max_range / 2.0, x_mid + max_range / 2.0)
-    ax.set_ylim(y_mid - max_range / 2.0, y_mid + max_range / 2.0)
-    ax.set_zlim(z_mid - max_range / 2.0, z_mid + max_range / 2.0)
-
-
 def visualize_circular_photon_toroidal():
     """
     Visual test: circularly polarized photon mode along a toroidal path.
@@ -122,128 +106,34 @@ def visualize_circular_photon_toroidal():
     print(f"  Total phase advance: {photon_params.total_phase / np.pi:.1f}π")
     print(f"  Wave cycles: {photon_params.wave_cycles}")
 
-    # Define views
+    # Define views with filenames for separate file output
     views = [
         dict(elev=25, azim=-60, title="Photon mode - oblique view", filename="tubular_photon_oblique.png"),
         dict(elev=10, azim=30, title="Photon mode - nearly in-plane", filename="tubular_photon_side.png"),
         dict(elev=80, azim=-90, title="Photon mode - top view", filename="tubular_photon_top.png"),
     ]
 
-    # Subsample for drawing E and B vectors
-    num = centerline.shape[0]
-    step = max(1, num // 40)
-    arrow_len = 1.8 * min(photon_params.sigma_n, photon_params.sigma_b)
+    # Calculate arrow scale to match previous visualization
+    # Previous: arrow_len = 1.8 * 0.12 = 0.216
+    # Generic function: arrow_len = arrow_scale * max_extent * 0.05
+    # Torus extent ≈ 2*(major_radius + minor_radius) ≈ 2.72
+    # So arrow_scale ≈ 0.216 / (2.72 * 0.05) ≈ 1.59
+    arrow_scale = 1.59
 
-    # Longitudinal modulation for intensity (for potential cloud drawing)
-    longitudinal_modulation = np.abs(a_long)
-    field_points, amplitudes = sample_gaussian_envelope(
-        centerline,
-        n,
-        b,
-        photon_params,
-        longitudinal_modulation=longitudinal_modulation,
-    )
-
-    # Normalize amplitudes for color/opacity mapping
-    colors = None
-    if amplitudes.size > 0 and DRAW_CLOUD:
-        amp_min = float(np.min(amplitudes))
-        amp_max = float(np.max(amplitudes))
-        denom = max(amp_max - amp_min, 1e-12)
-        amp_norm = (amplitudes - amp_min) / denom
-        cmap = plt.get_cmap()
-        colors = cmap(amp_norm)
-        gamma = 1.5
-        colors[:, 3] = amp_norm ** gamma
-
-    # Compute extent for aspect ratio (add margin for torus hull)
-    # Use torus outer radius for extent calculation
-    torus_outer_radius = torus_params.major_radius + torus_params.minor_radius + 0.04
-    all_x = centerline[:, 0]
-    all_y = centerline[:, 1]
-    all_z = centerline[:, 2]
-
-    # Extend by torus radius to ensure hull fits
-    extent_margin = torus_outer_radius * 1.1
-
-    # Create legend elements once
-    from matplotlib.lines import Line2D
-    legend_elements = [
-        Line2D([0], [0], color='k', linewidth=2.0, label='Centerline'),
-        Line2D([0], [0], color='C0', linewidth=1.7, label='E-field'),
-        Line2D([0], [0], color='C1', linewidth=1.7, label='B-field'),
-    ]
-
-    # Generate separate figure for each view
-    for view in views:
-        fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot(111, projection="3d")
-
-        # Outer torus hull for context
+    # Create background draw function to add torus hull
+    def draw_torus_background(ax):
+        """Background drawing function for torus hull."""
         _plot_torus_hull(
             ax,
             R=torus_params.major_radius,
             r=torus_params.minor_radius + 0.04,
         )
 
-        # Photon cloud (optional)
-        if DRAW_CLOUD and colors is not None:
-            ax.scatter(
-                field_points[:, 0],
-                field_points[:, 1],
-                field_points[:, 2],
-                s=4,
-                c=colors,
-                marker="o",
-            )
+        # Set axis limits to ensure torus hull fits
+        # Compute extent based on torus outer radius with margin
+        torus_outer_radius = torus_params.major_radius + torus_params.minor_radius + 0.04
+        extent_margin = torus_outer_radius * 1.1
 
-        # Centerline (path of the photon)
-        ax.plot(
-            centerline[:, 0],
-            centerline[:, 1],
-            centerline[:, 2],
-            linewidth=2.0,
-            color="k",
-            label="Centerline"
-        )
-
-        # E and B field arrows
-        for idx in range(0, num, step):
-            p = centerline[idx]
-
-            # Electric field arrow (blue)
-            e = e_vectors[idx]
-            e_norm = np.linalg.norm(e)
-            if e_norm > 1e-12:
-                e_normalized = e / e_norm
-                q_e = p + arrow_len * e_normalized
-                ax.plot(
-                    [p[0], q_e[0]],
-                    [p[1], q_e[1]],
-                    [p[2], q_e[2]],
-                    linewidth=1.7,
-                    color="C0",  # blue
-                    alpha=0.8
-                )
-
-            # Magnetic field arrow (orange), offset slightly along t to avoid overlap
-            b_vec = b_vectors[idx]
-            b_norm = np.linalg.norm(b_vec)
-            if b_norm > 1e-12:
-                b_normalized = b_vec / b_norm
-                t_vec = t[idx]
-                p_b = p + 0.4 * arrow_len * t_vec
-                q_b = p_b + arrow_len * b_normalized
-                ax.plot(
-                    [p_b[0], q_b[0]],
-                    [p_b[1], q_b[1]],
-                    [p_b[2], q_b[2]],
-                    linewidth=1.7,
-                    color="C1",  # orange
-                    alpha=0.8
-                )
-
-        # Set limits with margin to ensure torus hull fits
         ax.set_xlim(-extent_margin, extent_margin)
         ax.set_ylim(-extent_margin, extent_margin)
         ax.set_zlim(-extent_margin, extent_margin)
@@ -251,22 +141,57 @@ def visualize_circular_photon_toroidal():
         # Set equal aspect ratio
         ax.set_box_aspect([1, 1, 1])
 
-        ax.view_init(elev=view["elev"], azim=view["azim"])
-        ax.set_title(view["title"], fontsize=14, fontweight='bold')
-        ax.set_xlabel("X¹ (brane)", fontsize=12)
-        ax.set_ylabel("X² (brane)", fontsize=12)
-        ax.set_zlabel("X³ (brane)", fontsize=12)
+        # Optionally draw photon cloud
+        if DRAW_CLOUD:
+            # Longitudinal modulation for intensity
+            longitudinal_modulation = np.abs(a_long)
+            field_points, amplitudes = sample_gaussian_envelope(
+                centerline,
+                n,
+                b,
+                photon_params,
+                longitudinal_modulation=longitudinal_modulation,
+            )
 
-        # Add legend
-        ax.legend(handles=legend_elements, loc='upper right', fontsize=10)
+            # Normalize amplitudes for color/opacity mapping
+            if amplitudes.size > 0:
+                amp_min = float(np.min(amplitudes))
+                amp_max = float(np.max(amplitudes))
+                denom = max(amp_max - amp_min, 1e-12)
+                amp_norm = (amplitudes - amp_min) / denom
+                cmap = plt.get_cmap()
+                colors = cmap(amp_norm)
+                gamma = 1.5
+                colors[:, 3] = amp_norm ** gamma
 
-        plt.tight_layout()
+                ax.scatter(
+                    field_points[:, 0],
+                    field_points[:, 1],
+                    field_points[:, 2],
+                    s=4,
+                    c=colors,
+                    marker="o",
+                )
 
-        # Save to plots directory
-        output_path = run_manager.get_plot_path(view["filename"])
-        plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    # Use generic EM field visualization with custom background
+    visualize_em_fields_along_centerline(
+        centerline=centerline,
+        E_field=e_vectors,
+        B_field=b_vectors,
+        output_path=run_manager.plots_dir,  # Directory path for separate files
+        title="EM Fields: Circularly Polarized Photon (Toroidal Path)",
+        views=views,
+        arrow_scale=arrow_scale,
+        subsample_step=None,  # Auto-compute (matches previous: max(1, num // 40))
+        figsize=(8, 8),  # Used for separate files
+        dpi=150,
+        background_draw_func=draw_torus_background,
+        separate_files=True
+    )
+
+    # Print saved files
+    for view in views:
         print(f"  ✓ Saved: {view['filename']}")
-        plt.close(fig)
 
     # Save configuration
     config = {
