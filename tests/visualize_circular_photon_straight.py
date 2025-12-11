@@ -218,20 +218,26 @@ def main():
     E_field_np = E_field_centerline.cpu().numpy()
     B_field_np = B_field_centerline.cpu().numpy()
 
-    # Generate 3D visualization of EM fields
-    em_3d_path = run_manager.get_plot_path("em_fields_3d_views.png")
+    # Generate 3D visualization of EM fields (separate files for each view)
+    em_3d_dir = run_manager.plots_dir
     visualize_em_fields_along_centerline(
         centerline=centerline_coords,
         E_field=E_field_np,
         B_field=B_field_np,
-        output_path=em_3d_path,
-        title="EM Fields: Circularly Polarized Photon (Straight Waveguide)",
+        output_path=em_3d_dir,
+        title="EM Fields: Circularly Polarized Photon",
+        views=[
+            dict(elev=25, azim=-60, title="EM Fields - Oblique View", filename="em_fields_oblique.png"),
+            dict(elev=10, azim=30, title="EM Fields - Side View", filename="em_fields_side.png"),
+            dict(elev=80, azim=-90, title="EM Fields - Top View", filename="em_fields_top.png"),
+        ],
         arrow_scale=1.5,
         subsample_step=5,
-        figsize=(15, 5),
-        dpi=150
+        figsize=(8, 8),
+        dpi=150,
+        separate_files=True
     )
-    print(f"  ✓ Saved EM 3D views: em_fields_3d_views.png")
+    print(f"  ✓ Saved EM 3D views: em_fields_oblique.png, em_fields_side.png, em_fields_top.png")
 
     # Generate 2D component plots
     em_2d_path = run_manager.get_plot_path("em_field_components.png")
