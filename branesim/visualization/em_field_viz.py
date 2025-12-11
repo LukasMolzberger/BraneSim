@@ -357,11 +357,24 @@ def visualize_em_field_volume_3d(
     e_paths = []
     b_paths = []
 
+    # Draw centerline for reference (along x-axis at center of y,z)
+    x_min, x_max = positions[:, 0].min(), positions[:, 0].max()
+    y_center = (positions[:, 1].min() + positions[:, 1].max()) / 2.0
+    z_center = (positions[:, 2].min() + positions[:, 2].max()) / 2.0
+    centerline_x = np.linspace(x_min, x_max, 100)
+    centerline_y = np.full(100, y_center)
+    centerline_z = np.full(100, z_center)
+
     # Create separate figures for E and B fields at each viewing angle
     for view in views:
         # ===== E-FIELD PLOT =====
         fig_e = plt.figure(figsize=(10, 10))
         ax_e = fig_e.add_subplot(111, projection='3d')
+
+        # Draw centerline
+        ax_e.plot(centerline_x, centerline_y, centerline_z,
+                 color='k', linewidth=2.0, linestyle='--',
+                 label='Centerline', alpha=0.7)
 
         # Plot E-field arrows with varying opacity and length
         for i in range(len(positions_sub)):
@@ -404,6 +417,11 @@ def visualize_em_field_volume_3d(
         # ===== B-FIELD PLOT =====
         fig_b = plt.figure(figsize=(10, 10))
         ax_b = fig_b.add_subplot(111, projection='3d')
+
+        # Draw centerline
+        ax_b.plot(centerline_x, centerline_y, centerline_z,
+                 color='k', linewidth=2.0, linestyle='--',
+                 label='Centerline', alpha=0.7)
 
         # Plot B-field arrows with varying opacity and length
         for i in range(len(positions_sub)):

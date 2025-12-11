@@ -68,7 +68,10 @@ def compute_straight_waveguide_em_fields(
 
     k = 2.0 * np.pi / wavelength
     z_long = coords_np[:, propagation_axis]
-    r_transverse = np.linalg.norm(transverse_coords, axis=1)
+
+    # Center the Gaussian at the middle of the transverse domain
+    transverse_center = np.array([transverse_coords[:, i].mean() for i in range(transverse_coords.shape[1])])
+    r_transverse = np.linalg.norm(transverse_coords - transverse_center, axis=1)
 
     envelope_transverse = np.exp(-0.5 * (r_transverse / sigma_transverse) ** 2)
     phase = k * z_long
