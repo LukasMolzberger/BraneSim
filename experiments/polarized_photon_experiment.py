@@ -361,13 +361,15 @@ def main():
     print("Applying EM → Brane Mapping")
     print(f"{'=' * 70}")
 
+    # Compute brane tension from material parameters: T = ρ_m * c²
+    T_phys = rho_D * (constants.c ** 2)
     initialize_brane_from_em_fields(
         state=state,
         grid=grid,
         mapper=mapper,
         m_point_phys=m_point,
         h_phys=h_phys,
-        omega_phys=omega_phys,
+        T_phys=T_phys,
         E_field_phys=E_field_phys,
         B_field_phys=B_field_phys,
         epsilon_eff=constants.epsilon0,
