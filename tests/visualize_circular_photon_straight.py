@@ -247,7 +247,7 @@ def main():
         arrow_scale=1.5,
         subsample_step=5,
         figsize=(8, 8),
-        dpi=150,
+        dpi=300,
         separate_files=True
     )
     print(f"  ✓ Saved EM 3D views: em_fields_oblique.png, em_fields_side.png, em_fields_top.png")
@@ -262,7 +262,7 @@ def main():
         propagation_axis=0,
         title="EM Field Components Along Propagation (X-axis)",
         figsize=(12, 8),
-        dpi=150
+        dpi=300
     )
     print(f"  ✓ Saved EM components: em_field_components.png")
 
@@ -280,7 +280,7 @@ def main():
         grid_shape=(nx, ny, nz),  # Provide grid shape for proper 3D subsampling
         subsample_factor=5,  # 100×100×100 → 20×20×20 = 8,000 arrows per field
         arrow_scale=0.8,
-        dpi=150,
+        dpi=300,
         min_alpha=0.15,
         max_alpha=0.85
     )
@@ -334,7 +334,7 @@ def main():
         filename_prefix="polarized_photon",
         initial_positions=initial_positions,
         print_stats=True,
-        dpi=150,
+        dpi=300,
         csv_output_dir=run_manager.data_dir  # Use data directory for CSV files
     )
 

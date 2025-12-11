@@ -21,7 +21,7 @@ def visualize_em_fields_along_centerline(
     arrow_scale: float = 1.0,
     subsample_step: Optional[int] = None,
     figsize: Tuple[int, int] = (15, 5),
-    dpi: int = 150,
+    dpi: int = 300,
     background_draw_func: Optional[callable] = None,
     separate_files: bool = False
 ) -> str:
@@ -193,7 +193,7 @@ def visualize_em_field_components_2d(
     propagation_axis: int = 0,
     title: str = "EM Field Components Along Propagation",
     figsize: Tuple[int, int] = (12, 8),
-    dpi: int = 150
+    dpi: int = 300
 ) -> str:
     """
     Visualize E and B field components as 2D line plots along the propagation direction.
