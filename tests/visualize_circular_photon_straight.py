@@ -115,9 +115,9 @@ def main():
     constants = PhysicalConstants()
 
     # Physical setup
-    wavelength_phys = constants.lambda_C
+    wavelength_phys = 4 * constants.lambda_C  # Double the Compton wavelength
     points_per_wavelength = 20
-    h_phys = wavelength_phys / points_per_wavelength
+    h_phys = constants.lambda_C / points_per_wavelength # wavelength_phys
     D = 3
     m_point = 2.861821e-27  # kg
 
@@ -168,7 +168,7 @@ def main():
     coords_phys = mapper.to_phys_length(coords_sim)
 
     omega_phys = 2.0 * np.pi * constants.c / wavelength_phys
-    sigma_transverse = 1.0 * wavelength_phys
+    sigma_transverse = 1.0 * constants.lambda_C # wavelength_phys
 
     # Target amplitude: Use smaller value to avoid float32 overflow
     A_target = 0.005 * h_phys
