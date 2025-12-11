@@ -363,11 +363,12 @@ def visualize_em_field_volume_3d(
         fig_e = plt.figure(figsize=(10, 10))
         ax_e = fig_e.add_subplot(111, projection='3d')
 
-        # Plot E-field arrows with varying opacity
+        # Plot E-field arrows with varying opacity and length
         for i in range(len(positions_sub)):
             if E_mag[i] > 1e-12:  # Skip near-zero vectors
                 pos = positions_sub[i]
-                vec = E_field_sub[i] / E_mag[i] * arrow_length_scale  # Normalized direction * scale
+                # Arrow length proportional to field magnitude (normalized)
+                vec = E_field_sub[i] * (arrow_length_scale / E_max)
 
                 ax_e.quiver(
                     pos[0], pos[1], pos[2],
@@ -404,11 +405,12 @@ def visualize_em_field_volume_3d(
         fig_b = plt.figure(figsize=(10, 10))
         ax_b = fig_b.add_subplot(111, projection='3d')
 
-        # Plot B-field arrows with varying opacity
+        # Plot B-field arrows with varying opacity and length
         for i in range(len(positions_sub)):
             if B_mag[i] > 1e-12:  # Skip near-zero vectors
                 pos = positions_sub[i]
-                vec = B_field_sub[i] / B_mag[i] * arrow_length_scale
+                # Arrow length proportional to field magnitude (normalized)
+                vec = B_field_sub[i] * (arrow_length_scale / B_max)
 
                 ax_b.quiver(
                     pos[0], pos[1], pos[2],
