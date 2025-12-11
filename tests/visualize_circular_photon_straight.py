@@ -27,7 +27,8 @@ from branesim.physics.em_to_brane_mapping import initialize_brane_from_em_fields
 from branesim.visualization import visualize_brane_state
 from branesim.visualization.em_field_viz import (
     visualize_em_fields_along_centerline,
-    visualize_em_field_components_2d
+    visualize_em_field_components_2d,
+    visualize_em_field_volume_3d
 )
 from branesim.utils import TestRunManager
 
@@ -252,6 +253,27 @@ def main():
         dpi=150
     )
     print(f"  ✓ Saved EM components: em_field_components.png")
+
+    # Generate volumetric 3D visualization with arrow heads
+    print(f"\nGenerating volumetric EM field visualizations...")
+    coords_phys_np = coords_phys.cpu().numpy()
+    E_field_phys_np = E_field_phys.cpu().numpy()
+    B_field_phys_np = B_field_phys.cpu().numpy()
+
+    e_paths, b_paths = visualize_em_field_volume_3d(
+        positions=coords_phys_np,
+        E_field=E_field_phys_np,
+        B_field=B_field_phys_np,
+        output_dir=run_manager.plots_dir,
+        grid_shape=(nx, ny, nz),  # Provide grid shape for proper 3D subsampling
+        subsample_factor=10,  # 100×100×100 → 10×10×10 = 1,000 arrows per field
+        arrow_scale=0.8,
+        dpi=150,
+        min_alpha=0.15,
+        max_alpha=0.85
+    )
+    print(f"  ✓ Saved E-field volume views: {', '.join([os.path.basename(p) for p in e_paths])}")
+    print(f"  ✓ Saved B-field volume views: {', '.join([os.path.basename(p) for p in b_paths])}")
 
     # Apply EM → Brane mapping
     print(f"\nApplying EM → Brane mapping...")

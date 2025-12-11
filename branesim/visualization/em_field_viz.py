@@ -247,6 +247,202 @@ def visualize_em_field_components_2d(
     return output_path
 
 
+def visualize_em_field_volume_3d(
+    positions: np.ndarray,
+    E_field: np.ndarray,
+    B_field: np.ndarray,
+    output_dir: str,
+    grid_shape: Optional[Tuple[int, int, int]] = None,
+    subsample_factor: int = 5,
+    arrow_scale: float = 1.0,
+    views: Optional[List[dict]] = None,
+    dpi: int = 150,
+    min_alpha: float = 0.2,
+    max_alpha: float = 0.9
+) -> Tuple[List[str], List[str]]:
+    """
+    Visualize E and B field vectors throughout a 3D volume using arrows with heads.
+
+    Creates separate visualizations for E and B fields to avoid clutter.
+    Arrow length and opacity both encode field strength.
+
+    Args:
+        positions: (N, 3) array of 3D positions where fields are sampled
+        E_field: (N, 3) array of electric field vectors [V/m]
+        B_field: (N, 3) array of magnetic field vectors [T]
+        output_dir: Directory to save output files
+        grid_shape: (nx, ny, nz) grid dimensions for proper 3D subsampling
+        subsample_factor: Take every Nth point in each dimension (if grid_shape provided),
+                         or every Nth point linearly (if grid_shape not provided)
+        arrow_scale: Scale factor for arrow lengths
+        views: List of view dicts with 'elev', 'azim', 'title', 'filename_e', 'filename_b'
+        dpi: DPI for saved figures
+        min_alpha: Minimum opacity for weakest fields
+        max_alpha: Maximum opacity for strongest fields
+
+    Returns:
+        Tuple of (E_field_paths, B_field_paths) - lists of saved file paths
+    """
+    import os
+
+    # Subsample to reduce clutter
+    if grid_shape is not None:
+        # Proper 3D subsampling: take every subsample_factor-th point in each dimension
+        nx, ny, nz = grid_shape
+        positions_3d = positions.reshape(nx, ny, nz, 3)
+        E_field_3d = E_field.reshape(nx, ny, nz, 3)
+        B_field_3d = B_field.reshape(nx, ny, nz, 3)
+
+        positions_sub = positions_3d[::subsample_factor, ::subsample_factor, ::subsample_factor].reshape(-1, 3)
+        E_field_sub = E_field_3d[::subsample_factor, ::subsample_factor, ::subsample_factor].reshape(-1, 3)
+        B_field_sub = B_field_3d[::subsample_factor, ::subsample_factor, ::subsample_factor].reshape(-1, 3)
+
+        num_arrows = positions_sub.shape[0]
+        print(f"  3D subsampling: {nx}×{ny}×{nz} → {nx//subsample_factor}×{ny//subsample_factor}×{nz//subsample_factor} = {num_arrows} arrows per field")
+    else:
+        # Linear subsampling (fallback)
+        positions_sub = positions[::subsample_factor]
+        E_field_sub = E_field[::subsample_factor]
+        B_field_sub = B_field[::subsample_factor]
+        print(f"  Linear subsampling: {len(positions)} → {len(positions_sub)} arrows per field")
+
+    # Compute field magnitudes for normalization
+    E_mag = np.linalg.norm(E_field_sub, axis=1)
+    B_mag = np.linalg.norm(B_field_sub, axis=1)
+
+    E_max = E_mag.max() if E_mag.max() > 0 else 1.0
+    B_max = B_mag.max() if B_mag.max() > 0 else 1.0
+
+    # Normalize magnitudes to [0, 1] for opacity mapping
+    E_mag_norm = E_mag / E_max
+    B_mag_norm = B_mag / B_max
+
+    # Map normalized magnitudes to alpha values
+    E_alpha = min_alpha + (max_alpha - min_alpha) * E_mag_norm
+    B_alpha = min_alpha + (max_alpha - min_alpha) * B_mag_norm
+
+    # Compute arrow scale based on domain extent
+    extent_x = np.ptp(positions[:, 0])
+    extent_y = np.ptp(positions[:, 1])
+    extent_z = np.ptp(positions[:, 2])
+    max_extent = max(extent_x, extent_y, extent_z)
+    arrow_length_scale = arrow_scale * max_extent * 0.1
+
+    # Default views if not provided
+    if views is None:
+        views = [
+            dict(
+                elev=25, azim=-60,
+                title_e="E-Field - Oblique View",
+                title_b="B-Field - Oblique View",
+                filename_e="e_field_volume_oblique.png",
+                filename_b="b_field_volume_oblique.png"
+            ),
+            dict(
+                elev=10, azim=30,
+                title_e="E-Field - Side View",
+                title_b="B-Field - Side View",
+                filename_e="e_field_volume_side.png",
+                filename_b="b_field_volume_side.png"
+            ),
+            dict(
+                elev=80, azim=-90,
+                title_e="E-Field - Top View",
+                title_b="B-Field - Top View",
+                filename_e="e_field_volume_top.png",
+                filename_b="b_field_volume_top.png"
+            ),
+        ]
+
+    e_paths = []
+    b_paths = []
+
+    # Create separate figures for E and B fields at each viewing angle
+    for view in views:
+        # ===== E-FIELD PLOT =====
+        fig_e = plt.figure(figsize=(10, 10))
+        ax_e = fig_e.add_subplot(111, projection='3d')
+
+        # Plot E-field arrows with varying opacity
+        for i in range(len(positions_sub)):
+            if E_mag[i] > 1e-12:  # Skip near-zero vectors
+                pos = positions_sub[i]
+                vec = E_field_sub[i] / E_mag[i] * arrow_length_scale  # Normalized direction * scale
+
+                ax_e.quiver(
+                    pos[0], pos[1], pos[2],
+                    vec[0], vec[1], vec[2],
+                    color='C0',  # Blue for E-field
+                    alpha=E_alpha[i],
+                    arrow_length_ratio=0.3,
+                    linewidth=1.5
+                )
+
+        # Set equal aspect and view
+        _set_equal_aspect_3d(ax_e, positions[:, 0], positions[:, 1], positions[:, 2])
+        ax_e.view_init(elev=view['elev'], azim=view['azim'])
+        ax_e.set_title(view['title_e'], fontsize=14, fontweight='bold')
+        ax_e.set_xlabel('X [m]', fontsize=12)
+        ax_e.set_ylabel('Y [m]', fontsize=12)
+        ax_e.set_zlabel('Z [m]', fontsize=12)
+
+        # Add colorbar-like legend for field strength
+        from matplotlib.lines import Line2D
+        legend_elements = [
+            Line2D([0], [0], color='C0', linewidth=2, alpha=max_alpha, label='Strong E-field'),
+            Line2D([0], [0], color='C0', linewidth=2, alpha=min_alpha, label='Weak E-field'),
+        ]
+        ax_e.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
+        plt.tight_layout()
+        e_path = os.path.join(output_dir, view['filename_e'])
+        plt.savefig(e_path, dpi=dpi, bbox_inches='tight')
+        plt.close(fig_e)
+        e_paths.append(e_path)
+
+        # ===== B-FIELD PLOT =====
+        fig_b = plt.figure(figsize=(10, 10))
+        ax_b = fig_b.add_subplot(111, projection='3d')
+
+        # Plot B-field arrows with varying opacity
+        for i in range(len(positions_sub)):
+            if B_mag[i] > 1e-12:  # Skip near-zero vectors
+                pos = positions_sub[i]
+                vec = B_field_sub[i] / B_mag[i] * arrow_length_scale
+
+                ax_b.quiver(
+                    pos[0], pos[1], pos[2],
+                    vec[0], vec[1], vec[2],
+                    color='C1',  # Orange for B-field
+                    alpha=B_alpha[i],
+                    arrow_length_ratio=0.3,
+                    linewidth=1.5
+                )
+
+        # Set equal aspect and view
+        _set_equal_aspect_3d(ax_b, positions[:, 0], positions[:, 1], positions[:, 2])
+        ax_b.view_init(elev=view['elev'], azim=view['azim'])
+        ax_b.set_title(view['title_b'], fontsize=14, fontweight='bold')
+        ax_b.set_xlabel('X [m]', fontsize=12)
+        ax_b.set_ylabel('Y [m]', fontsize=12)
+        ax_b.set_zlabel('Z [m]', fontsize=12)
+
+        # Add legend
+        legend_elements = [
+            Line2D([0], [0], color='C1', linewidth=2, alpha=max_alpha, label='Strong B-field'),
+            Line2D([0], [0], color='C1', linewidth=2, alpha=min_alpha, label='Weak B-field'),
+        ]
+        ax_b.legend(handles=legend_elements, loc='upper right', fontsize=10)
+
+        plt.tight_layout()
+        b_path = os.path.join(output_dir, view['filename_b'])
+        plt.savefig(b_path, dpi=dpi, bbox_inches='tight')
+        plt.close(fig_b)
+        b_paths.append(b_path)
+
+    return e_paths, b_paths
+
+
 def _set_equal_aspect_3d(ax, xs, ys, zs):
     """Set equal aspect ratio for 3D axes based on data ranges."""
     x_min, x_max = np.min(xs), np.max(xs)
