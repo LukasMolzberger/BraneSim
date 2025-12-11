@@ -168,7 +168,7 @@ def main():
     coords_phys = mapper.to_phys_length(coords_sim)
 
     omega_phys = 2.0 * np.pi * constants.c / wavelength_phys
-    sigma_transverse = 3.0 * wavelength_phys
+    sigma_transverse = 1.0 * wavelength_phys
 
     # Target amplitude: Use smaller value to avoid float32 overflow
     A_target = 0.005 * h_phys
@@ -186,6 +186,15 @@ def main():
         propagation_axis=0,
         constants=constants,
     )
+
+    # Diagnostic: check field distribution
+    E_mag_all = torch.linalg.norm(E_field_phys, dim=1).cpu().numpy()
+    print(f"\n  E-field magnitude statistics:")
+    print(f"    Max:  {E_mag_all.max():.6e} V/m")
+    print(f"    Mean: {E_mag_all.mean():.6e} V/m")
+    print(f"    Min:  {E_mag_all.min():.6e} V/m")
+    print(f"    Fraction with E > 1% of peak: {(E_mag_all > 0.01 * E_mag_all.max()).sum() / len(E_mag_all):.1%}")
+    print(f"    Fraction with E > 10% of peak: {(E_mag_all > 0.1 * E_mag_all.max()).sum() / len(E_mag_all):.1%}")
 
     # ========================================================================
     # VISUALIZE EM FIELDS ALONG CENTERLINE (BEFORE MAPPING)
@@ -269,7 +278,7 @@ def main():
         B_field=B_field_phys_np,
         output_dir=run_manager.plots_dir,
         grid_shape=(nx, ny, nz),  # Provide grid shape for proper 3D subsampling
-        subsample_factor=10,  # 100×100×100 → 10×10×10 = 1,000 arrows per field
+        subsample_factor=5,  # 100×100×100 → 20×20×20 = 8,000 arrows per field
         arrow_scale=0.8,
         dpi=150,
         min_alpha=0.15,
