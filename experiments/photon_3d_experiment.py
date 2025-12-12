@@ -40,6 +40,8 @@ from branesim.visualization.brane_3d_viz import (
     create_3d_animation,
     camera_orbit,
 )
+from branesim.visualization.em_field_viz import visualize_em_field_volume_3d
+from branesim.physics.em_to_brane_mapping import ElectrostaticMapping
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -442,6 +444,96 @@ def main():
         dpi=150,
         csv_output_dir=run_manager.data_dir
     )
+
+    # ========================================================================
+    # COMPUTE AND VISUALIZE E-FIELD FROM BRANE (FORWARD MAPPING)
+    # ========================================================================
+    print(f"\nComputing E-field from brane using forward mapping...")
+
+    # Extract X⁴ component from brane state and reshape to 3D grid
+    X4_flat_sim = state.get_field_component(3).cpu()  # Get X⁴ in sim units
+    X4_3d_sim = X4_flat_sim.reshape(nx, ny, nz)  # Reshape to 3D grid
+
+    # Convert to physical units
+    X4_3d_phys = mapper.to_phys_length(X4_3d_sim)
+
+    # Initialize the electrostatic mapping
+    # κ_EM is phenomenological - for visualization we can use 1.0
+    kappa_EM = 1.0  # V/m or dimensionless depending on interpretation
+    epsilon_0 = 8.854187817e-12  # F/m
+
+    em_mapper = ElectrostaticMapping(
+        kappa_EM=kappa_EM,
+        epsilon_0=epsilon_0,
+        dx=h_phys,  # Physical grid spacing
+        device=device,
+        dtype=dtype
+    )
+
+    # Compute emergent EM fields from brane: Φ = κ_EM * X⁴, E = -∇Φ
+    print(f"  Computing Φ, E, ρ from X⁴...")
+    Phi, E_field, rho = em_mapper.map_from_brane(X4_3d_phys)
+
+    # Print field statistics
+    E_mag = torch.sqrt(torch.sum(E_field**2, dim=-1))
+    print(f"  Potential Φ range: [{Phi.min():.6e}, {Phi.max():.6e}] V")
+    print(f"  E-field magnitude: [{E_mag.min():.6e}, {E_mag.max():.6e}] V/m")
+    print(f"  Charge density ρ range: [{rho.min():.6e}, {rho.max():.6e}] C/m³")
+
+    # Convert to numpy for visualization
+    E_field_np = E_field.cpu().numpy()
+
+    # Create positions array for visualization (in physical units)
+    coords = grid.get_spatial_coordinates()  # Get coordinates in sim units
+    coords_phys = mapper.to_phys_length(coords).cpu().numpy()  # Convert to physical units
+
+    # For B-field, we set it to zero (electrostatic approximation)
+    # In the future, this could be computed from time derivatives or Lorentz transformations
+    B_field_np = np.zeros_like(E_field_np)
+
+    # Flatten the 3D arrays to (N, 3) format expected by visualize_em_field_volume_3d
+    E_field_flat = E_field_np.reshape(-1, 3)
+    B_field_flat = B_field_np.reshape(-1, 3)
+
+    print(f"  Visualizing E-field in 3D volume...")
+    # Create visualization with appropriate subsampling
+    subsample_factor = 5  # Take every 5th point in each dimension
+    e_paths, b_paths = visualize_em_field_volume_3d(
+        positions=coords_phys,
+        E_field=E_field_flat,
+        B_field=B_field_flat,
+        output_dir=run_manager.plots_dir,
+        grid_shape=(nx, ny, nz),
+        subsample_factor=subsample_factor,
+        arrow_scale=1.0,
+        dpi=150,
+        views=[
+            dict(
+                elev=25, azim=-60,
+                title_e="E-Field from Brane (X⁴) - Oblique View",
+                title_b="B-Field (Zero) - Oblique View",
+                filename_e="initial_e_field_from_brane_oblique.png",
+                filename_b="initial_b_field_from_brane_oblique.png"
+            ),
+            dict(
+                elev=10, azim=30,
+                title_e="E-Field from Brane (X⁴) - Side View",
+                title_b="B-Field (Zero) - Side View",
+                filename_e="initial_e_field_from_brane_side.png",
+                filename_b="initial_b_field_from_brane_side.png"
+            ),
+            dict(
+                elev=80, azim=-90,
+                title_e="E-Field from Brane (X⁴) - Top View",
+                title_b="B-Field (Zero) - Top View",
+                filename_e="initial_e_field_from_brane_top.png",
+                filename_b="initial_b_field_from_brane_top.png"
+            ),
+        ]
+    )
+    print(f"  ✓ Saved E-field visualizations:")
+    for path in e_paths:
+        print(f"    • {path.split('/')[-1]}")
 
     # Run simulation - fixed number of steps
     num_steps = 1000
