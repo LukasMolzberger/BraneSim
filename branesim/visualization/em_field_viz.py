@@ -463,6 +463,215 @@ def visualize_em_field_volume_3d(
     return e_paths, b_paths
 
 
+def visualize_em_field_slices_2d(
+    E_field: np.ndarray,
+    B_field: np.ndarray,
+    grid_shape: Tuple[int, int, int],
+    h_phys: float,
+    output_dir: str,
+    dpi: int = 150
+) -> List[str]:
+    """
+    Visualize E and B field components on 2D slices (similar to brane state visualization).
+
+    Creates 2D heatmaps for each field component on XY, XZ, and YZ slices through
+    the center of the domain.
+
+    Args:
+        E_field: (N, 3) array of electric field vectors [V/m]
+        B_field: (N, 3) array of magnetic field vectors [T]
+        grid_shape: (nx, ny, nz) grid dimensions
+        h_phys: Physical lattice spacing [m]
+        output_dir: Directory to save output files
+        dpi: DPI for saved figures
+
+    Returns:
+        List of saved file paths
+    """
+    import os
+
+    nx, ny, nz = grid_shape
+
+    # Reshape fields to 3D grid
+    E_field_3d = E_field.reshape(nx, ny, nz, 3)
+    B_field_3d = B_field.reshape(nx, ny, nz, 3)
+
+    # Get center indices for slicing
+    cx, cy, cz = nx // 2, ny // 2, nz // 2
+
+    # Define slices
+    slices = [
+        ('XY', E_field_3d[:, :, cz, :], B_field_3d[:, :, cz, :], (nx, ny), 'X', 'Y'),
+        ('XZ', E_field_3d[:, cy, :, :], B_field_3d[:, cy, :, :], (nx, nz), 'X', 'Z'),
+        ('YZ', E_field_3d[cx, :, :, :], B_field_3d[cx, :, :, :], (ny, nz), 'Y', 'Z'),
+    ]
+
+    saved_paths = []
+    component_labels = ['x', 'y', 'z']
+
+    for slice_name, E_slice, B_slice, shape, xlabel, ylabel in slices:
+        # Create figure with 2 rows (E and B) × 3 columns (x, y, z components)
+        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+        fig.suptitle(f'EM Fields - {slice_name} Slice at Center', fontsize=16, fontweight='bold')
+
+        # Extent in physical units
+        extent_x = shape[0] * h_phys
+        extent_y = shape[1] * h_phys
+        extent = [0, extent_x, 0, extent_y]
+
+        # Plot E-field components
+        for i in range(3):
+            ax = axes[0, i]
+            E_component = E_slice[:, :, i].T  # Transpose for correct orientation
+            vmax = np.abs(E_component).max()
+            im = ax.imshow(E_component, origin='lower', extent=extent,
+                          cmap='RdBu_r', vmin=-vmax, vmax=vmax, aspect='auto')
+            ax.set_title(f'$E_{component_labels[i]}$', fontsize=12)
+            ax.set_xlabel(f'{xlabel} [m]', fontsize=10)
+            ax.set_ylabel(f'{ylabel} [m]', fontsize=10)
+            plt.colorbar(im, ax=ax, label='[V/m]')
+
+        # Plot B-field components
+        for i in range(3):
+            ax = axes[1, i]
+            B_component = B_slice[:, :, i].T  # Transpose for correct orientation
+            vmax = np.abs(B_component).max()
+            im = ax.imshow(B_component, origin='lower', extent=extent,
+                          cmap='RdBu_r', vmin=-vmax, vmax=vmax, aspect='auto')
+            ax.set_title(f'$B_{component_labels[i]}$', fontsize=12)
+            ax.set_xlabel(f'{xlabel} [m]', fontsize=10)
+            ax.set_ylabel(f'{ylabel} [m]', fontsize=10)
+            plt.colorbar(im, ax=ax, label='[T]')
+
+        plt.tight_layout()
+        filename = f'em_fields_slice_{slice_name.lower()}.png'
+        filepath = os.path.join(output_dir, filename)
+        plt.savefig(filepath, dpi=dpi, bbox_inches='tight')
+        plt.close(fig)
+        saved_paths.append(filepath)
+
+    return saved_paths
+
+
+def export_em_field_slices_csv(
+    E_field: np.ndarray,
+    B_field: np.ndarray,
+    grid_shape: Tuple[int, int, int],
+    h_phys: float,
+    output_dir: str
+) -> List[str]:
+    """
+    Export E and B field components on 2D slices to CSV files.
+
+    Creates CSV files for each field component on XY, XZ, and YZ slices through
+    the center of the domain (similar to brane state CSV exports).
+
+    Args:
+        E_field: (N, 3) array of electric field vectors [V/m]
+        B_field: (N, 3) array of magnetic field vectors [T]
+        grid_shape: (nx, ny, nz) grid dimensions
+        h_phys: Physical lattice spacing [m]
+        output_dir: Directory to save CSV files
+
+    Returns:
+        List of saved file paths
+    """
+    import os
+    import csv
+
+    nx, ny, nz = grid_shape
+
+    # Reshape fields to 3D grid
+    E_field_3d = E_field.reshape(nx, ny, nz, 3)
+    B_field_3d = B_field.reshape(nx, ny, nz, 3)
+
+    # Get center indices for slicing
+    cx, cy, cz = nx // 2, ny // 2, nz // 2
+
+    saved_paths = []
+    component_labels = ['x', 'y', 'z']
+
+    # XY slice (at center z)
+    slice_name = 'xy'
+    E_slice = E_field_3d[:, :, cz, :]  # (nx, ny, 3)
+    B_slice = B_field_3d[:, :, cz, :]
+
+    for comp_idx, comp_label in enumerate(component_labels):
+        # E-field component
+        filepath = os.path.join(output_dir, f'em_E{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# E_' + comp_label + ' component [V/m]'])
+            writer.writerow(['# XY slice at z=' + f'{cz * h_phys:.6e}' + ' m'])
+            for i in range(nx):
+                writer.writerow(E_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+        # B-field component
+        filepath = os.path.join(output_dir, f'em_B{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# B_' + comp_label + ' component [T]'])
+            writer.writerow(['# XY slice at z=' + f'{cz * h_phys:.6e}' + ' m'])
+            for i in range(nx):
+                writer.writerow(B_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+    # XZ slice (at center y)
+    slice_name = 'xz'
+    E_slice = E_field_3d[:, cy, :, :]  # (nx, nz, 3)
+    B_slice = B_field_3d[:, cy, :, :]
+
+    for comp_idx, comp_label in enumerate(component_labels):
+        # E-field component
+        filepath = os.path.join(output_dir, f'em_E{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# E_' + comp_label + ' component [V/m]'])
+            writer.writerow(['# XZ slice at y=' + f'{cy * h_phys:.6e}' + ' m'])
+            for i in range(nx):
+                writer.writerow(E_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+        # B-field component
+        filepath = os.path.join(output_dir, f'em_B{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# B_' + comp_label + ' component [T]'])
+            writer.writerow(['# XZ slice at y=' + f'{cy * h_phys:.6e}' + ' m'])
+            for i in range(nx):
+                writer.writerow(B_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+    # YZ slice (at center x)
+    slice_name = 'yz'
+    E_slice = E_field_3d[cx, :, :, :]  # (ny, nz, 3)
+    B_slice = B_field_3d[cx, :, :, :]
+
+    for comp_idx, comp_label in enumerate(component_labels):
+        # E-field component
+        filepath = os.path.join(output_dir, f'em_E{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# E_' + comp_label + ' component [V/m]'])
+            writer.writerow(['# YZ slice at x=' + f'{cx * h_phys:.6e}' + ' m'])
+            for i in range(ny):
+                writer.writerow(E_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+        # B-field component
+        filepath = os.path.join(output_dir, f'em_B{comp_label}_slice_{slice_name}.csv')
+        with open(filepath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# B_' + comp_label + ' component [T]'])
+            writer.writerow(['# YZ slice at x=' + f'{cx * h_phys:.6e}' + ' m'])
+            for i in range(ny):
+                writer.writerow(B_slice[i, :, comp_idx])
+        saved_paths.append(filepath)
+
+    return saved_paths
+
+
 def _set_equal_aspect_3d(ax, xs, ys, zs):
     """Set equal aspect ratio for 3D axes based on data ranges."""
     x_min, x_max = np.min(xs), np.max(xs)

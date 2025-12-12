@@ -28,7 +28,9 @@ from branesim.visualization import visualize_brane_state
 from branesim.visualization.em_field_viz import (
     visualize_em_fields_along_centerline,
     visualize_em_field_components_2d,
-    visualize_em_field_volume_3d
+    visualize_em_field_volume_3d,
+    visualize_em_field_slices_2d,
+    export_em_field_slices_csv
 )
 from branesim.utils import TestRunManager
 
@@ -286,6 +288,29 @@ def main():
     )
     print(f"  ✓ Saved E-field volume views: {', '.join([os.path.basename(p) for p in e_paths])}")
     print(f"  ✓ Saved B-field volume views: {', '.join([os.path.basename(p) for p in b_paths])}")
+
+    # Generate 2D slice visualization of EM fields (similar to brane state output)
+    print(f"\nGenerating EM field 2D slice visualizations...")
+    slice_paths = visualize_em_field_slices_2d(
+        E_field=E_field_phys_np,
+        B_field=B_field_phys_np,
+        grid_shape=(nx, ny, nz),
+        h_phys=h_phys,
+        output_dir=run_manager.plots_dir,
+        dpi=300
+    )
+    print(f"  ✓ Saved EM field slices: {', '.join([os.path.basename(p) for p in slice_paths])}")
+
+    # Export EM fields to CSV (matching brane state CSV format)
+    print(f"\nExporting EM field data to CSV...")
+    csv_paths = export_em_field_slices_csv(
+        E_field=E_field_phys_np,
+        B_field=B_field_phys_np,
+        grid_shape=(nx, ny, nz),
+        h_phys=h_phys,
+        output_dir=run_manager.data_dir
+    )
+    print(f"  ✓ Exported {len(csv_paths)} CSV files to data directory")
 
     # Apply EM → Brane mapping
     print(f"\nApplying EM → Brane mapping...")

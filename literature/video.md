@@ -1,0 +1,1 @@
+https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/laplacian/v/laplacian-intuition?utm_source=chatgpt.com
