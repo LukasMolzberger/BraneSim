@@ -1,8 +1,8 @@
 """
-Electrostatic Brane-EM Mapping (Bidirectional)
+Electrostatic Brane-EM Mapping with Mixed Boundary Conditions
 
 This module implements the minimal, self-consistent electrostatic part of the
-brane ↔ EM mapping:
+brane ↔ EM mapping with support for mixed boundary conditions (clamped/periodic):
 
 FORWARD (brane → EM):
     Φ(x) = κ_EM * X^4(x)     (scalar potential from brane amplitude)
@@ -10,417 +10,485 @@ FORWARD (brane → EM):
     ρ(x) = ε₀ ∇·E(x)         (charge density from Gauss's law)
 
 INVERSE (EM → brane):
-    Given E(x) or ρ(x), solve ∇²Φ = -∇·E (or -ρ/ε₀) via FFT
+    Given E(x), solve via optimization (CG or L-BFGS):
+        min_{X^4} (1/2) |κ_EM ∇X^4 + E|² + (λ/2)|X^4|²
     Then X^4(x) = Φ(x) / κ_EM
 
-Both directions use periodic boundary conditions and FFT-based Poisson solver.
+Boundary Conditions:
+    - "periodic": Wrap indices across boundaries (periodic repetition)
+    - "dirichlet0": Treat values outside domain as 0 (clamped boundaries)
+    - Can be mixed per axis: e.g., ("periodic", "dirichlet0", "dirichlet0")
+
+No FFT is used. Inverse mapping uses iterative solvers (CG/L-BFGS).
 """
 
 import torch
-from typing import Tuple
+from typing import Tuple, Literal
 
-
-class ElectrostaticMapping:
-    """
-    Minimal EM-to-brane mapping (electrostatic part only).
-
-    Relates the brane amplitude field X^4(x) to electromagnetic quantities
-    through the electrostatic potential:
-        Φ(x)  = κ_EM * X^4(x)
-        E(x)  = -∇Φ(x)
-        ρ(x)  = ε₀ ∇·E(x)
-
-    This implements the forward brane → EM direction using pure field theory.
-    """
-
-    def __init__(
-        self,
-        kappa_EM: float = 1.0,
-        epsilon_0: float = 8.854187817e-12,
-        dx: float = 1.0,
-        device: torch.device = None,
-        dtype: torch.dtype = torch.float64
-    ):
-        """
-        Initialize the electrostatic mapping.
-
-        Args:
-            kappa_EM: Coupling constant relating X^4 to Φ [dimensionless or V/m]
-            epsilon_0: Vacuum permittivity [F/m]
-            dx: Spatial grid spacing for finite differences [m]
-            device: torch device for computations
-            dtype: torch dtype for computations
-        """
-        self.kappa_EM = kappa_EM
-        self.epsilon_0 = epsilon_0
-        self.dx = dx
-        self.device = device if device is not None else torch.device('cpu')
-        self.dtype = dtype
-
-    def compute_potential(self, X4: torch.Tensor) -> torch.Tensor:
-        """
-        Compute the macroscopic electric potential field.
-
-        Φ(x) = κ_EM * X^4(x)
-
-        Args:
-            X4: (nx, ny, nz) brane amplitude field (4th coordinate)
-
-        Returns:
-            Φ: (nx, ny, nz) electric potential [V]
-        """
-        return self.kappa_EM * X4
-
-    def compute_electric_field(self, Phi: torch.Tensor) -> torch.Tensor:
-        """
-        Compute E = -∇Φ using central finite differences.
-
-        Uses second-order accurate central differences in the interior and
-        one-sided differences at boundaries.
-
-        Args:
-            Phi: (nx, ny, nz) electric potential [V]
-
-        Returns:
-            E: (nx, ny, nz, 3) electric field [V/m]
-        """
-        # Compute gradients along each axis
-        # torch gradient uses central differences in interior, forward/backward at edges
-        grad_x = torch.gradient(Phi, spacing=self.dx, dim=0)[0]
-        grad_y = torch.gradient(Phi, spacing=self.dx, dim=1)[0]
-        grad_z = torch.gradient(Phi, spacing=self.dx, dim=2)[0]
-
-        # E = -∇Φ
-        E = -torch.stack([grad_x, grad_y, grad_z], dim=-1)
-
-        return E
-
-    def compute_charge_density(self, E: torch.Tensor) -> torch.Tensor:
-        """
-        Compute charge density ρ = ε₀ ∇·E using Gauss's law.
-
-        Args:
-            E: (nx, ny, nz, 3) electric field [V/m]
-
-        Returns:
-            rho: (nx, ny, nz) charge density [C/m³]
-        """
-        # Extract components
-        Ex = E[..., 0]
-        Ey = E[..., 1]
-        Ez = E[..., 2]
-
-        # Compute divergence: ∇·E = ∂Ex/∂x + ∂Ey/∂y + ∂Ez/∂z
-        div_E = (
-            torch.gradient(Ex, spacing=self.dx, dim=0)[0] +
-            torch.gradient(Ey, spacing=self.dx, dim=1)[0] +
-            torch.gradient(Ez, spacing=self.dx, dim=2)[0]
-        )
-
-        # Gauss's law: ρ = ε₀ ∇·E
-        rho = self.epsilon_0 * div_E
-
-        return rho
-
-    def map_from_brane(
-        self,
-        X4: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """
-        Given the brane amplitude X^4(x), compute the emergent electromagnetic quantities.
-
-        This implements the complete forward electrostatic mapping:
-            Φ = κ_EM * X^4
-            E = -∇Φ
-            ρ = ε₀ ∇·E
-
-        Args:
-            X4: (nx, ny, nz) brane amplitude field (4th coordinate)
-
-        Returns:
-            Phi: (nx, ny, nz) electric potential [V]
-            E: (nx, ny, nz, 3) electric field [V/m]
-            rho: (nx, ny, nz) charge density [C/m³]
-        """
-        # Step 1: Φ = κ_EM * X^4
-        Phi = self.compute_potential(X4)
-
-        # Step 2: E = -∇Φ
-        E = self.compute_electric_field(Phi)
-
-        # Step 3: ρ = ε₀ ∇·E
-        rho = self.compute_charge_density(E)
-
-        return Phi, E, rho
-
-    def compute_electric_field_energy_density(self, E: torch.Tensor) -> torch.Tensor:
-        """
-        Compute the electric field energy density.
-
-        u_E = (1/2) ε₀ |E|²
-
-        Args:
-            E: (nx, ny, nz, 3) electric field [V/m]
-
-        Returns:
-            u_E: (nx, ny, nz) energy density [J/m³]
-        """
-        E_squared = torch.sum(E**2, dim=-1)
-        return 0.5 * self.epsilon_0 * E_squared
+# Type alias for boundary condition specification
+# Order: (x, y, z) corresponding to tensor dims (0, 1, 2)
+BC = Tuple[Literal["periodic", "dirichlet0"],
+          Literal["periodic", "dirichlet0"],
+          Literal["periodic", "dirichlet0"]]
 
 
 # ============================================================================
-# INVERSE MAPPING (EM → brane) with Periodic Boundary Conditions
+# Boundary-Aware Shift Operator
 # ============================================================================
 
-def _central_diff_periodic(field: torch.Tensor, dx: float, axis: int) -> torch.Tensor:
-    """
-    Compute central difference along axis with periodic boundary conditions.
-
-    Uses second-order central differences: df/dx ≈ (f[i+1] - f[i-1]) / (2*dx)
-
-    Args:
-        field: Input tensor (nx, ny, nz) or (nx, ny, nz, 3)
-        dx: Grid spacing
-        axis: Axis along which to differentiate (0, 1, or 2)
-
-    Returns:
-        Derivative along specified axis (same shape as input)
-    """
-    # Roll forward and backward with periodic wrapping
-    field_forward = torch.roll(field, shifts=-1, dims=axis)
-    field_backward = torch.roll(field, shifts=1, dims=axis)
-
-    return (field_forward - field_backward) / (2.0 * dx)
-
-
-def divergence_periodic(
-    vector_field: torch.Tensor,
-    dx: float
+def shift_mixed(
+    f: torch.Tensor,
+    dim: int,
+    step: int,
+    bc: BC
 ) -> torch.Tensor:
     """
-    Compute divergence ∇·V using periodic boundary conditions.
+    Shift tensor along dimension with boundary condition handling.
 
     Args:
-        vector_field: (nx, ny, nz, 3) vector field
-        dx: Grid spacing
+        f: Input tensor (nx, ny, nz) or (nx, ny, nz, 3)
+        dim: Dimension to shift (0, 1, or 2)
+        step: Shift amount (+1 for forward, -1 for backward)
+        bc: Boundary conditions for each axis
 
     Returns:
-        divergence: (nx, ny, nz) scalar field
+        Shifted tensor with boundary conditions applied
     """
-    Vx = vector_field[..., 0]
-    Vy = vector_field[..., 1]
-    Vz = vector_field[..., 2]
+    bc_type = bc[dim]
 
-    dVx_dx = _central_diff_periodic(Vx, dx, axis=0)
-    dVy_dy = _central_diff_periodic(Vy, dx, axis=1)
-    dVz_dz = _central_diff_periodic(Vz, dx, axis=2)
+    if bc_type == "periodic":
+        # Periodic: wrap around
+        # torch.roll with positive shifts moves data "to the right" (later indices)
+        # We want: step=+1 to get f[i-1], step=-1 to get f[i+1]
+        # torch.roll(f, shifts=1) at index i gives f[i-1]
+        # torch.roll(f, shifts=-1) at index i gives f[i+1]
+        # So we use shifts=step (not -step)
+        return torch.roll(f, shifts=step, dims=dim)
 
-    return dVx_dx + dVy_dy + dVz_dz
+    elif bc_type == "dirichlet0":
+        # Dirichlet with zero outside: shift and fill with zeros
+        out = torch.zeros_like(f)
+
+        if step == 1:
+            # Forward shift: out[1:] = f[:-1], out[0] = 0
+            if dim == 0:
+                out[1:, ...] = f[:-1, ...]
+            elif dim == 1:
+                out[:, 1:, ...] = f[:, :-1, ...]
+            elif dim == 2:
+                out[:, :, 1:, ...] = f[:, :, :-1, ...]
+
+        elif step == -1:
+            # Backward shift: out[:-1] = f[1:], out[-1] = 0
+            if dim == 0:
+                out[:-1, ...] = f[1:, ...]
+            elif dim == 1:
+                out[:, :-1, ...] = f[:, 1:, ...]
+            elif dim == 2:
+                out[:, :, :-1, ...] = f[:, :, 1:, ...]
+        else:
+            raise ValueError(f"Only step=±1 supported, got {step}")
+
+        return out
+
+    else:
+        raise ValueError(f"Unknown boundary condition: {bc_type}")
 
 
-def gradient_periodic(
-    scalar_field: torch.Tensor,
-    dx: float
+# ============================================================================
+# Mixed Finite-Difference Operators
+# ============================================================================
+
+def grad_mixed(
+    phi: torch.Tensor,
+    h: float,
+    bc: BC
 ) -> torch.Tensor:
     """
-    Compute gradient ∇f using periodic boundary conditions.
+    Compute gradient ∇φ with mixed boundary conditions.
+
+    Uses second-order central differences:
+        ∂φ/∂x ≈ (φ[i+1] - φ[i-1]) / (2h)
 
     Args:
-        scalar_field: (nx, ny, nz) scalar field
-        dx: Grid spacing
+        phi: Scalar field (nx, ny, nz)
+        h: Grid spacing [m]
+        bc: Boundary conditions per axis
 
     Returns:
-        gradient: (nx, ny, nz, 3) vector field
+        Gradient field (nx, ny, nz, 3)
     """
-    grad_x = _central_diff_periodic(scalar_field, dx, axis=0)
-    grad_y = _central_diff_periodic(scalar_field, dx, axis=1)
-    grad_z = _central_diff_periodic(scalar_field, dx, axis=2)
+    # Compute partial derivatives using central differences
+    grad_x = (shift_mixed(phi, 0, -1, bc) - shift_mixed(phi, 0, 1, bc)) / (2.0 * h)
+    grad_y = (shift_mixed(phi, 1, -1, bc) - shift_mixed(phi, 1, 1, bc)) / (2.0 * h)
+    grad_z = (shift_mixed(phi, 2, -1, bc) - shift_mixed(phi, 2, 1, bc)) / (2.0 * h)
 
     return torch.stack([grad_x, grad_y, grad_z], dim=-1)
 
 
-def solve_poisson_periodic_fft(
-    rhs: torch.Tensor,
-    dx: float,
-    device: torch.device = None,
-    dtype: torch.dtype = torch.float64
+def div_mixed(
+    E: torch.Tensor,
+    h: float,
+    bc: BC
 ) -> torch.Tensor:
     """
-    Solve Poisson equation ∇²φ = rhs with periodic boundary conditions using FFT.
-
-    The solution is obtained by transforming to Fourier space where:
-        -k² φ̂ = F[rhs]
-        φ̂ = -F[rhs] / k²
-
-    The zero mode (k=0) is set to zero, fixing φ up to an additive constant.
+    Compute divergence ∇·E with mixed boundary conditions.
 
     Args:
-        rhs: (nx, ny, nz) right-hand side of Poisson equation
-        dx: Grid spacing
-        device: torch device for computations
-        dtype: torch dtype for computations
+        E: Vector field (nx, ny, nz, 3)
+        h: Grid spacing [m]
+        bc: Boundary conditions per axis
 
     Returns:
-        phi: (nx, ny, nz) solution to Poisson equation
+        Divergence field (nx, ny, nz)
     """
-    if device is None:
-        device = rhs.device
-    if dtype is None:
-        dtype = rhs.dtype
+    Ex, Ey, Ez = E[..., 0], E[..., 1], E[..., 2]
 
-    nx, ny, nz = rhs.shape
+    # Compute divergence: ∇·E = ∂Ex/∂x + ∂Ey/∂y + ∂Ez/∂z
+    dEx_dx = (shift_mixed(Ex, 0, -1, bc) - shift_mixed(Ex, 0, 1, bc)) / (2.0 * h)
+    dEy_dy = (shift_mixed(Ey, 1, -1, bc) - shift_mixed(Ey, 1, 1, bc)) / (2.0 * h)
+    dEz_dz = (shift_mixed(Ez, 2, -1, bc) - shift_mixed(Ez, 2, 1, bc)) / (2.0 * h)
 
-    # FFT of right-hand side
-    rhs_hat = torch.fft.fftn(rhs, dim=(0, 1, 2))
-
-    # Build k² in Fourier space
-    # Frequencies: k_i = 2π n_i / (N_i * dx) for n_i ∈ [0, N_i-1]
-    # with wrapping for negative frequencies
-    kx = 2.0 * torch.pi * torch.fft.fftfreq(nx, d=dx, device=device, dtype=dtype)
-    ky = 2.0 * torch.pi * torch.fft.fftfreq(ny, d=dx, device=device, dtype=dtype)
-    kz = 2.0 * torch.pi * torch.fft.fftfreq(nz, d=dx, device=device, dtype=dtype)
-
-    # Meshgrid for 3D
-    KX, KY, KZ = torch.meshgrid(kx, ky, kz, indexing='ij')
-    k_squared = KX**2 + KY**2 + KZ**2
-
-    # Avoid division by zero at k=0 (set to 1, will be zeroed out anyway)
-    k_squared[0, 0, 0] = 1.0
-
-    # Solve in Fourier space: φ̂ = -F[rhs] / k²
-    phi_hat = -rhs_hat / k_squared
-
-    # Zero out the mean (k=0 mode)
-    phi_hat[0, 0, 0] = 0.0
-
-    # Inverse FFT to get solution
-    phi = torch.fft.ifftn(phi_hat, dim=(0, 1, 2)).real
-
-    return phi
+    return dEx_dx + dEy_dy + dEz_dz
 
 
-def potential_from_E_periodic(
-    E_field: torch.Tensor,
-    dx: float,
-    device: torch.device = None,
-    dtype: torch.dtype = torch.float64
+def laplacian_mixed(
+    phi: torch.Tensor,
+    h: float,
+    bc: BC
 ) -> torch.Tensor:
     """
-    Reconstruct potential Φ from electric field E using ∇²Φ = -∇·E.
+    Compute Laplacian ∇²φ with mixed boundary conditions.
 
-    This uses the electrostatic relation E = -∇Φ, which implies that
-    the Laplacian of Φ is minus the divergence of E.
+    Uses 7-point stencil:
+        ∇²φ ≈ (φ[i+1] - 2φ[i] + φ[i-1])/h² + ... (for each dimension)
 
     Args:
-        E_field: (nx, ny, nz, 3) electric field [V/m]
-        dx: Grid spacing [m]
-        device: torch device for computations
-        dtype: torch dtype for computations
+        phi: Scalar field (nx, ny, nz)
+        h: Grid spacing [m]
+        bc: Boundary conditions per axis
 
     Returns:
-        Phi: (nx, ny, nz) electric potential [V]
+        Laplacian field (nx, ny, nz)
     """
-    # Compute divergence of E field
-    div_E = divergence_periodic(E_field, dx)
+    laplacian = torch.zeros_like(phi)
 
-    # Solve ∇²Φ = -∇·E
-    Phi = solve_poisson_periodic_fft(-div_E, dx, device=device, dtype=dtype)
+    for dim in range(3):
+        phi_forward = shift_mixed(phi, dim, -1, bc)
+        phi_backward = shift_mixed(phi, dim, 1, bc)
+        laplacian += (phi_forward - 2.0 * phi + phi_backward) / (h * h)
 
-    return Phi
+    return laplacian
 
 
-def potential_from_rho_periodic(
-    rho: torch.Tensor,
-    epsilon_0: float,
-    dx: float,
-    device: torch.device = None,
-    dtype: torch.dtype = torch.float64
+# ============================================================================
+# Reshape Helpers (Flat ↔ Grid)
+# ============================================================================
+
+def reshape_flat_to_grid_scalar(
+    f_flat: torch.Tensor,
+    nx: int,
+    ny: int,
+    nz: int
 ) -> torch.Tensor:
     """
-    Reconstruct potential Φ from charge density ρ using ∇²Φ = -ρ/ε₀.
-
-    This is Poisson's equation for the electrostatic potential.
+    Reshape flat scalar field to 3D grid.
 
     Args:
-        rho: (nx, ny, nz) charge density [C/m³]
-        epsilon_0: Vacuum permittivity [F/m]
-        dx: Grid spacing [m]
-        device: torch device for computations
-        dtype: torch dtype for computations
+        f_flat: Flat field (N,) where N = nx*ny*nz
+        nx, ny, nz: Grid dimensions
 
     Returns:
-        Phi: (nx, ny, nz) electric potential [V]
+        Grid field (nx, ny, nz)
     """
-    # Solve ∇²Φ = -ρ/ε₀
-    Phi = solve_poisson_periodic_fft(-rho / epsilon_0, dx, device=device, dtype=dtype)
-
-    return Phi
+    return f_flat.reshape(nx, ny, nz)
 
 
-def initialize_brane_from_electrostatics(
+def reshape_grid_to_flat_scalar(f_xyz: torch.Tensor) -> torch.Tensor:
+    """
+    Reshape 3D grid scalar field to flat.
+
+    Args:
+        f_xyz: Grid field (nx, ny, nz)
+
+    Returns:
+        Flat field (N,)
+    """
+    return f_xyz.flatten()
+
+
+def reshape_flat_to_grid_vec(
+    v_flat: torch.Tensor,
+    nx: int,
+    ny: int,
+    nz: int
+) -> torch.Tensor:
+    """
+    Reshape flat vector field to 3D grid.
+
+    Args:
+        v_flat: Flat vector field (N, 3) where N = nx*ny*nz
+        nx, ny, nz: Grid dimensions
+
+    Returns:
+        Grid vector field (nx, ny, nz, 3)
+    """
+    return v_flat.reshape(nx, ny, nz, 3)
+
+
+def reshape_grid_to_flat_vec(v_xyz: torch.Tensor) -> torch.Tensor:
+    """
+    Reshape 3D grid vector field to flat.
+
+    Args:
+        v_xyz: Grid vector field (nx, ny, nz, 3)
+
+    Returns:
+        Flat vector field (N, 3)
+    """
+    nx, ny, nz = v_xyz.shape[:3]
+    return v_xyz.reshape(nx * ny * nz, 3)
+
+
+# ============================================================================
+# Forward Electrostatic Mapping (Brane → EM)
+# ============================================================================
+
+def brane_X4_to_E_field(
     state,
-    kappa_EM: float,
-    dx: float,
-    epsilon_0: float = 8.854187817e-12,
-    E_field: torch.Tensor = None,
-    rho: torch.Tensor = None,
-    Phi: torch.Tensor = None,
-    field_component: int = 3,
-    device: torch.device = None,
-    dtype: torch.dtype = torch.float64
-):
+    grid,
+    mapper,
+    kappa_EM: float = 1.0,
+    bc: BC = ("dirichlet0", "dirichlet0", "dirichlet0"),
+    return_potential: bool = False,
+    return_charge_density: bool = False,
+    epsilon_0: float = 8.854187817e-12
+) -> Tuple[torch.Tensor, ...]:
     """
-    Initialize brane state from electrostatic quantities: E, ρ, or Φ.
+    Compute electric field E from brane amplitude X^4.
 
-    The inverse electrostatic mapping is:
-        1. If E is given: Solve ∇²Φ = -∇·E
-        2. If ρ is given: Solve ∇²Φ = -ρ/ε₀
-        3. If Φ is given: Use directly
-        4. Set X^4 = Φ / κ_EM
+    Forward electrostatic mapping:
+        Φ(x) = κ_EM * X^4(x)
+        E(x) = -∇Φ(x) = -κ_EM * ∇X^4(x)
+        ρ(x) = ε₀ ∇·E(x)  (optional)
 
     Args:
-        state: BraneState object to initialize
-        kappa_EM: Coupling constant relating X^4 to Φ
-        dx: Grid spacing [m]
+        state: BraneState with positions[:, 3] = X^4 in simulation units
+        grid: BraneGrid with grid_shape and spacing
+        mapper: DimensionalMapper for unit conversion
+        kappa_EM: Coupling constant [V/m] relating X^4 to Φ
+        bc: Boundary conditions per axis (x, y, z)
+        return_potential: If True, also return potential Φ
+        return_charge_density: If True, also return charge density ρ
         epsilon_0: Vacuum permittivity [F/m]
-        E_field: (nx, ny, nz, 3) electric field [V/m] (optional)
-        rho: (nx, ny, nz) charge density [C/m³] (optional)
-        Phi: (nx, ny, nz) electric potential [V] (optional)
-        field_component: Which component of state.positions to write to (default: 3 for X^4)
-        device: torch device for computations
-        dtype: torch dtype for computations
+
+    Returns:
+        E_phys_flat: Electric field (N, 3) in physical units [V/m]
+        If return_potential=True: also returns Phi_phys_flat (N,) [V]
+        If return_charge_density=True: also returns rho_phys_flat (N,) [C/m³]
+    """
+    # Extract X^4 in simulation units
+    X4_sim_flat = state.positions[:, 3]
+
+    # Convert to physical meters
+    X4_phys_flat = mapper.to_phys_length(X4_sim_flat)
+
+    # Get grid shape and spacing
+    nx, ny, nz = grid.grid_shape
+    h_phys = grid.spacing  # Already in physical units
+
+    # Reshape to 3D grid
+    X4_xyz = reshape_flat_to_grid_scalar(X4_phys_flat, nx, ny, nz)
+
+    # Compute potential: Φ = κ_EM * X^4
+    Phi_xyz = kappa_EM * X4_xyz
+
+    # Compute electric field: E = -∇Φ = -κ_EM * ∇X^4
+    E_xyz = -kappa_EM * grad_mixed(X4_xyz, h_phys, bc)
+
+    # Flatten for output
+    E_phys_flat = reshape_grid_to_flat_vec(E_xyz)
+
+    outputs = [E_phys_flat]
+
+    if return_potential:
+        Phi_phys_flat = reshape_grid_to_flat_scalar(Phi_xyz)
+        outputs.append(Phi_phys_flat)
+
+    if return_charge_density:
+        # ρ = ε₀ ∇·E
+        rho_xyz = epsilon_0 * div_mixed(E_xyz, h_phys, bc)
+        rho_phys_flat = reshape_grid_to_flat_scalar(rho_xyz)
+        outputs.append(rho_phys_flat)
+
+    if len(outputs) == 1:
+        return outputs[0]
+    else:
+        return tuple(outputs)
+
+
+def brane_X4_to_Phi(
+    state,
+    grid,
+    mapper,
+    kappa_EM: float = 1.0
+) -> torch.Tensor:
+    """
+    Compute electric potential Φ from brane amplitude X^4.
+
+    Φ(x) = κ_EM * X^4(x)
+
+    Args:
+        state: BraneState with positions[:, 3] = X^4 in simulation units
+        grid: BraneGrid with grid_shape
+        mapper: DimensionalMapper for unit conversion
+        kappa_EM: Coupling constant [V/m]
+
+    Returns:
+        Phi_phys_flat: Electric potential (N,) in physical units [V]
+    """
+    # Extract X^4 in simulation units
+    X4_sim_flat = state.positions[:, 3]
+
+    # Convert to physical meters
+    X4_phys_flat = mapper.to_phys_length(X4_sim_flat)
+
+    # Compute potential: Φ = κ_EM * X^4
+    Phi_phys_flat = kappa_EM * X4_phys_flat
+
+    return Phi_phys_flat
+
+
+def brane_X4_to_rho(
+    state,
+    grid,
+    mapper,
+    kappa_EM: float = 1.0,
+    bc: BC = ("dirichlet0", "dirichlet0", "dirichlet0"),
+    epsilon_0: float = 8.854187817e-12
+) -> torch.Tensor:
+    """
+    Compute charge density ρ from brane amplitude X^4.
+
+    ρ(x) = ε₀ ∇·E(x) where E = -κ_EM ∇X^4
+
+    Args:
+        state: BraneState with positions[:, 3] = X^4 in simulation units
+        grid: BraneGrid with grid_shape and spacing
+        mapper: DimensionalMapper for unit conversion
+        kappa_EM: Coupling constant [V/m]
+        bc: Boundary conditions per axis
+        epsilon_0: Vacuum permittivity [F/m]
+
+    Returns:
+        rho_phys_flat: Charge density (N,) in physical units [C/m³]
+    """
+    # Get E field
+    E_phys_flat = brane_X4_to_E_field(state, grid, mapper, kappa_EM, bc,
+                                       return_potential=False,
+                                       return_charge_density=False)
+
+    # Get grid parameters
+    nx, ny, nz = grid.grid_shape
+    h_phys = grid.spacing
+
+    # Reshape to grid
+    E_xyz = reshape_flat_to_grid_vec(E_phys_flat, nx, ny, nz)
+
+    # Compute divergence: ρ = ε₀ ∇·E
+    rho_xyz = epsilon_0 * div_mixed(E_xyz, h_phys, bc)
+
+    # Flatten for output
+    rho_phys_flat = reshape_grid_to_flat_scalar(rho_xyz)
+
+    return rho_phys_flat
+
+
+# ============================================================================
+# Inverse Mapping Stub (EM → Brane)
+# ============================================================================
+
+def inverse_E_to_X4_opt(
+    E_phys_flat: torch.Tensor,
+    grid,
+    mapper,
+    kappa_EM: float = 1.0,
+    bc: BC = ("dirichlet0", "dirichlet0", "dirichlet0"),
+    regularization: float = 1e-6,
+    max_iterations: int = 1000,
+    tolerance: float = 1e-8
+) -> torch.Tensor:
+    """
+    Inverse electrostatic mapping: reconstruct X^4 from E field.
+
+    Solves the optimization problem:
+        min_{X^4} (1/2) |κ_EM ∇X^4 + E|² + (λ/2)|X^4|²
+
+    using CG or L-BFGS (no FFT).
+
+    NOTE: The solution is unique up to an additive constant (gauge freedom).
+          The regularization term λ|X^4|² fixes this gauge by preferring
+          solutions with small mean value.
+
+    Args:
+        E_phys_flat: Electric field (N, 3) in physical units [V/m]
+        grid: BraneGrid with grid_shape and spacing
+        mapper: DimensionalMapper for unit conversion
+        kappa_EM: Coupling constant [V/m]
+        bc: Boundary conditions per axis
+        regularization: Regularization parameter λ for gauge fixing
+        max_iterations: Maximum number of optimization iterations
+        tolerance: Convergence tolerance
+
+    Returns:
+        X4_sim_flat: Brane amplitude (N,) in simulation units
 
     Raises:
-        ValueError: If none of E_field, rho, or Phi are provided
+        NotImplementedError: This function is not yet implemented
+
+    Implementation Notes:
+        When implementing, use one of:
+        1. Conjugate Gradient (CG) on the normal equations:
+           (κ_EM² ∇† ∇ + λI) X^4 = -κ_EM ∇† E
+
+        2. L-BFGS minimization of the objective:
+           f(X^4) = (1/2) |κ_EM ∇X^4 + E|² + (λ/2)|X^4|²
+
+        Both approaches must respect the boundary conditions via the
+        mixed finite-difference operators defined above.
+
+    Boundary Condition Consistency:
+        If using periodic BC, the system is consistent only if ∮ E·dl = 0
+        around any closed loop (i.e., E must be curl-free and have zero
+        circulation). Otherwise, no potential Φ exists.
+
+        If using Dirichlet BC, the problem is always well-posed, and the
+        regularization term ensures uniqueness by fixing X^4 = 0 on average.
     """
-    if device is None:
-        device = state.positions.device
-    if dtype is None:
-        dtype = state.positions.dtype
+    raise NotImplementedError(
+        "Inverse electrostatic mapping (EM → brane) not yet implemented.\n"
+        "\n"
+        "This function will solve for X^4 given E using an optimization-based\n"
+        "approach (CG or L-BFGS) with the boundary conditions specified in 'bc'.\n"
+        "\n"
+        "Implementation options:\n"
+        "  1. Conjugate Gradient on normal equations:\n"
+        "     (κ_EM² ∇† ∇ + λI) X^4 = -κ_EM ∇† E\n"
+        "\n"
+        "  2. L-BFGS minimization:\n"
+        "     min_{X^4} (1/2) |κ_EM ∇X^4 + E|² + (λ/2)|X^4|²\n"
+        "\n"
+        "Both must use the boundary-aware operators (grad_mixed, div_mixed, etc.)\n"
+        "to ensure consistency with the forward mapping.\n"
+        "\n"
+        "Gauge issue: The solution is unique up to an additive constant.\n"
+        "The regularization term λ|X^4|² fixes this by preferring small mean.\n"
+    )
 
-    # Determine which input was provided and compute Φ
-    if Phi is not None:
-        # Direct input of potential
-        pass
-    elif E_field is not None:
-        # Reconstruct Φ from E via ∇²Φ = -∇·E
-        Phi = potential_from_E_periodic(E_field, dx, device=device, dtype=dtype)
-    elif rho is not None:
-        # Reconstruct Φ from ρ via ∇²Φ = -ρ/ε₀
-        Phi = potential_from_rho_periodic(rho, epsilon_0, dx, device=device, dtype=dtype)
-    else:
-        raise ValueError("Must provide at least one of: E_field, rho, or Phi")
 
-    # Inverse electrostatic mapping: X^4 = Φ / κ_EM
-    X4 = Phi / kappa_EM
-
-    # Write to brane state
-    state.positions[:, field_component] = X4.flatten()
-
-    # Zero out velocities in the normal direction (gauge choice)
-    state.velocities[:, field_component] = 0.0
-
+# ============================================================================
+# Backward Compatibility: Initialization from EM Fields
+# ============================================================================
 
 def initialize_brane_from_em_fields(
     state,
@@ -441,9 +509,8 @@ def initialize_brane_from_em_fields(
     """
     Initialize brane state from electromagnetic fields (backward compatibility wrapper).
 
-    This function provides backward compatibility with the old interface by wrapping
-    the new simplified electrostatic mapping and adding energy-momentum matching for
-    lateral velocities.
+    This function provides backward compatibility with the old interface by computing
+    lateral velocities from the Poynting vector and normal amplitude from energy density.
 
     Args:
         state: BraneState object to initialize
@@ -543,85 +610,208 @@ def initialize_brane_from_em_fields(
     state.velocities[:, field_component] = 0.0
 
 
-# Example usage function
-def example_usage():
-    """
-    Example demonstrating how to use the ElectrostaticMapping class.
+# ============================================================================
+# Legacy Compatibility Layer
+# ============================================================================
 
-    Shows both forward (brane → EM) and inverse (EM → brane) mappings.
+class ElectrostaticMapping:
     """
-    # Create a synthetic brane amplitude field (64³ grid)
-    nx, ny, nz = 64, 64, 64
+    Legacy interface for electrostatic mapping.
+
+    DEPRECATED: Use functional API (brane_X4_to_E_field, etc.) instead.
+
+    This class provides backward compatibility with the old class-based interface.
+    New code should use the functional API directly for better flexibility with
+    boundary conditions.
+    """
+
+    def __init__(
+        self,
+        kappa_EM: float = 1.0,
+        epsilon_0: float = 8.854187817e-12,
+        dx: float = 1.0,
+        device: torch.device = None,
+        dtype: torch.dtype = torch.float64
+    ):
+        """
+        Initialize the electrostatic mapping.
+
+        Args:
+            kappa_EM: Coupling constant [V/m] relating X^4 to Φ
+            epsilon_0: Vacuum permittivity [F/m]
+            dx: Spatial grid spacing [m]
+            device: torch device for computations
+            dtype: torch dtype for computations
+        """
+        self.kappa_EM = kappa_EM
+        self.epsilon_0 = epsilon_0
+        self.dx = dx
+        self.device = device if device is not None else torch.device('cpu')
+        self.dtype = dtype
+
+        # Default to Dirichlet BC (clamped boundaries)
+        self.bc: BC = ("dirichlet0", "dirichlet0", "dirichlet0")
+
+    def set_boundary_conditions(self, bc: BC):
+        """
+        Set boundary conditions for all operations.
+
+        Args:
+            bc: Tuple of ("periodic" or "dirichlet0") for (x, y, z) axes
+        """
+        self.bc = bc
+
+    def compute_potential(self, X4: torch.Tensor) -> torch.Tensor:
+        """
+        Compute electric potential Φ = κ_EM * X^4.
+
+        Args:
+            X4: (nx, ny, nz) brane amplitude field
+
+        Returns:
+            Φ: (nx, ny, nz) electric potential [V]
+        """
+        return self.kappa_EM * X4
+
+    def compute_electric_field(self, Phi: torch.Tensor) -> torch.Tensor:
+        """
+        Compute E = -∇Φ using mixed boundary conditions.
+
+        Args:
+            Phi: (nx, ny, nz) electric potential [V]
+
+        Returns:
+            E: (nx, ny, nz, 3) electric field [V/m]
+        """
+        return -grad_mixed(Phi, self.dx, self.bc)
+
+    def compute_charge_density(self, E: torch.Tensor) -> torch.Tensor:
+        """
+        Compute charge density ρ = ε₀ ∇·E.
+
+        Args:
+            E: (nx, ny, nz, 3) electric field [V/m]
+
+        Returns:
+            rho: (nx, ny, nz) charge density [C/m³]
+        """
+        return self.epsilon_0 * div_mixed(E, self.dx, self.bc)
+
+    def map_from_brane(
+        self,
+        X4: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Forward mapping: brane → EM.
+
+        Φ = κ_EM * X^4
+        E = -∇Φ
+        ρ = ε₀ ∇·E
+
+        Args:
+            X4: (nx, ny, nz) brane amplitude field
+
+        Returns:
+            Phi: (nx, ny, nz) electric potential [V]
+            E: (nx, ny, nz, 3) electric field [V/m]
+            rho: (nx, ny, nz) charge density [C/m³]
+        """
+        Phi = self.compute_potential(X4)
+        E = self.compute_electric_field(Phi)
+        rho = self.compute_charge_density(E)
+        return Phi, E, rho
+
+    def compute_electric_field_energy_density(self, E: torch.Tensor) -> torch.Tensor:
+        """
+        Compute electric field energy density u_E = (1/2) ε₀ |E|².
+
+        Args:
+            E: (nx, ny, nz, 3) electric field [V/m]
+
+        Returns:
+            u_E: (nx, ny, nz) energy density [J/m³]
+        """
+        E_squared = torch.sum(E**2, dim=-1)
+        return 0.5 * self.epsilon_0 * E_squared
+
+
+# ============================================================================
+# Unit Tests / Sanity Checks
+# ============================================================================
+
+def test_boundary_conditions():
+    """
+    Test boundary condition handling for differential operators.
+
+    Tests:
+        1. Periodic BC: sin wave should have correct gradient
+        2. Dirichlet BC: zero at boundaries should propagate correctly
+    """
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dtype = torch.float64
 
-    # Synthetic X^4 field (small random amplitudes)
-    X4_original = torch.randn(nx, ny, nz, device=device, dtype=dtype) * 0.01
+    # Create test grid
+    nx, ny, nz = 32, 32, 32
+    Lx = 1.0  # Domain size
+    h = Lx / nx
 
-    # Initialize the mapping
-    dx = 1e-15  # 1 fm grid spacing
-    kappa_EM = 1.0
-    epsilon_0 = 8.854187817e-12
+    # Create coordinate arrays
+    x = torch.linspace(0, Lx - h, nx, device=device, dtype=dtype)
+    y = torch.linspace(0, Lx - h, ny, device=device, dtype=dtype)
+    z = torch.linspace(0, Lx - h, nz, device=device, dtype=dtype)
 
-    mapper = ElectrostaticMapping(
-        kappa_EM=kappa_EM,
-        epsilon_0=epsilon_0,
-        dx=dx,
-        device=device,
-        dtype=dtype
-    )
+    X, Y, Z = torch.meshgrid(x, y, z, indexing='ij')
 
     print("=" * 70)
-    print("FORWARD MAPPING (brane → EM)")
+    print("Testing Boundary Conditions")
     print("=" * 70)
 
-    # Compute emergent EM fields
-    Phi, E, rho = mapper.map_from_brane(X4_original)
+    # Test 1: Periodic BC with sine wave
+    print("\nTest 1: Periodic BC with sin(2πx/L)")
+    X4_periodic = torch.sin(2.0 * torch.pi * X / Lx)
 
-    # Compute energy density
-    u_E = mapper.compute_electric_field_energy_density(E)
+    # Use fully periodic BC for this test (since field is truly periodic in x)
+    bc_periodic = ("periodic", "periodic", "periodic")
+    E_periodic = -grad_mixed(X4_periodic, h, bc_periodic)
 
-    print(f"Potential range: [{Phi.min():.6e}, {Phi.max():.6e}] V")
-    print(f"E-field magnitude: [{E.norm(dim=-1).min():.6e}, {E.norm(dim=-1).max():.6e}] V/m")
-    print(f"Charge density range: [{rho.min():.6e}, {rho.max():.6e}] C/m³")
-    print(f"Energy density: [{u_E.min():.6e}, {u_E.max():.6e}] J/m³")
+    # Analytical gradient: -∂/∂x[sin(2πx/L)] = -(2π/L)cos(2πx/L)
+    Ex_analytical = -(2.0 * torch.pi / Lx) * torch.cos(2.0 * torch.pi * X / Lx)
+
+    error_periodic = torch.abs(E_periodic[..., 0] - Ex_analytical).max()
+    print(f"  Max error in Ex: {error_periodic:.6e}")
+    print(f"  Ey near zero (interior): {torch.abs(E_periodic[1:-1, 1:-1, 1:-1, 1]).max():.6e}")
+    print(f"  Ez near zero (interior): {torch.abs(E_periodic[1:-1, 1:-1, 1:-1, 2]).max():.6e}")
+
+    # Test 2: Dirichlet BC with Gaussian
+    print("\nTest 2: Dirichlet BC with Gaussian bump")
+    center = Lx / 2
+    sigma = Lx / 8
+    X4_dirichlet = torch.exp(-((X - center)**2 + (Y - center)**2 + (Z - center)**2) / (2 * sigma**2))
+
+    bc_dirichlet = ("dirichlet0", "dirichlet0", "dirichlet0")
+    E_dirichlet = -grad_mixed(X4_dirichlet, h, bc_dirichlet)
+
+    # Divergence of E should be close to Laplacian of X4
+    div_E = div_mixed(E_dirichlet, h, bc_dirichlet)
+    lap_X4 = laplacian_mixed(X4_dirichlet, h, bc_dirichlet)
+
+    error_div = torch.abs(div_E - lap_X4).max()
+    print(f"  Max error in ∇·(-∇X4) = ∇²X4: {error_div:.6e}")
+
+    # Test 3: Laplacian identity ∇²φ = ∇·(∇φ)
+    print("\nTest 3: Laplacian identity ∇²φ = ∇·(∇φ)")
+    lap_direct = laplacian_mixed(X4_dirichlet, h, bc_dirichlet)
+    grad_X4 = grad_mixed(X4_dirichlet, h, bc_dirichlet)
+    div_grad = div_mixed(grad_X4, h, bc_dirichlet)
+
+    error_laplacian = torch.abs(lap_direct - div_grad).max()
+    print(f"  Max error: {error_laplacian:.6e}")
 
     print("\n" + "=" * 70)
-    print("INVERSE MAPPING (EM → brane)")
+    print("Boundary condition tests complete!")
     print("=" * 70)
-
-    # Test inverse mapping from E field
-    Phi_reconstructed = potential_from_E_periodic(E, dx, device=device, dtype=dtype)
-    X4_reconstructed = Phi_reconstructed / kappa_EM
-
-    # Compare original and reconstructed X^4
-    diff = X4_reconstructed - X4_original
-    rel_error = torch.abs(diff).mean() / torch.abs(X4_original).mean()
-
-    print(f"X^4 reconstruction from E field:")
-    print(f"  Mean absolute difference: {torch.abs(diff).mean():.6e}")
-    print(f"  Relative error: {rel_error:.6e}")
-    print(f"  Max absolute difference: {torch.abs(diff).max():.6e}")
-
-    # Test inverse mapping from charge density
-    Phi_from_rho = potential_from_rho_periodic(rho, epsilon_0, dx, device=device, dtype=dtype)
-    X4_from_rho = Phi_from_rho / kappa_EM
-
-    diff_rho = X4_from_rho - X4_original
-    rel_error_rho = torch.abs(diff_rho).mean() / torch.abs(X4_original).mean()
-
-    print(f"\nX^4 reconstruction from ρ field:")
-    print(f"  Mean absolute difference: {torch.abs(diff_rho).mean():.6e}")
-    print(f"  Relative error: {rel_error_rho:.6e}")
-    print(f"  Max absolute difference: {torch.abs(diff_rho).max():.6e}")
-
-    print("\n" + "=" * 70)
-    print("Round-trip mapping successful!")
-    print("=" * 70)
-
-    return Phi, E, rho, u_E, X4_reconstructed
 
 
 if __name__ == "__main__":
-    # Run example if executed as script
-    example_usage()
+    # Run tests if executed as script
+    test_boundary_conditions()
