@@ -119,94 +119,174 @@ experiments genuinely test whether the simple brane dynamics are
 \emph{sufficient} to reproduce the observed structures of relativity,
 electromagnetism, and gravity.
 
-\subsection{Measurement procedures: spectral band isolation and Berry reconstruction}
+\subsection{Measurement procedures: band isolation and gauge reconstruction}
 \label{measurement-procedures}
 
-A key methodological change in the new layered framework is that the effective
-electromagnetic sector is not reconstructed from a direct coarse-graining of
-the raw normal displacement $X^4$, but from the geometric phase structure of
-\emph{band-isolated} substrate modes. Concretely, we reconstruct an effective
-four-potential from the pulled-back Berry connection introduced in
-Section~\ref{sec:berry-pullback-em}.
+A key methodological commitment of the layered framework is that gauge structure
+(connection, holonomy, effective electromagnetic fields) is \emph{not}
+reconstructed from a direct coarse-graining of the raw normal displacement
+$X^4$, but from the geometric phase of \emph{band-isolated} substrate modes. The
+measurement pipeline implements the three practical band-isolation methods
+introduced in Section~\ref{sec:band-isolation-route2}.
 
 \subsubsection{Data products from the substrate solver}
 
 At each time step the solver provides node positions and velocities,
-$\mathbf R_p(t)\approx \mathbf X(x_p,t)\in\mathbb R^4$ and
-$\dot{\mathbf R}_p(t)\approx \partial_t\mathbf X(x_p,t)$.
-All higher-layer fields are computed diagnostically from these arrays and their
-finite differences.
-
-\subsubsection{Local space--time spectral analysis}
-
-To obtain a meaningful complex envelope from a real substrate, we apply a
-\emph{windowed} space--time Fourier analysis (short-time Fourier transform / local
-FFT). On a chosen spatial patch and within a time window of length $\Delta t$ we
-compute $\hat{\xi}^A(\mathbf k,\omega)$ as in Eq.~\eqref{eq:xi-fourier}, using
-tapered windows to control leakage.
-
-The output of this step is a complex spectrum that resolves:
-(i) spatial wavevector $\mathbf k$,
-(ii) temporal frequency $\omega$, and
-(iii) a four-component complex mode amplitude.
-
-\subsubsection{Band identification and projection (Route 2 in practice)}
-
-For the same parameter settings we construct the linearized dynamical matrix
-$D(\mathbf k)$ of the discrete substrate (details depend on the discrete energy
-model in Section~\ref{discrete-energies-and-forces}) and compute its
-eigenpairs $(\omega_n(\mathbf k),u_n(\mathbf k))$.
-
-Given a target band index $n$ (``photon-like'' band), we project the measured
-spectrum onto the polarization eigenvector:
 \begin{equation}
-\hat{\psi}_n(\mathbf k,\omega)
-=\langle u_n(\mathbf k),\hat{\xi}(\mathbf k,\omega)\rangle,
-\label{eq:band-projection}
-\end{equation}
-and reconstruct the band-limited complex envelope $\psi_n(x,t)$ by inverse
-transform restricted to that band. This yields a complex field with a single
-local $U(1)$ phase, but we emphasize again: this phase is not yet the Berry
-phase; Berry structure is computed from the geometry of $u_n(\mathbf k)$.
-
-\subsubsection{Numerical Berry connection and curvature}
-
-We compute the Berry connection and curvature for the isolated band using a
-gauge-robust discrete formulation on a $\mathbf k$-grid (link-variable method).
-This avoids numerical instability from explicit derivatives
-$\partial_{k_i}u_n$ and ensures invariance under $u_n\mapsto e^{i\chi}u_n$.
-
-The result is $\mathcal A_i(\mathbf k)$ and $\mathcal F_{ij}(\mathbf k)$ as in
-Eqs.~\eqref{eq:berry-connection}--\eqref{eq:berry-curvature}.
-
-\subsubsection{Reconstruction of an effective electromagnetic field}
-
-From the band envelope $\psi_n(x,t)$ we estimate a slowly varying local
-wavevector field $\mathbf k(x,t)$ (either via local FFT peak tracking or via the
-phase-gradient estimator $\mathbf k\approx \nabla \arg\psi_n$ in regions of high
-signal-to-noise). We then compute the pulled-back Berry one-form
-$\mathcal A_\mu(x,t)$ from Eq.~\eqref{eq:berry-pullback} and define
-$A_\mu^{\mathrm{EM}}$ and $F_{\mu\nu}^{\mathrm{EM}}$ via
-Eqs.~\eqref{eq:em-potential-from-berry}--\eqref{eq:em-tensor-from-berry}.
-
-We extract the usual electric and magnetic fields as
-\begin{equation}
-E_i = F_{0i}^{\mathrm{EM}},
+\mathbf R_p(t) \approx \mathbf X(x_p,t) \in \mathbb R^4,
 \qquad
-B_i = \frac{1}{2}\epsilon_{ijk}F_{jk}^{\mathrm{EM}}.
+\mathbf v_p(t) = \dot{\mathbf R}_p(t) \approx \partial_t \mathbf X(x_p,t).
 \end{equation}
-The homogeneous Maxwell equations hold identically by construction (Bianchi
-identity). The inhomogeneous equations become part of the numerical test plan:
-we measure whether effective sources localize at defects/solitons and whether
-wave dynamics reproduces the expected vacuum behaviour away from defects.
+All higher-layer fields (band envelopes, gauge connections, holonomies) are
+computed diagnostically from these arrays and their finite differences. No
+emergent quantity feeds back into the substrate dynamics.
+
+\subsubsection{Band isolation: three practical methods}
+
+We implement all three band-isolation strategies as parallel diagnostic
+pipelines, allowing cross-validation of results.
+
+\paragraph{Method 1: Band-pass mask in $(\mathbf k,\omega)$ space.}
+\begin{enumerate}
+\item Compute the space--time Fourier transform on a spatial patch and time
+  window:
+  \begin{equation}
+  \hat{\xi}^A(\mathbf k,\omega) = \int dt \int d^3x \; \xi^A(\mathbf x,t)
+  \, e^{-i(\mathbf k\cdot\mathbf x - \omega t)},
+  \qquad A=1,\dots,4.
+  \end{equation}
+
+\item Define a band region $\mathcal B \subset (\mathbf k,\omega)$ space (e.g.,
+  $|\omega-\omega_0| \leq \Delta\omega$, $|\mathbf k-\mathbf k_0| \leq \Delta k$).
+
+\item Inverse-transform only the Fourier components in $\mathcal B$:
+  \begin{equation}
+  u^A(x,t) = \int_{\mathcal B} \frac{d^3k\,d\omega}{(2\pi)^4}
+  \hat{\xi}^A(\mathbf k,\omega) \, e^{i(\mathbf k\cdot\mathbf x - \omega t)}.
+  \end{equation}
+
+\item Normalize: $\tilde u(x,t) = u(x,t) / |u(x,t)|$ as in
+  Eq.~\eqref{eq:normalized-mode}.
+\end{enumerate}
+
+\paragraph{Method 2: Demodulation + low-pass filter.}
+\begin{enumerate}
+\item Choose a carrier frequency $\omega_0$ and wavevector $\mathbf k_0$ (e.g.,
+  from prior FFT or from expected excitation parameters).
+
+\item Multiply the substrate field by the conjugate carrier:
+  \begin{equation}
+  \xi_{\text{demod}}^A(x,t) = \xi^A(x,t) \, e^{-i(\mathbf k_0\cdot\mathbf x - \omega_0 t)}.
+  \end{equation}
+
+\item Apply spatial and temporal low-pass filters (e.g., Gaussian convolution
+  with width $\sigma_x \sim 1/\Delta k$, $\sigma_t \sim 1/\Delta\omega$) to
+  extract the slowly varying envelope $u^A(x,t)$.
+
+\item Normalize as above.
+\end{enumerate}
+
+\paragraph{Method 3: Dispersion-branch projection (requires local homogeneity).}
+\begin{enumerate}
+\item For a locally translation-invariant substrate region, compute the
+  dynamical matrix $D(\mathbf k)$ (linearized equations of motion in Fourier
+  space) and its eigenpairs $(\omega_n(\mathbf k), u_n(\mathbf k))$.
+
+\item Select a target band $n$ (e.g., the photon-like branch satisfying
+  $\omega_n(\mathbf k) \approx c|\mathbf k|$).
+
+\item Project the measured spectrum onto this band:
+  \begin{equation}
+  \hat{\psi}_n(\mathbf k,\omega) = \langle u_n(\mathbf k), \hat{\xi}(\mathbf k,\omega) \rangle,
+  \label{eq:band-projection}
+  \end{equation}
+  where $\langle \cdot,\cdot \rangle$ denotes the Hermitian inner product.
+
+\item Inverse-transform to obtain the band-projected envelope $u_n(x,t)$ and
+  normalize.
+\end{enumerate}
+
+All three methods yield a normalized complex four-component envelope
+$\tilde u(x,t) \in \mathbb C^4$ with $|\tilde u|=1$. The choice of method
+depends on the analysis context: Method 1 is most robust for arbitrary
+inhomogeneous configurations; Method 2 is computationally efficient for
+known-carrier excitations; Method 3 provides the cleanest connection to
+band-structure theory but requires approximate translation invariance.
+
+\subsubsection{Spacetime gauge connection and curvature}
+
+Given the normalized envelope $\tilde u(x,t)$, we compute the connection
+one-form directly via Eq.~\eqref{eq:spacetime-berry-connection}:
+\begin{equation}
+a_\mu(x,t) = i \sum_{A=1}^{4} \tilde u^{A\ast}(x,t) \, \partial_\mu \tilde u^A(x,t),
+\end{equation}
+where $\partial_\mu = (\tfrac{1}{c}\partial_t, \nabla)$. Spatial derivatives
+are computed via central finite differences on the discrete grid; temporal
+derivatives are computed from consecutive snapshots.
+
+The curvature two-form follows from Eq.~\eqref{eq:spacetime-berry-curvature}:
+\begin{equation}
+f_{\mu\nu}(x,t) = \partial_\mu a_\nu - \partial_\nu a_\mu.
+\end{equation}
+
+This curvature is gauge-invariant and measures the local holonomy rate. Regions
+of nonzero $f_{\mu\nu}$ indicate geometric obstruction to globally trivial phase
+choice.
+
+\subsubsection{Effective gauge potential and field reconstruction}
+
+We define the effective electromagnetic potential via
+Eq.~\eqref{eq:em-potential-from-berry}:
+\begin{equation}
+A_\mu^{\mathrm{eff}}(x,t) = \frac{\hbar}{q} a_\mu(x,t),
+\end{equation}
+with a conversion factor $\hbar/q$ to be calibrated (see
+Section~\ref{amplitude-scale-calibration}). The associated field-strength tensor
+is
+\begin{equation}
+F_{\mu\nu}^{\mathrm{eff}}(x,t) = \frac{\hbar}{q} f_{\mu\nu}(x,t).
+\end{equation}
+
+We extract spatial electric and magnetic fields as
+\begin{equation}
+E_i = F_{0i}^{\mathrm{eff}},
+\qquad
+B_i = \frac{1}{2} \epsilon_{ijk} F_{jk}^{\mathrm{eff}}.
+\end{equation}
+
+By construction, the homogeneous Maxwell equations
+\begin{equation}
+\nabla \cdot \mathbf B = 0,
+\qquad
+\nabla \times \mathbf E + \partial_t \mathbf B = 0
+\end{equation}
+hold identically (Bianchi identities). The inhomogeneous equations are
+\textbf{not} guaranteed; their validity becomes an empirical test target (see
+Section~\ref{falsifiable-criteria}).
+
+\subsubsection{Holonomy measurement}
+
+To measure the Berry phase (holonomy) accumulated around a closed loop
+$\gamma$ in spacetime, we compute the line integral
+\begin{equation}
+\Gamma[\gamma] = \oint_\gamma a_\mu \, dx^\mu
+= \int_{\Sigma} f_{\mu\nu} \, d\Sigma^{\mu\nu},
+\end{equation}
+where $\Sigma$ is any two-surface bounded by $\gamma$ (Stokes' theorem). This
+holonomy is gauge-invariant and physically observable via interference effects.
+
+For the electron defect (toroidal soliton), the target signature is
+$\Gamma = 2\pi$ (spin-$1/2$, $4\pi$ periodicity) when $\gamma$ encloses the
+defect core once.
 
 \subsubsection{Gravitational diagnostics (unchanged principle)}
 
-Gravitational effects are still reconstructed from the induced metric
-$g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$ and ray tracing in the
-effective interval $ds^2=-c^2dt^2+g_{ij}(x,t)\,dx^i dx^j$ (see
-Section~\ref{gravity-as-effective-metric}). This part of the pipeline remains
-independent of the electromagnetic reconstruction above.
+Gravitational effects are reconstructed from the induced metric
+$g_{ij} = \partial_i \mathbf X \cdot \partial_j \mathbf X$ and geodesic
+ray-tracing in the effective interval
+$ds^2 = -c^2 dt^2 + g_{ij}(x,t) \, dx^i dx^j$
+(see Section~\ref{gravity-as-effective-metric}). This pipeline remains
+independent of the gauge reconstruction above.
 
 \subsection{Discrete Simulation Framework}\label{discrete-simulation-framework}
 
@@ -215,12 +295,12 @@ We discretize the material domain $\Omega$ by nodes $x_p\in\Omega$ and store
   \mathbf R_p(t) \approx \mathbf X(x_p,t)\in\mathbb R^4,
 \end{equation}
 so that the discrete configuration $\{\mathbf R_p\}$ is a sampling of the continuum embedding
-$\mathbf X(x,t)$ introduced in Section~\ref{sec:conceptual-model}.
+$\mathbf X(x,t)$ introduced in Section~\ref{conceptual-model}.
 The fourth component of $\mathbf R_p$ encodes the out-of-brane displacement; there is no separate amplitude field.
 
 The choice of continuum parameters $(\rho_m,T,\kappa)$
-is constrained by the parameter-matching conditions of
-Section~\ref{sec:param-matching}; in particular, the amplitude scale calibration
+is guided by physical constraints (wave speed $c$, Compton-scale localization,
+charge normalization). In particular, the amplitude scale calibration
 of Section~\ref{amplitude-scale-calibration} implements the matching to
 $(m_e,c,\hbar,e)$ at the level of the discrete lattice.
 
@@ -487,9 +567,8 @@ integral of the reconstructed effective potential \cite{AharonovBohm1959}.
 \textbf{Note on implementation:} The discrete simulation framework described in Section~\ref{discrete-simulation-framework} supersedes earlier spring-lattice prototypes. Those preliminary implementations used a simpler cubic lattice with Hooke's-law springs and Euler integration; the current framework uses an FCC lattice with geometric nonlinearity and velocity-Verlet integration, providing better isotropy and numerical stability.
 
 \paragraph{Geometric nonlinearity diagnostic tool.}
-For diagnostic purposes we also provide a small Python script
-(used to generate Fig.~\ref{fig:geom-nonlinearity-compton}) that
-computes and visualizes $\eta(\lambda)$ for realistic electron
-parameters. This tool is not part of the simulation core, but serves
-to illustrate the Compton-scale onset of geometric nonlinearity in the
-calibrated substrate.
+For diagnostic purposes we also provide a small Python script that
+computes and visualizes the geometric nonlinearity parameter $\eta(\lambda)$
+for realistic electron parameters. This tool is not part of the simulation
+core, but serves to illustrate the Compton-scale onset of geometric
+nonlinearity in the calibrated substrate.

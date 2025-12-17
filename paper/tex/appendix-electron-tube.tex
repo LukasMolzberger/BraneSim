@@ -189,93 +189,17 @@ cost of longitudinal stretching versus transverse bulging through the
 effective tension $T_\mathrm{eff}$ and thus sets the critical amplitude
 threshold for self-confinement.
 
-In the brane picture, this localized, circulating electromagnetic energy
-density produces a quasi-static amplitude deformation $\bar{X}^4$ in
-its vicinity. At the coarse-grained level we can thus treat the
-effective charge density $\rho(\mathbf{x})$ as a functional of the
-time-averaged internal energy distribution,
-\begin{equation}
-  \rho(\mathbf{x})
-  \;\propto\;
-  \chi\,\big\langle u_{\text{EM}}(\mathbf{x},t)\big\rangle_{\text{fast}},
-  \label{eq:rho-from-u}
-\end{equation}
-where $u_{\text{EM}}$ denotes the electromagnetic energy density of the
-confined toroidal mode and $\chi=\pm 1$ encodes the orientation
-(chirality) of the internal field configuration. The sign of $\chi$
-distinguishes electron and positron: reversing the direction of the
-internal circulation flips the sign of the induced amplitude deformation
-and hence of $\Phi(\mathbf{x})$, while leaving the absolute charge
-magnitude and magnetic dipole moment unchanged, in agreement with
-experiment.
+\paragraph{Gauge sector from Berry/Wilczek--Zee holonomy.}
 
-Far outside the Compton-scale core, the rapid internal precession of
-the toroidal configuration renders the time-averaged deformation
-$\bar{X}^4(\mathbf{x})$ effectively spherically symmetric. In this
-regime the scalar potential defined in Eq.~\eqref{eq:phi-from-xi4}
-obeys a Poisson-type equation on the brane,
-\begin{equation}
-  \nabla^2 \Phi(\mathbf{x})
-  \;=\;
-  -\,\frac{\rho_{\text{free}}(\mathbf{x})}{\varepsilon_{\mathrm{eff}}},
-  \label{eq:poisson-from-brane}
-\end{equation}
-with an effective permittivity $\varepsilon_{\mathrm{eff}}$ determined
-by the elastic response of the medium. Here $\rho_{\text{free}}$ denotes
-the net (monopole) free charge density: bound, polarization-like
-patterns of $X^4$ that cancel on scales larger than the Compton
-wavelength do not contribute to this source term.
-
-\paragraph{Effective Poisson closure.}
-Equation~\eqref{eq:poisson-from-brane} is, at this stage, an \emph{effective closure}: we impose a phenomenological constitutive law that links the coarse-grained amplitude $\bar X^4$ to an electrostatic potential $\Phi_{\text{EM}}$ satisfying a Poisson equation. This closure is chosen such that localized brane deformations give rise to Coulomb-like fields at large distances, in agreement with observed electrostatic behavior. A microscopic derivation of \eqref{eq:poisson-from-brane} directly from the brane Lagrangian $L[\mathbf X]$---for instance via a systematic multipole analysis of static solutions---is left as future work.
-
-Combining Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}
-yields the local geometric relation
-\begin{equation}
-  \rho_{\text{free}}(\mathbf{x})
-  = -\,\varepsilon_{\mathrm{eff}}\kappa\,\nabla^2 \bar{X}^4(\mathbf{x}),
-\end{equation}
-so that net charge is associated not with the absolute value of the
-amplitude displacement, but with its curvature pattern on the brane.
-
-The resulting field
-\[
-  \mathbf{E}(\mathbf{x}) = -\nabla\Phi(\mathbf{x})
-  = -\,\kappa\,\nabla \bar{X}^4(\mathbf{x})
-\]
-reproduces the familiar Coulomb behavior of a point charge at large
-distances, even though microscopically the source is an extended,
-toroidal soliton of finite size. In the static rest frame of the
-soliton, and for this effective free charge component, the electric
-field is literally proportional to the gradient of the brane surface in
-the fourth (amplitude) dimension. From this perspective, regions of
-positive and negative free charge correspond to peaks and troughs of the
-brane surface in the amplitude direction, with the sign of the gradient
-fixing the sign of the observed electric field.
-
-It is important to emphasize that the same amplitude deformation that
-encodes electric charge also participates in the emergent gravitational
-response of the brane. However, these are distinct effects arising from
-different aspects of the deformation field $X^4$:
-
-\begin{itemize}
-\item \textbf{Gravitational sector:} responds to the induced metric
-  $g_{ij}[\mathbf{X}]$, which is roughly quadratic in gradients of $X^4$.
-  The isotropic component of the induced strain pattern---set by the total
-  internal energy of the toroidal mode---contributes to curvature and
-  inertial mass.
-
-\item \textbf{Electromagnetic sector:} couples directly to the time-averaged
-  amplitude $\bar{X}^4$ and its Laplacian via
-  Eqs.~\eqref{eq:phi-from-xi4} and~\eqref{eq:poisson-from-brane}. The signed
-  component associated with the orientation $\chi$ encodes the electric
-  interaction in the rest frame.
-\end{itemize}
-
-Thus, the same underlying amplitude deformation yields two distinct
-effective fields. In this way, a single localized brane deformation
-unifies mass, charge, and the external electromagnetic potential as
-different macroscopic manifestations of the same microscopic structure,
-without double-counting: gravity depends on metric curvature (quadratic
-in $\nabla X^4$), while electrostatics depends linearly on the Laplacian
-of $\bar{X}^4$.
+In the updated framework, we do \emph{not} close the electromagnetic
+sector by introducing a phenomenological Poisson equation for a scalar
+potential derived from $\bar{X}^4$. Instead, the U(1) gauge structure
+emerges from the Berry connection of band-isolated substrate modes, as
+detailed in Section~\ref{conceptual-model}. The internal circulating mode
+of the toroidal electron acts as a source of Berry curvature and
+holonomy defects; the effective electromagnetic potential $A_\mu^{\text{eff}}$
+is identified with this connection. The four-dimensional amplitude
+deformation $X^4$ still encodes energy density and contributes to the
+induced metric $g_{ij}[\mathbf{X}]$ (gravitational sector), but the
+electromagnetic sector is now traced to the geometric phase structure of
+the polarization bundle, not directly to the Laplacian of $X^4$.

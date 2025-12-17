@@ -21,22 +21,49 @@ substrate dynamics (see also Section~\ref{experimental-setting}).
 
 \paragraph{Layered model (overview).}
 We distinguish the following layers, which will be referenced throughout the
-paper:
+paper. Each layer is a diagnostic analysis step applied to the substrate; no
+layer modifies the dynamics.
+
 \begin{enumerate}
-\item \textbf{Substrate layer:} a tensioned 3D brane embedded in $\mathbb R^4$
-with time as an evolution parameter and geometric amplitude--lateral coupling.
-\item \textbf{Space--time spectral layer:} local Fourier analysis producing
-$(\mathbf k,\omega)$-resolved complex mode amplitudes for a \emph{real} substrate.
-\item \textbf{Berry layer:} a $U(1)$ (or, at degeneracies, $U(N)$) connection on
-the bundle of \emph{band-isolated} polarization eigenvectors.
-\item \textbf{Electron micro-structure:} localized topological/geometry-driven
-defects (W\&vdM torus + double-loop knot) that act as robust sources of
-degeneracy/holonomy.
-\item \textbf{Electromagnetism (effective):} an emergent four-potential and
-antisymmetric field tensor identified with (a pullback of) Berry connection and
-curvature.
-\item \textbf{Electron (effective):} Dirac/spinor structure as the long-scale
-envelope description associated with a defect-driven non-Abelian holonomy.
+\item \textbf{Substrate layer:} \\
+  \emph{Input:} None (fundamental) \\
+  \emph{Degrees of freedom:} Real embedding $\mathbf X(x,t) \in \mathbb R^4$ \\
+  \emph{Dynamics:} Lagrangian $\mathcal L[\mathbf X, \partial \mathbf X]$ with
+  geometric amplitude--lateral coupling \\
+  \emph{Output:} Time-evolved configuration $\mathbf X(x,t)$ and velocity
+  $\partial_t \mathbf X(x,t)$
+
+\item \textbf{Space--time spectral layer:} \\
+  \emph{Input:} Substrate field $\mathbf X(x,t)$ (real-valued) \\
+  \emph{Operator:} Local Fourier transform, band-pass filtering in
+  $(\mathbf k,\omega)$ space \\
+  \emph{Output:} Complex band-isolated envelope $u^A(x,t) \in \mathbb C^4$,
+  normalized to $\tilde u(x,t)$
+
+\item \textbf{Berry layer:} \\
+  \emph{Input:} Normalized envelope $\tilde u(x,t)$ \\
+  \emph{Operator:} Spacetime connection $a_\mu = i \langle \tilde u, \partial_\mu
+  \tilde u \rangle$; curvature $f_{\mu\nu} = \partial_\mu a_\nu - \partial_\nu a_\mu$ \\
+  \emph{Output:} $U(1)$ gauge connection (or $U(N)$ Wilczek--Zee at degeneracies)
+
+\item \textbf{Electron micro-structure:} \\
+  \emph{Input:} Substrate initial conditions (toroidal soliton with W\&vdM
+  double-loop, Compton-frequency internal mode) \\
+  \emph{Structure:} Localized topological/geometry-driven defects \\
+  \emph{Output:} Stable soliton with intrinsic holonomy defect, $4\pi$ periodicity
+
+\item \textbf{Electromagnetism (effective):} \\
+  \emph{Input:} Berry connection $a_\mu$ and curvature $f_{\mu\nu}$ \\
+  \emph{Operator:} Scaling $A_\mu^{\text{eff}} = (\hbar/q) a_\mu$,
+  $F_{\mu\nu}^{\text{eff}} = (\hbar/q) f_{\mu\nu}$ \\
+  \emph{Output:} Effective electromagnetic four-potential and field tensor;
+  homogeneous Maxwell equations hold by construction (Bianchi)
+
+\item \textbf{Electron (effective):} \\
+  \emph{Input:} Non-Abelian holonomy from defect-induced degeneracies \\
+  \emph{Structure:} Dirac/spinor as long-wavelength envelope description \\
+  \emph{Output:} Spin-$1/2$ representation, effective four-current
+  $j^\mu = \bar\psi \gamma^\mu \psi$
 \end{enumerate}
 
 The Michelson–Morley null result is naturally explained by Lorentz contraction of matter itself, rendering motion through the medium undetectable. In this view, the observed constancy of light speed reflects a dynamical property of the medium rather than a postulate about spacetime geometry.
@@ -276,135 +303,236 @@ For numerical experiments we work on finite brane patches
 $\Omega$ with physically motivated boundary conditions
 (periodic, free, or clamped; see Sec.~\ref{experimental-setting}).
 
-\subsection{From substrate waves to an emergent $U(1)$ gauge structure}
+\subsection{From substrate waves to emergent gauge structure and holonomy}
 \label{sec:brane-to-berry-to-em}
 
-The central analytical step in the new plan is:
-\emph{a real-valued substrate can still generate a physically meaningful local
-$U(1)$ structure}, but not by interpreting a raw FFT phase as ``the'' gauge
-phase. Instead, the relevant $U(1)$ lives on the \emph{bundle of polarization
-eigenvectors after band isolation} \cite{Berry1984}.
+The central analytical step is this: \emph{a real-valued substrate can generate
+a physically meaningful local $U(1)$ or $U(N)$ gauge structure}, but not by
+interpreting raw FFT phases component-wise. Instead, the relevant gauge freedom
+lives on the \emph{bundle of normalized complex mode envelopes after band
+isolation} \cite{Berry1984,WilczekZee1984}.
 
-\subsubsection{Space--time spectral representation (real substrate $\Rightarrow$ complex spectra)}
+\subsubsection{From real substrate to complex analytical signal}
 \label{sec:spectral-layer}
 
-Let $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_0(x)$ be the displacement
-around a slowly varying reference state $\mathbf X_0$. Even if
-$\boldsymbol\xi(x,t)\in\mathbb R^4$ is purely real, its space--time Fourier
-representation is complex:
-\begin{equation}
-\hat{\xi}^A(\mathbf k,\omega)
-=\int_{\mathbb R}\!dt\int_{\Omega}\!d^3x\;
-\xi^A(\mathbf x,t)\,e^{-i(\mathbf k\cdot\mathbf x-\omega t)},
-\qquad A=1,\dots,4.
-\label{eq:xi-fourier}
-\end{equation}
-Reality implies the usual conjugacy constraint
-$\hat{\xi}^A(-\mathbf k,-\omega)=\hat{\xi}^A(\mathbf k,\omega)^\ast$.
-Importantly, this does \emph{not} produce a ``3D phase vector'' at each point in
-space; the complex phase of $\hat{\xi}$ is representation-dependent and is not
-the geometric phase we will use.
+The substrate displacement field $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_0(x)$
+is real-valued, $\boldsymbol\xi(x,t)\in\mathbb R^4$. To construct a complex
+envelope with a well-defined local phase, we must first isolate a
+\emph{positive-frequency component}. This can be done via:
 
-\subsubsection{Band isolation and polarization eigenvectors (Route 2)}
+\begin{enumerate}
+\item \textbf{Analytic signal construction:} Apply a Hilbert transform (or
+  equivalent filter) in time to retain only $\omega>0$ components, yielding a
+  complex field $\xi_+(x,t)$ such that $\mathrm{Re}[\xi_+(x,t)]=\xi(x,t)$.
+
+\item \textbf{Band-pass filter in $(\mathbf k,\omega)$ space:} Compute the
+  space--time Fourier transform
+  \begin{equation}
+  \hat{\xi}^A(\mathbf k,\omega)
+  =\int_{\mathbb R}\!dt\int_{\Omega}\!d^3x\;
+  \xi^A(\mathbf x,t)\,e^{-i(\mathbf k\cdot\mathbf x-\omega t)},
+  \qquad A=1,\dots,4,
+  \label{eq:xi-fourier}
+  \end{equation}
+  and restrict to a narrow region in $(\mathbf k,\omega)$ space (a "band" in
+  the broad sense: either a single eigen-branch $\omega_n(\mathbf k)$ or a
+  localized wavepacket occupying a small tube in frequency space).
+\end{enumerate}
+
+In either case, the output is a complex four-component envelope field
+$u(x,t)\in\mathbb C^4$ that varies slowly in space and time compared to its
+internal oscillation scale.
+
+\subsubsection{Band definition and gauge structure}
 \label{sec:band-isolation-route2}
 
-Assume that on the analysis scale the substrate is locally close to a
-translation-invariant configuration so that linearization yields a $k$-space
-eigenproblem. For each wavevector $\mathbf k$, define a (model-dependent)
-dynamical matrix $D(\mathbf k)$ such that polarization eigenvectors
-$u_n(\mathbf k)\in\mathbb C^4$ and eigenfrequencies $\omega_n(\mathbf k)$ satisfy
+We use the term \emph{band} in a practical sense:
+
+\paragraph{Definition (band).}
+A \emph{band} is a smoothly varying family of complex mode directions in the
+substrate's configuration space, isolated by one of the following procedures:
+\begin{enumerate}
+\item \textbf{Dispersion-branch isolation:} For a locally translation-invariant
+  substrate, compute the eigen-decomposition of the dynamical matrix
+  $D(\mathbf k)$ and track a single branch $\omega_n(\mathbf k)$ with
+  polarization eigenvector $u_n(\mathbf k)\in\mathbb C^4$.
+
+\item \textbf{Wavepacket filtering:} Select a region $\mathcal B\subset
+  (\mathbf k,\omega)$ space (e.g., $|\omega-\omega_0|\leq\Delta\omega$,
+  $|\mathbf k-\mathbf k_0|\leq\Delta k$) and inverse-transform only those
+  Fourier components, yielding a band-limited envelope $u(x,t)$.
+
+\item \textbf{Demodulation + low-pass filter:} Multiply the substrate field by
+  a carrier $e^{i(\mathbf k_0\cdot\mathbf x-\omega_0 t)}$ and apply a spatial
+  and temporal low-pass filter to extract the slowly varying envelope.
+\end{enumerate}
+
+In all three cases, the physically relevant object is the \emph{normalized}
+complex direction
 \begin{equation}
-D(\mathbf k)\,u_n(\mathbf k)=\omega_n(\mathbf k)^2\,u_n(\mathbf k),
+\tilde u(x,t) = \frac{u(x,t)}{|u(x,t)|},
 \qquad
-\langle u_n(\mathbf k),u_n(\mathbf k)\rangle = 1.
-\label{eq:dynamical-matrix-eigs}
+|u|^2 = \sum_{A=1}^{4} |u^A|^2.
+\label{eq:normalized-mode}
 \end{equation}
-The precise inner product depends on the kinetic term (mass metric); in the
-simplest case it is the standard Hermitian inner product.
 
-\paragraph{$U(1)$ despite $u_n\in\mathbb C^4$.}
-Although $u_n(\mathbf k)$ has four complex components, an \emph{isolated} band is
-a one-dimensional complex line: the physically relevant object is the ray
-$[u_n(\mathbf k)]$ in projective space, and the only gauge freedom is the
-overall phase
-$u_n(\mathbf k)\mapsto e^{i\chi(\mathbf k)}u_n(\mathbf k)$.
-This is exactly the single $U(1)$ that will seed the effective electromagnetic
-description.
+\paragraph{$U(1)$ gauge freedom.}
+Although $u(x,t)\in\mathbb C^4$ has four complex components, the only gauge
+redundancy is the overall phase:
+\begin{equation}
+\tilde u(x,t) \mapsto e^{i\chi(x,t)} \tilde u(x,t).
+\end{equation}
+The physically measurable content of the band is encoded in the projector
+$P=|\tilde u\rangle\langle\tilde u|$, which is invariant under this $U(1)$ transformation.
 
-In practice we will isolate a target band $n$ by projecting the measured spectrum
-onto $u_n(\mathbf k)$ (details in Section~\ref{experimental-setting}).
-
-\subsubsection{Berry connection, curvature, and the meaning of ``curl''}
+\subsubsection{Connection and holonomy in spacetime}
 \label{sec:berry-connection-curvature}
 
-For an isolated band, the Berry connection in $\mathbf k$-space is the $U(1)$
-one-form
-\begin{equation}
-\mathcal A_i^{(n)}(\mathbf k)
-= i\,\langle u_n(\mathbf k),\partial_{k_i}u_n(\mathbf k)\rangle,
-\qquad i=1,2,3,
-\label{eq:berry-connection}
-\end{equation}
-with curvature (the ``curl'' of the connection)
-\begin{equation}
-\mathcal F_{ij}^{(n)}(\mathbf k)
-=\partial_{k_i}\mathcal A_j^{(n)}-\partial_{k_j}\mathcal A_i^{(n)}.
-\label{eq:berry-curvature}
-\end{equation}
-The curvature is gauge-invariant under $u_n\mapsto e^{i\chi}u_n$.
-Non-zero $\mathcal F_{ij}$ requires that $u_n(\mathbf k)$ cannot be chosen as a
-globally smooth phase choice across the relevant region of $\mathbf k$-space,
-which typically happens when the band structure contains singularities
-(degeneracies, defects) or when symmetries that would force trivial topology are
-broken. These conditions become testable numerically once the band is identified.
+The primary definition of gauge structure in this framework is the
+\emph{spacetime} connection one-form, defined directly from the normalized envelope:
 
-\subsubsection{Pullback to space--time and identification with an effective four-potential}
+\begin{equation}
+a_\mu(x,t) = i \langle \tilde u(x,t), \partial_\mu \tilde u(x,t) \rangle
+= i \sum_{A=1}^{4} \tilde u^{A\ast}(x,t) \, \partial_\mu \tilde u^A(x,t),
+\label{eq:spacetime-berry-connection}
+\end{equation}
+
+where $\partial_\mu=(\tfrac{1}{c}\partial_t,\nabla)$ and $\langle\cdot,\cdot\rangle$
+denotes the Hermitian inner product. This connection is real-valued and
+gauge-invariant up to total derivatives: under $\tilde u\mapsto e^{i\chi}\tilde u$,
+one has $a_\mu\mapsto a_\mu+\partial_\mu\chi$.
+
+The associated curvature two-form is
+
+\begin{equation}
+f_{\mu\nu}(x,t) = \partial_\mu a_\nu - \partial_\nu a_\mu.
+\label{eq:spacetime-berry-curvature}
+\end{equation}
+
+This curvature is fully gauge-invariant. The integral of $f_{\mu\nu}$ over a
+closed two-surface gives the \emph{holonomy} (Berry phase) accumulated by
+parallel-transporting the mode $\tilde u$ around the boundary of that surface.
+
+\paragraph{Scalar-field caveat.}
+If the band consists of a single scalar excitation (i.e., $u(x,t)$ is
+effectively one-dimensional in the internal space), then the connection
+$a_\mu=i\,\partial_\mu\log\tilde u$ and the curvature $f_{\mu\nu}$ vanishes
+everywhere except at \emph{zeros} of $\tilde u$ (defect points/lines).
+Smooth, non-zero curvature requires either:
+\begin{enumerate}
+\item a multi-component polarization structure (e.g., two orthogonal modes that
+  vary in relative phase, giving nontrivial $\mathbb C^2$ geometry), or
+\item degeneracies/defects where the band description breaks down.
+\end{enumerate}
+
+\subsubsection{Relation to k-space Berry connection (optional view)}
+\label{sec:k-space-berry-optional}
+
+For completeness, we note that in the case of dispersion-branch isolation
+(method 1 above), one can alternatively compute the Berry connection in
+$\mathbf k$-space:
+
+\begin{equation}
+\mathcal A_i(\mathbf k) = i\langle u_n(\mathbf k),\partial_{k_i}u_n(\mathbf k)\rangle,
+\qquad i=1,2,3,
+\label{eq:berry-connection-k}
+\end{equation}
+
+with curvature $\mathcal F_{ij}=\partial_{k_i}\mathcal A_j-\partial_{k_j}\mathcal A_i$.
+If a wavepacket is localized around a slowly varying local wavevector
+$\mathbf k(x,t)$, one can relate the spacetime and k-space connections via
+
+\begin{equation}
+a_\mu(x,t) \approx \mathcal A_i(\mathbf k(x,t))\,\partial_\mu k_i(x,t)
++ \text{(envelope-gradient corrections)}.
+\label{eq:k-to-spacetime-pullback}
+\end{equation}
+
+However, this "pullback" picture is \emph{secondary}: it relies on the
+semiclassical assumption that $\mathbf k(x,t)$ is well-defined, which fails
+for strongly localized or defect-carrying configurations. The primary object is
+the spacetime connection~\eqref{eq:spacetime-berry-connection}.
+
+\subsubsection{Identification with effective gauge potential}
 \label{sec:berry-pullback-em}
 
-To connect the $\mathbf k$-space Berry structure to an effective field on
-space--time, consider a wave packet with slowly varying local wavevector
-$\mathbf k=\mathbf k(x,t)$ (estimated from the band-projected complex envelope).
-The Berry phase accumulated along a path is
-$\gamma=\int \mathcal A_i(\mathbf k)\,dk_i$.
-This defines a pulled-back one-form on space--time:
-\begin{equation}
-\mathcal A_\mu(x,t)
-=\mathcal A_i(\mathbf k(x,t))\,\partial_\mu k_i(x,t),
-\qquad \mu=0,1,2,3,
-\label{eq:berry-pullback}
-\end{equation}
-with $x^\mu=(ct,x^1,x^2,x^3)$ and $\partial_0\equiv \tfrac{1}{c}\partial_t$.
+We define an \emph{effective} electromagnetic four-potential by introducing a
+conversion factor (to be calibrated against the observed electron charge):
 
-We then \emph{define} an effective electromagnetic four-potential by a single
-conversion factor (to be fixed by matching to the electron charge in the
-effective theory),
 \begin{equation}
-A_\mu^{\mathrm{EM}}(x,t)=\frac{\hbar}{q}\,\mathcal A_\mu(x,t),
+A_\mu^{\mathrm{eff}}(x,t) = \frac{\hbar}{q} \, a_\mu(x,t),
 \label{eq:em-potential-from-berry}
 \end{equation}
-and the corresponding antisymmetric field tensor
+
+and the associated field-strength tensor
+
 \begin{equation}
-F_{\mu\nu}^{\mathrm{EM}}
-=\partial_\mu A_\nu^{\mathrm{EM}}-\partial_\nu A_\mu^{\mathrm{EM}}.
+F_{\mu\nu}^{\mathrm{eff}}(x,t)
+= \partial_\mu A_\nu^{\mathrm{eff}} - \partial_\nu A_\mu^{\mathrm{eff}}
+= \frac{\hbar}{q} \, f_{\mu\nu}(x,t).
 \label{eq:em-tensor-from-berry}
 \end{equation}
-By construction, $F_{\mu\nu}^{\mathrm{EM}}$ satisfies the Bianchi identity
-$\partial_{[\lambda}F_{\mu\nu]}^{\mathrm{EM}}=0$, which corresponds to the
-homogeneous Maxwell equations. The inhomogeneous equations (dynamics and
-sources) become a concrete empirical question: they must arise as the effective
-long-wavelength dynamics of the band-projected envelope coupled to defects.
 
-\subsubsection{Degeneracies, defects, and the non-Abelian generalization}
+By construction, $F_{\mu\nu}^{\mathrm{eff}}$ automatically satisfies the
+\emph{homogeneous} Maxwell equations (Bianchi identities):
+
+\begin{equation}
+\partial_{[\lambda} F_{\mu\nu]}^{\mathrm{eff}} = 0,
+\qquad \text{equivalently:} \quad
+\nabla\cdot\mathbf B=0, \quad
+\nabla\times\mathbf E+\partial_t\mathbf B=0.
+\end{equation}
+
+The \emph{inhomogeneous} Maxwell equations (dynamics with sources) are \textbf{not}
+automatically satisfied; they become an empirical target:
+\begin{itemize}
+\item Do defects/solitons act as localized effective sources?
+\item Does the long-wavelength envelope dynamics of band-projected modes
+  reproduce wave equations consistent with Maxwell's equations in vacuum?
+\end{itemize}
+
+These questions are addressed numerically in Section~\ref{falsifiable-criteria}.
+
+\paragraph{Interpretation: holonomy, not Maxwell.}
+At this stage, we have defined a $U(1)$ connection and its curvature
+geometrically. The physical content of this structure is:
+\begin{enumerate}
+\item \textbf{Holonomy / Aharonov--Bohm phase:} parallel transport of the mode
+  $\tilde u$ around a closed loop accumulates a phase
+  $\gamma=\oint a_\mu dx^\mu$, which can be measured via interference.
+
+\item \textbf{Minimal coupling:} if an effective "matter" degree of freedom
+  (e.g., the Dirac envelope of the electron soliton) couples to the band via
+  $\partial_\mu\mapsto\partial_\mu-i(q/\hbar)A_\mu^{\mathrm{eff}}$, gauge
+  invariance is preserved.
+\end{enumerate}
+
+We do \textbf{not} claim that this immediately \emph{is} electromagnetism in the
+full Maxwell sense. That identification is a hypothesis to be tested via the
+numerical experiments of Section~\ref{experimental-setting}.
+
+\subsubsection{Degeneracies, defects, and non-Abelian holonomy}
 \label{sec:nonabelian-berry-electron}
 
-When a relevant mode subspace is \emph{degenerate} (dimension $N>1$), the correct
-geometric structure is the Wilczek--Zee non-Abelian connection
-$\mathcal A_i^{ab}=i\langle u_a,\partial_{k_i}u_b\rangle$
-with gauge group $U(N)$ \cite{WilczekZee1984}.
-In the present programme, robust localized defects (the W\&vdM-inspired toroidal
-electron micro-structure) are expected to act as precisely such degeneracy
-sources: the ``frame'' of polarization eigenvectors becomes ill-defined at the
-defect core, and holonomy around it can encode spinor-like behaviour (including
-$4\pi$ periodicity) at the effective layer. This supplies a concrete mechanism
-for how the description can transition from an Abelian (electromagnetic) sector
-to an electron sector that requires a non-Abelian geometric phase.
+When the mode subspace is \emph{degenerate} (dimension $N>1$), the gauge
+structure generalizes to the Wilczek--Zee non-Abelian connection
+\cite{WilczekZee1984}:
+
+\begin{equation}
+\mathcal A_\mu^{ab}(x,t) = i \langle u_a(x,t), \partial_\mu u_b(x,t) \rangle,
+\qquad a,b=1,\dots,N,
+\end{equation}
+
+where $\{u_1,\dots,u_N\}$ is an orthonormal frame spanning the degenerate
+subspace, and the gauge group is $U(N)$.
+
+In the present programme, robust localized defects (the toroidal electron
+micro-structure described in Section~\ref{sec:internal-structure-of-the-electron})
+are expected to act as degeneracy sources: the frame of polarization
+eigenvectors becomes ill-defined at the defect core. Holonomy around such a
+defect can yield a $U(2)\supset\mathrm{SU}(2)$ matrix, naturally encoding
+spin-$1/2$ behavior (including $4\pi$ periodicity).
+
+This supplies a concrete geometric mechanism for the electron's spinorial
+character, distinct from the Abelian ($U(1)$) sector that describes the
+electromagnetic interaction of charged matter.
