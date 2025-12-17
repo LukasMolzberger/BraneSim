@@ -77,46 +77,45 @@ as ``free energy'' in their analysis of mass and light
 \cite{vanderMark2000LightHeavy}, but here that slogan is given a concrete
 mechanical realization in terms of explicit brane deformations.
 
-\paragraph{Free versus bound charge in the brane picture.}
-
-Throughout this work we have interpreted the brane's displacement along
-the fourth, ``amplitude'' direction as encoding an effective electric
-charge content of the medium. It is, however, important to distinguish
-between \emph{bound} and \emph{free} contributions to this charge
-content. The fast, structured internal photon circulating within the
-toroidal electron soliton produces large, rapidly varying gradients and
-curvature of $X^4(x,t)$; in analogy with polarization in dielectrics,
-these contributions are most naturally interpreted as bound charge
-patterns of the brane.
-In the tubular-coordinate description of Section~\ref{subsec:tubular-electron}
-this internal photon-like mode appears as a structured amplitude field
-$\xi(t,z,x,y)$ in a curved world-tube, whose steep longitudinal
-gradients are geometrically coupled to lateral deformations of the brane.
-This provides a concrete mechanism for generating bound-charge patterns
-that largely cancel at Compton scales while leaving a slowly varying
-monopole component encoded in the coarse-grained field $\bar X^4(\mathbf x)$. On scales larger than the internal Compton
-wavelength, the associated multipole moments largely cancel, so that
-only a residual monopole component remains. This slowly varying,
-non-cancelling part of the amplitude deformation is encoded in the
-effective field $\bar{X}^4(\mathbf{x})$ and gives rise to the net free
-charge density $\rho_{\text{free}}(\mathbf{x})$ that appears in the
-Poisson equation~\eqref{eq:poisson-from-brane}. In this sense the
-electron's observed electric charge is not tied to the instantaneous
-value of $X^4$ at a point, but to the monopole component of its
-curvature pattern on the brane after bound, oscillatory structures have
-been taken into account. Pure radiation modes in the linear regime,
-including external photon wave packets propagating on the brane, can
-then be understood as oscillations of bound charge content with
-vanishing net free charge: they strongly excite $X^4$ locally, but their
-charge multipole expansion has no monopole term and thus do not
-source a long-range Coulomb field.
+\paragraph{Electromagnetism as Berry geometry: implications and limits.}
+A key revision in the present manuscript is that the electromagnetic sector is
+no longer introduced via a direct coarse-graining of the raw normal displacement
+$X^4$, but via the Berry connection and curvature of band-isolated substrate
+modes (Sections~\ref{sec:band-isolation-route2}--\ref{sec:berry-pullback-em}).
+This has two immediate implications. First, the relevant $U(1)$ is not a
+component-wise phase of the substrate, but the single overall phase freedom of
+an isolated complex polarization line bundle. Second, the homogeneous Maxwell
+equations become kinematic identities (Bianchi) of the reconstructed curvature,
+while the inhomogeneous sector becomes a dynamical and defect-driven question:
+effective sources must emerge from degeneracies/topological defects of the
+substrate, rather than being postulated.
 
 However, the model also raises open questions and challenges. The framework now possesses a rigorous variational formulation grounded in a Lagrangian and action principle (Section~\ref{conceptual-model}), which provides the theoretical foundation for the continuum dynamics. Key open problems include:
 \begin{itemize}
-\item \textbf{Coupling of brane geometry to electromagnetism}: The four-potential $A_\mu$ is currently introduced phenomenologically on the emergent spacetime; a full derivation from the embedding field $\mathbf{X}$ remains to be developed.
-\item \textbf{Recovery of Newtonian gravity and GR limits}: While geodesic focusing in the induced metric $g_{ij}$ provides a mechanism for gravitational effects, explicit demonstration of inverse-square potentials or Schwarzschild-like metrics in simple configurations is needed.
-\item \textbf{Multi-particle quantum statistics and entanglement}: We emphasize that the present brane model does not yet provide a detailed account of entanglement, Bell-inequality violations, or the full quantum measurement problem. These remain open questions for future work.
-\item \textbf{Connection to QED and renormalization}: The relationship between the extended solitonic electron structure and standard QED predictions (radiative corrections, running coupling, $g-2$ anomaly) requires clarification.
+\item \textbf{Derivation of electromagnetic dynamics:}
+While the homogeneous Maxwell sector follows from curvature identities, a
+controlled derivation of the inhomogeneous equations and an effective action for
+$A_\mu^{\mathrm{EM}}$ from integrating out substrate degrees of freedom remains open.
+
+\item \textbf{Band separation in the nonlinear regime:}
+The Berry construction assumes meaningful band isolation. Establishing when this
+remains valid in strongly nonlinear, defect-forming dynamics (and how to define
+a ``photon band'' operationally) is a central technical challenge.
+
+\item \textbf{Defects $\Rightarrow$ non-Abelian holonomy $\Rightarrow$ Dirac sector:}
+Making the link between defect-induced degeneracies (Wilczek--Zee connection),
+spin-$1/2$ holonomy and an effective Dirac spinor description precise requires
+both analytic control and dedicated numerical experiments.
+
+\item \textbf{Charge normalisation and coupling scale:}
+Fixing the conversion factor between geometric connection and physical
+four-potential (Eq.~\eqref{eq:em-potential-from-berry}) and relating it robustly
+to the observed electron charge is still unresolved.
+
+\item \textbf{Entanglement (assumed hidden variables in this work):}
+We explicitly assume a hidden-variable account of long-range correlations and do
+not attempt to address Bell-type constraints here. A concrete substrate-level
+mechanism and its empirical signatures remain open.
 \end{itemize}
 
 While not yet a full theory, this work constitutes a philosophical and

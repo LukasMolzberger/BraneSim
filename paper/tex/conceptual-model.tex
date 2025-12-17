@@ -10,16 +10,34 @@ Key features of this ontology:
 \item Quantization and collapse-like phenomena arise as nonlinear threshold effects, not stochastic postulates.
 \end{itemize}
 
-This section is deliberately restricted to the microscopic description of the
-brane substrate: its ontology, embedding and continuum dynamics. We introduce
-only the fundamental degrees of freedom, their Lagrangian and the resulting
-equations of motion. The interpretation of these equations in terms of
-relativistic spacetime, quantum behaviour, electromagnetism and gravity is
-postponed to Section~\ref{reconstructing-physics-as-an-emergent-brane-phenomenon}.
-All emergent fields and measurement concepts introduced there are defined as
-diagnostic functionals of the same substrate configuration $\mathbf X(x,t)$ and
-never modify the microscopic equations of motion (see also
-Section~\ref{experimental-setting}).
+This section introduces (i) the microscopic substrate model and (ii) the
+analytical \emph{layered} interpretation framework that connects substrate waves
+to effective gauge structure.
+The microscopic equations of motion are always those of the brane embedding
+$\mathbf X(x,t)$; all higher-layer objects (spectral envelopes, Berry
+connections, effective gauge potentials, etc.) are defined as \emph{diagnostic}
+functionals of $\mathbf X$ and $\partial_t\mathbf X$ and never modify the
+substrate dynamics (see also Section~\ref{experimental-setting}).
+
+\paragraph{Layered model (overview).}
+We distinguish the following layers, which will be referenced throughout the
+paper:
+\begin{enumerate}
+\item \textbf{Substrate layer:} a tensioned 3D brane embedded in $\mathbb R^4$
+with time as an evolution parameter and geometric amplitude--lateral coupling.
+\item \textbf{Space--time spectral layer:} local Fourier analysis producing
+$(\mathbf k,\omega)$-resolved complex mode amplitudes for a \emph{real} substrate.
+\item \textbf{Berry layer:} a $U(1)$ (or, at degeneracies, $U(N)$) connection on
+the bundle of \emph{band-isolated} polarization eigenvectors.
+\item \textbf{Electron micro-structure:} localized topological/geometry-driven
+defects (W\&vdM torus + double-loop knot) that act as robust sources of
+degeneracy/holonomy.
+\item \textbf{Electromagnetism (effective):} an emergent four-potential and
+antisymmetric field tensor identified with (a pullback of) Berry connection and
+curvature.
+\item \textbf{Electron (effective):} Dirac/spinor structure as the long-scale
+envelope description associated with a defect-driven non-Abelian holonomy.
+\end{enumerate}
 
 The Michelson–Morley null result is naturally explained by Lorentz contraction of matter itself, rendering motion through the medium undetectable. In this view, the observed constancy of light speed reflects a dynamical property of the medium rather than a postulate about spacetime geometry.
 
@@ -39,12 +57,14 @@ g_{ij}(x,t)=\partial_i\mathbf{X}\cdot\partial_j\mathbf{X}\quad (i,j=1,2,3),
 \end{equation}
 with reference (unstressed) metric $g^0_{ij}=\delta_{ij}$. The single unit normal $\mathbf{n}\in\mathbb{R}^4$ is defined by $\mathbf{n}\cdot\partial_i\mathbf{X}=0$ and $|\mathbf{n}|=1$. The second fundamental form (extrinsic curvature) is $b_{ij}=\partial_i\partial_j\mathbf{X}\cdot\mathbf{n}$.
 
-\paragraph{Static gauge and index conventions.}
-We work throughout in a static gauge. Spatial brane coordinates are denoted by $x^a$ with indices $a,b=1,2,3$, and time is a separate absolute coordinate $t$. In this gauge we set
-\begin{equation}
-X^a(x,t) = x^a, \qquad X^4(x,t) = \xi(x,t),
-\end{equation}
-so that all deformations occur in the fourth (lateral) direction. Latin indices $i,j$ are used for spatial indices $1,2,3$, while time derivatives are written explicitly as $\partial_t$.
+\paragraph{Gauge choice and index conventions.}
+The fundamental degree of freedom is the full embedding
+$\mathbf X(x,t)\in\mathbb R^4$ with four real components. In analytical
+derivations we sometimes introduce convenient coordinate choices (``gauges'')
+to simplify expressions in the small-slope regime, but no physical restriction
+to purely normal motion is assumed in the model.
+Latin indices $i,j$ refer to brane (material) coordinates $1,2,3$, and time
+derivatives are written explicitly as $\partial_t$.
 
 \paragraph{Normal displacement and amplitude.}
 We fix a reference embedding
@@ -255,3 +275,136 @@ ds^2 = -c^2 dt^2 + g_{ij}(x,t)\,dx^i\, dx^j \quad\text{(with $x^i$ intrinsic/mat
 For numerical experiments we work on finite brane patches
 $\Omega$ with physically motivated boundary conditions
 (periodic, free, or clamped; see Sec.~\ref{experimental-setting}).
+
+\subsection{From substrate waves to an emergent $U(1)$ gauge structure}
+\label{sec:brane-to-berry-to-em}
+
+The central analytical step in the new plan is:
+\emph{a real-valued substrate can still generate a physically meaningful local
+$U(1)$ structure}, but not by interpreting a raw FFT phase as ``the'' gauge
+phase. Instead, the relevant $U(1)$ lives on the \emph{bundle of polarization
+eigenvectors after band isolation} \cite{Berry1984}.
+
+\subsubsection{Space--time spectral representation (real substrate $\Rightarrow$ complex spectra)}
+\label{sec:spectral-layer}
+
+Let $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_0(x)$ be the displacement
+around a slowly varying reference state $\mathbf X_0$. Even if
+$\boldsymbol\xi(x,t)\in\mathbb R^4$ is purely real, its space--time Fourier
+representation is complex:
+\begin{equation}
+\hat{\xi}^A(\mathbf k,\omega)
+=\int_{\mathbb R}\!dt\int_{\Omega}\!d^3x\;
+\xi^A(\mathbf x,t)\,e^{-i(\mathbf k\cdot\mathbf x-\omega t)},
+\qquad A=1,\dots,4.
+\label{eq:xi-fourier}
+\end{equation}
+Reality implies the usual conjugacy constraint
+$\hat{\xi}^A(-\mathbf k,-\omega)=\hat{\xi}^A(\mathbf k,\omega)^\ast$.
+Importantly, this does \emph{not} produce a ``3D phase vector'' at each point in
+space; the complex phase of $\hat{\xi}$ is representation-dependent and is not
+the geometric phase we will use.
+
+\subsubsection{Band isolation and polarization eigenvectors (Route 2)}
+\label{sec:band-isolation-route2}
+
+Assume that on the analysis scale the substrate is locally close to a
+translation-invariant configuration so that linearization yields a $k$-space
+eigenproblem. For each wavevector $\mathbf k$, define a (model-dependent)
+dynamical matrix $D(\mathbf k)$ such that polarization eigenvectors
+$u_n(\mathbf k)\in\mathbb C^4$ and eigenfrequencies $\omega_n(\mathbf k)$ satisfy
+\begin{equation}
+D(\mathbf k)\,u_n(\mathbf k)=\omega_n(\mathbf k)^2\,u_n(\mathbf k),
+\qquad
+\langle u_n(\mathbf k),u_n(\mathbf k)\rangle = 1.
+\label{eq:dynamical-matrix-eigs}
+\end{equation}
+The precise inner product depends on the kinetic term (mass metric); in the
+simplest case it is the standard Hermitian inner product.
+
+\paragraph{$U(1)$ despite $u_n\in\mathbb C^4$.}
+Although $u_n(\mathbf k)$ has four complex components, an \emph{isolated} band is
+a one-dimensional complex line: the physically relevant object is the ray
+$[u_n(\mathbf k)]$ in projective space, and the only gauge freedom is the
+overall phase
+$u_n(\mathbf k)\mapsto e^{i\chi(\mathbf k)}u_n(\mathbf k)$.
+This is exactly the single $U(1)$ that will seed the effective electromagnetic
+description.
+
+In practice we will isolate a target band $n$ by projecting the measured spectrum
+onto $u_n(\mathbf k)$ (details in Section~\ref{experimental-setting}).
+
+\subsubsection{Berry connection, curvature, and the meaning of ``curl''}
+\label{sec:berry-connection-curvature}
+
+For an isolated band, the Berry connection in $\mathbf k$-space is the $U(1)$
+one-form
+\begin{equation}
+\mathcal A_i^{(n)}(\mathbf k)
+= i\,\langle u_n(\mathbf k),\partial_{k_i}u_n(\mathbf k)\rangle,
+\qquad i=1,2,3,
+\label{eq:berry-connection}
+\end{equation}
+with curvature (the ``curl'' of the connection)
+\begin{equation}
+\mathcal F_{ij}^{(n)}(\mathbf k)
+=\partial_{k_i}\mathcal A_j^{(n)}-\partial_{k_j}\mathcal A_i^{(n)}.
+\label{eq:berry-curvature}
+\end{equation}
+The curvature is gauge-invariant under $u_n\mapsto e^{i\chi}u_n$.
+Non-zero $\mathcal F_{ij}$ requires that $u_n(\mathbf k)$ cannot be chosen as a
+globally smooth phase choice across the relevant region of $\mathbf k$-space,
+which typically happens when the band structure contains singularities
+(degeneracies, defects) or when symmetries that would force trivial topology are
+broken. These conditions become testable numerically once the band is identified.
+
+\subsubsection{Pullback to space--time and identification with an effective four-potential}
+\label{sec:berry-pullback-em}
+
+To connect the $\mathbf k$-space Berry structure to an effective field on
+space--time, consider a wave packet with slowly varying local wavevector
+$\mathbf k=\mathbf k(x,t)$ (estimated from the band-projected complex envelope).
+The Berry phase accumulated along a path is
+$\gamma=\int \mathcal A_i(\mathbf k)\,dk_i$.
+This defines a pulled-back one-form on space--time:
+\begin{equation}
+\mathcal A_\mu(x,t)
+=\mathcal A_i(\mathbf k(x,t))\,\partial_\mu k_i(x,t),
+\qquad \mu=0,1,2,3,
+\label{eq:berry-pullback}
+\end{equation}
+with $x^\mu=(ct,x^1,x^2,x^3)$ and $\partial_0\equiv \tfrac{1}{c}\partial_t$.
+
+We then \emph{define} an effective electromagnetic four-potential by a single
+conversion factor (to be fixed by matching to the electron charge in the
+effective theory),
+\begin{equation}
+A_\mu^{\mathrm{EM}}(x,t)=\frac{\hbar}{q}\,\mathcal A_\mu(x,t),
+\label{eq:em-potential-from-berry}
+\end{equation}
+and the corresponding antisymmetric field tensor
+\begin{equation}
+F_{\mu\nu}^{\mathrm{EM}}
+=\partial_\mu A_\nu^{\mathrm{EM}}-\partial_\nu A_\mu^{\mathrm{EM}}.
+\label{eq:em-tensor-from-berry}
+\end{equation}
+By construction, $F_{\mu\nu}^{\mathrm{EM}}$ satisfies the Bianchi identity
+$\partial_{[\lambda}F_{\mu\nu]}^{\mathrm{EM}}=0$, which corresponds to the
+homogeneous Maxwell equations. The inhomogeneous equations (dynamics and
+sources) become a concrete empirical question: they must arise as the effective
+long-wavelength dynamics of the band-projected envelope coupled to defects.
+
+\subsubsection{Degeneracies, defects, and the non-Abelian generalization}
+\label{sec:nonabelian-berry-electron}
+
+When a relevant mode subspace is \emph{degenerate} (dimension $N>1$), the correct
+geometric structure is the Wilczek--Zee non-Abelian connection
+$\mathcal A_i^{ab}=i\langle u_a,\partial_{k_i}u_b\rangle$
+with gauge group $U(N)$ \cite{WilczekZee1984}.
+In the present programme, robust localized defects (the W\&vdM-inspired toroidal
+electron micro-structure) are expected to act as precisely such degeneracy
+sources: the ``frame'' of polarization eigenvectors becomes ill-defined at the
+defect core, and holonomy around it can encode spinor-like behaviour (including
+$4\pi$ periodicity) at the effective layer. This supplies a concrete mechanism
+for how the description can transition from an Abelian (electromagnetic) sector
+to an electron sector that requires a non-Abelian geometric phase.

@@ -42,7 +42,7 @@ relativity, electromagnetism or quantum statistics is genuinely \emph{emergent}
 from the substrate dynamics.
 
 \paragraph{Photon field initialization (clarification):}
-When we refer to "implementing a photon field component" for the electron model, this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution $\bar{X}^4(\mathbf{x})$. Appendix~\ref{app:inverse-em-mapping} describes a systematic procedure for constructing such initial brane configurations from given classical guided electromagnetic modes.
+When we refer to "implementing a photon field component" for the electron model, this means \emph{initializing} the brane with a photon-like wave pattern confined in a toroidal structure—a specific choice of $\mathbf{R}_p(t=0)$ and $\mathbf{v}_p(t=0)$. The subsequent time evolution is governed \emph{solely} by the elastic forces $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$. There is \textbf{no electromagnetic force} $\mathbf{F}_\text{EM}$ added to the equations of motion; any EM-like behavior (field gradients, Coulomb scaling) must appear naturally in the resulting amplitude distribution.
 
 \paragraph{Dirac-consistent rest-frame initial data.}
 
@@ -119,69 +119,94 @@ experiments genuinely test whether the simple brane dynamics are
 \emph{sufficient} to reproduce the observed structures of relativity,
 electromagnetism, and gravity.
 
-\subsection{Measurement Procedures for Emergent Fields}\label{measurement-procedures}
+\subsection{Measurement procedures: spectral band isolation and Berry reconstruction}
+\label{measurement-procedures}
 
-A key feature of this framework is that electromagnetic and gravitational fields are not fundamental inputs but emerge from the geometric configuration of the brane. This raises a methodological question: how do we operationally measure these fields in the simulation?
+A key methodological change in the new layered framework is that the effective
+electromagnetic sector is not reconstructed from a direct coarse-graining of
+the raw normal displacement $X^4$, but from the geometric phase structure of
+\emph{band-isolated} substrate modes. Concretely, we reconstruct an effective
+four-potential from the pulled-back Berry connection introduced in
+Section~\ref{sec:berry-pullback-em}.
 
-\subsubsection{Measuring the electromagnetic field}
+\subsubsection{Data products from the substrate solver}
 
-In the brane picture, the effective electrostatic potential $\Phi_{\text{EM}}(\mathbf{x})$ is defined in terms of the coarse-grained amplitude displacement $\bar{X}^4(\mathbf{x})$ (see Sec.~\ref{sec:charge-amplitude}),
+At each time step the solver provides node positions and velocities,
+$\mathbf R_p(t)\approx \mathbf X(x_p,t)\in\mathbb R^4$ and
+$\dot{\mathbf R}_p(t)\approx \partial_t\mathbf X(x_p,t)$.
+All higher-layer fields are computed diagnostically from these arrays and their
+finite differences.
+
+\subsubsection{Local space--time spectral analysis}
+
+To obtain a meaningful complex envelope from a real substrate, we apply a
+\emph{windowed} space--time Fourier analysis (short-time Fourier transform / local
+FFT). On a chosen spatial patch and within a time window of length $\Delta t$ we
+compute $\hat{\xi}^A(\mathbf k,\omega)$ as in Eq.~\eqref{eq:xi-fourier}, using
+tapered windows to control leakage.
+
+The output of this step is a complex spectrum that resolves:
+(i) spatial wavevector $\mathbf k$,
+(ii) temporal frequency $\omega$, and
+(iii) a four-component complex mode amplitude.
+
+\subsubsection{Band identification and projection (Route 2 in practice)}
+
+For the same parameter settings we construct the linearized dynamical matrix
+$D(\mathbf k)$ of the discrete substrate (details depend on the discrete energy
+model in Section~\ref{discrete-energies-and-forces}) and compute its
+eigenpairs $(\omega_n(\mathbf k),u_n(\mathbf k))$.
+
+Given a target band index $n$ (``photon-like'' band), we project the measured
+spectrum onto the polarization eigenvector:
 \begin{equation}
-  \Phi_{\text{EM}}(\mathbf{x}) \;=\; \kappa_{\Phi} \,\bar{X}^4(\mathbf{x}),
-  \label{eq:Phi-EM-measurement}
+\hat{\psi}_n(\mathbf k,\omega)
+=\langle u_n(\mathbf k),\hat{\xi}(\mathbf k,\omega)\rangle,
+\label{eq:band-projection}
 \end{equation}
-where $\kappa_{\Phi}$ is a phenomenological coupling constant. The measurement procedure is:
-\begin{enumerate}
-  \item \textbf{Extract fourth component:} From the node positions $\mathbf{R}_p(t)$, extract the fourth (normal) component $X^4_p(t) \equiv [\mathbf{R}_p(t)]_4$.
-  \item \textbf{Time-average:} Compute the time-averaged amplitude displacement over a window $\Delta t_{\text{avg}}$ that is long compared to the internal Compton oscillation period $2\pi/\omega_C$ but short compared to the timescale of macroscopic changes,
-    \[
-      \bar{X}^4_p \;=\; \frac{1}{\Delta t_{\text{avg}}} \int_{t_0}^{t_0 + \Delta t_{\text{avg}}} X^4_p(t')\, dt'.
-    \]
-    This procedure filters out bound, oscillatory contributions and isolates the net monopole component of the amplitude deformation.
-  \item \textbf{Spatial interpolation:} Interpolate the discrete values $\{\bar{X}^4_p\}$ onto a regular spatial grid using a smooth kernel (e.g., cubic spline) to obtain the continuous field $\bar{X}^4(\mathbf{x})$.
-  \item \textbf{Compute potential and field:} Define the effective electrostatic potential via Eq.~\eqref{eq:Phi-EM-measurement} and compute the electric field as
-    \[
-      \mathbf{E}(\mathbf{x}) \;=\; -\nabla \Phi_{\text{EM}}(\mathbf{x}) \;=\; -\kappa_{\Phi} \nabla \bar{X}^4(\mathbf{x}),
-    \]
-    using numerical differentiation (e.g., central differences) on the interpolated grid.
-\end{enumerate}
+and reconstruct the band-limited complex envelope $\psi_n(x,t)$ by inverse
+transform restricted to that band. This yields a complex field with a single
+local $U(1)$ phase, but we emphasize again: this phase is not yet the Berry
+phase; Berry structure is computed from the geometry of $u_n(\mathbf k)$.
 
-\paragraph{Epistemic status.}
-The coupling constant $\kappa_{\Phi}$ is not derived from first principles in the current work but is treated as a phenomenological parameter that sets the scale of the electrostatic interaction. In a complete microscopic theory it would be determined by the brane's elastic response to amplitude deformations. For the purposes of the numerical experiments, $\kappa_{\Phi}$ is chosen such that the measured far-field $\mathbf{E}$-field of a toroidal electron soliton reproduces the known Coulomb magnitude $e/(4\pi\varepsilon_0 r^2)$ at distances $r \gg \lambda_C$.
+\subsubsection{Numerical Berry connection and curvature}
 
-\subsubsection{Measuring the gravitational field}
+We compute the Berry connection and curvature for the isolated band using a
+gauge-robust discrete formulation on a $\mathbf k$-grid (link-variable method).
+This avoids numerical instability from explicit derivatives
+$\partial_{k_i}u_n$ and ensures invariance under $u_n\mapsto e^{i\chi}u_n$.
 
-In the brane picture, gravitational effects arise from the curvature of the induced metric $g_{ij}(\mathbf{x})$ on the brane (see Sec.~\ref{subsec:weak_field_gravity}). The measurement procedure is:
-\begin{enumerate}
-  \item \textbf{Compute tangent vectors:} At each material point $x_p$ in the simulation domain, estimate the tangent vectors $\partial_i \mathbf{X}$ using finite differences in material coordinates,
-    \[
-      \partial_i \mathbf{X}|_{x_p} \;\approx\; \frac{\mathbf{R}_{p+\hat{i}} - \mathbf{R}_{p-\hat{i}}}{2h},
-      \qquad i=1,2,3,
-    \]
-    where $\hat{i}$ denotes a unit step in the $i$-th material direction and $h$ is the lattice spacing.
-  \item \textbf{Build induced metric:} Compute the spatial components of the induced metric as
-    \[
-      g_{ij}(\mathbf{x}_p) \;=\; \partial_i \mathbf{X}|_{x_p} \cdot \partial_j \mathbf{X}|_{x_p},
-      \qquad i,j=1,2,3.
-    \]
-    In the weak-field regime this reduces to $g_{ij} \approx \delta_{ij} + h_{ij}$, where $h_{ij}$ is a small perturbation related to the amplitude gradients (Eq.~\eqref{eq:PhiG_from_gradX4}).
-  \item \textbf{Extract effective potential:} In the static, weak-field limit the effective gravitational potential $\Phi_{\text{grav}}(\mathbf{x})$ can be extracted from the time-time component of the effective spacetime metric,
-    \[
-      g_{00}(\mathbf{x}) \;\approx\; -\left(1 + \frac{2\Phi_{\text{grav}}(\mathbf{x})}{c^2}\right),
-    \]
-    which in the present framework is built from the quadratic combination of amplitude gradients postulated in Sec.~\ref{subsec:weak_field_gravity}. For spherically symmetric configurations, $\Phi_{\text{grav}}(r)$ can also be computed from the spatial metric components by solving the weak-field Einstein equations or by matching to the Newtonian limit.
-  \item \textbf{Ray-trace geodesics:} To measure gravitational light bending, initialize a null geodesic (probe photon trajectory) with initial position $\mathbf{x}_0$ and direction $\hat{\mathbf{k}}_0$ and numerically integrate the geodesic equation
-    \[
-      \frac{d^2 x^\mu}{d\lambda^2} + \Gamma^\mu_{\nu\rho} \frac{dx^\nu}{d\lambda} \frac{dx^\rho}{d\lambda} = 0,
-    \]
-    where $\Gamma^\mu_{\nu\rho}$ are the Christoffel symbols computed from $g_{\mu\nu}$ and $\lambda$ is an affine parameter along the geodesic. The deflection angle $\delta\theta$ is the angular difference between the initial and final asymptotic directions of the ray.
-\end{enumerate}
+The result is $\mathcal A_i(\mathbf k)$ and $\mathcal F_{ij}(\mathbf k)$ as in
+Eqs.~\eqref{eq:berry-connection}--\eqref{eq:berry-curvature}.
 
-\paragraph{Epistemic status.}
-The metric ansatz $g_{\mu\nu}[\mathbf{X}]$ introduced in Sec.~\ref{subsec:weak_field_gravity} is phenomenological rather than derived from a systematic expansion of the brane Lagrangian. The measurement procedure described here tests whether this ansatz, when applied to the simulated brane configurations, reproduces the known weak-field predictions of general relativity (e.g., $\Phi_{\text{grav}}(r) \propto -G M/r$ and the Newtonian deflection angle $\delta\theta \approx 2GM/(c^2 b)$). Discrepancies would indicate either that the metric ansatz must be refined or that additional terms in the brane Lagrangian are needed.
+\subsubsection{Reconstruction of an effective electromagnetic field}
 
-\paragraph{Summary: measurement as coarse-graining.}
-In both cases—electromagnetic and gravitational—the measurement procedures are coarse-graining operations that map the microscopic brane configuration $\{\mathbf{R}_p(t)\}$ to effective fields $\Phi_{\text{EM}}(\mathbf{x})$, $\mathbf{E}(\mathbf{x})$, $g_{\mu\nu}(\mathbf{x})$ living on the emergent spacetime. These procedures are not arbitrary: they implement the constitutive relations postulated in the theoretical sections (Sec.~\ref{sec:charge-amplitude} and Sec.~\ref{subsec:weak_field_gravity}). The experiments test whether these constitutive relations, when applied to self-consistent brane configurations (toroidal solitons, localized bulges), yield the correct large-distance behavior ($1/r^2$ Coulomb field, $1/r$ Newtonian potential) without fine-tuning of the microscopic parameters beyond the basic matching conditions of Sec.~\ref{sec:param-matching}.
+From the band envelope $\psi_n(x,t)$ we estimate a slowly varying local
+wavevector field $\mathbf k(x,t)$ (either via local FFT peak tracking or via the
+phase-gradient estimator $\mathbf k\approx \nabla \arg\psi_n$ in regions of high
+signal-to-noise). We then compute the pulled-back Berry one-form
+$\mathcal A_\mu(x,t)$ from Eq.~\eqref{eq:berry-pullback} and define
+$A_\mu^{\mathrm{EM}}$ and $F_{\mu\nu}^{\mathrm{EM}}$ via
+Eqs.~\eqref{eq:em-potential-from-berry}--\eqref{eq:em-tensor-from-berry}.
+
+We extract the usual electric and magnetic fields as
+\begin{equation}
+E_i = F_{0i}^{\mathrm{EM}},
+\qquad
+B_i = \frac{1}{2}\epsilon_{ijk}F_{jk}^{\mathrm{EM}}.
+\end{equation}
+The homogeneous Maxwell equations hold identically by construction (Bianchi
+identity). The inhomogeneous equations become part of the numerical test plan:
+we measure whether effective sources localize at defects/solitons and whether
+wave dynamics reproduces the expected vacuum behaviour away from defects.
+
+\subsubsection{Gravitational diagnostics (unchanged principle)}
+
+Gravitational effects are still reconstructed from the induced metric
+$g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$ and ray tracing in the
+effective interval $ds^2=-c^2dt^2+g_{ij}(x,t)\,dx^i dx^j$ (see
+Section~\ref{gravity-as-effective-metric}). This part of the pipeline remains
+independent of the electromagnetic reconstruction above.
 
 \subsection{Discrete Simulation Framework}\label{discrete-simulation-framework}
 
@@ -309,24 +334,15 @@ $A \approx \lambda_C/\sqrt{\pi}$ up to order-unity geometric factors. This
 choice sets the overall substrate mechanical scale (via $\rho$ and $K$) in terms
 of $(m_e,c,\hbar)$.
 
-\paragraph{Route (ii): Charge and internal energy density.}
-Independently, Section~\ref{sec:charge-magnitude} relates the observed charge
-magnitude $|e|$ to the internal energy density and geometry of a Compton-scale
-toroidal soliton. There the same displacement field $X^4(\mathbf{x},t)$ is used
-to compute an elastic energy density $\mathcal{E}(\xi,\partial\xi)$ in J/m$^3$,
-which is required to integrate to $m_e c^2$ over a toroidal volume, while the
-far-field gradient of the time-averaged deformation reproduces a Coulomb
-potential with $q\approx e$. This construction fixes another combination of the
-mechanical parameters and the typical internal amplitude $A$ of the soliton.
-Within the uncertainties of the torus geometry, the resulting $A$ is again of
-order $\lambda_C$, in agreement with the Compton-cell calibration above.
-In particular, the single-quantum amplitude scale $A$ obtained here
-enters directly into the geometric nonlinearity parameter
-$\eta$ defined in Sec.~\ref{threshold-localization}. For modes with
-wavelengths of order the Compton wavelength $\lambda_C$, this parameter
-satisfies $\eta = \mathcal O(1)$: the same calibration that ties the
-substrate to $(m_e,c,\hbar)$ therefore also marks the onset of strong
-geometric nonlinearity for photon-like excitations.
+\paragraph{Route (ii): charge calibration (deferred in the new framework).}
+In the previous draft, the charge magnitude was tied directly to a coarse-grained
+normal-displacement monopole. In the present layered framework, the effective
+electromagnetic sector is reconstructed from Berry geometry of band-isolated modes.
+This shifts the charge calibration problem to fixing the conversion factor
+$\hbar/q$ in Eq.~\eqref{eq:em-potential-from-berry} and identifying how defects
+realize effective sources in the inhomogeneous Maxwell sector. We therefore
+defer a first-principles charge matching to the dedicated numerical tests of
+Section~\ref{falsifiable-criteria}.
 
 \paragraph{Practical simulation choice.}
 In the discrete code we select a lattice spacing $h$ and identify each node with
@@ -445,15 +461,49 @@ bounded over the simulation time, illustrating how the pre-tensioned
 Hookean brane generates a mild coupling between normal and lateral
 coordinates without destroying photon propagation.
 
-\subsubsection{Falsifiable criteria}\label{falsifiable-criteria}
+\subsubsection{Test plan and falsifiable criteria}
+\label{falsifiable-criteria}
+
+All tests are formulated as measurements on simulation outputs. No emergent
+quantity is allowed to feed back into the substrate solver.
 
 \begin{enumerate}
-\item \textbf{Relativistic cones:} dispersion isotropy $\le 1\%$ up to $kh\approx0.5$.
-\item \textbf{Holonomy:} internal phase shows $4\pi$ periodicity under $2\pi$ rigid rotation.
-\item \textbf{Emergent threshold:} persistent localization appears only when the integrated energy density satisfies $\langle\mathcal E\rangle_{V_c}V_c\ge m_ec^2$. This threshold arises from the nonlinear elastic dynamics of the medium, not from an imposed strong-field cutoff or amplitude clamp.
-\item \textbf{Metric bending:} ray deflection scales with curvature extracted from $g$.
-\item \textbf{Newtonian gravity:} spherically symmetric mass produces potential $\Phi_{\text{grav}}(r) \propto -1/r$ with deviation $< 5\%$ over range $2\lambda_{\text{bulge}} < r < 10\lambda_{\text{bulge}}$.
-\item \textbf{Coulomb charge field:} toroidal soliton produces spherically symmetric electric field $|\mathbf{E}(r)| \propto 1/r^2$ with deviation $< 10\%$ over range $2\lambda_C < r < 10\lambda_C$; field reverses sign with chirality $\chi$.
+\item \textbf{Relativistic cones (substrate linear regime):}
+Measure $\omega(\mathbf k)$ for small-amplitude plane waves in multiple
+directions and verify isotropy and approximately linear dispersion
+$\omega\approx c|\mathbf k|$ up to a documented cutoff.
+
+\item \textbf{Band isolation sanity:}
+Inject a known single-mode excitation and verify that projection
+Eq.~\eqref{eq:band-projection} recovers the correct band amplitude while
+suppressing leakage into other bands below a set tolerance.
+
+\item \textbf{Gauge robustness of Berry numerics:}
+Verify invariance of $\mathcal F_{ij}(\mathbf k)$ under random phase
+redefinitions $u_n(\mathbf k)\mapsto e^{i\chi(\mathbf k)}u_n(\mathbf k)$.
+Optionally, test quantized invariants (e.g. Chern number) on closed $\mathbf k$-surfaces
+in controlled toy configurations.
+
+\item \textbf{Berry $\rightarrow$ EM (homogeneous Maxwell laws):}
+Compute $F_{\mu\nu}^{\mathrm{EM}}$ from the pulled-back Berry connection and
+numerically verify $\nabla\cdot\mathbf B\approx 0$ and
+$\partial_t\mathbf B+\nabla\times\mathbf E\approx 0$ away from defects, with
+errors decreasing under refinement.
+
+\item \textbf{Defect localization of effective sources:}
+In runs that form a stable localized soliton (electron candidate), test whether
+violations of the inhomogeneous Maxwell equations (interpreted as effective
+sources) localize at the defect core and vanish in the far field.
+
+\item \textbf{Spinorial holonomy ($4\pi$ behaviour):}
+Transport the reconstructed internal frame around a closed loop enclosing the
+defect and measure the holonomy. The target signature is a $4\pi$ periodicity
+consistent with an emergent spinor sector.
+
+\item \textbf{Aharonov--Bohm type holonomy (optional, medium term):}
+Construct two paths of the same band envelope enclosing a region of nontrivial
+Berry curvature and test whether the relative phase shift matches the path
+integral of the reconstructed effective potential \cite{AharonovBohm1959}.
 \end{enumerate}
 
 \subsection{Interpretation layers (clarity note)}\label{interpretation-layers}
