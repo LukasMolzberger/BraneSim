@@ -1,0 +1,118 @@
+\section{Internal structure of the electron}
+\label{sec:internal-structure-of-the-electron}
+
+In the brane framework, the electron is modeled as a stable, localized solitonic
+excitation with toroidal topology. This section describes the geometric and
+dynamical structure of this toroidal electron model, which serves as the
+foundation for the numerical experiments described in
+Section~\ref{experimental-setting}.
+
+\subsection{Tubular world-tube description}
+\label{subsec:tubular-electron}
+
+The electron is realized as a toroidal soliton whose centerline traces a closed
+curve in the brane. In the rest frame, this centerline lies in a fixed lateral
+plane (say, the $X^1$--$X^2$ plane), forming a torus of major radius $R$ and
+minor (tube) radius $r_0$. The torus axis defines the quantization axis for
+spin.
+
+We parametrize the centerline by arc length $z \in [0, 2\pi R)$ and introduce
+tubular coordinates $(\rho, \theta)$ for the cross-section perpendicular to the
+centerline at each point $z$, where $\rho$ is the radial distance from the
+centerline and $\theta$ is the angular coordinate around the tube. The
+displacement field $\xi(t,z,\rho,\theta)$ represents the amplitude of the
+internal oscillatory mode circulating along the torus.
+
+\subsection{Double-loop ridge profile (W\&vdM-inspired)}
+
+Following the Wheeler--van der Mark picture, we model the internal photon-like
+mode as a double-loop structure: two narrow ridges of high amplitude that spiral
+around each other as one traverses the torus. The cross-sectional profile at
+position $z$ along the centerline is given by
+
+\begin{equation}
+f(\rho,\theta;z) = G(\rho) \left[
+e^{-(\theta-\alpha(z))^2/(2\sigma_\theta^2)}
++ e^{-(\theta-\alpha(z)-\pi)^2/(2\sigma_\theta^2)}
+\right],
+\label{eq:double-tunnel-profile}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $G(\rho)$ is a radial envelope function (e.g., Gaussian) that confines the
+  amplitude to a thin shell of radius $\rho \approx r_0$,
+\item $\alpha(z) = \ell z / R$ controls the twist of the ridge pair as one moves
+  along the torus (with $\ell$ the twist winding number),
+\item $\sigma_\theta$ sets the angular width of each ridge.
+\end{itemize}
+
+With twist winding $\ell=1$, each ridge executes a single rotation as the torus
+is traversed once, producing an intertwined $(2,1)$-type torus-knot pattern in
+which the two ridges spiral around each other.
+
+\subsection{Compton-frequency oscillation}
+
+The full displacement field for the electron soliton in its rest frame is
+
+\begin{equation}
+\xi(t,z,\rho,\theta) = A \, f(\rho,\theta;z) \cos(\omega_C t - m k_C z),
+\label{eq:xi-electron-init}
+\end{equation}
+
+where:
+\begin{itemize}
+\item $A$ is the amplitude scale (of order the reduced Compton wavelength
+  $\lambda_C = \hbar/(m_e c)$, as determined by the parameter matching in
+  Section~\ref{amplitude-scale-calibration}),
+\item $\omega_C = m_e c^2 / \hbar$ is the Compton angular frequency,
+\item $k_C = 2\pi / \lambda_C$ is the Compton wavenumber,
+\item $m$ is the longitudinal winding number (typically $m=2$, encoding that the
+  internal Compton mode winds twice around the torus per revolution).
+\end{itemize}
+
+This configuration describes an internal standing wave pattern that circulates
+at the microscopic wave speed $c$ along the toroidal world-tube.
+
+\subsection{Dirac bilinears and effective four-current}
+
+In the effective long-wavelength description, the electron is associated with a
+Dirac spinor $\psi(x)$ whose bilinears encode the coarse-grained properties of
+the soliton. For a rest-frame spin-up electron (spin aligned with the torus
+axis, taken to be the $x^3$-direction), the Dirac bilinears are
+
+\begin{equation}
+j^\mu = \bar\psi \gamma^\mu \psi
+= \begin{pmatrix} m_e c \\ 0 \\ 0 \\ 0 \end{pmatrix},
+\qquad
+s^i = \frac{1}{2} \bar\psi \gamma^i \gamma^5 \psi
+= \begin{pmatrix} 0 \\ 0 \\ \hbar/2 \end{pmatrix}.
+\label{eq:dirac-rest-bilinears}
+\end{equation}
+
+These bilinears serve as target constraints for initializing the toroidal ansatz
+in numerical experiments: the axis of the torus, the direction of the internal
+circulation of $\xi$, and the net tangential lateral velocity field in the tube
+are chosen such that the resulting coarse-grained momentum and spin of the
+soliton approximate these Dirac values. The subsequent evolution is always
+governed by the full nonlinear brane equations; the Dirac constraints are used
+only to fix and assess the macroscopic properties (charge, spin, effective
+four-current) of the initial electron state.
+
+\subsection{Spinorial $4\pi$ periodicity}
+
+A key topological feature of the toroidal electron model is that the internal
+frame (the orientation of the double-loop ridge pair) exhibits $4\pi$
+periodicity under continuous rotation of the torus axis. This arises from the
+twist of the ridge profile: as the torus is rigidly rotated by $2\pi$ about its
+axis, the internal phase accumulated by the circulating mode does not return to
+its initial value, but instead picks up a sign change. A full $4\pi$ rotation is
+required to return the soliton to its original internal state.
+
+In the language of the Berry/Wilczek--Zee connection introduced in
+Section~\ref{sec:brane-to-berry-to-em}, this $4\pi$ periodicity corresponds to a
+non-Abelian holonomy around the defect core: the frame of polarization
+eigenvectors becomes ill-defined at the defect center, and transport around a
+closed loop enclosing it yields a holonomy element in $\mathrm{SU}(2)$ rather
+than $\mathrm{U}(1)$. This supplies a concrete geometric mechanism for the
+emergence of spin-$1/2$ behavior at the effective layer.
