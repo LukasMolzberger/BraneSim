@@ -252,36 +252,6 @@ We approximate the continuum energy in terms of \textbf{edge stretches} (intrins
   arises from the geometric dependence of distances and curvature
   on the brane embedding.
 
-\paragraph{Nonlinearity mode (implementation note).}
-
-In code we distinguish multiple nonlinearity modes via a
-\texttt{BraneNonlinearityMode} enumeration:
-\begin{itemize}
-  \item \texttt{NONE}: Linearized small-displacement approximation;
-        edge stiffness computed using $\epsilon \approx
-        (\partial_i\xi_j)/h$ rather than the full 4D Euclidean
-        distance.
-  \item \texttt{PURE\_GEOMETRY}: Default. Each edge stiffness is
-        computed from the exact 4D Euclidean distance
-        $\ell=|\mathbf R_q-\mathbf R_p|$, so lateral contraction from
-        normal displacements arises purely from metric changes. This is
-        the primary mode for all emergent-field experiments and
-        corresponds exactly to the theoretical model developed in
-        Section~\ref{conceptual-model}.
-  \item \texttt{SCHWINGER\_LIMIT}, \texttt{HUYGENS\_ELASTIC},
-        \texttt{HIGGS\_MEXICAN\_HAT}, \texttt{CUSTOM}: \emph{Purely
-        exploratory} extensions for future robustness tests. These modes
-        introduce additional material-nonlinearity potentials beyond the
-        geometric coupling and are \textbf{not part of the core theoretical
-        framework}. They are not used in any results presented in this paper.
-\end{itemize}
-Unless explicitly stated otherwise, all simulations and numerical experiments
-reported in this work use \texttt{PURE\_GEOMETRY}.
-
-  The derivative (useful for force implementation) is
-  \[
-  \phi'(\epsilon) = k\epsilon.
-  \]
 
 \item \textbf{Bending/curvature energy (optional but stabilizing):}
   For each node $p$, penalize changes of edge directions:
