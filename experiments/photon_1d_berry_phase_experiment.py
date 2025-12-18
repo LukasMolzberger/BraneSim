@@ -260,9 +260,9 @@ def main():
     Ax_by_tfs = {}  # Berry connection profiles
 
     # Precompute position coordinates
-    x_coords_sim = grid.get_coordinates_1d()  # sim units
+    x_coords_sim = grid.get_spatial_coordinates().squeeze()  # [N], sim units
     x_coords_phys = mapper.to_phys_length(x_coords_sim)  # meters
-    x_nm = x_coords_phys * 1e9  # nanometers for plotting
+    x_nm = x_coords_phys.cpu().numpy() * 1e9  # nanometers for plotting
 
     # Edge coordinates for Berry connection (midpoints)
     x_edges_nm = 0.5 * (x_nm[:-1] + x_nm[1:])
