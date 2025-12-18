@@ -509,7 +509,7 @@ def main():
             snapshots_lateralization[snapshot_steps[step]] = R_lat_local.cpu().numpy().copy()
 
             # Export CSV snapshot (converted to SI units)
-            csv_filename = f'photon_1d_snapshot_t{step:06d}.csv'
+            csv_filename = run_manager.get_data_path(f'photon_1d_snapshot_t{step:06d}.csv')
             export_csv_snapshot(csv_filename, state, grid, initial_positions,
                               k_sim, lateralization, physics, h_sim,
                               mapper, rest_length=rest_length_sim)
