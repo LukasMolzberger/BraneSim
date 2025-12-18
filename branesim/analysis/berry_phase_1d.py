@@ -1,21 +1,27 @@
 """
 Berry phase computation for 1D chains.
 
-Computes the discrete Berry phase profile along a 1D lattice using the
-gauge-invariant phase increment between neighboring states:
+Computes the discrete Berry connection and phase profile along a 1D lattice.
 
+The phase increment between neighbors defines a *discrete gauge potential*:
     Δφ_i = arg⟨u_i|u_{i+1}⟩
 
-The cumulative Berry phase is then:
+This is *not* gauge-invariant under local phase transformations u_i → e^{iχ_i}u_i.
+
+**Gauge-invariant quantities:**
+- Curvature (plaquette / Wilson loop phases in 2D slices)
+- Holonomy (closed-loop products Π_loop ⟨u_i|u_{i+1}⟩)
+
+The cumulative "Berry phase" γ(x) computed here is gauge-dependent and represents
+a particular gauge choice (typically γ(x_0) = 0 at the left boundary).
 
     γ_0 = 0,  γ_{i+1} = γ_i + Δφ_i
-
-This gives one Berry phase value per lattice point.
 """
 
 from __future__ import annotations
 import math
 from dataclasses import dataclass
+import numpy as np
 import torch
 
 
@@ -31,18 +37,22 @@ class BerryPhase1DConfig:
     amplitude_threshold : float
         Minimum amplitude to include a point in Berry phase calculation.
         Points with |ψ| < threshold are masked out to avoid noise.
+    overlap_threshold : float
+        Minimum overlap magnitude |⟨u_i|u_{i+1}⟩| to trust the phase increment.
+        Edges with |overlap| < threshold are flagged as invalid (e.g., near nodes
+        or abrupt mode changes where the phase becomes meaningless).
     eps : float
         Small constant for numerical stability
     unwrap : bool
-        If True, accumulate raw phase increments (may grow beyond [-π, π]).
-        Currently always uses cumulative sum; "unwrapping" in the phase-unwrap
-        sense would require additional logic.
+        If True, apply true phase unwrapping (using numpy.unwrap) to the cumulative
+        phase to remove 2π discontinuities. If False, use simple cumsum.
     force_cpu_on_mps : bool
         If True and device is MPS, move tensors to CPU for complex operations.
         MPS complex support can be spotty, so this is recommended.
     """
     spacing: float
     amplitude_threshold: float = 1e-8
+    overlap_threshold: float = 1e-3
     eps: float = 1e-12
     unwrap: bool = True
     force_cpu_on_mps: bool = True
@@ -81,11 +91,14 @@ def berry_phase_profile_along_x(
         - gamma_wrapped [N]: wrapped to [-π, π] at each point
         - dphi [N-1]: phase increment between neighbors, Δφ_i = arg⟨u_i|u_{i+1}⟩
         - A_x [N-1]: Berry connection along x, A_x[i] = Δφ_i / h
+        - overlap_abs [N-1]: magnitude |⟨u_i|u_{i+1}⟩| for each edge
         - mask [N]: boolean mask indicating which points have sufficient amplitude
         - valid_edge [N-1]: boolean mask for edges between valid points
 
     Notes
     -----
+    - **Gauge dependence**: The connection A_x(x) and phase γ(x) are gauge-dependent.
+      Only curvature (plaquette phases) and closed-loop holonomies are gauge-invariant.
     - Invalid edges (where either endpoint is below threshold) have dphi = 0
       to avoid contaminating the cumulative phase with noise.
     - The Berry connection A_x has units [rad / sim-length].
@@ -131,6 +144,14 @@ def berry_phase_profile_along_x(
         # Vector case [N, C]: inner product along component dimension
         overlap = torch.sum(torch.conj(u_hat[:-1, :]) * u_hat[1:, :], dim=-1)
 
+    # Compute overlap magnitude (needed for validity check)
+    overlap_abs = torch.abs(overlap)
+
+    # Update valid_edge: require both amplitude and overlap thresholds
+    # Low overlap magnitude indicates nodes, crossings, or abrupt mode changes
+    # where the phase becomes meaningless
+    valid_edge = valid_edge & (overlap_abs > cfg.overlap_threshold)
+
     # Set invalid edges to unity overlap (phase increment = 0)
     # This prevents noise from contaminating the cumulative phase
     overlap = torch.where(valid_edge, overlap, torch.ones_like(overlap))
@@ -142,10 +163,13 @@ def berry_phase_profile_along_x(
     # Cumulative Berry phase: γ[i+1] = γ[i] + Δφ_i
     gamma = torch.zeros(u_hat.shape[0], device=dphi.device, dtype=dphi.real.dtype)
     if cfg.unwrap:
-        # Simple cumulative sum (may exceed [-π, π])
-        gamma[1:] = torch.cumsum(dphi, dim=0)
+        # True phase unwrapping: use numpy's unwrap on cumsum, then convert back
+        gamma_raw = torch.cumsum(dphi, dim=0)
+        gamma_np = gamma_raw.cpu().numpy()
+        gamma_unwrapped_np = np.unwrap(gamma_np)
+        gamma[1:] = torch.from_numpy(gamma_unwrapped_np).to(device=dphi.device, dtype=dphi.real.dtype)
     else:
-        # Still use cumsum for now; true phase unwrapping would need more logic
+        # Simple cumsum without unwrapping
         gamma[1:] = torch.cumsum(dphi, dim=0)
 
     # Wrapped version: fold back into [-π, π]
@@ -161,6 +185,7 @@ def berry_phase_profile_along_x(
         "gamma_wrapped": gamma_wrapped,
         "dphi": dphi,
         "A_x": A_x,
+        "overlap_abs": overlap_abs,
         "mask": mask,
         "valid_edge": valid_edge,
     }
