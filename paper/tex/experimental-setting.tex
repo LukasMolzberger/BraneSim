@@ -119,15 +119,17 @@ experiments genuinely test whether the simple brane dynamics are
 \emph{sufficient} to reproduce the observed structures of relativity,
 electromagnetism, and gravity.
 
-\subsection{Measurement procedures: band isolation and gauge reconstruction}
+\subsection{Preparation and measurement procedures: initialization, degeneracy verification, and holonomy}
 \label{measurement-procedures}
 
 A key methodological commitment of the layered framework is that gauge structure
-(connection, holonomy, effective electromagnetic fields) is \emph{not}
-reconstructed from a direct coarse-graining of the raw normal displacement
-$X^4$, but from the geometric phase of \emph{band-isolated} substrate modes. The
-measurement pipeline implements the three practical band-isolation methods
-introduced in Section~\ref{sec:band-isolation-route2}.
+(connection, holonomy, effective electromagnetic fields) is \emph{not created}
+by diagnostic band-pass filters. Instead, the relevant narrowband carrier and its
+internal (possibly degenerate) polarization subspace are defined by the
+\emph{substrate initialization}. Diagnostic layers (FFT, Berry, curvature,
+holonomy) are used only to \emph{read out} the phase and degeneracy structure of
+the prepared state, and optional spectral masking is retained solely as a
+cross-check/visualization aid.
 
 \subsubsection{Data products from the substrate solver}
 
@@ -141,10 +143,66 @@ All higher-layer fields (band envelopes, gauge connections, holonomies) are
 computed diagnostically from these arrays and their finite differences. No
 emergent quantity feeds back into the substrate dynamics.
 
+\subsubsection{Preparation-first initialization of narrowband carriers}
+\label{sec:init-carriers}
+
+We initialize wave packets in the substrate directly as \emph{real} displacement
+and velocity fields whose spectrum is narrow by construction. Let
+$\mathbf{u}(x,t)$ denote the small-amplitude displacement field (in
+$\mathbb{R}^4$ components) about the static brane background. Given a chosen
+carrier $(\mathbf{k}_0,\omega_0)$ and a slowly varying envelope $A(x)$, we set
+\begin{align}
+\mathbf{u}(x,0) &= \Re\{A(x)\,e^{i\mathbf{k}_0\cdot x}\,\mathbf{p}(x)\},\\
+\dot{\mathbf{u}}(x,0) &= \Re\{-i\omega_0\,A(x)\,e^{i\mathbf{k}_0\cdot x}\,\mathbf{p}(x)\},
+\end{align}
+so that the initial state lies (approximately) on a single dispersion branch
+with minimal spectral leakage. Throughout this paper we typically anchor the
+carrier scale to the Compton wavelength.
+
+\paragraph{Photon packet (two-dimensional polarization subspace).}
+For photon-like propagation we choose a periodic propagation axis and initialize
+a packet whose internal polarization lives in a two-dimensional transverse
+subspace. A circularly polarized choice can be realized purely with real fields
+by using quadrature components (e.g.\ $\cos$/$\sin$ in two brane components),
+corresponding to a complex polarization direction $\mathbf{p}\propto(1,i)$.
+
+\paragraph{Electron packet (double-loop tube, spinorial transport).}
+For the electron-like defect we initialize a narrowband carrier confined to a
+tubular neighborhood of a closed double-loop centerline $\mathbf{C}(z)$ (Appendix
+B). Along the loop coordinate $z$ we impose a \emph{half-angle} rotation of the
+internal polarization frame $\mathbf{p}(z)$ so that one circuit produces a sign
+flip (spinorial $4\pi$ periodicity), while two circuits return the state. This
+construction targets a \emph{degenerate} two-dimensional subspace and is tested
+via a non-Abelian Wilson-loop holonomy (Section~\ref{sec:holonomy-wilson}).
+
+\subsubsection{Degeneracy verification without spectral band-pass filtering}
+\label{sec:degeneracy-verification}
+
+We verify that the prepared packet occupies a (nearly) degenerate
+$N$-dimensional mode subspace near $\omega_0$ using two complementary diagnostics
+that do not rely on diagnostic band-pass masks:
+
+\paragraph{(i) Local linearization eigen-scan.}
+On a local patch (or reduced model) we linearize the discrete equations of motion
+around the current substrate configuration and compute a small set of eigenpairs
+near $\omega_0$. Degeneracy is identified by $|\omega_1-\omega_2|/\omega_0 \ll 1$
+together with consistent polarization character.
+
+\paragraph{(ii) Subspace rank / SVD signature from time series.}
+At selected spatial locations we record a short time window (a few carrier
+cycles) and extract the dominant subspace dimension via SVD of the
+multi-component signal. A genuine two-dimensional polarization sector exhibits
+two dominant singular values and a strongly suppressed remainder.
+
 \subsubsection{Band isolation: three practical methods}
 
-We implement all three band-isolation strategies as parallel diagnostic
-pipelines, allowing cross-validation of results.
+We retain the following band-isolation strategies as \emph{optional cross-check}
+pipelines and visualization aids. Primary results rely on preparation-first
+narrowband carriers (Section~\ref{sec:init-carriers}) and on degeneracy/holonomy
+verification that does not depend on spectral masking (Section~\ref{sec:degeneracy-verification}).
+Among the methods below, Method~2 (demodulation at the prepared carrier) serves as
+the default \emph{envelope readout}; Methods~1 and~3 are used mainly for debugging
+and consistency checks.
 
 \paragraph{Method 1: Band-pass mask in $(\mathbf k,\omega)$ space.}
 \begin{enumerate}
@@ -171,8 +229,8 @@ pipelines, allowing cross-validation of results.
 
 \paragraph{Method 2: Demodulation + low-pass filter.}
 \begin{enumerate}
-\item Choose a carrier frequency $\omega_0$ and wavevector $\mathbf k_0$ (e.g.,
-  from prior FFT or from expected excitation parameters).
+\item Choose a carrier frequency $\omega_0$ and wavevector $\mathbf k_0$ from the \emph{initialization}
+  (optionally confirmed by FFT cross-checks).
 
 \item Multiply the substrate field by the conjugate carrier:
   \begin{equation}
@@ -303,25 +361,40 @@ hold identically (Bianchi identities). The inhomogeneous equations are
 Section~\ref{falsifiable-criteria}).
 
 \subsubsection{Holonomy measurement}
+\label{sec:holonomy-wilson}
 
-To measure the Berry phase (holonomy) accumulated around a closed loop
-$\gamma$ in spacetime, we compute the line integral
+To measure the geometric holonomy accumulated around a closed loop $\gamma$ in
+spacetime we distinguish the non-degenerate ($N=1$) and degenerate ($N>1$) cases.
+
+\paragraph{Non-degenerate transport ($U(1)$).}
+For $N=1$ we compute the line integral
 \begin{equation}
 \Gamma[\gamma] = \oint_\gamma a_\mu \, dx^\mu
 = \int_{\Sigma} f_{\mu\nu} \, d\Sigma^{\mu\nu},
 \end{equation}
-In practice, $\Gamma[\gamma]$ is computed on the discrete grid via link variables:
+where $\Sigma$ is any two-surface bounded by $\gamma$ (Stokes' theorem). In
+practice, $\Gamma[\gamma]$ is computed on the discrete grid via link variables:
 for a loop discretized into steps $\Delta_{\mu_j}$ we evaluate
 $\Gamma[\gamma]\approx \arg\prod_j U_{\mu_j}$, equivalently via plaquette phases
-(Eq.~\eqref{eq:plaquette-curvature}). This avoids gauge-fixing and remains stable in
-the presence of seams and near-degeneracies \cite{Ryabinkin2013QCLGP}.
+(Eq.~\eqref{eq:plaquette-curvature}). This avoids gauge-fixing and remains stable
+in the presence of seams and near-degeneracies \cite{Ryabinkin2013QCLGP}. The
+resulting holonomy is gauge-invariant and physically observable via interference
+effects.
 
-where $\Sigma$ is any two-surface bounded by $\gamma$ (Stokes' theorem). This
-holonomy is gauge-invariant and physically observable via interference effects.
+\paragraph{Degenerate transport ($U(N)$ / Wilczek--Zee).}
+For $N>1$ we use a gauge-invariant \emph{Wilson loop} matrix. Let
+$U_j=[u_1,\dots,u_N]$ be an orthonormal frame spanning the degenerate subspace at
+sample point $j$ along the loop. Define overlap matrices $M_j = U_j^\dagger
+U_{j+1}$ and the holonomy
+\begin{equation}
+W = \prod_j M_j \in U(N).
+\end{equation}
+Gauge-invariant diagnostics include $\mathrm{tr}(W)$ and the eigenphases of $W$.
 
-For the electron defect (toroidal soliton), the target signature is
-$\Gamma = 2\pi$ (spin-$1/2$, $4\pi$ periodicity) when $\gamma$ encloses the
-defect core once.
+\paragraph{Electron target signature.}
+For the electron-like double-loop defect (Appendix B) the target spinorial
+signature is $W \approx -I$ after one circuit (state sign flip), and $W^2 \approx
+I$ after two circuits.
 
 \subsubsection{Gravitational diagnostics (unchanged principle)}
 

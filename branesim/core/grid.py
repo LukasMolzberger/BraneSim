@@ -26,6 +26,7 @@ class BraneGrid:
         max_neighbors: int, maximum neighbors per point (2/8/26 for 1D/2D/3D)
         neighbors: [N, max_neighbors] tensor of neighbor indices (-1 for invalid)
         is_boundary: [N] boolean tensor marking boundary points
+        periodic_axes: Tuple[bool, ...] indicating which axes are periodic
         device: torch.device
     """
 
@@ -34,7 +35,8 @@ class BraneGrid:
         grid_shape: Tuple[int, ...],
         dimension: Dimensionality,
         spacing: float,
-        device: torch.device
+        device: torch.device,
+        periodic_axes: Tuple[bool, ...] = None
     ):
         """
         Initialize grid topology.
@@ -44,12 +46,24 @@ class BraneGrid:
             dimension: Dimensionality enum
             spacing: Grid spacing h in meters
             device: torch.device for tensor storage
+            periodic_axes: Tuple of booleans indicating which axes are periodic
+                          (default: None = all non-periodic)
+                          Example: (True, False, False) makes x-axis periodic
         """
         self.grid_shape = grid_shape
         self.dimension = dimension
         self.spacing = spacing
         self.device = device
         self.num_points = int(np.prod(grid_shape))
+
+        # Set periodic axes (default: all non-periodic)
+        ndim = len(grid_shape)
+        if periodic_axes is None:
+            self.periodic_axes = tuple([False] * ndim)
+        else:
+            if len(periodic_axes) != ndim:
+                raise ValueError(f"periodic_axes length {len(periodic_axes)} must match grid dimensionality {ndim}")
+            self.periodic_axes = tuple(periodic_axes)
 
         # Set max neighbors based on dimension
         if dimension == Dimensionality.ONE_D:
@@ -86,21 +100,27 @@ class BraneGrid:
         Build neighbors for 1D grid.
 
         Neighbors: [i-1, i+1]
+        With periodic BCs, wraps around at boundaries.
 
         Returns:
             [N, 2] tensor of neighbor indices
         """
         nx = self.grid_shape[0]
         neighbors = -np.ones((nx, 2), dtype=np.int64)
+        periodic_x = self.periodic_axes[0]
 
         for i in range(nx):
             # Left neighbor
             if i > 0:
                 neighbors[i, 0] = i - 1
+            elif periodic_x:
+                neighbors[i, 0] = nx - 1  # Wrap to right end
 
             # Right neighbor
             if i < nx - 1:
                 neighbors[i, 1] = i + 1
+            elif periodic_x:
+                neighbors[i, 1] = 0  # Wrap to left end
 
         return torch.from_numpy(neighbors).to(self.device)
 
