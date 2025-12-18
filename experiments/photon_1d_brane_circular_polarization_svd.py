@@ -20,6 +20,7 @@ from pathlib import Path
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
+from branesim.core.dimensions import MassModel
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.initialization.carrier_packets import make_photon_circular_packet
@@ -92,11 +93,11 @@ def run_photon_polarization_experiment(
     )
 
     # Calibrate mass density and spring stiffness
-    # ρ λ_C³ ≈ m_e  (Compton cell mass)
-    # c² = T/ρ  (wave speed)
-    rho = m_e / (lambda_C ** 3)
-    T = rho * c ** 2
-    m_point = rho * (h ** 3)
+    # For 1D chain: need linear density ρ₁ (kg/m)
+    # Compton cell mass: m_e ≈ ρ₁ * λ_C  (for 1D)
+    # Wave speed: c² = T/ρ₁
+    rho_1d = m_e / lambda_C  # Linear density (kg/m) for 1D chain
+    T = rho_1d * c ** 2       # Tension (N)
 
     # Initialize circular polarization packet
     # Packet width: 3 wavelengths (narrowband)
@@ -142,6 +143,16 @@ def run_photon_polarization_experiment(
         rest_length=h,  # Rest length equals spacing
     )
 
+    # Create mass model with proper 1D linear density
+    mass_model = MassModel.from_density(
+        density=rho_1d,      # Linear density in kg/m
+        intrinsic_dim=1,     # 1D chain
+        spacing=h,
+    )
+
+    print(f"\nMass model:")
+    print(f"  {mass_model}")
+
     # Time stepping
     dt = 0.1 * h / c  # CFL condition
     n_steps_per_cycle = int(2 * np.pi / (omega0 * dt))
@@ -155,7 +166,7 @@ def run_photon_polarization_experiment(
     print(f"  Simulation time:        {n_steps * dt:.6e} s ({n_cycles} cycles)")
 
     # Solver
-    solver = VelocityVerletSolver(dt, rho, physics, grid)
+    solver = VelocityVerletSolver(dt, mass_model, physics, grid)
 
     # Time series recording for SVD
     record_interval = max(1, n_steps_per_cycle // 20)  # 20 samples per cycle

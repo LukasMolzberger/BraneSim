@@ -10,6 +10,7 @@ from typing import Dict
 
 from branesim.core.state import BraneState
 from branesim.core.grid import BraneGrid
+from branesim.core.dimensions import MassModel
 
 
 class VelocityVerletSolver:
@@ -29,17 +30,18 @@ class VelocityVerletSolver:
 
     Attributes:
         dt: float, time step in seconds
-        mass_density: float, mass per unit volume (ρ_m) [kg/m³]
+        mass_model: MassModel with proper density units
         physics: Force computer instance
         grid: BraneGrid instance
         time: float, current simulation time
         step_count: int, number of steps taken
+        mass_per_point: float, mass per lattice node [kg]
     """
 
     def __init__(
         self,
         dt: float,
-        mass_density: float,
+        mass_model: MassModel,
         physics,  # SpringForceComputer
         grid: BraneGrid
     ):
@@ -48,27 +50,41 @@ class VelocityVerletSolver:
 
         Args:
             dt: Time step [s]
-            mass_density: Mass per unit volume ρ_m [kg/m³] (or per unit length in 1D, per unit area in 2D)
+            mass_model: MassModel with explicit density units
             physics: Force computer (e.g., SpringForceComputer)
             grid: BraneGrid with topology
+
+        Examples:
+            # 1D chain with linear density
+            mass_model = MassModel.from_density(rho, intrinsic_dim=1, spacing=h)
+            solver = VelocityVerletSolver(dt, mass_model, physics, grid)
+
+            # 2D sheet with surface density
+            mass_model = MassModel.from_density(rho, intrinsic_dim=2, spacing=h)
+            solver = VelocityVerletSolver(dt, mass_model, physics, grid)
+
+            # 1D chain with volumetric density (requires cross-section)
+            mass_model = MassModel.from_volumetric_density(
+                rho3=1000.0, intrinsic_dim=1, spacing=h, cross_section=A
+            )
+            solver = VelocityVerletSolver(dt, mass_model, physics, grid)
         """
         self.dt = dt
-        self.mass_density = mass_density
+        self.mass_model = mass_model
         self.physics = physics
         self.grid = grid
         self.time = 0.0
         self.step_count = 0
 
-        # Compute actual mass per point based on dimensionality
-        # 1D: m = ρ * h
-        # 2D: m = ρ * h²
-        # 3D: m = ρ * h³
-        if grid.dimension.value == 1:
-            self.mass_per_point = mass_density * grid.spacing
-        elif grid.dimension.value == 2:
-            self.mass_per_point = mass_density * grid.spacing ** 2
-        else:  # 3D
-            self.mass_per_point = mass_density * grid.spacing ** 3
+        # Extract per-node mass from model
+        self.mass_per_point = mass_model.m_node
+
+        # Verify dimensional consistency
+        if mass_model.intrinsic_dim != grid.dimension.value:
+            raise ValueError(
+                f"Mass model intrinsic dimension ({mass_model.intrinsic_dim}) "
+                f"does not match grid dimension ({grid.dimension.value})"
+            )
 
     def step(self, state: BraneState) -> BraneState:
         """
@@ -182,13 +198,16 @@ class VelocityVerletSolver:
         L_0 = self.physics.rest_length
         h = self.grid.spacing
 
+        # Get density in proper units for the intrinsic dimension
+        rho = self.mass_model.density
+
         if self.grid.dimension.value == 1:
             T_0 = k * (h - L_0)
-            mu = self.mass_density
+            mu = rho  # kg/m for 1D
             computed_c = (T_0 / mu) ** 0.5
         else:
             tension = k * L_0
-            computed_c = (tension / self.mass_density) ** 0.5
+            computed_c = (tension / rho) ** 0.5
 
         relative_error = abs(computed_c - expected_c) / expected_c
 
@@ -219,9 +238,11 @@ class VelocityVerletSolver:
         else:
             warning = ""
 
+        density_units = self.mass_model.get_density_units()
         return (
             f"VelocityVerletSolver(dt={self.dt:.2e}s, "
-            f"ρ_m={self.mass_density:.2e} kg/m³, "
+            f"ρ={self.mass_model.density:.2e} {density_units}, "
+            f"m_node={self.mass_per_point:.2e} kg, "
             f"c_eff={computed_c:.2e} m/s{warning}, "
             f"t={self.time:.2e}s, steps={self.step_count})"
         )

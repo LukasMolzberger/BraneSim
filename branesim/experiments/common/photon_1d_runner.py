@@ -13,6 +13,7 @@ import torch
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
+from branesim.core.dimensions import MassModel
 from branesim.core.initial_conditions import (
     initialize_wave_shape_1d,
     initialize_right_moving_velocities_time_reversed,
@@ -243,7 +244,16 @@ def build_photon_1d_simulation(cfg: Photon1DConfig) -> Photon1DRunData:
 
     grid = BraneGrid((nx,), Dimensionality.ONE_D, h_sim, device)
     physics = SpringForceComputer(k_sim, rest_length_sim)
-    solver = VelocityVerletSolver(dt_sim, m_sim, physics, grid)
+
+    # Create mass model
+    # In sim units: density = m_sim / h_sim (linear density for 1D)
+    rho_sim = m_sim / h_sim
+    mass_model = MassModel.from_density(
+        density=rho_sim,
+        intrinsic_dim=1,
+        spacing=h_sim,
+    )
+    solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
 
     # Lateralization measurement
     lat_config = LateralizationConfig(

@@ -220,6 +220,15 @@ For any such change:
 - document which non-negotiables are relevant
 - add/extend at least one test or experiment that would detect regressions
 
+### 7.4 Clean refactoring (no backwards compatibility mess)
+When refactoring code:
+- Do the refactoring completely or don't do it at all
+- No backwards compatibility if-statements or deprecated parameters with warnings
+- No conditional logic to support old and new APIs simultaneously
+- Make a clean break with the old API
+
+Technical debt from mixed old/new APIs is confusing and error-prone. Clean code is easier to maintain.
+
 ---
 
 ## 8. Summary

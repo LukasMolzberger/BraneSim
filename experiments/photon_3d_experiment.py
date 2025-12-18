@@ -26,6 +26,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
+from branesim.core.dimensions import MassModel
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
@@ -382,7 +383,16 @@ def main():
     print(f"  Background tension F_0 (sim) = k×(h-L_0) = {k_sim * (h_sim - rest_length_sim):.6e}")
 
     physics = SpringForceComputer(k_sim, rest_length_sim)
-    solver = VelocityVerletSolver(dt_sim, m_sim, physics, grid)
+
+    # Create mass model
+    # In sim units: density = m_sim / h_sim^3 (volumetric density for 3D)
+    rho_sim = m_sim / (h_sim ** 3)
+    mass_model = MassModel.from_density(
+        density=rho_sim,
+        intrinsic_dim=3,
+        spacing=h_sim,
+    )
+    solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
 
     # Initialize wave packet IN SIMULATION UNITS
     print(f"\nInitializing photon wave packet...")
