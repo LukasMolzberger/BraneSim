@@ -350,6 +350,20 @@ In either case, the output is a complex four-component envelope field
 $u(x,t)\in\mathbb C^4$ that varies slowly in space and time compared to its
 internal oscillation scale.
 
+\paragraph{Order of operations (transform-then-project).}
+A central numerical subtlety is that \emph{geometric phase lives on a gauge bundle}:
+the eigenvectors/polarization frames used for band identification can become
+\emph{multi-valued} (sign flips / branch cuts) when the dynamics approaches
+degeneracies or mode-crossings. In such situations, performing a Fourier/Wigner-like
+transform \emph{after} an adiabatic projection can implicitly require transforming
+double-valued objects and can suppress geometric-phase effects.
+A clear example is given by the WA vs.\ AW comparison in quantum--classical Liouville
+theory, where only the \emph{Wigner-then-Adiabatic} order captures GP effects
+\cite{Ryabinkin2013QCLGP}. For the present brane programme we therefore adopt the
+analogous rule:
+\emph{apply any time--frequency or $(\mathbf{k},\omega)$ filtering to the single-valued
+substrate fields first, and only then project onto the target band/subspace.}
+
 \subsubsection{Band definition and gauge structure}
 \label{sec:band-isolation-route2}
 
@@ -403,6 +417,17 @@ a_\mu(x,t) = i \langle \tilde u(x,t), \partial_\mu \tilde u(x,t) \rangle
 = i \sum_{A=1}^{4} \tilde u^{A\ast}(x,t) \, \partial_\mu \tilde u^A(x,t),
 \label{eq:spacetime-berry-connection}
 \end{equation}
+
+\paragraph{Discrete, gauge-robust evaluation.}
+While Eq.~\eqref{eq:spacetime-berry-connection} is the continuum definition,
+numerical evaluation should avoid relying on raw derivatives of an arbitrarily
+gauged eigenvector field. In practice we compute holonomy and curvature from
+\emph{overlap products} (link variables / Wilson loops), which are manifestly
+gauge-invariant and remain stable near gauge seams and (near-)degeneracies.
+This choice is directly motivated by the fact that double-valued adiabatic objects
+can make transform-based pipelines ill-defined and can erase GP physics if handled
+in the wrong order \cite{Ryabinkin2013QCLGP}; see the implementation details in
+Section~\ref{experimental-setting}.
 
 where $\partial_\mu=(\tfrac{1}{c}\partial_t,\nabla)$ and $\langle\cdot,\cdot\rangle$
 denotes the Hermitian inner product. This connection is real-valued and

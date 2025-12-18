@@ -206,6 +206,15 @@ pipelines, allowing cross-validation of results.
   normalize.
 \end{enumerate}
 
+\paragraph{Implementation note (avoid transforming gauge-dependent eigenvectors).}
+Near crossings/degeneracies the eigenvectors $u_n(\mathbf{k})$ may exhibit gauge
+seams (sign/phase jumps). To avoid any ill-defined transform of such objects, we
+treat $u_n(\mathbf{k})$ only as a \emph{local spectral frame} and project the
+\emph{single-valued transformed substrate field} using the projector
+$P_n(\mathbf{k}) = u_n(\mathbf{k})u_n^\dagger(\mathbf{k})$.
+This enforces the transform-then-project order and mirrors the WA-vs-AW lesson that
+geometric-phase physics can be lost if the order is reversed \cite{Ryabinkin2013QCLGP}.
+
 All three methods yield a normalized complex four-component envelope
 $\tilde u(x,t) \in \mathbb C^4$ with $|\tilde u|=1$. The choice of method
 depends on the analysis context: Method 1 is most robust for arbitrary
@@ -215,23 +224,44 @@ band-structure theory but requires approximate translation invariance.
 
 \subsubsection{Spacetime gauge connection and curvature}
 
-Given the normalized envelope $\tilde u(x,t)$, we compute the connection
-one-form directly via Eq.~\eqref{eq:spacetime-berry-connection}:
-\begin{equation}
-a_\mu(x,t) = i \sum_{A=1}^{4} \tilde u^{A\ast}(x,t) \, \partial_\mu \tilde u^A(x,t),
-\end{equation}
-where $\partial_\mu = (\tfrac{1}{c}\partial_t, \nabla)$. Spatial derivatives
-are computed via central finite differences on the discrete grid; temporal
-derivatives are computed from consecutive snapshots.
+Given the normalized envelope $\tilde u(x,t)$, we evaluate the spacetime connection
+and curvature using a discrete, gauge-invariant overlap formulation (link variables).
+This avoids numerical artifacts from gauge seams (phase/sign jumps) and is especially
+important near (near-)degeneracies \cite{Ryabinkin2013QCLGP}.
 
-The curvature two-form follows from Eq.~\eqref{eq:spacetime-berry-curvature}:
+Let $\Delta_\mu$ denote a single grid step in the $\mu$ direction
+($\Delta_0 \equiv \Delta t$, $\Delta_i \equiv \Delta x_i$). Define the $U(1)$ link:
 \begin{equation}
-f_{\mu\nu}(x,t) = \partial_\mu a_\nu - \partial_\nu a_\mu.
+U_\mu(x,t)=
+\frac{\langle \tilde u(x,t)\mid \tilde u(x+\Delta_\mu,t)\rangle}
+{\big|\langle \tilde u(x,t)\mid \tilde u(x+\Delta_\mu,t)\rangle\big|}.
+\label{eq:link-variable}
+\end{equation}
+A discrete connection estimate is then
+\begin{equation}
+a_\mu(x,t)\;\approx\;\frac{1}{\Delta x^\mu}\,\arg U_\mu(x,t),
+\end{equation}
+where $\Delta x^0 \equiv c\,\Delta t$ and $\Delta x^i\equiv \Delta x_i$.
+
+For curvature we use the plaquette (Wilson loop) phase:
+\begin{equation}
+W_{\mu\nu}(x,t)=
+U_\mu(x,t)\,U_\nu(x+\Delta_\mu,t)\,
+U_\mu^\ast(x+\Delta_\nu,t)\,U_\nu^\ast(x,t),
+\end{equation}
+and set
+\begin{equation}
+f_{\mu\nu}(x,t)\;\approx\;\frac{1}{\Delta x^\mu\,\Delta x^\nu}\,\arg W_{\mu\nu}(x,t).
+\label{eq:plaquette-curvature}
 \end{equation}
 
-This curvature is gauge-invariant and measures the local holonomy rate. Regions
-of nonzero $f_{\mu\nu}$ indicate geometric obstruction to globally trivial phase
-choice.
+\paragraph{Degenerate subspaces (non-Abelian case).}
+If the relevant band is $N$-fold degenerate, we work with an orthonormal frame
+$U(x,t)\in\mathbb{C}^{4\times N}$ spanning the subspace and define the overlap matrix
+$M_\mu(x,t)=U^\dagger(x,t)\,U(x+\Delta_\mu,t)\in\mathbb{C}^{N\times N}$.
+Holonomy is then obtained from ordered products of $M_\mu$ along a loop; the gauge-invariant
+$U(1)$ component can be extracted via $\arg\det(\cdot)$, while the full matrix encodes the
+$U(N)$ (Wilczek--Zee) structure.
 
 \subsubsection{Effective gauge potential and field reconstruction}
 
@@ -272,6 +302,12 @@ $\gamma$ in spacetime, we compute the line integral
 \Gamma[\gamma] = \oint_\gamma a_\mu \, dx^\mu
 = \int_{\Sigma} f_{\mu\nu} \, d\Sigma^{\mu\nu},
 \end{equation}
+In practice, $\Gamma[\gamma]$ is computed on the discrete grid via link variables:
+for a loop discretized into steps $\Delta_{\mu_j}$ we evaluate
+$\Gamma[\gamma]\approx \arg\prod_j U_{\mu_j}$, equivalently via plaquette phases
+(Eq.~\eqref{eq:plaquette-curvature}). This avoids gauge-fixing and remains stable in
+the presence of seams and near-degeneracies \cite{Ryabinkin2013QCLGP}.
+
 where $\Sigma$ is any two-surface bounded by $\gamma$ (Stokes' theorem). This
 holonomy is gauge-invariant and physically observable via interference effects.
 
@@ -543,10 +579,12 @@ Eq.~\eqref{eq:band-projection} recovers the correct band amplitude while
 suppressing leakage into other bands below a set tolerance.
 
 \item \textbf{Gauge robustness of Berry numerics:}
-Verify invariance of $\mathcal F_{ij}(\mathbf k)$ under random phase
-redefinitions $u_n(\mathbf k)\mapsto e^{i\chi(\mathbf k)}u_n(\mathbf k)$.
-Optionally, test quantized invariants (e.g. Chern number) on closed $\mathbf k$-surfaces
-in controlled toy configurations.
+Verify gauge invariance using the overlap (link / Wilson loop) formulation:
+apply random local phase redefinitions $\tilde u\mapsto e^{i\chi(x,t)}\tilde u$ and
+confirm that (i) plaquette phases (curvature) and (ii) loop holonomies are unchanged.
+Additionally, explicitly probe near-crossing configurations to demonstrate that naive
+derivative-of-phase estimates can fail when eigenvector gauges develop seams, consistent
+with the transform-order pathology highlighted in \cite{Ryabinkin2013QCLGP}.
 
 \item \textbf{Berry $\rightarrow$ EM (homogeneous Maxwell laws):}
 Compute $F_{\mu\nu}^{\mathrm{EM}}$ from the pulled-back Berry connection and
