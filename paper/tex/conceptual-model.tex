@@ -141,7 +141,7 @@ We postulate a minimal elastic Lagrangian density (per unit material volume)
 \begin{equation}
 \mathcal{L}
 =\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
--\frac{T}{2}\mathrm{tr}(E)
+-T\,\mathrm{tr}(E)
 -\mu|E|^2
 -\frac{\kappa}{2}|b|^2,
 \label{eq:brane-lagrangian}
@@ -220,7 +220,7 @@ Variation of the action $S=\int\mathcal{L}\,dx\,dt$ gives
 where $\nabla_i$ is the material covariant derivative built from $g$, $\Delta_g$ the Laplace–Beltrami operator (we use $\Delta_g^2=\Delta_g(\Delta_g\,\cdot)$, the biharmonic operator, applied to the normal component), $\mathbf{X}_\perp=(\mathbf{X}\cdot\mathbf{n})\mathbf{n}$ the normal part, and $\sigma^{ij}$ the (symmetric) 2nd Piola–Kirchhoff stress derived from
 \[
 \frac{\partial \mathcal{L}}{\partial g_{ij}}
-=-\frac{T}{4}g^{ij}-\mu E^{ij}.
+=-\frac{T}{2}g^{ij}-\mu E^{ij}.
 \]
 Here $E^{ij}=g^{ik}g^{j\ell}E_{k\ell}$ denotes the raised-index strain. (Exact closed forms are standard in thin-shell/branes; we keep the compact tensor form for clarity.)
 
@@ -269,21 +269,28 @@ Section~\ref{emergent-relativity-and-lorentz-invariance}.
 Define the local energy density
 \begin{equation}
 \mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
-+\frac{T}{2}\mathrm{tr}(E)
++T\,\mathrm{tr}(E)
 +\mu|E|^2
 +\frac{\kappa}{2}|b|^2.
 \label{eq:energy-density}
 \end{equation}
-Soliton nucleation occurs when coarse-grained energy within a Compton-scale material volume reaches the electron rest energy:
+
+\paragraph{Threshold for soliton nucleation: dimensionless nonlinearity.}
+Geometric nonlinearity is controlled by the dimensionless parameter measuring the slope of normal displacement:
 \begin{equation}
-\big\langle \mathcal{E} \big\rangle_{V_c}V_c \ge m_e c^2,\qquad
-V_c=\Big(\frac{\lambda_C}{2\pi}\Big)^3.
+\eta(x,t) \;\sim\; |\nabla X^4|^2 \;\sim\; (A k)^2,
+\label{eq:eta-nonlinearity}
+\end{equation}
+for a mode of amplitude $A$ and characteristic wavenumber $k$. Localization into a self-confined soliton occurs when $\eta$ reaches order unity over a region of linear size $\sim\lambda_C$, where $\lambda_C = \hbar/(m_e c)$ is the reduced Compton wavelength. For such a configuration with $k \sim 1/\lambda_C$, the nonlinearity condition $\eta \gtrsim 1$ implies $A \sim \lambda_C$.
+
+Given the calibration $\rho \lambda_C^3 \approx m_e$ (see Section~\ref{amplitude-scale-calibration}), the elastic energy in a Compton-scale cell with $\eta \sim 1$ satisfies
+\begin{equation}
+E_{\text{cell}} \;\sim\; \rho\,A^2\,\omega_C^2\,\lambda_C^3
+\;\sim\; \rho c^2 \lambda_C^3
+\;\sim\; m_e c^2,
 \label{eq:threshold-criterion}
 \end{equation}
-Above threshold, the geometric nonlinearity inherent in the full
-strain and curvature tensors can naturally lock in localized
-high-curvature 4D bulges, turning a propagating photon-like mode
-into a self-confined, particle-like soliton.
+where $\omega_C = c/\lambda_C$ is the Compton angular frequency. Thus, the \emph{energy-in-a-Compton-volume} threshold is not a separate postulate but the energetic restatement of the geometric nonlinearity condition $\eta \gtrsim 1$ given the mass-density calibration. Above threshold, the geometric nonlinearity inherent in the full strain and curvature tensors can naturally lock in localized high-curvature 4D bulges, turning a propagating photon-like mode into a self-confined, particle-like soliton.
 
 As a concrete example of this geometric nonlinearity, Appendix~\ref{app:bulge-curvature} shows that a Gaussian bulge of amplitude $A$ and width $\sigma$ in the fourth direction induces a three-dimensional scalar curvature at its center that scales as
 \begin{equation}

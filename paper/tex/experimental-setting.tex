@@ -351,7 +351,21 @@ Forces are $\mathbf F_p=-\partial U/\partial \mathbf R_p$. Because $|\mathbf R_q
 
 \paragraph{Discrete-to-continuum parameter mapping}\label{discrete-continuum-mapping}
 
-The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate. The effective \textbf{isotropic tension} $T$ in the continuum is encoded in the discrete spring stiffness parameter $k$ appearing in $\phi(\epsilon)$; in the small-strain limit, dimensional analysis and dispersion measurements yield $T \sim k/h$. The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
+The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate.
+
+\textbf{Dimensional consistency (tension and moduli).}
+For a lattice with spacing $h$, node mass $m$, and nearest-neighbor spring constant $k_s$ (units: N/m), the characteristic wave speed scales as
+\begin{equation}
+c^2 \sim \frac{k_s h^2}{m}.
+\end{equation}
+Equivalently, with continuum mass density $\rho \sim m/h^3$, the continuum tension parameter has units of Pa (energy per 3-volume) and scales as
+\begin{equation}
+T \sim \frac{k_s}{h},
+\qquad \text{so that } c^2 = \frac{T}{\rho}.
+\end{equation}
+This establishes the consistent dimensional mapping between discrete spring stiffness ($k_s$, in N/m) and continuum tension ($T$, in Pa). Similarly, the shear modulus $\mu$ and bulk modulus $K$ (if present) all carry units of Pa.
+
+The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
 
 \subsubsection{Amplitude scale calibration}\label{amplitude-scale-calibration}
 

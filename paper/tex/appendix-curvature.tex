@@ -35,8 +35,15 @@ and the squared norm is
 \Bigl(3 + \frac{r^4}{\sigma^4} - 2\,\frac{r^2}{\sigma^2}\Bigr)
 \;+\; \mathcal{O}\bigl((A/\sigma)^3\bigr).
 \end{equation}
-By the Gauss--Codazzi relation~\eqref{eq:gauss-codazzi-3d}, the
-three-dimensional scalar curvature is
+
+For a three-dimensional hypersurface embedded in flat $\mathbb{R}^4$ (codimension one), the Gauss equation in contracted form relates the intrinsic scalar curvature $R_3$ to the extrinsic curvature tensor $b_{ij}$ via
+\begin{equation}
+R_3 \;=\; K^2 \;-\; |b|^2,
+\label{eq:gauss-codazzi-3d}
+\end{equation}
+where $K = \tr(b) = g^{ij}b_{ij}$ is the mean curvature (trace of the second fundamental form) and $|b|^2 = b_{ij}b^{ij}$ is the squared Frobenius norm. This identity follows from the Gauss--Codazzi equations, which express the compatibility between the intrinsic (Riemann) curvature of the brane and its extrinsic bending in the ambient space \cite{DoCarmo1992}.
+
+Using this relation, the three-dimensional scalar curvature is
 \begin{equation}
 R_3 \;=\; K^2 \;-\; |b|^2
 \;=\; \frac{A^2}{\sigma^4}\,\exp\!\Bigl(-\frac{r^2}{\sigma^2}\Bigr)
