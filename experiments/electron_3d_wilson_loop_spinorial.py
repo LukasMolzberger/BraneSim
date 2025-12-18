@@ -64,11 +64,14 @@ def run_electron_holonomy_experiment(
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-    # Physical constants
-    c = PhysicalConstants.c
-    lambda_C = PhysicalConstants.lambda_C
-    omega_C = PhysicalConstants.omega_C
-    m_e = PhysicalConstants.m_e
+    # Physical constants (Compton scale)
+    constants = PhysicalConstants()
+    c = constants.c
+    lambda_C = constants.lambda_C
+    m_e = constants.m_e
+
+    # Compute Compton frequency: ω_C = m_e c² / ℏ
+    omega_C = m_e * c**2 / constants.hbar
 
     k0 = 2 * np.pi / lambda_C
     omega0 = omega_C
