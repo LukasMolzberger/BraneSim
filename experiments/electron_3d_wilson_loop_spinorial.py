@@ -92,8 +92,8 @@ def run_electron_holonomy_experiment(
     # Initialize state
     n_points = n_grid ** 3
     state = BraneState(
-        num_points=n_points,
-        dimensionality=Dimensionality.THREE_D,
+        grid_shape=(n_grid, n_grid, n_grid),
+        dimension=Dimensionality.THREE_D,
         device=device_torch,
     )
 
@@ -190,13 +190,25 @@ def run_electron_holonomy_experiment(
         print("\n⚠ WARNING: Too few frames collected. Results may not be reliable.")
         print("Consider increasing grid resolution or torus radius.\n")
 
+    # Ensure all frames have the same number of points (required for Wilson loop)
+    # Find minimum frame size
+    frame_sizes = [frame.shape[0] for frame in frames]
+    min_size = min(frame_sizes)
+    max_size = max(frame_sizes)
+
+    print(f"\n  Frame sizes: min={min_size}, max={max_size}")
+    print(f"  Truncating all frames to {min_size} points for consistency")
+
+    # Truncate all frames to minimum size
+    frames_uniform = [frame[:min_size, :] for frame in frames]
+
     # Compute Wilson loop
     print("\n" + "="*80)
     print("WILSON LOOP COMPUTATION")
     print("="*80)
 
     wilson_result = wilson_loop_holonomy(
-        frames=frames,
+        frames=frames_uniform,
         reorthonormalize=True,
         gauge_check=True,
     )
@@ -247,7 +259,7 @@ def run_electron_holonomy_experiment(
     print("="*80)
 
     invariant_check = verify_gauge_invariance(
-        frames=frames,
+        frames=frames_uniform,
         W_original=W,
         n_random_tests=3,
     )

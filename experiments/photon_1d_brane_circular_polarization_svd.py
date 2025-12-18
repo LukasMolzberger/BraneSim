@@ -86,8 +86,8 @@ def run_photon_polarization_experiment(
 
     # Initialize state
     state = BraneState(
-        num_points=nx,
-        dimensionality=Dimensionality.ONE_D,
+        grid_shape=(nx,),
+        dimension=Dimensionality.ONE_D,
         device=device_torch,
     )
 
@@ -138,9 +138,8 @@ def run_photon_polarization_experiment(
 
     # Initialize physics (spring force computer)
     physics = SpringForceComputer(
-        m_point=m_point,
-        k_spring=T / h,  # Spring constant from tension
-        L0=h,  # Rest length equals spacing
+        spring_constant=T / h,  # Spring constant from tension
+        rest_length=h,  # Rest length equals spacing
     )
 
     # Time stepping
@@ -156,7 +155,7 @@ def run_photon_polarization_experiment(
     print(f"  Simulation time:        {n_steps * dt:.6e} s ({n_cycles} cycles)")
 
     # Solver
-    solver = VelocityVerletSolver(dt=dt)
+    solver = VelocityVerletSolver(dt, rho, physics, grid)
 
     # Time series recording for SVD
     record_interval = max(1, n_steps_per_cycle // 20)  # 20 samples per cycle
@@ -173,7 +172,7 @@ def run_photon_polarization_experiment(
             times.append(step * dt)
 
         # Time step
-        solver.step(state, grid, physics)
+        solver.step(state)
 
         # Progress
         if (step + 1) % (n_steps // 10) == 0:
@@ -207,7 +206,14 @@ def run_photon_polarization_experiment(
     print(f"  Dominant dimension:     {svd_result.dominant_dimension}")
     print(f"  Is 2D degenerate:       {'YES' if svd_result.is_degenerate_2d else 'NO'}")
     print(f"  Singular values:        {svd_result.singular_values[:5]}")
-    print(f"  Energy in top 2 modes:  {svd_result.energy_ratios[1]*100:.2f}%")
+
+    # Check if we have enough energy ratios
+    if len(svd_result.energy_ratios) >= 2:
+        print(f"  Energy in top 2 modes:  {svd_result.energy_ratios[1]*100:.2f}%")
+    elif len(svd_result.energy_ratios) == 1:
+        print(f"  Energy in top 1 mode:   {svd_result.energy_ratios[0]*100:.2f}%")
+    else:
+        print(f"  WARNING: No energy ratios computed")
 
     if svd_result.is_degenerate_2d:
         print("\n✓ SUCCESS: 2D polarization subspace confirmed (no filtering used)")
