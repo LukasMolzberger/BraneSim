@@ -391,3 +391,70 @@ def verify_wave_propagation(
             print("⚠ Wave speed matches c within 5%")
         else:
             print(f"✗ Wave speed error {relative_error*100:.1f}% exceeds tolerance")
+
+
+def initialize_wave_shape_1d(
+    state: BraneState,
+    grid: BraneGrid,
+    wavelength: float,
+    amplitude: float,
+    center: float,
+    field_component: int = 3,
+) -> None:
+    """
+    Initialize ONLY the shape of a 1D wave packet.
+
+    Velocities are initialized separately using time-reversal initialization.
+    This uses the actual brane forces to compute consistent initial velocities.
+
+    Creates a Gaussian-enveloped sinusoidal wave packet:
+        ξ(x) = A · exp(-(x-x₀)²/(2σ²)) · cos(k(x-x₀))
+
+    where:
+        - A is the amplitude
+        - x₀ is the center position
+        - σ = 3λ/(2π) is the width (3 wavelengths FWHM)
+        - k = 2π/λ is the wave number
+        - Hard truncation at 4σ ensures compact support
+
+    Args:
+        state: BraneState with positions to be initialized
+        grid: BraneGrid with spacing information
+        wavelength: Wavelength λ of the carrier wave (in simulation units)
+        amplitude: Amplitude A of the wave packet (in simulation units)
+        center: Center position x₀ of the wave packet (in simulation units)
+        field_component: Embedding dimension to initialize (default: 3 for X⁴)
+
+    Note:
+        - This only sets positions; velocities should be set separately
+          using initialize_right_moving_velocities_time_reversed()
+        - The hard truncation at 4σ prevents far-field artifacts
+        - Grid spacing should satisfy Nyquist criterion: h < λ/2
+    """
+    device = state.device
+    dtype = state.dtype
+
+    # 1D coordinate array
+    x = torch.arange(grid.grid_shape[0], device=device, dtype=dtype) * grid.spacing
+
+    k = 2 * np.pi / wavelength
+    sigma = 3 * wavelength / (2 * np.pi)  # Width of wave packet (3 wavelengths)
+
+    # Gaussian envelope
+    envelope = amplitude * torch.exp(-((x - center) ** 2) / (2 * sigma ** 2))
+
+    # Hard-truncate Gaussian at 4σ to ensure compact support
+    # This prevents far-field regions from showing lateral motion before photon arrival
+    cutoff = 4.0 * sigma
+    mask = torch.abs(x - center) <= cutoff
+    envelope = envelope * mask
+
+    # Position field only - velocities set separately
+    state.positions[:, field_component] = envelope * torch.cos(k * (x - center))
+
+    print(f"\nInitialized 1D wave packet shape:")
+    print(f"  Wavelength λ = {wavelength:.6e} ({wavelength/grid.spacing:.1f} × h)")
+    print(f"  Width σ = {sigma:.6e}")
+    print(f"  Center = {center:.6e}")
+    print(f"  Amplitude = {amplitude:.6e}")
+    print(f"  Wave number k = {k:.6e} rad/length")
