@@ -11,31 +11,30 @@ from .berry_phase_1d import (
     plot_berry_phase_profiles,
     plot_berry_connection_profiles,
 )
-from .photon_1d import (
-    plot_photon_1d_amplitude_propagation,
-    plot_photon_1d_lateral_distortion,
-    plot_photon_1d_amplitude_velocity,
-    plot_photon_1d_lateral_velocity,
-    plot_photon_1d_lateralization_snapshots,
-    plot_photon_1d_lateralization_global,
-    plot_photon_1d_tracking_analysis,
-    plot_all_photon_1d_standard,
+from .brane_1d_viz import (
+    plot_brane_1d_amplitude_propagation,
+    plot_brane_1d_lateral_distortion,
+    plot_brane_1d_amplitude_velocity,
+    plot_brane_1d_lateral_velocity,
+    plot_brane_1d_tracking_analysis,
+    plot_all_brane_1d_standard,
 )
 
 __all__ = [
+    # Brane state visualization
     'BraneStateVisualizer',
     'visualize_brane_state',
     'extract_slice_xy',
     'extract_slice_xz',
     'extract_slice_yz',
+    # Berry phase
     'plot_berry_phase_profiles',
     'plot_berry_connection_profiles',
-    'plot_photon_1d_amplitude_propagation',
-    'plot_photon_1d_lateral_distortion',
-    'plot_photon_1d_amplitude_velocity',
-    'plot_photon_1d_lateral_velocity',
-    'plot_photon_1d_lateralization_snapshots',
-    'plot_photon_1d_lateralization_global',
-    'plot_photon_1d_tracking_analysis',
-    'plot_all_photon_1d_standard',
+    # Generic 1D brane visualization (preferred)
+    'plot_brane_1d_amplitude_propagation',
+    'plot_brane_1d_lateral_distortion',
+    'plot_brane_1d_amplitude_velocity',
+    'plot_brane_1d_lateral_velocity',
+    'plot_brane_1d_tracking_analysis',
+    'plot_all_brane_1d_standard',
 ]

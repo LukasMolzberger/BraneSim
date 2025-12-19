@@ -1,8 +1,8 @@
 """
-Visualization tools for 1D photon simulations.
+Visualization tools for 1D brane simulations.
 
-Provides reusable plotting functions for amplitude, lateral distortion, velocity,
-and lateralization analysis in 1D photon experiments.
+Provides reusable plotting functions for amplitude, lateral distortion, and velocity
+analysis in 1D brane experiments (photons, electrons, etc).
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ def _plot_1d_snapshots_generic(
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data containing coordinates and run_manager
     data_by_t : dict[float, np.ndarray]
         Dictionary mapping time (fs) to data array [N] in desired units
@@ -96,13 +96,13 @@ def _plot_1d_snapshots_generic(
     plt.close(fig)
 
 
-def plot_photon_1d_amplitude_propagation(run: "Photon1DRunData") -> None:
+def plot_brane_1d_amplitude_propagation(run: "Photon1DRunData") -> None:
     """
     Plot amplitude ξ (X⁴ displacement) snapshots in nanometers.
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data with snapshots and coordinates
     """
     # Convert sim → phys → nm
@@ -117,21 +117,21 @@ def plot_photon_1d_amplitude_propagation(run: "Photon1DRunData") -> None:
         run,
         data_by_t_nm,
         ylabel='ξ [nm]',
-        title=f'1D Photon - Amplitude Propagation (c = {run.constants.c:.3e} m/s)',
-        filename='photon_1d_example_propagation.png',
+        title=f'1D Brane - Amplitude Propagation (c = {run.constants.c:.3e} m/s)',
+        filename='brane_1d_amplitude_propagation.png',
         ylim_factor=1.5,
         add_zero_line=False,
         add_boundary_markers=True,
     )
 
 
-def plot_photon_1d_lateral_distortion(run: "Photon1DRunData") -> None:
+def plot_brane_1d_lateral_distortion(run: "Photon1DRunData") -> None:
     """
     Plot lateral distortion Δx (left/right movement) in picometers.
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data with snapshots and coordinates
     """
     # Convert sim → phys → pm
@@ -146,21 +146,21 @@ def plot_photon_1d_lateral_distortion(run: "Photon1DRunData") -> None:
         run,
         data_by_t_pm,
         ylabel='Δx [pm]',
-        title='1D Photon - Lateral Distortion (Left/Right Movement)',
-        filename='photon_1d_example_lateral_distortion.png',
+        title='1D Brane - Lateral Distortion (Left/Right Movement)',
+        filename='brane_1d_lateral_distortion.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
     )
 
 
-def plot_photon_1d_amplitude_velocity(run: "Photon1DRunData") -> None:
+def plot_brane_1d_amplitude_velocity(run: "Brane1DRunData") -> None:
     """
     Plot amplitude velocity v_ξ (∂ξ/∂t) in m/s.
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data with snapshots and coordinates
     """
     # Convert sim → phys (m/s)
@@ -175,21 +175,21 @@ def plot_photon_1d_amplitude_velocity(run: "Photon1DRunData") -> None:
         run,
         data_by_t_ms,
         ylabel='v_ξ [m/s]',
-        title='1D Photon - Amplitude Velocity (v_ξ = ∂ξ/∂t)',
-        filename='photon_1d_example_amplitude_velocity.png',
+        title='1D Brane - Amplitude Velocity (v_ξ = ∂ξ/∂t)',
+        filename='brane_1d_amplitude_velocity.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
     )
 
 
-def plot_photon_1d_lateral_velocity(run: "Photon1DRunData") -> None:
+def plot_brane_1d_lateral_velocity(run: "Brane1DRunData") -> None:
     """
     Plot lateral velocity v_x (∂x/∂t) in m/s.
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data with snapshots and coordinates
     """
     # Convert sim → phys (m/s)
@@ -204,92 +204,15 @@ def plot_photon_1d_lateral_velocity(run: "Photon1DRunData") -> None:
         run,
         data_by_t_ms,
         ylabel='v_x [m/s]',
-        title='1D Photon - Lateral Velocity (v_x = ∂x/∂t)',
-        filename='photon_1d_example_lateral_velocity.png',
+        title='1D Brane - Lateral Velocity (v_x = ∂x/∂t)',
+        filename='brane_1d_lateral_velocity.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
     )
 
 
-def plot_photon_1d_lateralization_snapshots(run: "Photon1DRunData") -> None:
-    """
-    Plot lateralization ratio R_lat (dimensionless, 0 to 1) at snapshot times.
-
-    Parameters
-    ----------
-    run : Photon1DRunData
-        Run data with snapshots and coordinates
-    """
-    x_nm = run.x_coords_phys_m * 1e9
-    # Use original times in seconds to avoid floating-point precision issues
-    times_phys_s_sorted = sorted(run.snapshot_times_phys_s)
-    n = len(times_phys_s_sorted)
-
-    fig, axes = plt.subplots(n, 1, figsize=(14, max(4, 3 * n)))
-    if n == 1:
-        axes = [axes]
-
-    fig.suptitle('1D Photon - Lateralization Ratio (R_lat = E_lat / E_total)',
-                 fontsize=16, fontweight='bold')
-
-    for ax, t_phys_s in zip(axes, times_phys_s_sorted):
-        t_fs = t_phys_s * 1e15
-        R_lat = run.snapshots_R_lat[t_phys_s]
-
-        ax.plot(x_nm, R_lat, 'orange', linewidth=2, label='R_lat')
-        ax.axhline(y=0.5, color='k', linestyle='--', linewidth=0.5, alpha=0.5,
-                   label='R_lat=0.5' if ax == axes[0] else '')
-        ax.set_ylabel('R_lat', fontsize=11)
-        ax.set_xlim(x_nm[0], x_nm[-1])
-        ax.set_ylim(0, 1)
-        ax.grid(True, alpha=0.3)
-
-        ax.text(0.02, 0.95, f't = {t_fs:.3f} fs',
-                transform=ax.transAxes,
-                fontsize=12, verticalalignment='top',
-                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
-
-        if ax == axes[0]:
-            ax.legend(loc='upper right', fontsize=10)
-
-    axes[-1].set_xlabel('Position [nm]', fontsize=12)
-
-    plt.tight_layout()
-    plt.savefig(run.run_manager.get_plot_path('photon_1d_example_lateralization.png'),
-                dpi=150, bbox_inches='tight')
-    plt.close(fig)
-
-
-def plot_photon_1d_lateralization_global(run: "Photon1DRunData") -> None:
-    """
-    Plot global lateralization ratio vs time.
-
-    Parameters
-    ----------
-    run : Photon1DRunData
-        Run data with tracking history
-    """
-    times_fs = np.array(run.times_phys_track_s) * 1e15
-    R_lat_global = np.array(run.R_lat_global_track)
-
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    ax.plot(times_fs, R_lat_global, 'orange', linewidth=2, label='Global R_lat')
-    ax.axhline(y=0.5, color='k', linestyle='--', linewidth=1, alpha=0.5, label='R_lat=0.5')
-    ax.set_xlabel('Time [fs]', fontsize=12)
-    ax.set_ylabel('Global R_lat', fontsize=12)
-    ax.set_title('Global Lateralization Ratio vs Time', fontsize=14, fontweight='bold')
-    ax.set_ylim(0, 1)
-    ax.grid(True, alpha=0.3)
-    ax.legend(fontsize=10)
-
-    plt.tight_layout()
-    plt.savefig(run.run_manager.get_plot_path('photon_1d_example_lateralization_global.png'),
-                dpi=150, bbox_inches='tight')
-    plt.close(fig)
-
-
-def plot_photon_1d_tracking_analysis(run: "Photon1DRunData") -> None:
+def plot_brane_1d_tracking_analysis(run: "Photon1DRunData") -> None:
     """
     Plot wave center tracking and energy conservation.
 
@@ -299,7 +222,7 @@ def plot_photon_1d_tracking_analysis(run: "Photon1DRunData") -> None:
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data with tracking history
     """
     times_fs = np.array(run.times_phys_track_s) * 1e15
@@ -327,57 +250,48 @@ def plot_photon_1d_tracking_analysis(run: "Photon1DRunData") -> None:
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(run.run_manager.get_plot_path('photon_1d_example_analysis.png'),
+    plt.savefig(run.run_manager.get_plot_path('brane_1d_tracking_analysis.png'),
                 dpi=150, bbox_inches='tight')
     plt.close(fig)
 
 
-def plot_all_photon_1d_standard(run: "Photon1DRunData") -> None:
+def plot_all_brane_1d_standard(run: "Photon1DRunData") -> None:
     """
-    Convenience function to generate all standard 1D photon plots.
+    Convenience function to generate all standard 1D brane plots.
 
     Generates:
     - Amplitude propagation (ξ vs x at different times)
     - Lateral distortion (Δx vs x)
     - Amplitude velocity (v_ξ vs x)
     - Lateral velocity (v_x vs x)
-    - Lateralization snapshots (R_lat vs x)
-    - Global lateralization (R_lat vs t)
     - Tracking analysis (center and energy vs t)
 
     Parameters
     ----------
-    run : Photon1DRunData
+    run : Brane1DRunData
         Run data containing all necessary information
 
     Example
     -------
-    >>> from branesim.experiments.common.photon_1d_runner import run_photon_1d, Photon1DConfig
-    >>> from branesim.visualization.photon_1d import plot_all_photon_1d_standard
+    >>> from branesim.utils.photon_1d_runner import run_photon_1d, Photon1DConfig
+    >>> from branesim.visualization.brane_1d_viz import plot_all_brane_1d_standard
     >>>
     >>> cfg = Photon1DConfig()
     >>> run = run_photon_1d(cfg)
-    >>> plot_all_photon_1d_standard(run)
+    >>> plot_all_brane_1d_standard(run)
     """
     print("\nCreating plots...")
-    plot_photon_1d_amplitude_propagation(run)
-    print("  ✓ Saved: photon_1d_example_propagation.png")
+    plot_brane_1d_amplitude_propagation(run)
+    print("  ✓ Saved: brane_1d_amplitude_propagation.png")
 
-    plot_photon_1d_lateral_distortion(run)
-    print("  ✓ Saved: photon_1d_example_lateral_distortion.png")
+    plot_brane_1d_lateral_distortion(run)
+    print("  ✓ Saved: brane_1d_lateral_distortion.png")
 
-    plot_photon_1d_amplitude_velocity(run)
-    print("  ✓ Saved: photon_1d_example_amplitude_velocity.png")
+    plot_brane_1d_amplitude_velocity(run)
+    print("  ✓ Saved: brane_1d_amplitude_velocity.png")
 
-    plot_photon_1d_lateral_velocity(run)
-    print("  ✓ Saved: photon_1d_example_lateral_velocity.png")
+    plot_brane_1d_lateral_velocity(run)
+    print("  ✓ Saved: brane_1d_lateral_velocity.png")
 
-    # Lateralization diagnostics removed
-    # plot_photon_1d_lateralization_snapshots(run)
-    # print("  ✓ Saved: photon_1d_example_lateralization.png")
-
-    # plot_photon_1d_lateralization_global(run)
-    # print("  ✓ Saved: photon_1d_example_lateralization_global.png")
-
-    plot_photon_1d_tracking_analysis(run)
-    print("  ✓ Saved: photon_1d_example_analysis.png")
+    plot_brane_1d_tracking_analysis(run)
+    print("  ✓ Saved: brane_1d_tracking_analysis.png")

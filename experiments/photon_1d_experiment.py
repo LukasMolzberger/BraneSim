@@ -13,7 +13,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from branesim.utils.photon_1d_runner import Photon1DConfig, run_photon_1d
-from branesim.visualization import plot_all_photon_1d_standard
+from branesim.visualization import plot_all_brane_1d_standard
 
 
 def main():
@@ -36,7 +36,7 @@ def main():
     run = run_photon_1d(cfg)
 
     # Generate all standard plots
-    plot_all_photon_1d_standard(run)
+    plot_all_brane_1d_standard(run)
 
     print(f"\n{'=' * 70}")
     print(f"All outputs saved to: {run.run_manager.run_dir}")
