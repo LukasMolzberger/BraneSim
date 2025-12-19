@@ -36,7 +36,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from branesim.utils.photon_1d_runner import Photon1DConfig, run_photon_1d
 from branesim.visualization import (
-    plot_all_photon_1d_standard,
+    plot_all_brane_1d_standard,
     plot_berry_phase_profiles,
     plot_berry_connection_profiles,
 )
@@ -69,7 +69,7 @@ def main():
     run = run_photon_1d(cfg)
 
     # Generate all standard photon plots (reuse visualization)
-    plot_all_photon_1d_standard(run)
+    plot_all_brane_1d_standard(run)
 
     # ========================================================================
     # Berry Phase Analysis (additional)
