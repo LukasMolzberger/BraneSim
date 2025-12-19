@@ -14,18 +14,14 @@ from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.core.solver import VelocityVerletSolver
 from branesim.core.dimensions import MassModel
-from branesim.core.initial_conditions import (
+from branesim.initialization.initial_conditions import (
     initialize_wave_shape_1d,
     initialize_right_moving_velocities_time_reversed,
 )
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
-from branesim.diagnostics.lateralization import (
-    LateralizationMeasurement,
-    LateralizationConfig,
-)
-from branesim.io import export_photon_1d_snapshot_csv
+from branesim.utils.io import export_photon_1d_snapshot_csv
 from branesim.utils import TestRunManager
 
 
@@ -86,7 +82,6 @@ class Photon1DRunData:
     state: BraneState
     solver: VelocityVerletSolver
     physics: SpringForceComputer
-    lateralization: LateralizationMeasurement
     initial_positions: torch.Tensor
 
     # Core scales (both sim and phys)
@@ -113,7 +108,6 @@ class Photon1DRunData:
     snapshots_delta_x: dict[float, np.ndarray]  # (x - x0)(t) [N] (scalar, backward compat)
     snapshots_v_xi: dict[float, np.ndarray]     # vξ(t) [N] (scalar, backward compat)
     snapshots_v_x: dict[float, np.ndarray]      # vx(t) [N] (scalar, backward compat)
-    snapshots_R_lat: dict[float, np.ndarray]    # R_lat(t) [N] (dimensionless)
     snapshots_xi_vec: dict[float, np.ndarray]   # Full displacement vector [N, 4]
     snapshots_v_vec: dict[float, np.ndarray]    # Full velocity vector [N, 4]
 
@@ -121,7 +115,6 @@ class Photon1DRunData:
     times_phys_track_s: list[float] = field(default_factory=list)
     centers_sim_track: list[float] = field(default_factory=list)
     energies_track_J: list[float] = field(default_factory=list)
-    R_lat_global_track: list[float] = field(default_factory=list)
 
 
 def _track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
@@ -255,18 +248,6 @@ def build_photon_1d_simulation(cfg: Photon1DConfig) -> Photon1DRunData:
     )
     solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
 
-    # Lateralization measurement
-    lat_config = LateralizationConfig(
-        amplitude_dim=3,
-        lateral_dims=(0,),
-    )
-    lateralization = LateralizationMeasurement(
-        config=lat_config,
-        grid=grid,
-        m_point=m_point,
-        reference_positions=initial_positions,
-    )
-
     # Initialize wave packet
     print(f"\nInitializing photon wave packet...")
 
@@ -329,7 +310,6 @@ def build_photon_1d_simulation(cfg: Photon1DConfig) -> Photon1DRunData:
         state=state,
         solver=solver,
         physics=physics,
-        lateralization=lateralization,
         initial_positions=initial_positions,
         h_sim=h_sim,
         dt_sim=dt_sim,
@@ -348,7 +328,6 @@ def build_photon_1d_simulation(cfg: Photon1DConfig) -> Photon1DRunData:
         snapshots_delta_x={},
         snapshots_v_xi={},
         snapshots_v_x={},
-        snapshots_R_lat={},
         snapshots_xi_vec={},
         snapshots_v_vec={},
     )
@@ -406,12 +385,6 @@ def run_photon_1d(cfg: Photon1DConfig) -> Photon1DRunData:
             ).cpu().numpy().copy()
             run.snapshots_v_vec[t_phys_s] = run.state.velocities.cpu().numpy().copy()
 
-            # Lateralization
-            R_lat_local, R_lat_global, diagnostics = run.lateralization.measure(
-                run.state, run.physics
-            )
-            run.snapshots_R_lat[t_phys_s] = R_lat_local.cpu().numpy().copy()
-
             # Optional CSV export
             if cfg.export_csv_snapshots:
                 csv_filename = run.run_manager.get_data_path(
@@ -423,7 +396,6 @@ def run_photon_1d(cfg: Photon1DConfig) -> Photon1DRunData:
                     run.grid,
                     run.initial_positions,
                     run.physics.spring_constant,
-                    run.lateralization,
                     run.physics,
                     run.h_sim,
                     run.mapper,
@@ -437,15 +409,11 @@ def run_photon_1d(cfg: Photon1DConfig) -> Photon1DRunData:
         if step % max(1, num_steps // 100) == 0:
             center_sim = _track_wave_center(run.state, run.grid)
             energy = run.solver.compute_energy(run.state)
-            R_lat_local, R_lat_global, diagnostics = run.lateralization.measure(
-                run.state, run.physics
-            )
 
             time_phys = run.mapper.to_phys_time(run.solver.time)
             run.times_phys_track_s.append(time_phys)
             run.centers_sim_track.append(center_sim)
             run.energies_track_J.append(energy['total'])
-            run.R_lat_global_track.append(R_lat_global)
 
         if step % print_interval == 0:
             time_phys = run.mapper.to_phys_time(run.solver.time)

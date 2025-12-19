@@ -2,7 +2,7 @@
 CSV export for 1D photon simulation snapshots.
 
 Exports detailed per-point data including positions, velocities, accelerations,
-forces, energies, and lateralization ratios in SI units.
+and forces in SI units.
 """
 
 from __future__ import annotations
@@ -17,7 +17,6 @@ def export_photon_1d_snapshot_csv(
     grid,
     initial_positions: torch.Tensor,
     spring_constant: float,
-    lateralization,
     physics,
     h_sim: float,
     mapper,
@@ -42,8 +41,6 @@ def export_photon_1d_snapshot_csv(
         Reference positions for computing displacements, shape [N, 4]
     spring_constant : float
         Spring constant in simulation units
-    lateralization : LateralizationMeasurement
-        Lateralization measurement object
     physics : SpringForceComputer
         Physics force computer
     h_sim : float
@@ -73,9 +70,6 @@ def export_photon_1d_snapshot_csv(
     - delta_L_to_next [m]: Spring extension beyond reference
     - F_left_x [N], F_left_xi [N]: Force from left neighbor
     - F_right_x [N], F_right_xi [N]: Force from right neighbor
-    - E_amp_kin [J], E_amp_pot [J]: Amplitude kinetic and potential energy
-    - E_lat_kin [J], E_lat_pot [J]: Lateral kinetic and potential energy
-    - R_lat: Lateralization ratio (dimensionless)
 
     Notes
     -----
@@ -85,19 +79,11 @@ def export_photon_1d_snapshot_csv(
     nx = state.positions.shape[0]
     neighbors = grid.neighbors
 
-    # Get lateralization measurement
-    R_lat_local, R_lat_global, diagnostics = lateralization.measure(state, physics)
-
     # Convert to numpy (still in sim units)
     positions_sim = state.positions.cpu().numpy()
     velocities_sim = state.velocities.cpu().numpy()
     accelerations_sim = state.accelerations.cpu().numpy()
     initial_pos_sim = initial_positions.cpu().numpy()
-    R_lat = R_lat_local.cpu().numpy()
-    E_amp_kin = diagnostics['E_amp_kin'].cpu().numpy()  # Already in J
-    E_amp_pot = diagnostics['E_amp_pot'].cpu().numpy()  # Already in J
-    E_lat_kin = diagnostics['E_lat_kin'].cpu().numpy()  # Already in J
-    E_lat_pot = diagnostics['E_lat_pot'].cpu().numpy()  # Already in J
 
     # Compute spring forces for each point (in sim units)
     k_sim = spring_constant
@@ -148,7 +134,6 @@ def export_photon_1d_snapshot_csv(
             'h_spacing [m]',
             'L_to_next [m]', 'delta_L_to_next [m]',
             'F_left_x [N]', 'F_left_xi [N]', 'F_right_x [N]', 'F_right_xi [N]',
-            'E_amp_kin [J]', 'E_amp_pot [J]', 'E_lat_kin [J]', 'E_lat_pot [J]', 'R_lat'
         ])
 
         # Write data for each point (convert to physical units using mapper)
@@ -200,13 +185,6 @@ def export_photon_1d_snapshot_csv(
             f_right_x = mapper.to_phys_force(F_right_sim[i, lateral_dim_idx])
             f_right_xi = mapper.to_phys_force(F_right_sim[i, amplitude_dim_idx])
 
-            # Energy and lateralization (already in J and dimensionless)
-            e_amp_kin = E_amp_kin[i]
-            e_amp_pot = E_amp_pot[i]
-            e_lat_kin = E_lat_kin[i]
-            e_lat_pot = E_lat_pot[i]
-            r_lat = R_lat[i]
-
             # Grid spacing in physical units [m]
             h_phys = mapper.to_phys_length(h_sim)
 
@@ -220,5 +198,4 @@ def export_photon_1d_snapshot_csv(
                 h_phys,
                 L_to_next_phys, delta_L_to_next_phys,
                 f_left_x, f_left_xi, f_right_x, f_right_xi,
-                e_amp_kin, e_amp_pot, e_lat_kin, e_lat_pot, r_lat
             ])

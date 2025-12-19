@@ -5,12 +5,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import matplotlib.pyplot as plt
 import numpy as np
 
-from branesim.geometry.tubular_electron_geometry import (
+from branesim.initialization.geometry import (
     TorusKnotParameters,
     sample_torus_knot_centerline,
     compute_frenet_frames,
 )
-from branesim.geometry.tubular_photon_mode import (
+from branesim.initialization.geometry import (
     PhotonModeParameters,
     compute_circular_polarization_EB,
     sample_gaussian_envelope,

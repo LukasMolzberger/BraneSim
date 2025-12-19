@@ -14,7 +14,7 @@ from branesim.core.state import Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.em.em_state import EMState
 from branesim.em.potential_solver import FourPotentialVerletSolver
-from branesim.em.initial_conditions_em import initialize_plane_wave_Ay
+from branesim.initialization.initial_conditions_em import initialize_plane_wave_Ay
 
 
 def test_plane_wave_propagates():

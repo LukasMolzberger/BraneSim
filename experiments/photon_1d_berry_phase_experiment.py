@@ -34,9 +34,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import numpy as np
-
-from branesim.experiments.common import Photon1DConfig, run_photon_1d
+from branesim.utils.photon_1d_runner import Photon1DConfig, run_photon_1d
 from branesim.visualization import (
     plot_all_photon_1d_standard,
     plot_berry_phase_profiles,
@@ -48,7 +46,7 @@ from branesim.analysis import (
     BerryPhase1DConfig,
     berry_phase_profile_along_x,
 )
-from branesim.io import export_berry_phase_csv
+from branesim.utils.io import export_berry_phase_csv
 
 
 def main():

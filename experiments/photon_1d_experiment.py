@@ -12,7 +12,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from branesim.experiments.common import Photon1DConfig, run_photon_1d
+from branesim.utils.photon_1d_runner import Photon1DConfig, run_photon_1d
 from branesim.visualization import plot_all_photon_1d_standard
 
 

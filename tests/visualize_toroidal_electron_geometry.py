@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from branesim.geometry.tubular_electron_geometry import (
+from branesim.initialization.geometry import (
     TorusKnotParameters,
     sample_torus_knot_centerline,
     compute_frenet_frames,

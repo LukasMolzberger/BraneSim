@@ -23,9 +23,8 @@ from branesim.core.dimensions import MassModel
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
-from branesim.core.initial_conditions import (
+from branesim.initialization.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
-    verify_wave_propagation,
 )
 from branesim.utils import TestRunManager
 

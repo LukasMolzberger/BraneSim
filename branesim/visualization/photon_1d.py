@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from branesim.experiments.common.photon_1d_runner import Photon1DRunData
+    from branesim.utils.photon_1d_runner import Photon1DRunData
 
 
 def _plot_1d_snapshots_generic(
