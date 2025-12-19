@@ -1,45 +1,586 @@
 """
-1D Photon with Realistic Physical Scales
+1D Photon Simulation with Complete Diagnostics
 
-Uses actual speed of light c = 299,792,458 m/s and physical length scales
-based on the Compton wavelength.
+This experiment simulates a photon (EM wave packet) propagating along a 1D brane.
+It computes comprehensive diagnostics including:
+- Standard wave tracking (energy, position, shape)
+- Berry phase analysis (connection, phase profiles, quality metrics)
+- Spectrum analysis (FFT, power spectrum)
 
-This experiment is now a thin wrapper around the common photon_1d_runner
-to eliminate code duplication with photon_1d_berry_phase_experiment.py
+The Berry phase diagnostics extract gauge-dependent and gauge-invariant
+geometric properties of the wave's phase structure.
 """
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from branesim.utils.photon_1d_runner import Photon1DConfig, run_photon_1d
+import numpy as np
+import torch
+
+from branesim.core.state import BraneState, Dimensionality
+from branesim.core.grid import BraneGrid
+from branesim.core.solver import VelocityVerletSolver
+from branesim.core.dimensions import MassModel
+from branesim.initialization.initial_conditions import (
+    initialize_wave_shape_1d,
+    initialize_right_moving_velocities_time_reversed,
+)
+from branesim.physics.forces import SpringForceComputer
+from branesim.config.physical_constants import PhysicalConstants
+from branesim.physics.dimensional_mapping import DimensionalMapper
+from branesim.utils import TestRunManager
+
+# New diagnostic infrastructure
+from branesim.diagnostics import (
+    GridSpec,
+    Snapshot,
+    BerryConfig,
+    complex_band_state_from_quadrature,
+    pointwise_normalize,
+    berry_connection_along_axis,
+    berry_phase_integrated_along_axis,
+)
+from branesim.diagnostics.spectrum import spatial_power_spectrum_1d
+from branesim.diagnostics.types import DiagnosticResult
+from branesim.utils.io import export_photon_1d_snapshot_csv, save_result_csv_1d
 from branesim.visualization import plot_all_brane_1d_standard
+from branesim.visualization.berry_viz import (
+    plot_berry_1d_profile,
+    plot_berry_connection_profiles,
+    plot_berry_phase_profiles,
+)
+from branesim.visualization.spectrum_viz import plot_power_spectrum_1d
+
+
+def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
+    """Track center of wave energy in simulation units."""
+    energy_density = state.velocities[:, field_component] ** 2 + state.positions[:, field_component] ** 2
+    total = energy_density.sum()
+
+    if total > 1e-10:
+        x_coords = torch.arange(len(energy_density), device=energy_density.device,
+                               dtype=energy_density.dtype)
+        center = (x_coords * energy_density).sum() / total
+        return center.item() * grid.spacing
+    return 0.0
 
 
 def main():
-    """Run 1D photon simulation experiment."""
-    # Configure simulation
-    cfg = Photon1DConfig(
-        num_steps=20000,
-        num_snapshots=7,
-        add_snapshot_step1=True,
-        points_per_wavelength=20,
-        num_wavelengths=100,
-        amplitude_factor_h=10.0,
-        center_fraction=1.0 / 3.0,
-        export_csv_snapshots=True,
-        experiment_name="photon_1d_experiment",
-        cfl_factor=0.1,
+    """Run 1D photon simulation with complete diagnostics."""
+
+    # ========================================================================
+    # Configuration
+    # ========================================================================
+
+    # Simulation parameters
+    num_steps = 20000
+    num_snapshots = 7
+    add_snapshot_step1 = True  # Add extra snapshot at step 1
+    cfl_factor = 0.1
+
+    # Domain and resolution
+    points_per_wavelength = 20
+    num_wavelengths = 100
+
+    # Wave packet initialization
+    amplitude_factor_h = 10.0  # Amplitude = amplitude_factor_h * h_phys
+    center_fraction = 1.0 / 3.0  # Wave packet center as fraction of domain
+
+    # Output options
+    export_csv_snapshots = True
+    experiment_name = "photon_1d_experiment"
+
+    # Berry phase diagnostics configuration
+    berry_amplitude_threshold = 1e-6  # Minimum amplitude for valid Berry phase
+    berry_overlap_threshold = 1e-3    # Minimum overlap for valid edges
+
+    print("=" * 70)
+    print(f"1D Photon Simulation with Complete Diagnostics")
+    print("=" * 70)
+
+    # ========================================================================
+    # Setup
+    # ========================================================================
+
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name=experiment_name)
+    print(run_manager.get_summary())
+
+    # Physical constants
+    constants = PhysicalConstants()
+    print(f"\nPhysical Constants:")
+    print(f"  Speed of light c = {constants.c:.6e} m/s")
+    print(f"  Compton wavelength λ_C = {constants.lambda_C:.6e} m")
+
+    # Physical parameters
+    wavelength_phys = constants.lambda_C
+    h_phys = wavelength_phys / points_per_wavelength
+    D = 1
+    m_point = 2.861821e-27  # kg (universal point mass)
+
+    # 1D brane parameters
+    rho_D = m_point / (h_phys ** D)
+    T_D = rho_D * constants.c**2
+    rest_length_phys = constants.rest_length_frac * h_phys
+    c_wave = constants.c
+    k_spring = T_D * (h_phys ** (D - 2))
+
+    # Create dimensional mapper
+    mapper = DimensionalMapper(
+        h_phys=h_phys,
+        c_light=constants.c,
+        mass_reference=m_point
     )
 
-    # Run simulation
-    run = run_photon_1d(cfg)
+    # Simulation units
+    h_sim = mapper.to_sim_length(h_phys)
+    m_sim = mapper.to_sim_mass(m_point)
+    k_sim = mapper.to_sim_spring_constant(k_spring)
+    c_wave_sim = mapper.to_sim_velocity(c_wave)
+    rest_length_sim = mapper.to_sim_length(rest_length_phys)
 
-    # Generate all standard plots
-    plot_all_brane_1d_standard(run)
+    # Time step
+    dt_phys = cfl_factor * h_phys / c_wave
+    dt_sim = mapper.to_sim_time(dt_phys)
+
+    # Domain size
+    nx = num_wavelengths * points_per_wavelength
+    domain_length_phys = nx * h_phys
+    domain_length_sim = nx * h_sim
+
+    print(f"\nPhysical Parameters:")
+    print(f"  1D linear mass density ρ_1 = {rho_D:.6e} kg/m")
+    print(f"  1D tension T_1 = {T_D:.6e} N")
+    print(f"  Point mass m = {m_point:.6e} kg")
+    print(f"  Time step dt = {dt_phys:.6e} s")
+
+    print(f"\nSimulation Configuration:")
+    print(f"  Domain: {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
+    print(f"  CFL number = {cfl_factor:.3f}")
+
+    # Auto-select device
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        print(f"\n✓ Using NVIDIA GPU: {torch.cuda.get_device_name(0)}")
+        dtype = torch.float64
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        device = torch.device('mps')
+        print(f"\n✓ Using Apple Silicon GPU (MPS)")
+        dtype = torch.float32
+        print(f"  Using float32 (MPS doesn't support float64)")
+    else:
+        device = torch.device('cpu')
+        print(f"\n⚠ Using CPU (no GPU detected)")
+        dtype = torch.float64
+
+    # ========================================================================
+    # Create Simulation Components
+    # ========================================================================
+
+    # Create state
+    state = BraneState((nx,), Dimensionality.ONE_D, device, dtype)
+    state.initialize_flat_configuration(h_sim)
+    initial_positions = state.positions.clone()
+
+    # Fixed boundaries
+    state.set_fixed_boundaries()
+    print(f"\nBoundary Conditions:")
+    print(f"  Fixed boundaries at x=0 and x={domain_length_phys:.3e} m")
+
+    # Create grid and physics
+    grid = BraneGrid((nx,), Dimensionality.ONE_D, h_sim, device)
+    physics = SpringForceComputer(k_sim, rest_length_sim)
+
+    # Create mass model
+    rho_sim = m_sim / h_sim
+    mass_model = MassModel.from_density(
+        density=rho_sim,
+        intrinsic_dim=1,
+        spacing=h_sim,
+    )
+    solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
+
+    # ========================================================================
+    # Initialize Wave Packet
+    # ========================================================================
+
+    print(f"\nInitializing photon wave packet...")
+
+    amplitude_phys = amplitude_factor_h * h_phys
+    center_position_phys = domain_length_phys * center_fraction
+
+    wavelength_sim = mapper.to_sim_length(wavelength_phys)
+    amplitude_sim = mapper.to_sim_length(amplitude_phys)
+    center_position_sim = mapper.to_sim_length(center_position_phys)
+
+    print(f"  Physical wavelength: {wavelength_phys:.6e} m (= λ_C)")
+    print(f"  Sim wavelength: {wavelength_sim:.1f} grid units")
+
+    # Step 1: Initialize shape
+    print(f"\n[1] Initializing wave shape...")
+    initialize_wave_shape_1d(state, grid, wavelength_sim, amplitude_sim, center_position_sim)
+
+    # Step 2: Initialize velocities using time-reversal
+    print(f"\n[2] Initializing velocities using time-reversal method...")
+    initialize_right_moving_velocities_time_reversed(
+        state=state,
+        grid=grid,
+        physics=physics,
+        m_point=m_sim,
+        wave_speed=c_wave_sim,
+        field_component=3,
+        shift_cells=1,
+    )
+
+    # Step 3: Initialize accelerations
+    solver.initialize_accelerations(state)
+    state.apply_fixed_boundaries()
+
+    # Compute carrier frequency for complex state construction
+    omega_sim = 2.0 * np.pi * float(c_wave_sim) / float(wavelength_sim)
+
+    print(f"\nWave Parameters:")
+    print(f"  Carrier frequency ω_sim = {omega_sim:.6e} rad/sim-time")
+    print(f"  Carrier frequency ω_phys = {mapper.to_phys_frequency(omega_sim):.6e} rad/s")
+
+    # ========================================================================
+    # Prepare Diagnostics Infrastructure
+    # ========================================================================
+
+    # Coordinate arrays
+    x_coords_sim = grid.get_spatial_coordinates().squeeze()
+    x_coords_phys_m = mapper.to_phys_length(x_coords_sim).cpu().numpy()
+    x_nm = x_coords_phys_m * 1e9  # For plotting
+
+    # GridSpec for new diagnostic system
+    grid_spec = GridSpec(
+        shape=(nx,),
+        spacing_sim=float(h_sim),
+        coords_phys=(torch.from_numpy(x_coords_phys_m),)
+    )
+
+    # Berry phase configuration
+    berry_cfg = BerryConfig(
+        spacing_sim=float(h_sim),
+        amplitude_threshold=berry_amplitude_threshold,
+        overlap_threshold=berry_overlap_threshold,
+        eps=1e-12,
+        unwrap=True,
+        force_cpu_on_mps=(device.type == "mps"),
+    )
+
+    print(f"\nBerry Phase Configuration:")
+    print(f"  Amplitude threshold: {berry_cfg.amplitude_threshold:.6e}")
+    print(f"  Overlap threshold: {berry_cfg.overlap_threshold:.6e}")
+
+    # Prepare snapshot times
+    simulation_time_phys = mapper.to_phys_time(num_steps * dt_sim)
+    snapshot_times_phys = np.linspace(0, simulation_time_phys, num_snapshots)
+    snapshot_steps = {int(t / dt_phys): t for t in snapshot_times_phys}
+
+    if add_snapshot_step1:
+        snapshot_steps[1] = dt_phys
+
+    print(f"\nSimulation Setup Complete:")
+    print(f"  Total steps: {num_steps:,}")
+    print(f"  Snapshots: {len(snapshot_steps)} times")
+    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} fs")
+
+    # ========================================================================
+    # Storage for Results
+    # ========================================================================
+
+    # Snapshots (values in simulation units)
+    snapshots_xi = {}
+    snapshots_v_xi = {}
+    snapshots_delta_x = {}
+    snapshots_v_x = {}
+
+    # Berry phase results
+    berry_results = []  # List of DiagnosticResult objects
+
+    # Tracking
+    times_phys_track_s = []
+    centers_sim_track = []
+    energies_track_J = []
+
+    # ========================================================================
+    # Run Simulation
+    # ========================================================================
+
+    print(f"\nRunning simulation...")
+
+    print_interval = max(1, num_steps // 20)
+
+    for step in range(num_steps + 1):
+        # Capture snapshots
+        if step in snapshot_steps:
+            t_phys_s = snapshot_steps[step]
+
+            # Store fields (sim units)
+            snapshots_xi[t_phys_s] = state.positions[:, 3].cpu().numpy().copy()
+            snapshots_v_xi[t_phys_s] = state.velocities[:, 3].cpu().numpy().copy()
+            snapshots_delta_x[t_phys_s] = (
+                state.positions[:, 0] - initial_positions[:, 0]
+            ).cpu().numpy().copy()
+            snapshots_v_x[t_phys_s] = state.velocities[:, 0].cpu().numpy().copy()
+
+            # Optional CSV export
+            if export_csv_snapshots:
+                csv_filename = run_manager.get_data_path(
+                    f'photon_1d_snapshot_t{step:06d}.csv'
+                )
+                export_photon_1d_snapshot_csv(
+                    csv_filename,
+                    state,
+                    grid,
+                    initial_positions,
+                    physics.spring_constant,
+                    physics,
+                    h_sim,
+                    mapper,
+                    rest_length_sim=physics.rest_length,
+                )
+
+                if step == 0:
+                    print(f"  ✓ Exporting CSV snapshots ({len(snapshot_steps)} total)")
+
+        # Tracking (every 1% of simulation)
+        if step % max(1, num_steps // 100) == 0:
+            center_sim = track_wave_center(state, grid)
+            energy = solver.compute_energy(state)
+
+            time_phys = mapper.to_phys_time(solver.time)
+            times_phys_track_s.append(time_phys)
+            centers_sim_track.append(center_sim)
+            energies_track_J.append(energy['total'])
+
+        if step % print_interval == 0:
+            time_phys = mapper.to_phys_time(solver.time)
+            print(f"  Step {step:8d}/{num_steps}: t={time_phys:.6e}s")
+
+        if step < num_steps:
+            solver.step(state)
+
+    # ========================================================================
+    # Post-Processing: Berry Phase Diagnostics
+    # ========================================================================
 
     print(f"\n{'=' * 70}")
-    print(f"All outputs saved to: {run.run_manager.run_dir}")
+    print("Computing Berry Phase Diagnostics")
+    print(f"{'=' * 70}")
+
+    for t_phys_s in sorted(snapshots_xi.keys()):
+        t_fs = t_phys_s * 1e15
+        print(f"\nProcessing t = {t_fs:.3f} fs...")
+
+        # Get snapshots
+        xi_sim = snapshots_xi[t_phys_s]
+        v_xi_sim = snapshots_v_xi[t_phys_s]
+
+        # Convert to torch tensors
+        xi_t = torch.from_numpy(xi_sim).to(device, dtype)
+        v_xi_t = torch.from_numpy(v_xi_sim).to(device, dtype)
+
+        # Build complex band state: ψ = ξ + i·ξ̇/ω
+        psi = complex_band_state_from_quadrature(xi_t, v_xi_t, omega_sim, eps=berry_cfg.eps)
+
+        # Normalize pointwise
+        psi_hat, amp = pointwise_normalize(psi, eps=berry_cfg.eps)
+
+        # Compute Berry connection along x-axis
+        conn_result = berry_connection_along_axis(psi_hat, amp, axis=0, cfg=berry_cfg)
+
+        # Integrate to get Berry phase profile
+        phase_result = berry_phase_integrated_along_axis(conn_result["dphi"], axis=0, cfg=berry_cfg)
+
+        # Store as DiagnosticResult
+        berry_result = DiagnosticResult(
+            name=f"berry_phase_axis0",
+            t_sim=mapper.to_sim_time(t_phys_s),
+            t_phys_s=t_phys_s,
+            data={
+                "dphi": conn_result["dphi"],
+                "A_x": conn_result["A_axis"],
+                "gamma_wrapped": phase_result["gamma_wrapped"],
+                "gamma_unwrapped": phase_result["gamma_unwrapped"],
+                "amp": amp,
+            },
+            quality={
+                "mask_point": conn_result["mask_point"],
+                "valid_edge": conn_result["valid_edge"],
+                "overlap_abs": conn_result["overlap_abs"],
+            },
+            meta={
+                "axis": 0,
+                "omega_sim": omega_sim,
+                "config": berry_cfg,
+            }
+        )
+        berry_results.append(berry_result)
+
+        # Export to CSV using new infrastructure
+        csv_path = run_manager.get_data_path(f"berry_phase_t_{t_fs:.3f}fs.csv")
+        save_result_csv_1d(csv_path, berry_result, grid_spec, coord_name="x_m")
+
+        # Quality metrics
+        valid_frac = conn_result["valid_edge"].float().mean().item()
+        amp_mean = amp.mean().item()
+        print(f"  Valid edges: {valid_frac*100:.1f}%")
+        print(f"  Mean amplitude: {amp_mean:.6e}")
+
+    print(f"\n✓ Computed Berry phase at {len(berry_results)} snapshot times")
+
+    # ========================================================================
+    # Post-Processing: Spectrum Analysis
+    # ========================================================================
+
+    print(f"\n{'=' * 70}")
+    print("Computing Spectrum Diagnostics")
+    print(f"{'=' * 70}")
+
+    # Analyze spectrum at final time
+    t_final = sorted(snapshots_xi.keys())[-1]
+    xi_final = torch.from_numpy(snapshots_xi[t_final]).to(device, dtype)
+
+    spec_result = spatial_power_spectrum_1d(
+        xi_final,
+        grid_spec,
+        axis=0,
+        window="hann"
+    )
+
+    k_axis = spec_result["k_axis"].cpu().numpy()
+    power_mean = spec_result["power_mean"].cpu().numpy()
+
+    print(f"\nSpectrum computed at t = {t_final*1e15:.3f} fs")
+    print(f"  Peak wavenumber: {k_axis[power_mean.argmax()]:.6e} rad/sim-length")
+
+    # ========================================================================
+    # Visualization
+    # ========================================================================
+
+    print(f"\n{'=' * 70}")
+    print("Creating Visualizations")
+    print(f"{'=' * 70}")
+
+    # Standard brane plots (existing infrastructure)
+    # Reconstruct minimal run data for compatibility
+    class RunData:
+        pass
+
+    run_data = RunData()
+    run_data.run_manager = run_manager
+    run_data.snapshots_xi = snapshots_xi
+    run_data.snapshots_delta_x = snapshots_delta_x
+    run_data.snapshots_v_xi = snapshots_v_xi
+    run_data.snapshots_v_x = snapshots_v_x
+    run_data.x_coords_phys_m = x_coords_phys_m
+    run_data.snapshot_times_phys_s = sorted(snapshots_xi.keys())
+    run_data.times_phys_track_s = times_phys_track_s
+    run_data.centers_sim_track = centers_sim_track
+    run_data.energies_track_J = energies_track_J
+    run_data.h_sim = h_sim
+    run_data.mapper = mapper
+    run_data.constants = constants
+
+    plot_all_brane_1d_standard(run_data)
+    print(f"  ✓ Standard brane plots")
+
+    # Berry phase profile plot (detailed, with quality metrics)
+    if berry_results:
+        # Plot first and last snapshots
+        for i, idx in enumerate([0, -1]):
+            result = berry_results[idx]
+            fig = plot_berry_1d_profile(
+                result,
+                grid_spec,
+                coords=x_nm,
+                coord_label="x",
+                coord_unit="nm",
+                save_path=run_manager.get_plot_path(f"berry_profile_detailed_{i}.png"),
+                show_quality=True
+            )
+            print(f"  ✓ Berry profile (detailed) #{i}")
+
+    # Berry phase evolution plots (all times)
+    x_edges_nm = 0.5 * (x_nm[:-1] + x_nm[1:])
+
+    plot_berry_phase_profiles(
+        berry_results,
+        grid_spec,
+        coords=x_nm,
+        coord_label="x",
+        coord_unit="nm",
+        save_path=run_manager.get_plot_path("berry_phase_profiles.png")
+    )
+    print(f"  ✓ Berry phase profiles (all times)")
+
+    plot_berry_connection_profiles(
+        berry_results,
+        grid_spec,
+        coords=x_edges_nm,
+        coord_label="x",
+        coord_unit="nm",
+        save_path=run_manager.get_plot_path("berry_connection_profiles.png")
+    )
+    print(f"  ✓ Berry connection profiles (all times)")
+
+    # Spectrum plot
+    plot_power_spectrum_1d(
+        k_axis,
+        power_mean,
+        k_label="k",
+        k_unit="rad/sim-length",
+        title=f"Power Spectrum at t = {t_final*1e15:.3f} fs",
+        save_path=run_manager.get_plot_path("power_spectrum.png")
+    )
+    print(f"  ✓ Power spectrum")
+
+    # ========================================================================
+    # Summary
+    # ========================================================================
+
+    print(f"\n{'=' * 70}")
+    print("Simulation Complete!")
+    print(f"{'=' * 70}")
+
+    print(f"\nPhysical Interpretation:")
+    print(f"  Domain size: {domain_length_phys*1e9:.3f} nm ({num_wavelengths} wavelengths)")
+    print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm (Compton)")
+    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} fs")
+    print(f"  Snapshots: {len(snapshots_xi)} times")
+
+    print(f"\nDiagnostics Computed:")
+    print(f"  ✓ Wave tracking (energy, position)")
+    print(f"  ✓ Berry phase profiles ({len(berry_results)} times)")
+    print(f"  ✓ Berry connection (gauge field)")
+    print(f"  ✓ Quality metrics (amplitude masks, overlap)")
+    print(f"  ✓ Spectrum analysis")
+
+    print(f"\nEnergy Conservation:")
+    if energies_track_J:
+        E_initial = energies_track_J[0]
+        E_final = energies_track_J[-1]
+        drift = abs(E_final - E_initial) / E_initial * 100
+        print(f"  Initial: {E_initial:.6e} J")
+        print(f"  Final:   {E_final:.6e} J")
+        print(f"  Drift:   {drift:.3f}%")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": experiment_name,
+        "num_steps": num_steps,
+        "num_snapshots": len(snapshots_xi),
+        "wavelength_phys_m": wavelength_phys,
+        "omega_sim": omega_sim,
+        "berry_amplitude_threshold": berry_amplitude_threshold,
+        "berry_overlap_threshold": berry_overlap_threshold,
+    })
+
+    print(f"\n{'=' * 70}")
+    print(f"All outputs saved to: {run_manager.run_dir}")
     print(f"{'=' * 70}")
 
 

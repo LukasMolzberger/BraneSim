@@ -84,6 +84,18 @@ class DimensionalMapper:
         return mass_sim * self.mass_scale
 
     # ========================================================================
+    # FREQUENCY conversions (1/time)
+    # ========================================================================
+
+    def to_sim_frequency(self, frequency_phys: ScalarOrArray) -> ScalarOrArray:
+        """Convert physical frequency [rad/s or Hz] to simulation units."""
+        return frequency_phys * self.time_scale
+
+    def to_phys_frequency(self, frequency_sim: ScalarOrArray) -> ScalarOrArray:
+        """Convert simulation frequency to physical units [rad/s or Hz]."""
+        return frequency_sim / self.time_scale
+
+    # ========================================================================
     # VELOCITY conversions (length/time)
     # ========================================================================
 
