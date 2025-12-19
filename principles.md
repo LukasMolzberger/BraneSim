@@ -29,12 +29,18 @@ Read it before making **any** physics, mapping, measurement, or experiment chang
    - Time `t` is an **external evolution parameter** (not a geometric coordinate in the substrate).
    - Relativity, EM, gravity, particles, quantization are **emergent descriptions**.
 
+6. **Dimensionality-Agnostic Implementation**
+   All core implementations (solver, forces, initialization, diagnostics) must work for 1D, 2D, and 3D
+   without hard-coded dimension checks or separate code paths. Exceptions: visualization, geometry
+   setup, and experiment orchestration may be dimension-specific.
+
 **Quick check before a PR/change:**
 - [ ] Only changing substrate evolution or clearly separated diagnostics/initialization?
 - [ ] No emergent back-reaction introduced (even indirectly)?
 - [ ] No clamps/cutoffs/hand-imposed thresholds?
 - [ ] Coupling remains geometric (distance/metric), not an added "field"?
 - [ ] Layer boundaries respected (core vs mapping vs measurements vs experiments)?
+- [ ] Implementation works for 1D/2D/3D (or is in visualization/geometry/experiments)?
 
 ---
 
@@ -228,6 +234,85 @@ When refactoring code:
 - Make a clean break with the old API
 
 Technical debt from mixed old/new APIs is confusing and error-prone. Clean code is easier to maintain.
+
+### 7.5 Delete obsolete code immediately after refactoring
+When creating new implementations that replace old code:
+- **Delete the old implementation files immediately** after the refactoring is complete
+- Do not leave multiple versions of the same functionality in the codebase
+- Ensure experiments and tests use the new implementation, then remove old files
+- If backward compatibility wrappers are needed, they should be thin re-exports, not duplicated implementations
+
+**Rationale:** Dead code wastes developer time. Fixing bugs in obsolete code that's no longer used is extremely frustrating. Keep one clear implementation path.
+
+**Checklist after refactoring:**
+- [ ] Verified all experiments/tests use new implementation
+- [ ] Deleted old implementation files (not just deprecated them)
+- [ ] Updated imports in any remaining backward compatibility layers
+- [ ] No duplicate implementations of the same functionality exist
+
+### 7.6 Dimensionality-agnostic implementation (detailed)
+
+**Core principle:** The brane can be 1D, 2D, or 3D in its intrinsic dimensionality. All core
+infrastructure must handle any of these cases automatically, without dimension-specific code paths.
+
+**What MUST be dimension-agnostic:**
+- **Solver core:** forces, energy computation, integration steps
+- **Initialization:** carrier compilation, velocity initialization, polarization selection
+- **Diagnostics:** Berry phases, holonomy, spectrum analysis, induced metric
+- **Grid operations:** neighbor lookups, boundary conditions, gradients
+- **State management:** positions, velocities, accelerations updates
+
+**Implementation guidelines:**
+- Use `len(grid_shape)` or `state.dimension.value` to determine dimensionality at runtime
+- Loop over spatial dimensions: `for axis in range(ndim):`
+- Use dynamic slicing: `slice_list = [slice(None)] * ndim; slice_list[axis] = ...`
+- Tensor operations should broadcast naturally across dimensions
+- Grid reshaping: `field.view(*grid_shape)` adapts to any dimension
+
+**Example (correct):**
+```python
+# Dimension-agnostic gradient computation
+ndim = len(grid_shape)
+for axis in range(ndim):
+    center = [slice(None)] * ndim
+    center[axis] = slice(1, -1)
+    grad[tuple(center)] = (field[tuple(plus)] - field[tuple(minus)]) / (2*h)
+```
+
+**Example (incorrect):**
+```python
+# Hard-coded for 3D only - WRONG
+grad_x = (field[1:-1, :, :] - field[:-2, :, :]) / h
+grad_y = (field[:, 1:-1, :] - field[:, :-2, :]) / h
+grad_z = (field[:, :, 1:-1] - field[:, :, :-2]) / h
+```
+
+**What MAY be dimension-specific:**
+- **Visualization:** plotting 1D vs 2D vs 3D requires different matplotlib calls
+- **Geometry setup:** torus knots are inherently 3D, 1D chains are inherently 1D
+- **Experiment orchestration:** specific experiments may target a particular dimension
+- **Test fixtures:** individual tests can fix dimensionality for clarity
+
+**When dimension-specific code is unavoidable:**
+Use clear conditional structure and document why:
+```python
+if ndim == 1:
+    # 1D-specific visualization
+    plt.plot(x, field)
+elif ndim == 2:
+    # 2D-specific visualization
+    plt.imshow(field.reshape(nx, ny))
+else:  # 3D
+    # 3D-specific visualization (slice or 3D plot)
+    plt.imshow(field.reshape(nx, ny, nz)[:, :, nz//2])
+```
+
+**Validation:**
+Before merging code that operates on grids or fields:
+- [ ] Test manually with 1D, 2D, and 3D inputs (or add dimension-parametrized tests)
+- [ ] No hard-coded axis indices (0, 1, 2) except in dimension-specific sections
+- [ ] No assumptions like "grid_shape has exactly 3 elements"
+- [ ] Dynamic slicing used for multi-dimensional array operations
 
 ---
 

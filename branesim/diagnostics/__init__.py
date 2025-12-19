@@ -18,10 +18,11 @@ from branesim.diagnostics.types import (
     DiagnosticResult,
 )
 
-# Complex band state
-from branesim.diagnostics.complex_band_state import (
-    complex_band_state_from_quadrature,
-    pointwise_normalize,
+# Analytic signal (ω-free complex state)
+from branesim.diagnostics.analytic_signal import (
+    analytic_signal_along_axis,
+    pointwise_normalize_from_grid,
+    pointwise_normalize_scalar,
     pointwise_normalize_vector,
 )
 
@@ -63,9 +64,10 @@ __all__ = [
     "GridSpec",
     "Snapshot",
     "DiagnosticResult",
-    # Complex band state
-    "complex_band_state_from_quadrature",
-    "pointwise_normalize",
+    # Analytic signal (ω-free complex state)
+    "analytic_signal_along_axis",
+    "pointwise_normalize_from_grid",
+    "pointwise_normalize_scalar",
     "pointwise_normalize_vector",
     # Berry phase
     "BerryConfig",

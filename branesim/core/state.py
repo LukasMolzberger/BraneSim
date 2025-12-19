@@ -81,6 +81,10 @@ class BraneState:
         self.accelerations = torch.zeros((self.num_points, 4), device=self.device, dtype=dtype)
         self.new_accelerations = torch.zeros((self.num_points, 4), device=self.device, dtype=dtype)
 
+        # Rest configuration (unperturbed substrate)
+        # This is set by initialize_flat_configuration and used by initialization pipeline
+        self.rest_positions = None
+
         # Grid coordinates [N, D] for topology lookups
         self.grid_coords = self._create_grid_coords()
 
@@ -138,6 +142,8 @@ class BraneState:
         self.velocities = self.velocities.to(device)
         self.accelerations = self.accelerations.to(device)
         self.new_accelerations = self.new_accelerations.to(device)
+        if self.rest_positions is not None:
+            self.rest_positions = self.rest_positions.to(device)
         self.grid_coords = self.grid_coords.to(device)
         self.fixed_mask = self.fixed_mask.to(device)
         self.fixed_positions = self.fixed_positions.to(device)
@@ -160,6 +166,8 @@ class BraneState:
         new_state.velocities = self.velocities.clone()
         new_state.accelerations = self.accelerations.clone()
         new_state.new_accelerations = self.new_accelerations.clone()
+        if self.rest_positions is not None:
+            new_state.rest_positions = self.rest_positions.clone()
         new_state.grid_coords = self.grid_coords.clone()
         new_state.fixed_mask = self.fixed_mask.clone()
         new_state.fixed_positions = self.fixed_positions.clone()
@@ -265,6 +273,49 @@ class BraneState:
             self.positions[:, 1] = yy.flatten()
             self.positions[:, 2] = zz.flatten()
             # X^3 remains zero
+
+        # Store rest configuration
+        self.rest_positions = self.positions.clone()
+
+    def set_displacement(self, u: torch.Tensor) -> None:
+        """
+        Set positions from displacement field relative to rest configuration.
+
+        This is the API used by the initialization pipeline. It ensures that
+        carrier values are never written directly to positions - only
+        displacements are applied.
+
+        Args:
+            u: [N, 4] displacement field
+
+        Raises:
+            ValueError: If rest_positions is not set
+        """
+        if self.rest_positions is None:
+            raise ValueError(
+                "rest_positions not set. Call initialize_flat_configuration first."
+            )
+        self.positions = self.rest_positions + u
+
+    def set_kinematics(self, u: torch.Tensor, v: torch.Tensor) -> None:
+        """
+        Set both positions and velocities from displacement and velocity fields.
+
+        This is the main initialization API used by the init pipeline.
+
+        Args:
+            u: [N, 4] displacement field
+            v: [N, 4] velocity field
+
+        Raises:
+            ValueError: If rest_positions is not set
+        """
+        if self.rest_positions is None:
+            raise ValueError(
+                "rest_positions not set. Call initialize_flat_configuration first."
+            )
+        self.positions = self.rest_positions + u
+        self.velocities = v
 
     def set_fixed_boundaries(self):
         """

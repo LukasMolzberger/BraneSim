@@ -128,16 +128,21 @@ def berry_connection_along_axis(
 
     Examples
     --------
+    >>> from branesim.diagnostics.analytic_signal import (
+    ...     analytic_signal_along_axis,
+    ...     pointwise_normalize_from_grid,
+    ... )
+    >>>
     >>> # 1D case
-    >>> psi = complex_band_state_from_quadrature(xi, xi_dot, omega)
-    >>> psi_hat, amp = pointwise_normalize(psi)
+    >>> psi = analytic_signal_along_axis(xi, axis=0, spatial_ndim=1)
+    >>> psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec)
     >>> cfg = BerryConfig(spacing_sim=1.0)
     >>> result = berry_connection_along_axis(psi_hat, amp, axis=0, cfg=cfg)
     >>> A_x = result['A_axis']  # Berry connection along x
     >>>
     >>> # 2D case: compute connection along x-axis
-    >>> psi = complex_band_state_from_quadrature(xi_2d, v_2d, omega)
-    >>> psi_hat, amp = pointwise_normalize(psi)
+    >>> psi = analytic_signal_along_axis(xi_2d, axis=0, spatial_ndim=2)
+    >>> psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec)
     >>> result = berry_connection_along_axis(psi_hat, amp, axis=0, cfg=cfg)
     >>> A_x = result['A_axis']  # Shape: [nx-1, ny]
     """
@@ -332,16 +337,21 @@ def berry_plaquette_curvature(
 
     Examples
     --------
+    >>> from branesim.diagnostics.analytic_signal import (
+    ...     analytic_signal_along_axis,
+    ...     pointwise_normalize_from_grid,
+    ... )
+    >>>
     >>> # 2D case: compute curvature in xy-plane
-    >>> psi = complex_band_state_from_quadrature(xi_2d, v_2d, omega)
-    >>> psi_hat, amp = pointwise_normalize(psi)
+    >>> psi = analytic_signal_along_axis(xi_2d, axis=0, spatial_ndim=2)
+    >>> psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec)
     >>> cfg = BerryConfig(spacing_sim=1.0)
     >>> result = berry_plaquette_curvature(psi_hat, amp, axes=(0, 1), cfg=cfg)
     >>> F_xy = result['curvature']  # Shape: [nx-1, ny-1]
     >>>
     >>> # 3D case: compute curvature in xy-plane at each z
-    >>> psi = complex_band_state_from_quadrature(xi_3d, v_3d, omega)
-    >>> psi_hat, amp = pointwise_normalize(psi)
+    >>> psi = analytic_signal_along_axis(xi_3d, axis=0, spatial_ndim=3)
+    >>> psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec)
     >>> result = berry_plaquette_curvature(psi_hat, amp, axes=(0, 1), cfg=cfg)
     >>> F_xy = result['curvature']  # Shape: [nx-1, ny-1, nz]
     """
@@ -498,14 +508,16 @@ def berry_phase_profile_along_x(
     Examples
     --------
     >>> from branesim.diagnostics import (
-    ...     complex_band_state_from_quadrature,
-    ...     pointwise_normalize,
     ...     berry_phase_profile_along_x,
     ...     BerryPhase1DConfig
     ... )
+    >>> from branesim.diagnostics.analytic_signal import (
+    ...     analytic_signal_along_axis,
+    ...     pointwise_normalize_from_grid,
+    ... )
     >>>
-    >>> psi = complex_band_state_from_quadrature(xi, xi_dot, omega_sim)
-    >>> psi_hat, amp = pointwise_normalize(psi)
+    >>> psi = analytic_signal_along_axis(xi, axis=0, spatial_ndim=1)
+    >>> psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec)
     >>> cfg = BerryPhase1DConfig(spacing=h_sim)
     >>> result = berry_phase_profile_along_x(psi_hat, amp, cfg)
     >>> gamma = result['gamma_wrapped']

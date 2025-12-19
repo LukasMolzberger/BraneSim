@@ -36,12 +36,14 @@ from branesim.diagnostics import (
     GridSpec,
     Snapshot,
     BerryConfig,
-    complex_band_state_from_quadrature,
-    pointwise_normalize,
     berry_connection_along_axis,
     berry_phase_integrated_along_axis,
 )
-from branesim.diagnostics.spectrum import spatial_power_spectrum_1d
+from branesim.diagnostics.analytic_signal import (
+    analytic_signal_along_axis,
+    pointwise_normalize_from_grid,
+)
+from branesim.diagnostics.spectrum import local_power_spectrum_along_axis
 from branesim.diagnostics.types import DiagnosticResult
 from branesim.utils.io import export_photon_1d_snapshot_csv, save_result_csv_1d
 from branesim.visualization import plot_all_brane_1d_standard
@@ -50,7 +52,6 @@ from branesim.visualization.berry_viz import (
     plot_berry_connection_profiles,
     plot_berry_phase_profiles,
 )
-from branesim.visualization.spectrum_viz import plot_power_spectrum_1d
 
 
 def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
@@ -377,17 +378,15 @@ def main():
 
         # Get snapshots
         xi_sim = snapshots_xi[t_phys_s]
-        v_xi_sim = snapshots_v_xi[t_phys_s]
 
         # Convert to torch tensors
         xi_t = torch.from_numpy(xi_sim).to(device, dtype)
-        v_xi_t = torch.from_numpy(v_xi_sim).to(device, dtype)
 
-        # Build complex band state: ψ = ξ + i·ξ̇/ω
-        psi = complex_band_state_from_quadrature(xi_t, v_xi_t, omega_sim, eps=berry_cfg.eps)
+        # Build ω-free analytic signal via positive-frequency projection
+        psi = analytic_signal_along_axis(xi_t, axis=0, spatial_ndim=1)
 
         # Normalize pointwise
-        psi_hat, amp = pointwise_normalize(psi, eps=berry_cfg.eps)
+        psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec, eps=berry_cfg.eps)
 
         # Compute Berry connection along x-axis
         conn_result = berry_connection_along_axis(psi_hat, amp, axis=0, cfg=berry_cfg)
@@ -414,7 +413,6 @@ def main():
             },
             meta={
                 "axis": 0,
-                "omega_sim": omega_sim,
                 "config": berry_cfg,
             }
         )
@@ -440,22 +438,36 @@ def main():
     print("Computing Spectrum Diagnostics")
     print(f"{'=' * 70}")
 
-    # Analyze spectrum at final time
+    # Analyze local spectrum (STFT) at final time
     t_final = sorted(snapshots_xi.keys())[-1]
     xi_final = torch.from_numpy(snapshots_xi[t_final]).to(device, dtype)
 
-    spec_result = spatial_power_spectrum_1d(
+    # Choose window length based on carrier wavelength (no tuning to omega)
+    win_len = min(256, int(points_per_wavelength * 12))  # ~12 wavelengths per window
+    hop = win_len // 4
+
+    spec_result = local_power_spectrum_along_axis(
         xi_final,
         grid_spec,
         axis=0,
-        window="hann"
+        win_len=win_len,
+        hop=hop,
+        window="hann",
+        transverse_reduction="mean",
     )
 
+    x_centers = spec_result["x_centers"].cpu().numpy()
     k_axis = spec_result["k_axis"].cpu().numpy()
     power_mean = spec_result["power_mean"].cpu().numpy()
 
-    print(f"\nSpectrum computed at t = {t_final*1e15:.3f} fs")
-    print(f"  Peak wavenumber: {k_axis[power_mean.argmax()]:.6e} rad/sim-length")
+    # Find peak wavenumber (average over all windows)
+    avg_power = power_mean.mean(axis=0)
+    k_peak = k_axis[avg_power.argmax()]
+
+    print(f"\nLocal spectrum (STFT) computed at t = {t_final*1e15:.3f} fs")
+    print(f"  Window length: {win_len} points")
+    print(f"  Number of windows: {len(x_centers)}")
+    print(f"  Peak wavenumber (avg): {k_peak:.6e} rad/sim-length")
 
     # ========================================================================
     # Visualization
@@ -527,16 +539,9 @@ def main():
     )
     print(f"  ✓ Berry connection profiles (all times)")
 
-    # Spectrum plot
-    plot_power_spectrum_1d(
-        k_axis,
-        power_mean,
-        k_label="k",
-        k_unit="rad/sim-length",
-        title=f"Power Spectrum at t = {t_final*1e15:.3f} fs",
-        save_path=run_manager.get_plot_path("power_spectrum.png")
-    )
-    print(f"  ✓ Power spectrum")
+    # TODO: Add spectrogram visualization for local spectrum
+    # (plot_power_spectrum_1d was removed with global FFT)
+    print(f"  ⚠ Spectrogram visualization not yet implemented")
 
     # ========================================================================
     # Summary

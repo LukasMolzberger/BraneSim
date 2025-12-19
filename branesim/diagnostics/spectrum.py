@@ -1,361 +1,325 @@
 """
-Dimension-agnostic spectrum diagnostics (FFT-based).
+Local spectrum diagnostics via STFT (dimension-agnostic).
 
-Provides tools for computing spatial power spectra in 1D, 2D, and 3D.
-Supports:
-- 1D FFT along a specific axis
-- Full D-dimensional FFT
-- Optional windowing to reduce spectral leakage
-- Radial averaging for 2D/3D isotropic spectra
+This module provides local/windowed spectrum analysis using Short-Time Fourier
+Transform (STFT) over spatial coordinates. Unlike global FFT, STFT gives
+position-resolved spectral information: S(x, k) instead of just S(k).
+
+**Design principle:**
+- All functions are dimension-agnostic (work for 1D/2D/3D without branching)
+- Use tensor operations (movedim, reshape, unfold) to handle arbitrary dimensions
+- No global FFT functions (no spatial_power_spectrum_1d/nd, no radial averaging)
+
+Works for scalar and vector fields in any dimension.
 """
 
 from __future__ import annotations
 from typing import Literal
 import math
 import torch
-import numpy as np
 
 from .types import GridSpec
 
 
-def spatial_power_spectrum_1d(
+def _get_window(
+    win_len: int,
+    window: Literal["none", "hann", "hamming", "blackman"] | None,
+    device,
+    dtype,
+) -> torch.Tensor | None:
+    """
+    Create window function of given length.
+
+    Parameters
+    ----------
+    win_len : int
+        Window length
+    window : str | None
+        Window type
+    device : torch.device
+        Device for output
+    dtype : torch.dtype
+        Data type for output
+
+    Returns
+    -------
+    torch.Tensor | None
+        Window array of length win_len, or None if window="none"
+    """
+    if window is None or window == "none":
+        return None
+
+    if window == "hann":
+        return torch.hann_window(win_len, device=device, dtype=dtype)
+    elif window == "hamming":
+        return torch.hamming_window(win_len, device=device, dtype=dtype)
+    elif window == "blackman":
+        return torch.blackman_window(win_len, device=device, dtype=dtype)
+    else:
+        raise ValueError(f"Unknown window type: {window}")
+
+
+def local_power_spectrum_along_axis(
     field: torch.Tensor,
     grid: GridSpec,
     axis: int,
-    window: Literal["none", "hann", "hamming", "blackman"] | None = None
+    win_len: int,
+    hop: int,
+    window: Literal["none", "hann", "hamming", "blackman"] | None = "hann",
+    transverse_reduction: Literal["mean", "none"] = "mean",
+    component_reduction: Literal["sum", "none"] = "sum",
+    normalize: Literal["none", "win_len"] = "win_len",
 ) -> dict[str, torch.Tensor]:
     """
-    Compute 1D spatial power spectrum along a specified axis.
+    Compute local power spectrum along a spatial axis using STFT.
 
-    For each transverse coordinate, computes the 1D FFT along the specified
-    axis and returns the power spectrum. Statistics over transverse directions
-    are returned (mean and std).
+    This function is **dimension-agnostic**: it works for 1D, 2D, 3D (and beyond)
+    fields by using generic tensor operations.
+
+    The STFT is computed by:
+    1. Sliding a window along the chosen axis
+    2. Computing FFT within each window
+    3. Computing power spectrum |FFT|^2
+    4. Optionally averaging over transverse directions and/or components
+
+    Works for:
+    - Scalar fields: field.shape == grid.shape
+    - Vector fields: field.shape == (*grid.shape, C) (components last)
 
     Parameters
     ----------
     field : torch.Tensor
-        Real or complex field, shape [*grid.shape]
+        Real or complex field
+        Shape: [*grid.shape] or [*grid.shape, C]
     grid : GridSpec
         Grid specification
     axis : int
-        Axis along which to compute FFT (0 to D-1)
-    window : str | None
-        Window function to apply before FFT:
-        - "none" or None: no windowing (default)
-        - "hann": Hann window
-        - "hamming": Hamming window
-        - "blackman": Blackman window
+        Spatial axis along which to compute STFT (0 to grid.D-1)
+    win_len : int
+        Length of window (in grid points)
+    hop : int
+        Hop size between windows (stride in grid points)
+    window : str | None, optional
+        Window function: "none", "hann", "hamming", "blackman"
+        Default: "hann"
+    transverse_reduction : {"mean", "none"}, optional
+        How to reduce over transverse directions:
+        - "mean": return mean and std over transverse coords
+        - "none": return full array with transverse dims preserved
+        Default: "mean"
+    component_reduction : {"sum", "none"}, optional
+        How to reduce over vector components (for vector fields):
+        - "sum": sum power over components before other reductions
+        - "none": keep components separate
+        Default: "sum"
+    normalize : {"none", "win_len"}, optional
+        Power normalization:
+        - "none": raw |FFT|^2
+        - "win_len": divide by win_len (energy conservation)
+        Default: "win_len"
 
     Returns
     -------
-    dict
+    dict[str, torch.Tensor]
         Dictionary containing:
-        - k_axis: wavenumber array [k_len] (positive frequencies only)
-        - power_mean: mean power over transverse directions [k_len]
-        - power_std: standard deviation over transverse directions [k_len]
-        - power_full: power for all transverse slices [*transverse_shape, k_len]
+        - "x_centers": window center positions [n_win] (in sim coords)
+        - "k_axis": wavenumber array [n_k] (rad / sim-length)
+
+        If transverse_reduction == "mean":
+        - "power_mean": mean power [n_win, n_k]
+        - "power_std": std power [n_win, n_k]
+
+        If transverse_reduction == "none":
+        - "power_full": full power [*transverse, n_win, n_k]
+          or [*transverse, n_win, n_k, C] if component_reduction="none"
 
     Examples
     --------
-    >>> # 1D field
-    >>> field = torch.randn(256)
-    >>> grid = GridSpec(shape=(256,), spacing_sim=1.0)
-    >>> result = spatial_power_spectrum_1d(field, grid, axis=0)
-    >>> k = result['k_axis']
-    >>> power = result['power_mean']
+    >>> import torch
+    >>> from branesim.diagnostics.types import GridSpec
     >>>
-    >>> # 2D field: spectrum along x-axis, averaged over y
-    >>> field = torch.randn(128, 128)
-    >>> grid = GridSpec(shape=(128, 128), spacing_sim=1.0)
-    >>> result = spatial_power_spectrum_1d(field, grid, axis=0)
-    >>> k_x = result['k_axis']
-    >>> power_x_mean = result['power_mean']
-    >>> power_x_std = result['power_std']
+    >>> # 1D field: sinusoid
+    >>> N = 512
+    >>> x = torch.linspace(0, 10*torch.pi, N)
+    >>> field = torch.sin(5 * x)  # k=5
+    >>> grid = GridSpec(shape=(N,), spacing_sim=x[1].item() - x[0].item())
+    >>> spec = local_power_spectrum_along_axis(
+    ...     field, grid, axis=0, win_len=128, hop=32
+    ... )
+    >>> spec["x_centers"].shape
+    torch.Size([...])  # number of windows
+    >>> spec["k_axis"].shape
+    torch.Size([65])  # rfft: win_len//2 + 1
+    >>> spec["power_mean"].shape
+    torch.Size([..., 65])
+    >>>
+    >>> # 2D field: wave along x, constant in y
+    >>> field_2d = torch.sin(5 * x[:, None]).expand(N, 64)
+    >>> grid_2d = GridSpec(shape=(N, 64), spacing_sim=1.0)
+    >>> spec_2d = local_power_spectrum_along_axis(
+    ...     field_2d, grid_2d, axis=0, win_len=128, hop=32
+    ... )
+    >>> # power_mean is averaged over y direction
+    >>>
+    >>> # 2D vector field (3 components)
+    >>> field_vec = torch.randn(N, 64, 3)
+    >>> spec_vec = local_power_spectrum_along_axis(
+    ...     field_vec, grid_2d, axis=0, win_len=128, hop=32,
+    ...     component_reduction="sum"
+    ... )
+    >>> # power_mean has components summed before averaging
     """
+    # Validate inputs
+    if axis < 0 or axis >= grid.D:
+        raise ValueError(f"axis must be in [0, {grid.D-1}], got {axis}")
+
+    has_components = (field.ndim == grid.D + 1)
+    if field.ndim not in (grid.D, grid.D + 1):
+        raise ValueError(
+            f"field.ndim={field.ndim} incompatible with grid.D={grid.D}. "
+            f"Expected field.shape = {grid.shape} or {grid.shape} + (C,)"
+        )
+
     if not grid.is_compatible(field):
         raise ValueError(f"Field shape {field.shape} incompatible with grid {grid.shape}")
 
-    # Ensure field is on CPU for numpy interop (if needed for windowing)
-    device = field.device
-    dtype = field.dtype
+    if win_len > grid.shape[axis]:
+        raise ValueError(
+            f"win_len={win_len} larger than grid.shape[axis]={grid.shape[axis]}"
+        )
 
-    # Apply window if requested
+    device = field.device
+    dtype = field.dtype if not torch.is_complex(field) else field.real.dtype
+
+    # Strategy:
+    # 1. Move analyzed axis to last spatial position
+    # 2. If vector field: move components before axis, fold into batch
+    # 3. Flatten transverse dims into batch
+    # 4. Unfold windows along axis
+    # 5. Apply window, FFT, power
+    # 6. Reshape back and reduce as requested
+
+    spatial_ndim = grid.D
+
+    # Step 1: Move axis to position (spatial_ndim - 1)
+    x = field.movedim(axis, spatial_ndim - 1)
+    # x.shape = [*transverse, N] or [*transverse, N, C]
+
+    if has_components:
+        # x.shape = [*transverse, N, C]
+        # Move C before N: [*transverse, C, N]
+        x = x.movedim(-1, -2)
+        # Now x.shape = [*transverse, C, N]
+        transverse_shape = x.shape[:spatial_ndim - 1]
+        C = x.shape[spatial_ndim - 1]
+        N = x.shape[spatial_ndim]
+        # Flatten: [batch, N] where batch = prod(transverse) * C
+        batch_total = int(x.numel() // N)
+        x_flat = x.reshape(batch_total, N)
+    else:
+        # x.shape = [*transverse, N]
+        transverse_shape = x.shape[:spatial_ndim - 1]
+        N = x.shape[spatial_ndim - 1]
+        C = None
+        # Flatten: [batch, N]
+        batch_total = int(x.numel() // N)
+        x_flat = x.reshape(batch_total, N)
+
+    # Step 2: Unfold windows
+    # x_flat.shape = [batch, N]
+    # unfold -> [batch, N_windows, win_len]
+    x_unfolded = x_flat.unfold(dimension=1, size=win_len, step=hop)
+    # x_unfolded.shape = [batch, n_win, win_len]
+    n_win = x_unfolded.shape[1]
+
+    # Step 3: Apply window function
     if window is not None and window != "none":
-        # Create window along the specified axis
-        axis_len = grid.shape[axis]
-        if window == "hann":
-            win = torch.hann_window(axis_len, device=device, dtype=torch.float32)
-        elif window == "hamming":
-            win = torch.hamming_window(axis_len, device=device, dtype=torch.float32)
-        elif window == "blackman":
-            win = torch.blackman_window(axis_len, device=device, dtype=torch.float32)
+        win = _get_window(win_len, window, device, dtype)
+        if win is not None:
+            # Broadcast: [1, 1, win_len]
+            x_unfolded = x_unfolded * win[None, None, :]
+
+    # Step 4: FFT per window
+    # x_unfolded.shape = [batch, n_win, win_len]
+    # We want FFT along last dim
+    if torch.is_complex(field):
+        X = torch.fft.fft(x_unfolded, dim=-1)  # [batch, n_win, win_len]
+        n_k = win_len
+    else:
+        # rfft expects real input, don't convert to complex dtype
+        X = torch.fft.rfft(x_unfolded, dim=-1)  # [batch, n_win, win_len//2+1]
+        n_k = win_len // 2 + 1
+
+    # Step 5: Compute power
+    power_flat = torch.abs(X) ** 2  # [batch, n_win, n_k]
+
+    if normalize == "win_len":
+        power_flat = power_flat / win_len
+
+    # Step 6: Reshape back to [*transverse, C, n_win, n_k] or [*transverse, n_win, n_k]
+    if has_components:
+        # batch_total = prod(transverse) * C
+        # Reshape to [*transverse, C, n_win, n_k]
+        batch_transverse = int(batch_total // C)
+        power_reshaped = power_flat.reshape(*transverse_shape, C, n_win, n_k)
+    else:
+        # Reshape to [*transverse, n_win, n_k]
+        power_reshaped = power_flat.reshape(*transverse_shape, n_win, n_k)
+
+    # Step 7: Reduce over components if requested (for vector fields)
+    if has_components and component_reduction == "sum":
+        # Sum over component dimension (axis = spatial_ndim - 1)
+        power_reshaped = power_reshaped.sum(dim=spatial_ndim - 1)
+        # Now power_reshaped.shape = [*transverse, n_win, n_k]
+
+    # Step 8: Reduce over transverse dimensions if requested
+    if transverse_reduction == "mean":
+        if spatial_ndim == 1:
+            # No transverse dimensions
+            power_mean = power_reshaped  # shape: [n_win, n_k]
+            power_std = torch.zeros_like(power_mean)
         else:
-            raise ValueError(f"Unknown window: {window}")
-
-        # Reshape window to broadcast along the axis
-        win_shape = [1] * field.ndim
-        win_shape[axis] = axis_len
-        win = win.reshape(win_shape)
-
-        field = field * win
-
-    # Compute FFT along the specified axis
-    # torch.fft.rfft for real input, torch.fft.fft for complex input
-    if torch.is_complex(field):
-        fft_result = torch.fft.fft(field, dim=axis)
-    else:
-        fft_result = torch.fft.rfft(field, dim=axis)
-
-    # Compute power: |FFT|^2
-    power = torch.abs(fft_result) ** 2
-
-    # Normalize power (optional: by 1/N for energy conservation)
-    N = grid.shape[axis]
-    power = power / N
-
-    # Compute wavenumber array
-    # k = 2π * f / spacing, where f is frequency in cycles per point
-    if torch.is_complex(field):
-        freqs = torch.fft.fftfreq(N, d=float(grid.spacing_sim), device=device)
-        k_axis = 2.0 * math.pi * freqs
-    else:
-        freqs = torch.fft.rfftfreq(N, d=float(grid.spacing_sim), device=device)
-        k_axis = 2.0 * math.pi * freqs
-
-    # Statistics over transverse directions
-    if grid.D == 1:
-        # No transverse directions
-        power_mean = power
-        power_std = torch.zeros_like(power)
-        power_full = power
-    else:
-        # Compute mean and std over all dimensions except axis
-        reduce_dims = [i for i in range(power.ndim) if i != axis]
-        power_mean = power.mean(dim=reduce_dims)
-        power_std = power.std(dim=reduce_dims)
-        power_full = power
-
-    return {
-        "k_axis": k_axis,
-        "power_mean": power_mean,
-        "power_std": power_std,
-        "power_full": power_full,
-    }
-
-
-def spatial_power_spectrum_nd(
-    field: torch.Tensor,
-    grid: GridSpec,
-    window: Literal["none", "hann", "hamming", "blackman"] | None = None
-) -> dict[str, torch.Tensor]:
-    """
-    Compute full N-dimensional spatial power spectrum.
-
-    Parameters
-    ----------
-    field : torch.Tensor
-        Real or complex field, shape [*grid.shape]
-    grid : GridSpec
-        Grid specification
-    window : str | None
-        Window function to apply before FFT (applied separably to each axis)
-
-    Returns
-    -------
-    dict
-        Dictionary containing:
-        - k_grids: tuple of wavenumber arrays for each dimension
-        - power: N-dimensional power spectrum, shape [*k_shape]
-
-    Examples
-    --------
-    >>> # 2D field
-    >>> field = torch.randn(128, 128)
-    >>> grid = GridSpec(shape=(128, 128), spacing_sim=1.0)
-    >>> result = spatial_power_spectrum_nd(field, grid)
-    >>> k_x, k_y = result['k_grids']
-    >>> power_2d = result['power']
-    """
-    if not grid.is_compatible(field):
-        raise ValueError(f"Field shape {field.shape} incompatible with grid {grid.shape}")
-
-    device = field.device
-
-    # Apply window if requested (separable windows along each axis)
-    if window is not None and window != "none":
-        windowed = field
-        for axis in range(grid.D):
-            axis_len = grid.shape[axis]
-            if window == "hann":
-                win = torch.hann_window(axis_len, device=device, dtype=torch.float32)
-            elif window == "hamming":
-                win = torch.hamming_window(axis_len, device=device, dtype=torch.float32)
-            elif window == "blackman":
-                win = torch.blackman_window(axis_len, device=device, dtype=torch.float32)
+            # Reduce over all transverse dimensions
+            reduce_dims = list(range(power_reshaped.ndim - 2))  # All except last two (n_win, n_k)
+            if len(reduce_dims) > 0:
+                power_mean = power_reshaped.mean(dim=reduce_dims)
+                power_std = power_reshaped.std(dim=reduce_dims)
             else:
-                raise ValueError(f"Unknown window: {window}")
+                # Edge case: no transverse dims to reduce
+                power_mean = power_reshaped
+                power_std = torch.zeros_like(power_mean)
 
-            # Reshape window to broadcast along the axis
-            win_shape = [1] * windowed.ndim
-            win_shape[axis] = axis_len
-            win = win.reshape(win_shape)
-            windowed = windowed * win
-        field = windowed
+        result_power = {
+            "power_mean": power_mean,
+            "power_std": power_std,
+        }
+    else:  # transverse_reduction == "none"
+        result_power = {
+            "power_full": power_reshaped,
+        }
 
-    # Compute full N-D FFT
+    # Step 9: Compute window center positions and wavenumbers
+    # Window centers in grid indices
+    win_indices = torch.arange(n_win, device=device, dtype=dtype) * hop + win_len / 2.0
+    # Convert to sim coordinates
+    x_centers = win_indices * grid.spacing_sim
+
+    # Wavenumber array
     if torch.is_complex(field):
-        fft_result = torch.fft.fftn(field, dim=list(range(grid.D)))
+        freqs = torch.fft.fftfreq(win_len, d=float(grid.spacing_sim), device=device)
     else:
-        fft_result = torch.fft.rfftn(field, dim=list(range(grid.D)))
-
-    # Compute power
-    power = torch.abs(fft_result) ** 2
-
-    # Normalize power
-    N_total = grid.num_points
-    power = power / N_total
-
-    # Compute wavenumber grids
-    k_grids = []
-    for axis in range(grid.D):
-        N = grid.shape[axis]
-        # For rfftn, last axis uses rfftfreq
-        if not torch.is_complex(field) and axis == grid.D - 1:
-            freqs = torch.fft.rfftfreq(N, d=float(grid.spacing_sim), device=device)
-        else:
-            freqs = torch.fft.fftfreq(N, d=float(grid.spacing_sim), device=device)
-        k = 2.0 * math.pi * freqs
-        k_grids.append(k)
+        freqs = torch.fft.rfftfreq(win_len, d=float(grid.spacing_sim), device=device)
+    k_axis = 2.0 * math.pi * freqs
 
     return {
-        "k_grids": tuple(k_grids),
-        "power": power,
+        "x_centers": x_centers,
+        "k_axis": k_axis,
+        **result_power,
     }
 
 
-def radial_average_spectrum_2d(
-    power_2d: torch.Tensor,
-    k_x: torch.Tensor,
-    k_y: torch.Tensor,
-    num_bins: int = 50
-) -> dict[str, torch.Tensor]:
-    """
-    Compute radially averaged power spectrum from 2D spectrum.
-
-    Useful for isotropic systems where we want P(|k|) instead of P(k_x, k_y).
-
-    Parameters
-    ----------
-    power_2d : torch.Tensor
-        2D power spectrum, shape [n_kx, n_ky]
-    k_x : torch.Tensor
-        Wavenumber array for x-axis, shape [n_kx]
-    k_y : torch.Tensor
-        Wavenumber array for y-axis, shape [n_ky]
-    num_bins : int
-        Number of radial bins
-
-    Returns
-    -------
-    dict
-        Dictionary containing:
-        - k_radial: radial wavenumber array [num_bins]
-        - power_radial: radially averaged power [num_bins]
-        - counts: number of (k_x, k_y) points in each bin [num_bins]
-
-    Examples
-    --------
-    >>> field = torch.randn(128, 128)
-    >>> grid = GridSpec(shape=(128, 128), spacing_sim=1.0)
-    >>> result_2d = spatial_power_spectrum_nd(field, grid)
-    >>> k_x, k_y = result_2d['k_grids']
-    >>> power_2d = result_2d['power']
-    >>> result_radial = radial_average_spectrum_2d(power_2d, k_x, k_y)
-    >>> k_r = result_radial['k_radial']
-    >>> P_r = result_radial['power_radial']
-    """
-    # Create 2D grid of |k| values
-    K_X, K_Y = torch.meshgrid(k_x, k_y, indexing='ij')
-    K_mag = torch.sqrt(K_X**2 + K_Y**2)
-
-    # Flatten
-    k_mag_flat = K_mag.flatten()
-    power_flat = power_2d.flatten()
-
-    # Compute radial bins
-    k_max = k_mag_flat.max().item()
-    k_bins = torch.linspace(0, k_max, num_bins + 1, device=k_x.device)
-    k_radial = 0.5 * (k_bins[:-1] + k_bins[1:])
-
-    # Bin the power
-    power_radial = torch.zeros(num_bins, device=k_x.device, dtype=power_2d.dtype)
-    counts = torch.zeros(num_bins, device=k_x.device, dtype=torch.int64)
-
-    for i in range(num_bins):
-        mask = (k_mag_flat >= k_bins[i]) & (k_mag_flat < k_bins[i + 1])
-        if mask.any():
-            power_radial[i] = power_flat[mask].mean()
-            counts[i] = mask.sum()
-
-    return {
-        "k_radial": k_radial,
-        "power_radial": power_radial,
-        "counts": counts,
-    }
-
-
-def radial_average_spectrum_3d(
-    power_3d: torch.Tensor,
-    k_x: torch.Tensor,
-    k_y: torch.Tensor,
-    k_z: torch.Tensor,
-    num_bins: int = 50
-) -> dict[str, torch.Tensor]:
-    """
-    Compute radially averaged power spectrum from 3D spectrum.
-
-    Parameters
-    ----------
-    power_3d : torch.Tensor
-        3D power spectrum, shape [n_kx, n_ky, n_kz]
-    k_x, k_y, k_z : torch.Tensor
-        Wavenumber arrays for each axis
-    num_bins : int
-        Number of radial bins
-
-    Returns
-    -------
-    dict
-        Dictionary containing:
-        - k_radial: radial wavenumber array [num_bins]
-        - power_radial: radially averaged power [num_bins]
-        - counts: number of points in each bin [num_bins]
-    """
-    # Create 3D grid of |k| values
-    K_X, K_Y, K_Z = torch.meshgrid(k_x, k_y, k_z, indexing='ij')
-    K_mag = torch.sqrt(K_X**2 + K_Y**2 + K_Z**2)
-
-    # Flatten
-    k_mag_flat = K_mag.flatten()
-    power_flat = power_3d.flatten()
-
-    # Compute radial bins
-    k_max = k_mag_flat.max().item()
-    k_bins = torch.linspace(0, k_max, num_bins + 1, device=k_x.device)
-    k_radial = 0.5 * (k_bins[:-1] + k_bins[1:])
-
-    # Bin the power
-    power_radial = torch.zeros(num_bins, device=k_x.device, dtype=power_3d.dtype)
-    counts = torch.zeros(num_bins, device=k_x.device, dtype=torch.int64)
-
-    for i in range(num_bins):
-        mask = (k_mag_flat >= k_bins[i]) & (k_mag_flat < k_bins[i + 1])
-        if mask.any():
-            power_radial[i] = power_flat[mask].mean()
-            counts[i] = mask.sum()
-
-    return {
-        "k_radial": k_radial,
-        "power_radial": power_radial,
-        "counts": counts,
-    }
+def _complex_dtype(real_dtype: torch.dtype) -> torch.dtype:
+    """Map real dtype to corresponding complex dtype."""
+    if real_dtype == torch.float64:
+        return torch.complex128
+    return torch.complex64

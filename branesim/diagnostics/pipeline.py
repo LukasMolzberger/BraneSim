@@ -60,16 +60,21 @@ class Diagnostic(Protocol):
 
 
 @dataclass
-class BandStateDiagnostic:
+class AnalyticSignalDiagnostic:
     """
-    Diagnostic that computes complex band state and caches it.
+    Diagnostic that computes ω-free analytic signal and caches it.
 
     This is typically the first diagnostic in a Berry phase pipeline,
     as it computes psi, psi_hat, and amp that other diagnostics need.
+
+    Unlike the old BandStateDiagnostic, this does NOT require omega or velocity.
+    It constructs the complex state via positive-frequency projection along
+    a chosen spatial axis.
     """
-    name: str = "band_state"
-    omega: float = None
+    name: str = "analytic_signal"
+    axis: int = 0
     eps: float = 1e-12
+    field_key: str = "xi"  # Fallback to "q" if not present
 
     def compute(
         self,
@@ -77,37 +82,24 @@ class BandStateDiagnostic:
         grid: GridSpec,
         cache: dict[str, Any]
     ) -> DiagnosticResult:
-        """Compute and cache complex band state."""
-        from .complex_band_state import (
-            complex_band_state_from_quadrature,
-            pointwise_normalize,
+        """Compute and cache ω-free analytic signal."""
+        from .analytic_signal import (
+            analytic_signal_along_axis,
+            pointwise_normalize_from_grid,
         )
 
-        # Get omega from snapshot metadata if not provided
-        omega = self.omega
-        if omega is None:
-            if "omega_sim" in snapshot.meta:
-                omega = snapshot.meta["omega_sim"]
-            elif "omega" in snapshot.meta:
-                omega = snapshot.meta["omega"]
-            else:
-                raise ValueError("omega not provided and not in snapshot metadata")
-
-        # Get position and velocity fields
-        if "xi" in snapshot.fields and "v_xi" in snapshot.fields:
-            q = snapshot.fields["xi"]
-            v = snapshot.fields["v_xi"]
-        elif "q" in snapshot.fields and "v" in snapshot.fields:
-            q = snapshot.fields["q"]
-            v = snapshot.fields["v"]
-        else:
+        # Get position field (no velocity needed)
+        q = snapshot.fields.get(self.field_key, None)
+        if q is None:
+            q = snapshot.fields.get("q", None)
+        if q is None:
             raise ValueError(
-                "Snapshot must contain either ('xi', 'v_xi') or ('q', 'v') fields"
+                f"Snapshot must contain '{self.field_key}' or 'q' field for analytic signal"
             )
 
-        # Compute complex band state
-        psi = complex_band_state_from_quadrature(q, v, omega, eps=self.eps)
-        psi_hat, amp = pointwise_normalize(psi, eps=self.eps)
+        # Compute analytic signal via positive-frequency projection
+        psi = analytic_signal_along_axis(q, axis=self.axis, spatial_ndim=grid.D)
+        psi_hat, amp = pointwise_normalize_from_grid(psi, grid, eps=self.eps)
 
         # Cache for other diagnostics
         cache["psi"] = psi
@@ -116,7 +108,7 @@ class BandStateDiagnostic:
 
         # Return as diagnostic result
         return DiagnosticResult(
-            name=self.name,
+            name=f"{self.name}_axis{self.axis}",
             t_sim=snapshot.t_sim,
             t_phys_s=snapshot.t_phys_s,
             data={
@@ -130,8 +122,9 @@ class BandStateDiagnostic:
                 "amp_max": amp.max().item(),
             },
             meta={
-                "omega": omega,
+                "axis": self.axis,
                 "eps": self.eps,
+                "method": "analytic_signal_fft",
             },
         )
 
@@ -154,11 +147,11 @@ class BerryConnectionDiagnostic:
         """Compute Berry connection from cached band state."""
         from .berry import berry_connection_along_axis, BerryConfig
 
-        # Get cached band state (assumes BandStateDiagnostic ran first)
+        # Get cached band state (assumes AnalyticSignalDiagnostic ran first)
         if "psi_hat" not in cache or "amp" not in cache:
             raise ValueError(
-                "Berry connection requires cached band state. "
-                "Run BandStateDiagnostic first."
+                "Berry connection requires cached analytic signal. "
+                "Run AnalyticSignalDiagnostic first."
             )
 
         psi_hat = cache["psi_hat"]
@@ -228,8 +221,8 @@ class BerryPhaseDiagnostic:
             # Need to compute connection first
             if "psi_hat" not in cache or "amp" not in cache:
                 raise ValueError(
-                    "Berry phase requires cached band state. "
-                    "Run BandStateDiagnostic first."
+                    "Berry phase requires cached analytic signal. "
+                    "Run AnalyticSignalDiagnostic first."
                 )
 
             psi_hat = cache["psi_hat"]
@@ -280,14 +273,14 @@ class DiagnosticPipeline:
     -------
     >>> from branesim.diagnostics.pipeline import (
     ...     DiagnosticPipeline,
-    ...     BandStateDiagnostic,
+    ...     AnalyticSignalDiagnostic,
     ...     BerryConnectionDiagnostic,
     ...     BerryPhaseDiagnostic,
     ... )
     >>>
     >>> # Create pipeline
     >>> pipeline = DiagnosticPipeline([
-    ...     BandStateDiagnostic(omega=6.28),
+    ...     AnalyticSignalDiagnostic(axis=0),
     ...     BerryConnectionDiagnostic(axis=0),
     ...     BerryPhaseDiagnostic(axis=0),
     ... ])
