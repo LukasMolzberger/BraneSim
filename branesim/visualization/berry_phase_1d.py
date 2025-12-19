@@ -48,7 +48,7 @@ def plot_berry_phase_profiles(
     >>>
     >>> plot_berry_phase_profiles(
     ...     run_manager, x_nm, times_fs, gamma_by_t,
-    ...     filename="photon_1d_berry_phase.png"
+    ...     filename="berry_phase_profiles.png"
     ... )
     """
     n = len(times_fs)
@@ -129,7 +129,7 @@ def plot_berry_connection_profiles(
     >>> x_edges_nm = 0.5 * (x_nm[:-1] + x_nm[1:])
     >>> plot_berry_connection_profiles(
     ...     run_manager, x_edges_nm, times_fs, A_x_by_t,
-    ...     filename="photon_1d_berry_connection.png"
+    ...     filename="berry_connection_profiles.png"
     ... )
     """
     n = len(times_fs)

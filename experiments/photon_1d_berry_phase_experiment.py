@@ -155,9 +155,9 @@ def main():
         times_fs,
         gamma_by_tfs,
         title="1D Photon - Berry Phase Profile γ(x) (wrapped to [-π, π])",
-        filename="photon_1d_berry_phase_profiles.png",
+        filename="berry_phase_profiles.png",
     )
-    print(f"  ✓ Saved: photon_1d_berry_phase_profiles.png")
+    print(f"  ✓ Saved: berry_phase_profiles.png")
 
     # Plot 2: Berry connection profiles A_x(x)
     plot_berry_connection_profiles(
@@ -166,9 +166,9 @@ def main():
         times_fs,
         Ax_by_tfs,
         title="1D Photon - Berry Connection A_x(x)",
-        filename="photon_1d_berry_connection_profiles.png",
+        filename="berry_connection_profiles.png",
     )
-    print(f"  ✓ Saved: photon_1d_berry_connection_profiles.png")
+    print(f"  ✓ Saved: berry_connection_profiles.png")
 
     # ========================================================================
     # Summary

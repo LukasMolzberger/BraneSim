@@ -118,7 +118,7 @@ def plot_brane_1d_amplitude_propagation(run: "Photon1DRunData") -> None:
         data_by_t_nm,
         ylabel='ξ [nm]',
         title=f'1D Brane - Amplitude Propagation (c = {run.constants.c:.3e} m/s)',
-        filename='brane_1d_amplitude_propagation.png',
+        filename='amplitude_propagation.png',
         ylim_factor=1.5,
         add_zero_line=False,
         add_boundary_markers=True,
@@ -147,7 +147,7 @@ def plot_brane_1d_lateral_distortion(run: "Photon1DRunData") -> None:
         data_by_t_pm,
         ylabel='Δx [pm]',
         title='1D Brane - Lateral Distortion (Left/Right Movement)',
-        filename='brane_1d_lateral_distortion.png',
+        filename='lateral_distortion.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
@@ -176,7 +176,7 @@ def plot_brane_1d_amplitude_velocity(run: "Brane1DRunData") -> None:
         data_by_t_ms,
         ylabel='v_ξ [m/s]',
         title='1D Brane - Amplitude Velocity (v_ξ = ∂ξ/∂t)',
-        filename='brane_1d_amplitude_velocity.png',
+        filename='amplitude_velocity.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
@@ -205,7 +205,7 @@ def plot_brane_1d_lateral_velocity(run: "Brane1DRunData") -> None:
         data_by_t_ms,
         ylabel='v_x [m/s]',
         title='1D Brane - Lateral Velocity (v_x = ∂x/∂t)',
-        filename='brane_1d_lateral_velocity.png',
+        filename='lateral_velocity.png',
         ylim_factor=1.5,
         add_zero_line=True,
         add_boundary_markers=True,
@@ -250,7 +250,7 @@ def plot_brane_1d_tracking_analysis(run: "Photon1DRunData") -> None:
     axes[1].grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(run.run_manager.get_plot_path('brane_1d_tracking_analysis.png'),
+    plt.savefig(run.run_manager.get_plot_path('tracking_analysis.png'),
                 dpi=150, bbox_inches='tight')
     plt.close(fig)
 
@@ -282,16 +282,16 @@ def plot_all_brane_1d_standard(run: "Photon1DRunData") -> None:
     """
     print("\nCreating plots...")
     plot_brane_1d_amplitude_propagation(run)
-    print("  ✓ Saved: brane_1d_amplitude_propagation.png")
+    print("  ✓ Saved: amplitude_propagation.png")
 
     plot_brane_1d_lateral_distortion(run)
-    print("  ✓ Saved: brane_1d_lateral_distortion.png")
+    print("  ✓ Saved: lateral_distortion.png")
 
     plot_brane_1d_amplitude_velocity(run)
-    print("  ✓ Saved: brane_1d_amplitude_velocity.png")
+    print("  ✓ Saved: amplitude_velocity.png")
 
     plot_brane_1d_lateral_velocity(run)
-    print("  ✓ Saved: brane_1d_lateral_velocity.png")
+    print("  ✓ Saved: lateral_velocity.png")
 
     plot_brane_1d_tracking_analysis(run)
-    print("  ✓ Saved: brane_1d_tracking_analysis.png")
+    print("  ✓ Saved: tracking_analysis.png")
