@@ -372,11 +372,12 @@ def plot_all_photon_1d_standard(run: "Photon1DRunData") -> None:
     plot_photon_1d_lateral_velocity(run)
     print("  ✓ Saved: photon_1d_example_lateral_velocity.png")
 
-    plot_photon_1d_lateralization_snapshots(run)
-    print("  ✓ Saved: photon_1d_example_lateralization.png")
+    # Lateralization diagnostics removed
+    # plot_photon_1d_lateralization_snapshots(run)
+    # print("  ✓ Saved: photon_1d_example_lateralization.png")
 
-    plot_photon_1d_lateralization_global(run)
-    print("  ✓ Saved: photon_1d_example_lateralization_global.png")
+    # plot_photon_1d_lateralization_global(run)
+    # print("  ✓ Saved: photon_1d_example_lateralization_global.png")
 
     plot_photon_1d_tracking_analysis(run)
     print("  ✓ Saved: photon_1d_example_analysis.png")
