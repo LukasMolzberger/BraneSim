@@ -16,7 +16,6 @@ Paper reference:
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -27,10 +26,10 @@ from branesim.diagnostics.holonomy import (
     verify_gauge_invariance,
 )
 from branesim.diagnostics.degeneracy import subspace_rank_svd
+from branesim.utils import TestRunManager
 
 
 def run_electron_holonomy_experiment(
-    output_dir: str = "outputs/electron_holonomy",
     n_grid: int = 40,  # Grid points per dimension
     torus_major_radius_factor: float = 5.0,  # R / lambda_C
     device: str = "cpu",
@@ -43,7 +42,6 @@ def run_electron_holonomy_experiment(
     and is deferred to future numerical work.
 
     Args:
-        output_dir: Directory for outputs
         n_grid: Grid points per dimension (3D grid will be n_grid³)
         torus_major_radius_factor: Major radius in units of λ_C
         device: torch device ('cpu' or 'cuda')
@@ -61,8 +59,9 @@ def run_electron_holonomy_experiment(
     print("NOTE: This is a proof-of-concept demonstration.")
     print("Full 3D toroidal dynamics deferred to future work.\n")
 
-    # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="electron_wilson_loop_spinorial")
+    print(run_manager.get_summary())
 
     # Physical constants (Compton scale)
     constants = PhysicalConstants()
@@ -290,8 +289,9 @@ def run_electron_holonomy_experiment(
         },
     }
 
-    np.save(f"{output_dir}/results.npy", results, allow_pickle=True)
-    print(f"\nResults saved to {output_dir}/results.npy")
+    results_path = run_manager.get_data_path('results.npy')
+    np.save(results_path, results, allow_pickle=True)
+    print(f"\nResults saved to {results_path}")
 
     # Plot eigenphases of W
     fig, ax = plt.subplots(1, 1, figsize=(8, 8))
@@ -323,12 +323,21 @@ def run_electron_holonomy_experiment(
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/wilson_eigenvalues.png", dpi=150)
-    print(f"Plot saved to {output_dir}/wilson_eigenvalues.png")
+    plt.savefig(run_manager.get_plot_path('wilson_eigenvalues.png'), dpi=150)
+    print(f"Plot saved to wilson_eigenvalues.png")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Electron Wilson Loop Spinorial",
+        "n_grid": n_grid,
+        "torus_major_radius_factor": torus_major_radius_factor,
+        "device": device,
+    })
 
     print("\n" + "="*80)
     print("EXPERIMENT COMPLETE")
     print("="*80)
+    print(f"All outputs saved to: {run_manager.run_dir}")
 
     return results
 

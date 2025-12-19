@@ -15,7 +15,6 @@ Paper reference:
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
@@ -28,10 +27,10 @@ from branesim.diagnostics.degeneracy import (
     subspace_rank_svd,
     verify_narrowband_preparation,
 )
+from branesim.utils import TestRunManager
 
 
 def run_photon_polarization_experiment(
-    output_dir: str = "outputs/photon_polarization",
     nx: int = 200,
     n_cycles: int = 5,
     amplitude_scale: float = 1e-14,  # meters (~ lambda_C / sqrt(pi))
@@ -41,7 +40,6 @@ def run_photon_polarization_experiment(
     Run photon circular polarization experiment.
 
     Args:
-        output_dir: Directory for outputs
         nx: Number of grid points
         n_cycles: Number of Compton cycles to simulate
         amplitude_scale: Amplitude A (default: ~lambda_C/√π)
@@ -57,8 +55,9 @@ def run_photon_polarization_experiment(
     print("  4. Optional FFT cross-check")
     print("="*80 + "\n")
 
-    # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    # Initialize test run manager
+    run_manager = TestRunManager(experiment_name="photon_circular_polarization_svd")
+    print(run_manager.get_summary())
 
     # Physical constants (Compton scale)
     constants = PhysicalConstants()
@@ -250,8 +249,9 @@ def run_photon_polarization_experiment(
         "times": times,
     }
 
-    np.save(f"{output_dir}/results.npy", results, allow_pickle=True)
-    print(f"\nResults saved to {output_dir}/results.npy")
+    results_path = run_manager.get_data_path('results.npy')
+    np.save(results_path, results, allow_pickle=True)
+    print(f"\nResults saved to {results_path}")
 
     # Plot final state
     fig, axes = plt.subplots(2, 1, figsize=(12, 8))
@@ -271,12 +271,22 @@ def run_photon_polarization_experiment(
     axes[1].grid(True)
 
     plt.tight_layout()
-    plt.savefig(f"{output_dir}/final_state.png", dpi=150)
-    print(f"Plot saved to {output_dir}/final_state.png")
+    plt.savefig(run_manager.get_plot_path('final_state.png'), dpi=150)
+    print(f"Plot saved to final_state.png")
+
+    # Save configuration
+    run_manager.save_config({
+        "experiment": "Photon Circular Polarization SVD",
+        "nx": nx,
+        "n_cycles": n_cycles,
+        "amplitude_scale": amplitude_scale,
+        "device": device,
+    })
 
     print("\n" + "="*80)
     print("EXPERIMENT COMPLETE")
     print("="*80)
+    print(f"All outputs saved to: {run_manager.run_dir}")
 
     return results
 
