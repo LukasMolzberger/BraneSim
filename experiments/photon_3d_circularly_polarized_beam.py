@@ -19,6 +19,8 @@ The goal is to demonstrate:
 
 import sys
 import os
+
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import math
@@ -29,10 +31,9 @@ from matplotlib.animation import FuncAnimation, FFMpegWriter
 from matplotlib.colors import hsv_to_rgb
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from branesim.em import EMState, FourPotentialVerletSolver
 from branesim.core.state import Dimensionality
 from branesim.core.grid import BraneGrid
-from branesim.em.em_state import EMState
-from branesim.em.potential_solver import FourPotentialVerletSolver
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.utils import TestRunManager
 
