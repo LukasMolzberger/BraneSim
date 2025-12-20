@@ -22,6 +22,14 @@ as independent sources, forces, or constraints.
 \item Initial conditions: Gaussian pulses, toroidal configurations, amplitude patterns
 \end{itemize}
 
+\paragraph{Periodic cell with pre-tension (implementation detail).}
+To represent pre-tension under periodic boundary conditions we use the decomposition
+$\mathbf R_p(t)=\mathbf R^\star_p+\mathbf u_p(t)$ where the base state is affine
+$\mathbf R^\star_{n}=A(hn)+\mathbf b$ and $\mathbf u$ is periodic in the lattice indices.
+Edges that cross a periodic boundary must include the appropriate cell-shift vector
+consistent with $A$; otherwise the pre-tensioned base state is not represented correctly.
+This mirrors the continuum formulation of Eq.~\eqref{eq:decomposition-affine-plus-periodic}.
+
 \paragraph{What must emerge (detected via measurement, \emph{not} coded):}
 \begin{itemize}
 \item \textbf{Lorentz invariance:} Isotropic dispersion $\omega(|\mathbf{k}|)$ measured from wave propagation tests (Section~\ref{calibration-dispersion-isotropy})
@@ -443,6 +451,9 @@ U(\{\mathbf R_p\})
 \label{eq:discrete-stretch-energy}
 \end{equation}
 Here $k>0$ is the spring constant and $\ell_0>0$ the rest length.
+A uniformly pre-tensioned base state corresponds to a periodic affine embedding with
+$|\mathbf R^\star_q-\mathbf R^\star_p|=\ell^\star\neq \ell_0$ (typically $\ell^\star>\ell_0$),
+while periodicity (cell shape) prevents relaxation back to $\ell_0$.
 
 \paragraph{Forces and equations of motion.}
 For each node $p$ the internal force is

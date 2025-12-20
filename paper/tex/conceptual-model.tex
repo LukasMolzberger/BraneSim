@@ -70,105 +70,275 @@ The Michelson–Morley null result is naturally explained by Lorentz contraction
 
 \subsection{Continuous Formulation: Pre-tensioned $d$-Brane Embedded in $\mathbb{R}^4$}\label{continuous-formulation}
 
-We model the substrate as a $d$-dimensional material continuum (typically $d=3$) embedded in a Euclidean
-$\mathbb{R}^4$. The model has no explicit particles and no additional fields beyond the embedding map itself.
-Pre-tension is represented as a \emph{material} (tangential) stress state maintained by boundary conditions; it is
-not associated with any particular embedding component.
+\subsubsection{Periodic pre-tensioned hyperelastic substrate (minimal model)}
+\label{sec:periodic-pretension-minimal}
 
-\paragraph{Kinematics (embedding and induced metric).}
-Let $\Omega\subset\mathbb{R}^d$ be material coordinates $x=(x^1,\dots,x^d)$ and let
+\paragraph{Periodic cell.}
+Throughout this work the brane is modeled on a periodic material domain
+\[
+  \Omega=\mathbb T^3 \equiv \prod_{i=1}^3 [0,L_i]\quad\text{with endpoints identified.}
+\]
+All admissible perturbations and variations are periodic in $x$; integration by
+parts therefore produces no boundary terms.
+
+\paragraph{Induced metric and reference metric.}
+The fundamental degree of freedom is the embedding $\mathbf X(x,t)\in\mathbb R^4$.
+The induced metric is
 \begin{equation}
-\mathbf{X}:\Omega\times\mathbb{R}\to\mathbb{R}^4,\qquad (x,t)\mapsto \mathbf{X}(x,t)=(X^1,\dots,X^4)
-\label{eq:embedding-map}
+  g_{ij}(\mathbf X)=\partial_i\mathbf X\cdot\partial_j\mathbf X,
+  \qquad i,j=1,2,3,
+  \label{eq:induced-metric}
 \end{equation}
-be the embedding map. Time $t$ is an external evolution parameter.
-The deformation gradient is $F_{Ai}=\partial_i X^A$ and the induced (pullback) metric on the brane is
+and the reference (stress-free) metric is taken as
 \begin{equation}
-g_{ij}(x,t)=\partial_i\mathbf{X}\cdot\partial_j\mathbf{X}
-=\sum_{A=1}^4 \partial_i X^A\,\partial_j X^A,\qquad i,j=1,\dots,d.
-\label{eq:induced-metric}
+  g^0_{ij}=\ell_0^2\,\delta_{ij}.
+  \label{eq:reference-metric}
+\end{equation}
+Define the relative mixed metric
+\begin{equation}
+  \widehat g := (g^0)^{-1}g,
+  \label{eq:relative-metric}
+\end{equation}
+with eigenvalues $\lambda_a>0$ and principal stretches $\sigma_a=\sqrt{\lambda_a}$.
+
+\paragraph{Eigen-stretch energy density.}
+We use an isotropic stretch-only hyperelastic energy minimized at $g=g^0$:
+\begin{equation}
+  W(g;g^0)=\frac{K}{2}\sum_{a=1}^3(\sigma_a-1)^2,
+  \qquad \sigma_a=\sqrt{\lambda_a(\widehat g)}.
+  \label{eq:eigen-stretch-energy}
+\end{equation}
+All nonlinearity considered in this substrate model arises from the geometric
+dependence of $g_{ij}$ on the embedding $\mathbf X$ and from the nonlinear
+dependence of $W$ on the stretches $\sigma_a$. No additional saturation law is assumed.
+
+\paragraph{Lagrangian and action.}
+The (minimal) Lagrangian density is
+\begin{equation}
+  \mathcal L
+  =\frac{\rho_m}{2}\,|\partial_t\mathbf X|^2
+  -W(g(\mathbf X);g^0),
+  \label{eq:brane-lagrangian}
+\end{equation}
+with action
+\begin{equation}
+  S[\mathbf X]=\int dt\int_{\Omega} d^3x\;\mathcal L\big(\mathbf X,\partial_t\mathbf X,\partial_i\mathbf X\big).
+  \label{eq:brane-action}
+\end{equation}
+(Discrete curvature/bending penalties are treated as optional numerical regularizers
+in the experimental setting and are not part of the minimal analytical model here.)
+
+\paragraph{First variation: stress and equations of motion.}
+Define
+\begin{equation}
+  S^{ij}:=\frac{\partial W}{\partial g_{ij}},
+  \qquad
+  P_{Ai}:=\frac{\partial W}{\partial(\partial_i X^A)} = 2\,S^{ij}\,\partial_j X^A,
+  \qquad A=1,\dots,4.
+  \label{eq:piola-stress}
+\end{equation}
+Hamilton's principle $\delta S=0$ yields the (second-order) substrate PDE
+\begin{equation}
+  \rho_m\,\partial_{tt}X^A = \partial_i P_{Ai},
+  \qquad A=1,\dots,4,
+  \label{eq:equations-of-motion}
+\end{equation}
+where periodicity implies no boundary/traction terms.
+
+\paragraph{Pre-tension on a periodic cell (affine base + periodic displacement).}
+A uniform pre-tensioned base state is represented by an affine embedding
+\begin{equation}
+  \mathbf X_\star(x)=A x+\mathbf b,
+  \qquad A\in\mathbb R^{4\times 3},\ \mathrm{rank}(A)=3,
+  \label{eq:affine-base-embedding}
+\end{equation}
+with constant base metric $g_{\star,ij}=(A^\mathsf T A)_{ij}$.
+Pre-tension means $g_\star\neq g^0$ (equivalently, $\sigma_{\star,a}\neq 1$ for at least one $a$),
+and it is maintained because the periodic cell (i.e.\ the affine part $A$) is held fixed.
+We evolve only periodic displacements about this base,
+\begin{equation}
+  \mathbf X(x,t)=\mathbf X_\star(x)+\boldsymbol\xi(x,t),
+  \qquad \boldsymbol\xi(\cdot,t)\ \text{periodic on }\Omega.
+  \label{eq:decomposition-affine-plus-periodic}
+\end{equation}
+Let $A_i:=\partial_i\mathbf X_\star\in\mathbb R^4$ denote the constant base tangents.
+
+\paragraph{Assumptions (minimal analytic substrate model).}
+The continuous substrate model used in this paper rests on the following explicit assumptions:
+
+\begin{enumerate}
+  \item \textbf{Material domain is periodic:}
+  the brane is modeled on a 3-torus $\Omega=\mathbb T^3$ (a periodic cell).
+  Consequently, there are no physical boundary layers or boundary forces in the analytic model;
+  all fields and admissible variations are periodic in $x$.
+
+  \item \textbf{Embedding space is Euclidean $\mathbb R^4$:}
+  the brane configuration is an embedding field $\mathbf X(x,t)\in\mathbb R^4$
+  with the standard inner product. No embedding component (including $X^4$) is treated as special.
+
+  \item \textbf{Stretch-only hyperelasticity (no bending):}
+  the internal energy depends only on first derivatives $\partial_i\mathbf X$
+  through the induced metric $g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$.
+  No curvature/second-derivative penalties (bending) are included in the minimal analytic model.
+
+  \item \textbf{Eigen-stretch constitutive law:}
+  the strain energy density is the isotropic eigen-stretch form
+  $W(g;g^0)$ defined in Eq.~\eqref{eq:eigen-stretch-energy}.
+  In particular, the only material nonlinearity in the substrate model enters through
+  $g_{ij}(\mathbf X)$ and the nonlinear dependence of $W$ on the principal stretches $\sigma_a$.
+
+  \item \textbf{Reference metric (rest geometry) is prescribed:}
+  the stress-free state is defined by a given reference metric $g^0_{ij}$
+  (taken constant in this work, typically $g^0_{ij}=\ell_0^2\delta_{ij}$).
+
+  \item \textbf{Pre-tension is imposed by a fixed periodic cell:}
+  pre-tension is represented by an affine base embedding $\mathbf X_\star(x)=Ax+\mathbf b$
+  with $g_\star\neq g^0$ and is maintained by holding the macroscopic cell deformation (the affine part $A$) fixed.
+  Only periodic displacements $\boldsymbol\xi$ about this base are evolved,
+  cf.\ Eq.~\eqref{eq:decomposition-affine-plus-periodic}.
+
+  \item \textbf{Inertia-only dynamics (no dissipation):}
+  the action uses the kinetic term $\frac{\rho_m}{2}|\partial_t\mathbf X|^2$
+  with constant mass density $\rho_m$ in material coordinates, and no damping or forcing terms
+  are included unless explicitly stated in the experimental section.
+
+  \item \textbf{Regular embedding (no rank loss / self-intersection modeling):}
+  the induced metric is assumed positive definite in the regime of interest
+  (no local collapse of $\partial_i\mathbf X$). Self-contact and self-avoidance are not modeled.
+
+  \item \textbf{Smoothness / classical field theory:}
+  fields are assumed sufficiently smooth for the required derivatives and
+  spectral objects (eigenvalues/projectors of $\widehat g$) to be well-defined.
+\end{enumerate}
+
+\subsubsection{Second variation and linearized operator about a pre-tensioned base}
+\label{sec:second-variation-linearization}
+
+\paragraph{Metric variations induced by $\boldsymbol\xi$.}
+The induced metric expands as $g=g_\star+\delta g + \delta^2 g + \cdots$ with
+\begin{align}
+  \delta g_{ij}
+  &=
+  A_i\cdot\partial_j\boldsymbol\xi
+  +
+  A_j\cdot\partial_i\boldsymbol\xi,
+  \label{eq:delta-metric}
+  \\
+  \delta^2 g_{ij}
+  &=
+  \partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi.
+  \label{eq:delta2-metric}
+\end{align}
+
+\paragraph{Base stress and tangent moduli.}
+Evaluate at the base metric $g_\star$:
+\begin{equation}
+  S_\star^{ij}:=\left.\frac{\partial W}{\partial g_{ij}}\right|_{g=g_\star},
+  \qquad
+  H_\star^{ij\,kl}:=\left.\frac{\partial^2 W}{\partial g_{ij}\,\partial g_{kl}}\right|_{g=g_\star}.
+  \label{eq:base-stress-and-moduli}
 \end{equation}
 
-\paragraph{Reference (rest) metric and rest-length scale.}
-A stress-free rest geometry is encoded by a reference metric $g^0_{ij}(x)$.
-For a homogeneous isotropic rest state with a single rest-length scale $\ell_0>0$ we use
+\paragraph{Quadratic action.}
+Because $\mathbf X_\star$ is an equilibrium on the periodic domain, the linear term vanishes and
+the action expanded to second order is
 \begin{equation}
-g^0_{ij}=\ell_0^2\,\delta_{ij},\qquad (g^0)^{ik}g^0_{kj}=\delta^{i}{}_{j}.
-\label{eq:reference-metric}
+  S^{(2)}[\boldsymbol\xi]
+  =
+  \int dt\int_{\Omega} d^3x\;
+  \left[
+    \frac{\rho_m}{2}|\partial_t\boldsymbol\xi|^2
+    -
+    \left(
+      S_\star^{ij}\,\partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi
+      +
+      \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
+    \right)
+  \right].
+  \label{eq:quadratic-action}
 \end{equation}
-Define the mixed relative metric
-\begin{equation}
-\widehat g^{i}{}_{j}=(g^0)^{ik}g_{kj}.
-\label{eq:relative-metric}
-\end{equation}
-Let $\lambda_a$ be the eigenvalues of $\widehat g^{i}{}_{j}$ and define relative principal stretches
-\begin{equation}
-\sigma_a=\sqrt{\lambda_a},\qquad a=1,\dots,d.
-\label{eq:principal-stretches}
-\end{equation}
-The stress-free condition is $g=g^0$ (equivalently $\sigma_a=1$ for all $a$).
+The first term in parentheses is the \emph{geometric stiffness} contribution from pre-stress;
+it vanishes if the base is stress-free ($S_\star^{ij}=0$).
 
-\paragraph{Stretch-only hyperelastic energy (no bending).}
-We use an isotropic stretch-only energy density (per material volume) minimized at $g=g^0$:
+\paragraph{Linearized equations of motion.}
+The Euler--Lagrange equations from $S^{(2)}$ yield the linear operator
 \begin{equation}
-W(g;g^0)=\frac{K}{2}\sum_{a=1}^{d}(\sigma_a-1)^2,
-\qquad \sigma_a=\sqrt{\lambda_a(\widehat g)}.
-\label{eq:stretch-energy-density}
+  \rho_m\,\partial_{tt}\xi^A
+  =
+  \partial_i\Big(
+    2\,S_\star^{ij}\,\partial_j\xi^A
+    +
+    2\,H_\star^{ij\,kl}\,(\delta g_{kl})\,A_j^A
+  \Big),
+  \qquad A=1,\dots,4,
+  \label{eq:linearized-pde-general}
 \end{equation}
-Here $K>0$ is the continuum stiffness scale and $W$ depends on $\mathbf{X}$ only through first derivatives
-(via $g_{ij}$); no curvature/bending term is included in the present model statement.
-
-\paragraph{Equations of motion.}
-Let $\rho_m>0$ be mass density per material volume. The conservative equations of motion are
+where $\delta g_{kl}$ is given by Eq.~\eqref{eq:delta-metric}. For an affine base state
+($A_i$, $S_\star$, $H_\star$ constant), this can be written explicitly as a constant-coefficient system:
 \begin{equation}
-\rho_m\,\partial_{tt}X^A=\partial_i P_{Ai},\qquad A=1,\dots,4,
-\label{eq:continuum-eom}
+  \rho_m\,\partial_{tt}\xi^A
+  =
+  2\,S_\star^{ij}\,\partial_i\partial_j\xi^A
+  +
+  2\,H_\star^{ij\,kl}\,A_j^A\,
+  \Big(
+    A_k^B\,\partial_i\partial_l\xi^B + A_l^B\,\partial_i\partial_k\xi^B
+  \Big).
+  \label{eq:linearized-pde-constant-coeff}
 \end{equation}
-with first Piola-type stress
+This expression makes the coupling between embedding components ($A,B$) induced by the pre-tensioned geometry fully explicit
+without treating any embedding direction (including $X^4$) as a special case.
+
+\paragraph{Isotropic pre-tension (useful special case).}
+If $g_\star=s^2 g^0$ with $s\neq 1$, then $S_\star^{ij}$ is proportional to $(g^0)^{ij}$
+and the geometric stiffness term reduces to an isotropic wave operator.
+This case provides a clean reference point for measuring the emergent wave speed $c$ in periodic dispersion tests.
+
+\paragraph{Spectral formulas (eigen-stretch model).}
+Let $\widehat g_\star=(g^0)^{-1}g_\star$ have eigenvalues $\lambda_{\star,a}$ and
+$g^0$-orthogonal projectors $\Pi_a$ onto the corresponding eigenspaces, with $\sigma_{\star,a}=\sqrt{\lambda_{\star,a}}$.
+Then the base stress can be written compactly as
 \begin{equation}
-P_{Ai}=\frac{\partial W}{\partial(\partial_i X^A)}
-=2\,\frac{\partial W}{\partial g_{ij}}\,\partial_j X^A.
-\label{eq:piola-stress}
+  S_\star^{ij}
+  =
+  \sum_{a=1}^3
+  \frac{K}{4}\,\frac{\sigma_{\star,a}-1}{\sigma_{\star,a}}\,
+  \big(\Pi_a\big)^{ij}_{(g^0)}.
+  \label{eq:base-stress-spectral}
 \end{equation}
-All four embedding components enter symmetrically through $\mathbf{X}$ and the induced metric $g_{ij}$; no
-embedding axis is privileged by the dynamics.
+The second variation is most cleanly expressed in projector form. Let
+$f(\lambda)=\frac{K}{2}(\sqrt{\lambda}-1)^2$, so that
+$f'(\lambda)=\frac{K}{2}\frac{\sqrt{\lambda}-1}{\sqrt{\lambda}}$ and
+$f''(\lambda)=\frac{K}{4}\lambda^{-3/2}$.
+For a symmetric perturbation $\delta\widehat g=(g^0)^{-1}\delta g$ one has
+\begin{align}
+  D^2W_\star[\delta\widehat g,\delta\widehat g]
+  &=
+  \sum_a f''(\lambda_{\star,a})\big(\mathrm{tr}(\Pi_a\,\delta \widehat g)\big)^2
+  \nonumber\\
+  &\quad+
+  2\sum_{a<b}
+  \frac{f'(\lambda_{\star,a})-f'(\lambda_{\star,b})}{\lambda_{\star,a}-\lambda_{\star,b}}\,
+  \mathrm{tr}\big(\Pi_a\,\delta \widehat g\,\Pi_b\,\delta \widehat g\big),
+  \label{eq:second-variation-spectral}
+\end{align}
+with the usual continuous-limit interpretation when eigenvalues are degenerate (projectors onto the degenerate eigenspace).
+The tensor $H_\star^{ij\,kl}$ in Eq.~\eqref{eq:base-stress-and-moduli} is defined implicitly by
+$\tfrac12\,H_\star^{ij\,kl}\delta g_{ij}\delta g_{kl}=\tfrac12\,D^2W_\star[(g^0)^{-1}\delta g,(g^0)^{-1}\delta g]$.
 
-\paragraph{Pre-tensioned base state.}
-A pre-tensioned brane is defined by choosing a time-independent equilibrium embedding $\mathbf{X}_\star(x)$
-such that its induced metric $g^\star_{ij}=\partial_i\mathbf{X}_\star\cdot\partial_j\mathbf{X}_\star$
-differs from the reference metric: $g^\star\neq g^0$. A convenient uniform choice is an affine embedding
-\begin{equation}
-\mathbf{X}_\star(x)=A x+\mathbf b,\qquad A\in\mathbb{R}^{4\times d},\ \mathrm{rank}(A)=d,
-\label{eq:affine-base-embedding}
-\end{equation}
-for which $g^\star=A^\mathsf{T}A$ is constant.
-Pre-tension is maintained by boundary conditions or external loads (e.g.\ periodic cell with fixed shape, or
-Dirichlet clamping $\mathbf{X}|_{\partial\Omega}=\mathbf{X}_\star|_{\partial\Omega}$). Perturbations are then
-written as $\mathbf{X}(x,t)=\mathbf{X}_\star(x)+\boldsymbol\xi(x,t)$.
+\paragraph{Assumptions specific to linearization.}
+When deriving Eqs.~\eqref{eq:quadratic-action}--\eqref{eq:linearized-pde-constant-coeff},
+we additionally assume:
 
-\paragraph{Dictionary (continuous model).}
-\begin{itemize}
-\item $d$: intrinsic/material dimension of the brane (typically $3$).
-\item $\Omega\subset\mathbb{R}^d$: material domain; $x^i$ material coordinates; $t$ time parameter.
-\item $\mathbf{X}(x,t)\in\mathbb{R}^4$: embedding map; $X^A$ its components ($A=1,\dots,4$).
-\item $F_{Ai}=\partial_i X^A$: deformation gradient.
-\item $g_{ij}=\partial_i\mathbf{X}\cdot\partial_j\mathbf{X}$: induced metric.
-\item $g^0_{ij}=\ell_0^2\delta_{ij}$: reference (rest) metric; $\ell_0$ rest-length scale.
-\item $\widehat g^{i}{}_{j}=(g^0)^{ik}g_{kj}$: relative metric; $\lambda_a$ its eigenvalues; $\sigma_a=\sqrt{\lambda_a}$ relative principal stretches.
-\item $W(g;g^0)$: stretch-only energy density; $K$ stiffness scale.
-\item $\rho_m$: mass density; $P_{Ai}$ first Piola-type stress.
-\item $\mathbf{X}_\star$: pre-tensioned equilibrium embedding; $g^\star$ its induced metric.
-\end{itemize}
+\begin{enumerate}
+  \item \textbf{Small perturbations about the base:}
+  $\mathbf X=\mathbf X_\star+\boldsymbol\xi$ with $\|\partial\boldsymbol\xi\|$ small enough that
+  truncation at second order in $\boldsymbol\xi$ is valid.
 
-\paragraph{Assumptions (continuous model).}
-\begin{itemize}
-\item Euclidean embedding space $\mathbb{R}^4$ with standard inner product.
-\item No bending/curvature energy; $W$ depends only on first derivatives via $g_{ij}$.
-\item Hyperelastic and isotropic material response: $W$ depends only on the eigenvalues of $(g^0)^{-1}g$.
-\item Regular embedding in the regime of interest ($g_{ij}$ positive definite).
-\item Pre-tension is a maintained equilibrium mismatch ($g^\star\neq g^0$) enforced by boundary conditions or loads.
-\item No dissipation unless explicitly added in the implementation layer.
-\end{itemize}
+  \item \textbf{Uniform base state:}
+  the base embedding is affine so that $A_i$, $S_\star^{ij}$, and $H_\star^{ij\,kl}$ are spatially constant,
+  yielding a constant-coefficient linear operator on the periodic cell.
+\end{enumerate}
 
 \subsubsection{Linear wave regime and isotropy}\label{linear-wave-regime-and-isotropy}
 
