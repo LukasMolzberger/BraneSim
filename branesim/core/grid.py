@@ -131,12 +131,16 @@ class BraneGrid:
         Neighbors: 8-connectivity (3x3 - 1).
         Order: [(-1,-1), (-1,0), (-1,1), (0,-1), (0,1), (1,-1), (1,0), (1,1)]
 
+        Supports periodic boundary conditions via self.periodic_axes.
+
         Returns:
             [N, 8] tensor of neighbor indices
         """
         nx, ny = self.grid_shape
         N = nx * ny
         neighbors = -np.ones((N, 8), dtype=np.int64)
+
+        periodic_x, periodic_y = self.periodic_axes
 
         # Neighbor offsets (di, dj)
         offsets = [
@@ -152,8 +156,20 @@ class BraneGrid:
                 for k, (di, dj) in enumerate(offsets):
                     ni, nj = i + di, j + dj
 
-                    # Check bounds
-                    if 0 <= ni < nx and 0 <= nj < ny:
+                    # Handle periodic boundaries
+                    valid = True
+                    if ni < 0 or ni >= nx:
+                        if periodic_x:
+                            ni = ni % nx  # Wrap around
+                        else:
+                            valid = False
+                    if nj < 0 or nj >= ny:
+                        if periodic_y:
+                            nj = nj % ny  # Wrap around
+                        else:
+                            valid = False
+
+                    if valid:
                         neighbors[idx, k] = ni * ny + nj
 
         return torch.from_numpy(neighbors).to(self.device)
@@ -165,12 +181,16 @@ class BraneGrid:
         Neighbors: 26-connectivity (3x3x3 - 1).
         All combinations of (di, dj, dk) ∈ {-1, 0, 1}³ except (0, 0, 0).
 
+        Supports periodic boundary conditions via self.periodic_axes.
+
         Returns:
             [N, 26] tensor of neighbor indices
         """
         nx, ny, nz = self.grid_shape
         N = nx * ny * nz
         neighbors = -np.ones((N, 26), dtype=np.int64)
+
+        periodic_x, periodic_y, periodic_z = self.periodic_axes
 
         # Generate all 26 offsets
         offsets = []
@@ -188,8 +208,25 @@ class BraneGrid:
                     for n_idx, (di, dj, dk) in enumerate(offsets):
                         ni, nj, nk = i + di, j + dj, k + dk
 
-                        # Check bounds
-                        if 0 <= ni < nx and 0 <= nj < ny and 0 <= nk < nz:
+                        # Handle periodic boundaries
+                        valid = True
+                        if ni < 0 or ni >= nx:
+                            if periodic_x:
+                                ni = ni % nx  # Wrap around
+                            else:
+                                valid = False
+                        if nj < 0 or nj >= ny:
+                            if periodic_y:
+                                nj = nj % ny  # Wrap around
+                            else:
+                                valid = False
+                        if nk < 0 or nk >= nz:
+                            if periodic_z:
+                                nk = nk % nz  # Wrap around
+                            else:
+                                valid = False
+
+                        if valid:
                             neighbors[idx, n_idx] = (ni * ny + nj) * nz + nk
 
         return torch.from_numpy(neighbors).to(self.device)
