@@ -1,6 +1,6 @@
 \section{Conceptual Model}\label{conceptual-model}
 
-\textbf{Ontological postulate:} We postulate that the physical universe is a continuous, tensioned three-dimensional brane embedded in a higher-dimensional space. This brane is ontically real; all observable phenomena—particles, forces, spacetime structure—arise from its internal oscillations and patterns of strain. The fourth embedding coordinate represents amplitude deformations of the brane, not an independent traversable dimension. Time is not a geometric coordinate but an external evolution parameter.
+\textbf{Ontological postulate:} We postulate that the physical universe is a continuous, tensioned three-dimensional brane embedded in a higher-dimensional space. This brane is ontically real; all observable phenomena—particles, forces, spacetime structure—arise from its internal oscillations and patterns of strain. We may choose a convenient embedding frame where one component visualizes transverse amplitude, but the substrate dynamics depends only on the full embedding $\mathbf{X}\in\mathbb{R}^4$ and does not privilege any component. Time is not a geometric coordinate but an external evolution parameter.
 
 Key features of this ontology:
 \begin{itemize}
@@ -145,6 +145,58 @@ Hamilton's principle $\delta S=0$ yields the (second-order) substrate PDE
 \end{equation}
 where periodicity implies no boundary/traction terms.
 
+\paragraph{Hamiltonian formulation (canonical fields on a periodic cell).}
+Define the canonical momentum density conjugate to $X^A$:
+\begin{equation}
+  \Pi_A := \frac{\partial \mathcal L}{\partial(\partial_t X^A)}
+  = \rho_m\,\partial_t X^A,
+  \qquad A=1,\dots,4.
+  \label{eq:canonical-momentum}
+\end{equation}
+The Hamiltonian density is
+\begin{equation}
+  \mathcal H(\mathbf X,\boldsymbol\Pi)
+  := \Pi_A\,\partial_t X^A - \mathcal L
+  = \frac{1}{2\rho_m}\,|\boldsymbol\Pi|^2 + W(g(\mathbf X);g^0),
+  \label{eq:brane-hamiltonian-density}
+\end{equation}
+and the Hamiltonian functional is
+\begin{equation}
+  H[\mathbf X,\boldsymbol\Pi]=\int_{\Omega} d^3x\;\mathcal H(\mathbf X,\boldsymbol\Pi).
+  \label{eq:brane-hamiltonian}
+\end{equation}
+The canonical Poisson bracket for functionals $F,G$ is
+\begin{equation}
+  \{F,G\}
+  =
+  \int_{\Omega} d^3x\left(
+    \frac{\delta F}{\delta X^A}\frac{\delta G}{\delta \Pi_A}
+    -
+    \frac{\delta F}{\delta \Pi_A}\frac{\delta G}{\delta X^A}
+  \right),
+  \label{eq:field-poisson-bracket}
+\end{equation}
+which implies Hamilton's equations
+\begin{align}
+  \partial_t X^A &= \frac{\delta H}{\delta \Pi_A} = \frac{\Pi_A}{\rho_m},
+  \label{eq:hamilton-eq-X}\\
+  \partial_t \Pi_A &= -\frac{\delta H}{\delta X^A} = \partial_i P_{Ai},
+  \label{eq:hamilton-eq-Pi}
+\end{align}
+where $P_{Ai}=2\,S^{ij}\partial_jX^A$ as in Eq.~\eqref{eq:piola-stress}.
+Combining $\Pi_A=\rho_m\partial_t X^A$ with Eq.~\eqref{eq:hamilton-eq-Pi} recovers
+the second-order substrate PDE Eq.~\eqref{eq:equations-of-motion}.
+
+\paragraph{Conservation laws (periodic cell).}
+The Hamiltonian $H$ is conserved in time for the conservative dynamics: $\frac{dH}{dt}=0$.
+Translation invariance in the embedding space implies conservation of the total momentum
+\begin{equation}
+  \mathbf P_{\text{tot}} = \int_{\Omega} d^3x\, \boldsymbol\Pi(x,t),
+  \label{eq:total-momentum}
+\end{equation}
+since $W$ depends only on spatial derivatives $\partial_i\mathbf X$.
+The periodic domain ensures no boundary flux contributions.
+
 \paragraph{Pre-tension on a periodic cell (affine base + periodic displacement).}
 A uniform pre-tensioned base state is represented by an affine embedding
 \begin{equation}
@@ -260,6 +312,29 @@ the action expanded to second order is
 The first term in parentheses is the \emph{geometric stiffness} contribution from pre-stress;
 it vanishes if the base is stress-free ($S_\star^{ij}=0$).
 
+\paragraph{Quadratic Hamiltonian about a pre-tensioned base.}
+For $\mathbf X=\mathbf X_\star+\boldsymbol\xi$ define the perturbation momentum
+$\boldsymbol\pi := \rho_m\,\partial_t\boldsymbol\xi$.
+The Hamiltonian expanded to second order is
+\begin{equation}
+  H^{(2)}[\boldsymbol\xi,\boldsymbol\pi]
+  =
+  \int_{\Omega} d^3x\;
+  \left[
+    \frac{1}{2\rho_m}|\boldsymbol\pi|^2
+    +
+    \left(
+      S_\star^{ij}\,\partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi
+      +
+      \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
+    \right)
+  \right],
+  \label{eq:quadratic-hamiltonian}
+\end{equation}
+with $\delta g_{ij}$ given by Eq.~\eqref{eq:delta-metric}.
+This $H^{(2)}$ is the Legendre transform of the quadratic action
+Eq.~\eqref{eq:quadratic-action} and makes the geometric-stiffness contribution of the base pre-stress explicit.
+
 \paragraph{Linearized equations of motion.}
 The Euler--Lagrange equations from $S^{(2)}$ yield the linear operator
 \begin{equation}
@@ -340,9 +415,9 @@ we additionally assume:
   yielding a constant-coefficient linear operator on the periodic cell.
 \end{enumerate}
 
-\subsubsection{Linear wave regime and isotropy}\label{linear-wave-regime-and-isotropy}
+\subsubsection{Linear wave regime and isotropy (stress-free reference)}\label{linear-wave-regime-and-isotropy}
 
-Linearize about a flat pre-tensioned embedding $\mathbf X_\star(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_\star+\boldsymbol\xi$, and retain leading order. For a uniform pre-tension state with $g^\star_{ij}=\delta_{ij}$ and homogeneous parameters, one obtains a linear wave equation of the form
+Linearize about a flat embedding $\mathbf X_\star(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_\star+\boldsymbol\xi$, and retain leading order. For a stress-free base state with $g^\star_{ij}=g^0_{ij}$ (equivalently, setting $\ell_0=1$ as a dimensionless normalization so $g^\star_{ij}=\delta_{ij}$) and homogeneous parameters, one obtains a linear wave equation of the form
 \begin{equation}
 \partial_{tt}\boldsymbol\xi = c^2\Delta\boldsymbol\xi,
 \label{eq:linear-wave-equation}
@@ -352,6 +427,7 @@ where the effective wave speed is determined by the continuum stiffness and dens
 c^2 = \frac{K}{\rho_m}.
 \end{equation}
 Throughout this work we identify this emergent wave speed with the physical speed of light $c$.
+For a pre-tensioned base with $g_\star\neq g^0$, the linear operator includes additional geometric stiffness terms from the base stress $S_\star^{ij}$, as derived in Eqs.~\eqref{eq:linearized-pde-general}--\eqref{eq:linearized-pde-constant-coeff}.
 
 All \textbf{four components} of $\boldsymbol\xi$ obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large stretches) introduce deviations from this ideal isotropic behavior.
 
