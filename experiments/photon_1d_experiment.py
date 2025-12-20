@@ -1,14 +1,6 @@
 """
 1D Photon Simulation with Complete Diagnostics
 
-This experiment simulates a photon (EM wave packet) propagating along a 1D brane.
-It computes comprehensive diagnostics including:
-- Standard wave tracking (energy, position, shape)
-- Berry phase analysis (connection, phase profiles, quality metrics)
-- Spectrum analysis (FFT, power spectrum)
-
-The Berry phase diagnostics extract gauge-dependent and gauge-invariant
-geometric properties of the wave's phase structure.
 """
 
 import sys
@@ -32,9 +24,6 @@ from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.utils import TestRunManager
 
 # New diagnostic infrastructure
-from branesim.diagnostics import (
-    GridSpec,
-)
 from branesim.utils.io import export_photon_1d_snapshot_csv, save_result_csv_1d
 from branesim.visualization import plot_all_brane_1d_standard
 
@@ -235,12 +224,6 @@ def main():
     x_coords_phys_m = mapper.to_phys_length(x_coords_sim).cpu().numpy()
     x_nm = x_coords_phys_m * 1e9  # For plotting
 
-    # GridSpec for new diagnostic system
-    grid_spec = GridSpec(
-        shape=(nx,),
-        spacing_sim=float(h_sim),
-        coords_phys=(torch.from_numpy(x_coords_phys_m),)
-    )
 
     # Prepare snapshot times
     simulation_time_phys = mapper.to_phys_time(num_steps * dt_sim)
@@ -264,9 +247,6 @@ def main():
     snapshots_v_xi = {}
     snapshots_delta_x = {}
     snapshots_v_x = {}
-
-    # Berry phase results
-    berry_results = []  # List of DiagnosticResult objects
 
     # Tracking
     times_phys_track_s = []
@@ -376,12 +356,6 @@ def main():
     print(f"  Simulation time: {simulation_time_phys*1e15:.3f} fs")
     print(f"  Snapshots: {len(snapshots_xi)} times")
 
-    print(f"\nDiagnostics Computed:")
-    print(f"  ✓ Wave tracking (energy, position)")
-    print(f"  ✓ Berry phase profiles ({len(berry_results)} times)")
-    print(f"  ✓ Berry connection (gauge field)")
-    print(f"  ✓ Quality metrics (amplitude masks, overlap)")
-    print(f"  ✓ Spectrum analysis")
 
     print(f"\nEnergy Conservation:")
     if energies_track_J:
