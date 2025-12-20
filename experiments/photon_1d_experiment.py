@@ -34,25 +34,9 @@ from branesim.utils import TestRunManager
 # New diagnostic infrastructure
 from branesim.diagnostics import (
     GridSpec,
-    Snapshot,
-    BerryConfig,
-    berry_connection_along_axis,
-    berry_phase_integrated_along_axis,
 )
-from branesim.diagnostics.analytic_signal import (
-    analytic_signal_along_axis,
-    pointwise_normalize_from_grid,
-)
-from branesim.diagnostics.spectrum import local_power_spectrum_along_axis
-from branesim.diagnostics.types import DiagnosticResult
 from branesim.utils.io import export_photon_1d_snapshot_csv, save_result_csv_1d
 from branesim.visualization import plot_all_brane_1d_standard
-from branesim.visualization.berry_viz import (
-    plot_berry_1d_profile,
-    plot_berry_connection_profiles,
-    plot_berry_phase_profiles,
-)
-from branesim.visualization.spectrum_viz import plot_spectrogram_1d_multi_time
 
 
 def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
@@ -92,10 +76,6 @@ def main():
     # Output options
     export_csv_snapshots = True
     experiment_name = "photon_1d_experiment"
-
-    # Berry phase diagnostics configuration
-    berry_amplitude_threshold = 1e-6  # Minimum amplitude for valid Berry phase
-    berry_overlap_threshold = 1e-3    # Minimum overlap for valid edges
 
     print("=" * 70)
     print(f"1D Photon Simulation with Complete Diagnostics")
@@ -262,20 +242,6 @@ def main():
         coords_phys=(torch.from_numpy(x_coords_phys_m),)
     )
 
-    # Berry phase configuration
-    berry_cfg = BerryConfig(
-        spacing_sim=float(h_sim),
-        amplitude_threshold=berry_amplitude_threshold,
-        overlap_threshold=berry_overlap_threshold,
-        eps=1e-12,
-        unwrap=True,
-        force_cpu_on_mps=(device.type == "mps"),
-    )
-
-    print(f"\nBerry Phase Configuration:")
-    print(f"  Amplitude threshold: {berry_cfg.amplitude_threshold:.6e}")
-    print(f"  Overlap threshold: {berry_cfg.overlap_threshold:.6e}")
-
     # Prepare snapshot times
     simulation_time_phys = mapper.to_phys_time(num_steps * dt_sim)
     snapshot_times_phys = np.linspace(0, simulation_time_phys, num_snapshots)
@@ -366,121 +332,6 @@ def main():
             solver.step(state)
 
     # ========================================================================
-    # Post-Processing: Berry Phase Diagnostics
-    # ========================================================================
-
-    print(f"\n{'=' * 70}")
-    print("Computing Berry Phase Diagnostics")
-    print(f"{'=' * 70}")
-
-    for t_phys_s in sorted(snapshots_xi.keys()):
-        t_fs = t_phys_s * 1e15
-        print(f"\nProcessing t = {t_fs:.3f} fs...")
-
-        # Get snapshots
-        xi_sim = snapshots_xi[t_phys_s]
-
-        # Convert to torch tensors
-        xi_t = torch.from_numpy(xi_sim).to(device, dtype)
-
-        # Build ω-free analytic signal via positive-frequency projection
-        psi = analytic_signal_along_axis(xi_t, axis=0, spatial_ndim=1)
-
-        # Normalize pointwise
-        psi_hat, amp = pointwise_normalize_from_grid(psi, grid_spec, eps=berry_cfg.eps)
-
-        # Compute Berry connection along x-axis
-        conn_result = berry_connection_along_axis(psi_hat, amp, axis=0, cfg=berry_cfg)
-
-        # Integrate to get Berry phase profile
-        phase_result = berry_phase_integrated_along_axis(conn_result["dphi"], axis=0, cfg=berry_cfg)
-
-        # Store as DiagnosticResult
-        berry_result = DiagnosticResult(
-            name=f"berry_phase_axis0",
-            t_sim=mapper.to_sim_time(t_phys_s),
-            t_phys_s=t_phys_s,
-            data={
-                "dphi": conn_result["dphi"],
-                "A_x": conn_result["A_axis"],
-                "gamma_wrapped": phase_result["gamma_wrapped"],
-                "gamma_unwrapped": phase_result["gamma_unwrapped"],
-                "amp": amp,
-            },
-            quality={
-                "mask_point": conn_result["mask_point"],
-                "valid_edge": conn_result["valid_edge"],
-                "overlap_abs": conn_result["overlap_abs"],
-            },
-            meta={
-                "axis": 0,
-                "config": berry_cfg,
-            }
-        )
-        berry_results.append(berry_result)
-
-        # Export to CSV using new infrastructure
-        csv_path = run_manager.get_data_path(f"berry_phase_t_{t_fs:.3f}fs.csv")
-        save_result_csv_1d(csv_path, berry_result, grid_spec, coord_name="x_m")
-
-        # Quality metrics
-        valid_frac = conn_result["valid_edge"].float().mean().item()
-        amp_mean = amp.mean().item()
-        print(f"  Valid edges: {valid_frac*100:.1f}%")
-        print(f"  Mean amplitude: {amp_mean:.6e}")
-
-    print(f"\n✓ Computed Berry phase at {len(berry_results)} snapshot times")
-
-    # ========================================================================
-    # Post-Processing: Spectrum Analysis
-    # ========================================================================
-
-    print(f"\n{'=' * 70}")
-    print("Computing Spectrum Diagnostics")
-    print(f"{'=' * 70}")
-
-    # Choose window length based on carrier wavelength (no tuning to omega)
-    win_len = min(256, int(points_per_wavelength * 12))  # ~12 wavelengths per window
-    hop = win_len // 4
-
-    # Analyze local spectrum (STFT) at all snapshot times
-    spectrogram_data = []
-    for t_phys_s in sorted(snapshots_xi.keys()):
-        t_fs = t_phys_s * 1e15
-        print(f"\nComputing spectrum at t = {t_fs:.3f} fs...")
-
-        xi_t = torch.from_numpy(snapshots_xi[t_phys_s]).to(device, dtype)
-
-        spec_result = local_power_spectrum_along_axis(
-            xi_t,
-            grid_spec,
-            axis=0,
-            win_len=win_len,
-            hop=hop,
-            window="hann",
-            transverse_reduction="mean",
-        )
-
-        # Store for plotting
-        spectrogram_data.append({
-            'x_centers': spec_result["x_centers"].cpu().numpy(),
-            'k_axis': spec_result["k_axis"].cpu().numpy(),
-            'power_mean': spec_result["power_mean"].cpu().numpy(),
-            't_phys_s': t_phys_s,
-        })
-
-        # Find peak wavenumber
-        power_mean = spec_result["power_mean"].cpu().numpy()
-        avg_power = power_mean.mean(axis=0)
-        k_peak = spec_result["k_axis"].cpu().numpy()[avg_power.argmax()]
-
-        print(f"  Window length: {win_len} points")
-        print(f"  Number of windows: {len(spec_result['x_centers'])}")
-        print(f"  Peak wavenumber (avg): {k_peak:.6e} rad/sim-length")
-
-    print(f"\n✓ Computed spectra at {len(spectrogram_data)} snapshot times")
-
-    # ========================================================================
     # Visualization
     # ========================================================================
 
@@ -510,76 +361,6 @@ def main():
 
     plot_all_brane_1d_standard(run_data)
     print(f"  ✓ Standard brane plots")
-
-    # Berry phase profile plot (detailed, with quality metrics)
-    if berry_results:
-        # Plot first and last snapshots
-        for i, idx in enumerate([0, -1]):
-            result = berry_results[idx]
-            fig = plot_berry_1d_profile(
-                result,
-                grid_spec,
-                coords=x_nm,
-                coord_label="x",
-                coord_unit="nm",
-                save_path=run_manager.get_plot_path(f"berry_profile_detailed_{i}.png"),
-                show_quality=True
-            )
-            print(f"  ✓ Berry profile (detailed) #{i}")
-
-    # Berry phase evolution plots (all times)
-    x_edges_nm = 0.5 * (x_nm[:-1] + x_nm[1:])
-
-    plot_berry_phase_profiles(
-        berry_results,
-        grid_spec,
-        coords=x_nm,
-        coord_label="x",
-        coord_unit="nm",
-        save_path=run_manager.get_plot_path("berry_phase_profiles.png")
-    )
-    print(f"  ✓ Berry phase profiles (all times)")
-
-    plot_berry_connection_profiles(
-        berry_results,
-        grid_spec,
-        coords=x_edges_nm,
-        coord_label="x",
-        coord_unit="nm",
-        save_path=run_manager.get_plot_path("berry_connection_profiles.png")
-    )
-    print(f"  ✓ Berry connection profiles (all times)")
-
-    # Local spectrum (spectrogram) visualization
-    # Convert x_centers from sim to nm for all snapshots
-    for data in spectrogram_data:
-        x_centers_sim = data['x_centers']
-        x_centers_nm = x_centers_sim * mapper.to_phys_length(torch.tensor(1.0)).item() * 1e9
-        data['x_centers'] = x_centers_nm
-
-    plot_spectrogram_1d_multi_time(
-        spectrogram_data,
-        x_label="x",
-        x_unit="nm",
-        k_label="k",
-        k_unit="rad/sim-length",
-        save_path=run_manager.get_plot_path("local_spectrum_spectrogram.png")
-    )
-    print(f"  ✓ Local spectrum (spectrogram) - all times")
-
-    # Export spectrum data for all times
-    for i, data in enumerate(spectrogram_data):
-        t_fs = data['t_phys_s'] * 1e15
-        np.savez(
-            run_manager.get_data_path(f"local_spectrum_t_{t_fs:.3f}fs.npz"),
-            x_centers_nm=data['x_centers'],
-            k_axis=data['k_axis'],
-            power_mean=data['power_mean'],
-            win_len=win_len,
-            hop=hop,
-            t_fs=t_fs,
-        )
-    print(f"  ✓ Spectrum data exported ({len(spectrogram_data)} times)")
 
     # ========================================================================
     # Summary
@@ -618,8 +399,6 @@ def main():
         "num_snapshots": len(snapshots_xi),
         "wavelength_phys_m": wavelength_phys,
         "omega_sim": omega_sim,
-        "berry_amplitude_threshold": berry_amplitude_threshold,
-        "berry_overlap_threshold": berry_overlap_threshold,
     })
 
     print(f"\n{'=' * 70}")

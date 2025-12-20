@@ -3,11 +3,11 @@ Dimension-agnostic diagnostic tools for BraneSim.
 
 This module provides:
 - Data types: GridSpec, Snapshot, DiagnosticResult
-- Complex band state construction
-- Berry phase diagnostics (connection, phase, curvature)
+- Time-domain Berry phase diagnostics (analytic signal + Berry connection/phase)
 - Spectrum analysis
 - Energy diagnostics
 - Holonomy and degeneracy verification
+- Symplectic band structure and Berry phase diagnostics (in bands subpackage)
 """
 
 # Core data types
@@ -18,7 +18,7 @@ from branesim.diagnostics.types import (
     DiagnosticResult,
 )
 
-# Analytic signal (ω-free complex state)
+# Analytic signal (for time-domain Berry phase)
 from branesim.diagnostics.analytic_signal import (
     analytic_signal_along_axis,
     pointwise_normalize_from_grid,
@@ -26,7 +26,7 @@ from branesim.diagnostics.analytic_signal import (
     pointwise_normalize_vector,
 )
 
-# Berry phase diagnostics
+# Time-domain Berry phase diagnostics
 from branesim.diagnostics.berry import (
     BerryConfig,
     BerryPhase1DConfig,
@@ -64,12 +64,12 @@ __all__ = [
     "GridSpec",
     "Snapshot",
     "DiagnosticResult",
-    # Analytic signal (ω-free complex state)
+    # Analytic signal
     "analytic_signal_along_axis",
     "pointwise_normalize_from_grid",
     "pointwise_normalize_scalar",
     "pointwise_normalize_vector",
-    # Berry phase
+    # Time-domain Berry phase
     "BerryConfig",
     "BerryPhase1DConfig",
     "berry_connection_along_axis",
