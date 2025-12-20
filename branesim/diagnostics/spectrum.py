@@ -69,6 +69,7 @@ def local_power_spectrum_along_axis(
     transverse_reduction: Literal["mean", "none"] = "mean",
     component_reduction: Literal["sum", "none"] = "sum",
     normalize: Literal["none", "win_len"] = "win_len",
+    return_complex: bool = False,
 ) -> dict[str, torch.Tensor]:
     """
     Compute local power spectrum along a spatial axis using STFT.

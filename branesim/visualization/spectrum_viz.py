@@ -347,3 +347,253 @@ def plot_power_spectrum_2d(
         fig.savefig(save_path, dpi=150, bbox_inches='tight')
 
     return fig
+
+def plot_spectrogram_1d(
+    x_centers: np.ndarray | torch.Tensor,
+    k_axis: np.ndarray | torch.Tensor,
+    power_mean: np.ndarray | torch.Tensor,
+    x_label: str = "x",
+    x_unit: str = "sim",
+    k_label: str = "k",
+    k_unit: str = "rad/sim",
+    title: str = "Local Power Spectrum (STFT)",
+    cmap: str = "viridis",
+    logscale: bool = True,
+    plot_peak_k: bool = True,
+    figsize: tuple[float, float] = (12, 6),
+    save_path: Path | str | None = None,
+) -> Figure:
+    """
+    Plot 1D spectrogram (position-resolved power spectrum).
+
+    Shows S(x, k) as a heatmap with optional overlay of dominant wavenumber k_peak(x).
+
+    Parameters
+    ----------
+    x_centers : np.ndarray | torch.Tensor
+        Window center positions [n_win]
+    k_axis : np.ndarray | torch.Tensor
+        Wavenumber array [n_k]
+    power_mean : np.ndarray | torch.Tensor
+        Power spectrum [n_win, n_k]
+    x_label : str
+        Label for position axis
+    x_unit : str
+        Unit for position
+    k_label : str
+        Label for wavenumber axis
+    k_unit : str
+        Unit for wavenumber
+    title : str
+        Plot title
+    cmap : str
+        Colormap
+    logscale : bool
+        If True, plot log10(power)
+    plot_peak_k : bool
+        If True, overlay curve showing k_peak(x)
+    figsize : tuple
+        Figure size
+    save_path : Path | str | None
+        If provided, save figure
+
+    Returns
+    -------
+    Figure
+        Matplotlib figure
+
+    Examples
+    --------
+    >>> from branesim.diagnostics.spectrum import local_power_spectrum_along_axis
+    >>> spec = local_power_spectrum_along_axis(field, grid, axis=0, win_len=128, hop=32)
+    >>> fig = plot_spectrogram_1d(
+    ...     spec['x_centers'],
+    ...     spec['k_axis'],
+    ...     spec['power_mean'],
+    ...     x_label="x", x_unit="nm"
+    ... )
+    """
+    # Convert to numpy if needed
+    if isinstance(x_centers, torch.Tensor):
+        x_centers = x_centers.cpu().numpy()
+    if isinstance(k_axis, torch.Tensor):
+        k_axis = k_axis.cpu().numpy()
+    if isinstance(power_mean, torch.Tensor):
+        power_mean = power_mean.cpu().numpy()
+
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+    # Prepare power for plotting
+    if logscale:
+        # Avoid log(0)
+        power_plot = np.log10(power_mean + 1e-20)
+        clabel = "log₁₀(Power)"
+    else:
+        power_plot = power_mean
+        clabel = "Power"
+
+    # Plot spectrogram as heatmap
+    # power_mean shape: [n_win, n_k]
+    # We want x on horizontal axis, k on vertical
+    extent = [x_centers.min(), x_centers.max(), k_axis.min(), k_axis.max()]
+
+    im = ax.imshow(power_plot.T, origin='lower', extent=extent,
+                   cmap=cmap, aspect='auto', interpolation='nearest')
+    plt.colorbar(im, ax=ax, label=clabel)
+
+    # Overlay peak wavenumber curve
+    if plot_peak_k:
+        # Find peak k for each window
+        k_peak_idx = power_mean.argmax(axis=1)  # [n_win]
+        k_peak = k_axis[k_peak_idx]
+
+        ax.plot(x_centers, k_peak, 'r-', linewidth=2, label=f'{k_label}_peak')
+        ax.legend(loc='upper right')
+
+    ax.set_xlabel(f"{x_label} ({x_unit})")
+    ax.set_ylabel(f"{k_label} ({k_unit})")
+    ax.set_title(title)
+    ax.grid(True, alpha=0.2, color='white')
+
+    plt.tight_layout()
+
+    if save_path:
+        fig.savefig(save_path, dpi=150, bbox_inches='tight')
+
+    return fig
+
+
+def plot_spectrogram_1d_multi_time(
+    spectrogram_data: list[dict],
+    x_label: str = "x",
+    x_unit: str = "sim",
+    k_label: str = "k",
+    k_unit: str = "rad/sim",
+    cmap: str = "viridis",
+    logscale: bool = True,
+    plot_peak_k: bool = True,
+    figsize: tuple[float, float] | None = None,
+    save_path: Path | str | None = None,
+) -> Figure:
+    """
+    Plot 1D spectrograms for multiple timestamps in separate subplots.
+
+    Parameters
+    ----------
+    spectrogram_data : list[dict]
+        List of dictionaries, each containing:
+        - 'x_centers': np.ndarray of window center positions
+        - 'k_axis': np.ndarray of wavenumber values
+        - 'power_mean': np.ndarray of power spectrum [n_win, n_k]
+        - 't_phys_s': float, timestamp in seconds
+    x_label : str
+        Label for position axis
+    x_unit : str
+        Unit for position
+    k_label : str
+        Label for wavenumber axis
+    k_unit : str
+        Unit for wavenumber
+    cmap : str
+        Colormap
+    logscale : bool
+        If True, plot log10(power)
+    plot_peak_k : bool
+        If True, overlay curve showing k_peak(x)
+    figsize : tuple | None
+        Figure size (if None, auto-computed based on number of timestamps)
+    save_path : Path | str | None
+        If provided, save figure
+
+    Returns
+    -------
+    Figure
+        Matplotlib figure
+    """
+    n_times = len(spectrogram_data)
+
+    # Auto-compute figsize if not provided
+    # Use vertical stacking (n rows, 1 column) matching standard brane plots
+    if figsize is None:
+        figsize = (14, max(4, 3 * n_times))
+
+    fig, axes = plt.subplots(n_times, 1, figsize=figsize)
+    if n_times == 1:
+        axes = [axes]
+
+    # Collect all power data to determine common colorbar range
+    all_power = []
+    for data in spectrogram_data:
+        power_mean = data['power_mean']
+        if isinstance(power_mean, torch.Tensor):
+            power_mean = power_mean.cpu().numpy()
+        all_power.append(power_mean)
+
+    if logscale:
+        vmin = np.log10(min(p.min() for p in all_power) + 1e-20)
+        vmax = np.log10(max(p.max() for p in all_power) + 1e-20)
+    else:
+        vmin = min(p.min() for p in all_power)
+        vmax = max(p.max() for p in all_power)
+
+    for i, (ax, data) in enumerate(zip(axes, spectrogram_data)):
+        # Extract data
+        x_centers = data['x_centers']
+        k_axis = data['k_axis']
+        power_mean = data['power_mean']
+        t_phys_s = data['t_phys_s']
+
+        # Convert to numpy if needed
+        if isinstance(x_centers, torch.Tensor):
+            x_centers = x_centers.cpu().numpy()
+        if isinstance(k_axis, torch.Tensor):
+            k_axis = k_axis.cpu().numpy()
+        if isinstance(power_mean, torch.Tensor):
+            power_mean = power_mean.cpu().numpy()
+
+        # Prepare power for plotting
+        if logscale:
+            power_plot = np.log10(power_mean + 1e-20)
+            clabel = "log₁₀(Power)"
+        else:
+            power_plot = power_mean
+            clabel = "Power"
+
+        # Plot spectrogram as heatmap
+        extent = [x_centers.min(), x_centers.max(), k_axis.min(), k_axis.max()]
+
+        im = ax.imshow(power_plot.T, origin='lower', extent=extent,
+                       cmap=cmap, aspect='auto', interpolation='nearest',
+                       vmin=vmin, vmax=vmax)
+
+        # Overlay peak wavenumber curve
+        if plot_peak_k:
+            k_peak_idx = power_mean.argmax(axis=1)
+            k_peak = k_axis[k_peak_idx]
+            ax.plot(x_centers, k_peak, 'r-', linewidth=2, alpha=0.8)
+
+        ax.set_ylabel(f"{k_label} ({k_unit})", fontsize=11)
+        ax.grid(True, alpha=0.2, color='white')
+
+        # Time label with proper precision
+        t_fs = t_phys_s * 1e15
+        ax.text(0.02, 0.95, f't = {t_fs:.3f} fs',
+                transform=ax.transAxes,
+                fontsize=12, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    axes[-1].set_xlabel(f"{x_label} ({x_unit})", fontsize=12)
+
+    # Add colorbar on the right side of the figure
+    fig.subplots_adjust(right=0.9)
+    cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+    cbar.set_label(clabel, fontsize=11)
+
+    fig.suptitle("Local Power Spectrum (STFT)", fontsize=16, fontweight='bold')
+    plt.tight_layout(rect=[0, 0, 0.9, 1])
+
+    if save_path:
+        fig.savefig(save_path, dpi=150, bbox_inches='tight')
+
+    return fig

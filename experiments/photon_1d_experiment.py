@@ -52,6 +52,7 @@ from branesim.visualization.berry_viz import (
     plot_berry_connection_profiles,
     plot_berry_phase_profiles,
 )
+from branesim.visualization.spectrum_viz import plot_spectrogram_1d_multi_time
 
 
 def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
@@ -438,36 +439,46 @@ def main():
     print("Computing Spectrum Diagnostics")
     print(f"{'=' * 70}")
 
-    # Analyze local spectrum (STFT) at final time
-    t_final = sorted(snapshots_xi.keys())[-1]
-    xi_final = torch.from_numpy(snapshots_xi[t_final]).to(device, dtype)
-
     # Choose window length based on carrier wavelength (no tuning to omega)
     win_len = min(256, int(points_per_wavelength * 12))  # ~12 wavelengths per window
     hop = win_len // 4
 
-    spec_result = local_power_spectrum_along_axis(
-        xi_final,
-        grid_spec,
-        axis=0,
-        win_len=win_len,
-        hop=hop,
-        window="hann",
-        transverse_reduction="mean",
-    )
+    # Analyze local spectrum (STFT) at all snapshot times
+    spectrogram_data = []
+    for t_phys_s in sorted(snapshots_xi.keys()):
+        t_fs = t_phys_s * 1e15
+        print(f"\nComputing spectrum at t = {t_fs:.3f} fs...")
 
-    x_centers = spec_result["x_centers"].cpu().numpy()
-    k_axis = spec_result["k_axis"].cpu().numpy()
-    power_mean = spec_result["power_mean"].cpu().numpy()
+        xi_t = torch.from_numpy(snapshots_xi[t_phys_s]).to(device, dtype)
 
-    # Find peak wavenumber (average over all windows)
-    avg_power = power_mean.mean(axis=0)
-    k_peak = k_axis[avg_power.argmax()]
+        spec_result = local_power_spectrum_along_axis(
+            xi_t,
+            grid_spec,
+            axis=0,
+            win_len=win_len,
+            hop=hop,
+            window="hann",
+            transverse_reduction="mean",
+        )
 
-    print(f"\nLocal spectrum (STFT) computed at t = {t_final*1e15:.3f} fs")
-    print(f"  Window length: {win_len} points")
-    print(f"  Number of windows: {len(x_centers)}")
-    print(f"  Peak wavenumber (avg): {k_peak:.6e} rad/sim-length")
+        # Store for plotting
+        spectrogram_data.append({
+            'x_centers': spec_result["x_centers"].cpu().numpy(),
+            'k_axis': spec_result["k_axis"].cpu().numpy(),
+            'power_mean': spec_result["power_mean"].cpu().numpy(),
+            't_phys_s': t_phys_s,
+        })
+
+        # Find peak wavenumber
+        power_mean = spec_result["power_mean"].cpu().numpy()
+        avg_power = power_mean.mean(axis=0)
+        k_peak = spec_result["k_axis"].cpu().numpy()[avg_power.argmax()]
+
+        print(f"  Window length: {win_len} points")
+        print(f"  Number of windows: {len(spec_result['x_centers'])}")
+        print(f"  Peak wavenumber (avg): {k_peak:.6e} rad/sim-length")
+
+    print(f"\n✓ Computed spectra at {len(spectrogram_data)} snapshot times")
 
     # ========================================================================
     # Visualization
@@ -539,9 +550,36 @@ def main():
     )
     print(f"  ✓ Berry connection profiles (all times)")
 
-    # TODO: Add spectrogram visualization for local spectrum
-    # (plot_power_spectrum_1d was removed with global FFT)
-    print(f"  ⚠ Spectrogram visualization not yet implemented")
+    # Local spectrum (spectrogram) visualization
+    # Convert x_centers from sim to nm for all snapshots
+    for data in spectrogram_data:
+        x_centers_sim = data['x_centers']
+        x_centers_nm = x_centers_sim * mapper.to_phys_length(torch.tensor(1.0)).item() * 1e9
+        data['x_centers'] = x_centers_nm
+
+    plot_spectrogram_1d_multi_time(
+        spectrogram_data,
+        x_label="x",
+        x_unit="nm",
+        k_label="k",
+        k_unit="rad/sim-length",
+        save_path=run_manager.get_plot_path("local_spectrum_spectrogram.png")
+    )
+    print(f"  ✓ Local spectrum (spectrogram) - all times")
+
+    # Export spectrum data for all times
+    for i, data in enumerate(spectrogram_data):
+        t_fs = data['t_phys_s'] * 1e15
+        np.savez(
+            run_manager.get_data_path(f"local_spectrum_t_{t_fs:.3f}fs.npz"),
+            x_centers_nm=data['x_centers'],
+            k_axis=data['k_axis'],
+            power_mean=data['power_mean'],
+            win_len=win_len,
+            hop=hop,
+            t_fs=t_fs,
+        )
+    print(f"  ✓ Spectrum data exported ({len(spectrogram_data)} times)")
 
     # ========================================================================
     # Summary

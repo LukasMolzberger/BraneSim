@@ -303,11 +303,11 @@ def plot_berry_connection_profiles(
     coord_label: str = "x",
     coord_unit: str = "sim",
     time_labels: list[str] | None = None,
-    figsize: tuple[float, float] = (12, 6),
+    figsize: tuple[float, float] | None = None,
     save_path: Path | str | None = None,
 ) -> Figure:
     """
-    Plot Berry connection profiles for multiple timesteps.
+    Plot Berry connection profiles for multiple timesteps in separate subplots.
 
     Parameters
     ----------
@@ -323,8 +323,8 @@ def plot_berry_connection_profiles(
         Unit for coordinate axis
     time_labels : list[str] | None
         Labels for each timestep (if None, use result.t_phys_s)
-    figsize : tuple
-        Figure size
+    figsize : tuple | None
+        Figure size (if None, auto-computed based on number of subplots)
     save_path : Path | str | None
         If provided, save figure
 
@@ -337,9 +337,33 @@ def plot_berry_connection_profiles(
         # Use edge coordinates (connection is defined on edges)
         coords = (np.arange(grid.shape[0] - 1) + 0.5) * grid.spacing_sim
 
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    n_times = len(results)
 
-    for i, result in enumerate(results):
+    # Auto-compute figsize if not provided
+    # Use vertical stacking (n rows, 1 column) matching standard brane plots
+    if figsize is None:
+        figsize = (14, max(4, 3 * n_times))
+
+    fig, axes = plt.subplots(n_times, 1, figsize=figsize)
+    if n_times == 1:
+        axes = [axes]
+
+    # Collect all data to determine common y-axis range
+    all_A_axis = []
+    for result in results:
+        A_axis = _get_field(result.data, "A_axis", "A_x")
+        if A_axis is not None:
+            all_A_axis.append(A_axis)
+
+    if all_A_axis:
+        y_min = min(np.min(A) for A in all_A_axis)
+        y_max = max(np.max(A) for A in all_A_axis)
+        y_margin = 0.1 * (y_max - y_min) if y_max > y_min else 0.1
+        y_lim = (y_min - y_margin, y_max + y_margin)
+    else:
+        y_lim = None
+
+    for i, (ax, result) in enumerate(zip(axes, results)):
         A_axis = _get_field(result.data, "A_axis", "A_x")
         if A_axis is None:
             continue
@@ -351,14 +375,24 @@ def plot_berry_connection_profiles(
         else:
             label = f"Snapshot {i}"
 
-        ax.plot(coords, A_axis, label=label, linewidth=1.5)
+        ax.plot(coords, A_axis, 'g-', linewidth=2)
+        ax.grid(True, alpha=0.3)
+        ax.axhline(0, color='k', linestyle='-', alpha=0.2)
 
-    ax.set_xlabel(f"{coord_label} ({coord_unit})")
-    ax.set_ylabel(f"Berry Connection A (rad/{coord_unit})")
-    ax.set_title("Berry Connection Profiles")
-    ax.grid(True, alpha=0.3)
-    ax.legend()
+        if y_lim is not None:
+            ax.set_ylim(y_lim)
 
+        ax.set_ylabel(f"A (rad/{coord_unit})", fontsize=11)
+
+        # Time label
+        ax.text(0.02, 0.95, label,
+                transform=ax.transAxes,
+                fontsize=12, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    axes[-1].set_xlabel(f"{coord_label} ({coord_unit})", fontsize=12)
+
+    fig.suptitle("Berry Connection Profiles", fontsize=16, fontweight='bold')
     plt.tight_layout()
 
     if save_path:
@@ -374,11 +408,11 @@ def plot_berry_phase_profiles(
     coord_label: str = "x",
     coord_unit: str = "sim",
     time_labels: list[str] | None = None,
-    figsize: tuple[float, float] = (12, 6),
+    figsize: tuple[float, float] | None = None,
     save_path: Path | str | None = None,
 ) -> Figure:
     """
-    Plot Berry phase profiles for multiple timesteps.
+    Plot Berry phase profiles for multiple timesteps in separate subplots.
 
     Parameters
     ----------
@@ -394,8 +428,8 @@ def plot_berry_phase_profiles(
         Unit for coordinate axis
     time_labels : list[str] | None
         Labels for each timestep
-    figsize : tuple
-        Figure size
+    figsize : tuple | None
+        Figure size (if None, auto-computed based on number of subplots)
     save_path : Path | str | None
         If provided, save figure
 
@@ -407,9 +441,33 @@ def plot_berry_phase_profiles(
     if coords is None:
         coords = np.arange(grid.shape[0]) * grid.spacing_sim
 
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    n_times = len(results)
 
-    for i, result in enumerate(results):
+    # Auto-compute figsize if not provided
+    # Use vertical stacking (n rows, 1 column) matching standard brane plots
+    if figsize is None:
+        figsize = (14, max(4, 3 * n_times))
+
+    fig, axes = plt.subplots(n_times, 1, figsize=figsize)
+    if n_times == 1:
+        axes = [axes]
+
+    # Collect all data to determine common y-axis range
+    all_gamma = []
+    for result in results:
+        gamma = _get_field(result.data, "gamma_wrapped", "gamma_unwrapped")
+        if gamma is not None:
+            all_gamma.append(gamma)
+
+    if all_gamma:
+        y_min = min(np.min(g) for g in all_gamma)
+        y_max = max(np.max(g) for g in all_gamma)
+        y_margin = 0.1 * (y_max - y_min) if y_max > y_min else 0.1
+        y_lim = (y_min - y_margin, y_max + y_margin)
+    else:
+        y_lim = None
+
+    for i, (ax, result) in enumerate(zip(axes, results)):
         gamma = _get_field(result.data, "gamma_wrapped", "gamma_unwrapped")
         if gamma is None:
             continue
@@ -421,15 +479,24 @@ def plot_berry_phase_profiles(
         else:
             label = f"Snapshot {i}"
 
-        ax.plot(coords, gamma, label=label, linewidth=1.5)
+        ax.plot(coords, gamma, 'b-', linewidth=2)
+        ax.grid(True, alpha=0.3)
+        ax.axhline(0, color='k', linestyle='-', alpha=0.2)
 
-    ax.set_xlabel(f"{coord_label} ({coord_unit})")
-    ax.set_ylabel("Berry Phase γ (rad)")
-    ax.set_title("Berry Phase Profiles")
-    ax.grid(True, alpha=0.3)
-    ax.legend()
-    ax.axhline(0, color='k', linestyle='-', alpha=0.2)
+        if y_lim is not None:
+            ax.set_ylim(y_lim)
 
+        ax.set_ylabel("γ (rad)", fontsize=11)
+
+        # Time label
+        ax.text(0.02, 0.95, label,
+                transform=ax.transAxes,
+                fontsize=12, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+    axes[-1].set_xlabel(f"{coord_label} ({coord_unit})", fontsize=12)
+
+    fig.suptitle("Berry Phase Profiles", fontsize=16, fontweight='bold')
     plt.tight_layout()
 
     if save_path:
