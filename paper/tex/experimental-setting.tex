@@ -6,8 +6,8 @@
 
 \textbf{Core principle:} The simulation integrates \emph{only} the microscopic
 brane degrees of freedom (node positions and velocities) evolving according to
-the discretized equations of motion derived from the action
-\eqref{eq:brane-action}. All emergent quantities
+the discrete pre-tensioned spring--mass equations (Sec.~\ref{discrete-energies-and-forces}).
+All emergent quantities
 — effective metric, electromagnetic fields, particle identities, measurement
 outcomes, etc. — are computed diagnostically from $\mathbf X(x,t)$ and
 $\dot{\mathbf X}(x,t)$ and are \emph{never} fed back into the equations of motion
@@ -16,9 +16,9 @@ as independent sources, forces, or constraints.
 \paragraph{What is implemented (explicit in code):}
 \begin{itemize}
 \item The 4D embedding map $\mathbf{X}(x,t) \in \mathbb{R}^4$ discretized as node positions $\mathbf{R}_p(t)$
-\item Elastic energy functionals: stretching $U_\text{str}$ and bending $U_\text{bend}$
-\item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m_p \ddot{\mathbf{R}}_p = \mathbf{F}_p$
-\item Boundary conditions (periodic, free, or clamped)
+\item Elastic energy functional: stretching $U$ (pre-tensioned spring network)
+\item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m \ddot{\mathbf{R}}_p = \mathbf{F}_p$
+\item Boundary conditions (periodic or clamped to maintain pre-tension)
 \item Initial conditions: Gaussian pulses, toroidal configurations, amplitude patterns
 \end{itemize}
 
@@ -26,7 +26,7 @@ as independent sources, forces, or constraints.
 \begin{itemize}
 \item \textbf{Lorentz invariance:} Isotropic dispersion $\omega(|\mathbf{k}|)$ measured from wave propagation tests (Section~\ref{calibration-dispersion-isotropy})
 \item \textbf{Gravity:} Induced metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ computed post-hoc from node positions; geodesic deflection ray-traced through $g$
-\item \textbf{Electromagnetism:} Coulomb-like $1/r^2$ field measured from time-averaged amplitude $\bar{X}^4(\mathbf{x})$ around stable toroidal solitons
+\item \textbf{Electromagnetism:} Reconstructed from phase/holonomy diagnostics (Berry connection/curvature) of a narrowband mode extracted from $\mathbf{X}(x,t)$, evaluated around stable solitonic configurations
 \item \textbf{Nonlinear threshold:} Emergent energy density threshold for soliton nucleation; \emph{not} imposed as a hard cutoff on amplitude or strain
 \item \textbf{Particle stability:} Toroidal solitons that self-confine via nonlinear elasticity; no explicit "particle glue" or confinement potential added
 \item \textbf{Spinor behavior:} $4\pi$ holonomy measured from phase transport around rotated configurations
@@ -92,8 +92,8 @@ four-current) of the initial electron state.
 \paragraph{Experimental workflow:}
 \begin{enumerate}
 \item Set initial conditions $\{\mathbf{R}_p(0), \mathbf{v}_p(0)\}$ representing a physical scenario (e.g., localized pulse, toroidal electron, point mass)
-\item Evolve forward using only elastic forces from $U_\text{str} + U_\text{bend}$
-\item \textbf{Measure} emergent quantities: dispersion $\omega(\mathbf{k})$, induced metric $g_{ij}$, energy localization, field profiles $\bar{X}^4(\mathbf{x})$, geodesic deflection angles, etc.
+\item Evolve forward using only elastic forces from pre-tensioned spring network $U$
+\item \textbf{Measure} emergent quantities: dispersion $\omega(\mathbf{k})$, induced metric $g_{ij}$, energy localization, embedding field profiles, geodesic deflection angles, etc.
 \item Compare measured behavior against known physics (Lorentz cones, $1/r$ potentials, $1/r^2$ fields) to assess whether the substrate dynamics reproduce standard results
 \end{enumerate}
 
@@ -110,11 +110,7 @@ Lorentz-force-like terms --- are defined purely as \emph{diagnostic
 functionals} of $\mathbf{X}$ and its derivatives, evaluated on
 snapshots of the simulation. They are never fed back into the
 microscopic equations of motion as additional forces, constraints, or
-dimension-specific damping terms. In particular, the fourth (normal)
-component $X^4$ enters the dynamics only through the mechanical
-Lagrangian; any identification of $X^4$ with an effective charge or
-scalar potential is an interpretational step applied \emph{after} the
-fact. This architectural separation ensures that the numerical
+dimension-specific damping terms. In particular, the state is always the full embedding vector $\mathbf{X}(x,t)\in\mathbb{R}^4$. Any decomposition into tangential/normal components is a diagnostic choice tied to a chosen base embedding (e.g.\ for plotting or initializing a flat reference state) and is not part of the dynamics. This architectural separation ensures that the numerical
 experiments genuinely test whether the simple brane dynamics are
 \emph{sufficient} to reproduce the observed structures of relativity,
 electromagnetism, and gravity.
@@ -413,9 +409,11 @@ We discretize the material domain $\Omega$ by nodes $x_p\in\Omega$ and store
 \end{equation}
 so that the discrete configuration $\{\mathbf R_p\}$ is a sampling of the continuum embedding
 $\mathbf X(x,t)$ introduced in Section~\ref{conceptual-model}.
-The fourth component of $\mathbf R_p$ encodes the out-of-brane displacement; there is no separate amplitude field.
+Each node stores the full embedding coordinate $\mathbf R_p(t)\in\mathbb R^4$; there is no separate amplitude field.
+If a particular experiment uses a flat reference embedding, a coordinate frame may be chosen for convenience, but the
+dynamics treats all embedding components symmetrically through 4D edge lengths.
 
-The choice of continuum parameters $(\rho_m,T,\kappa)$
+The choice of continuum parameters $(\rho_m,K)$ and discrete parameters $(m,k,\ell_0,h_\star)$
 is guided by physical constraints (wave speed $c$, Compton-scale localization,
 charge normalization). In particular, the amplitude scale calibration
 of Section~\ref{amplitude-scale-calibration} implements the matching to
@@ -429,60 +427,89 @@ $(m_e,c,\hbar,e)$ at the level of the discrete lattice.
 \item If FCC is impractical, a cubic 26-stencil with \textbf{isotropic weights} (4th-order Laplacian fit) can be used; document the weights.
 \end{itemize}
 
-\subsubsection{Discrete energies and forces}\label{discrete-energies-and-forces}
+\subsubsection{Discrete energies and forces (pre-tensioned, stretch-only)}\label{discrete-energies-and-forces}
 
-We approximate the continuum energy in terms of \textbf{edge stretches} (intrinsic strain) and \textbf{bending} between neighboring edge directions.
+We represent the brane as a spring--mass network $G=(\mathcal V,\mathcal E)$ embedded in $\mathbb R^4$.
+Each node $p\in\mathcal V$ carries a position $\mathbf R_p(t)\in\mathbb R^4$ and velocity $\dot{\mathbf R}_p(t)$.
+Each edge $(p,q)\in\mathcal E$ is a Hooke spring whose extension is measured by the 4D Euclidean length
+$\ell_{pq}(t)=\|\mathbf R_q(t)-\mathbf R_p(t)\|$.
 
+\paragraph{Stretching energy.}
+\begin{equation}
+U(\{\mathbf R_p\})
+=\sum_{(p,q)\in\mathcal E}\frac{k}{2}\big(\ell_{pq}-\ell_0\big)^2,
+\qquad
+\ell_{pq}=\|\mathbf R_q-\mathbf R_p\|_{\mathbb R^4}.
+\label{eq:discrete-stretch-energy}
+\end{equation}
+Here $k>0$ is the spring constant and $\ell_0>0$ the rest length.
+
+\paragraph{Forces and equations of motion.}
+For each node $p$ the internal force is
+\begin{equation}
+\mathbf F_p
+=
+\sum_{q:\,(p,q)\in\mathcal E}
+k\,(\ell_{pq}-\ell_0)\,\frac{\mathbf R_q-\mathbf R_p}{\ell_{pq}},
+\label{eq:discrete-force}
+\end{equation}
+and the dynamics is
+\begin{equation}
+m\,\ddot{\mathbf R}_p=\mathbf F_p+\mathbf F^{\mathrm{bc}}_p.
+\label{eq:discrete-eom}
+\end{equation}
+Here $m>0$ is the node mass and $\mathbf F^{\mathrm{bc}}_p$ denotes constraint/holding forces (if used) required by the
+chosen boundary conditions.
+
+\paragraph{Pre-tension (discrete).}
+A pre-tensioned equilibrium is any time-independent configuration $\{\mathbf R^\star_p\}$ such that edge lengths satisfy
+$\ell^\star_{pq}=\|\mathbf R^\star_q-\mathbf R^\star_p\|\neq \ell_0$ while remaining in static equilibrium under the chosen
+boundary conditions. For a regular lattice and uniform pre-tension one typically sets the geometric neighbor spacing to a
+value $h_\star$ (fixed by the periodic cell or by boundary clamping) and chooses $\ell_0<h_\star$. A convenient dimensionless
+measure of pre-tension is the uniform pre-strain
+\begin{equation}
+\varepsilon_0=\frac{h_\star-\ell_0}{\ell_0}.
+\label{eq:prestrain}
+\end{equation}
+In a periodic bulk lattice the symmetric neighbor forces cancel in the interior, so $\{\mathbf R^\star_p\}$ is an equilibrium;
+in a finite sample, pre-tension must be maintained by boundary constraints (clamped boundary nodes or an imposed periodic cell).
+
+\paragraph{No privileged embedding axis.}
+All embedding components enter only through 4D edge lengths $\ell_{pq}$. Any "normal/tangential" decomposition is a diagnostic
+convention tied to a chosen base embedding, not a special dynamical degree of freedom.
+
+\paragraph{Dictionary (discrete model).}
 \begin{itemize}
-\item \textbf{Stretching energy (Hooke-like):}
-  \[
-  U_\text{str}=\sum_{(p,q)\in\mathcal E}
-  \phi\left(\frac{|\mathbf R_q-\mathbf R_p|-h}{h}\right),
-  \]
-  with a simple quadratic potential
-  \[
-  \phi(\epsilon)=\frac{1}{2}k\,\epsilon^2,
-  \]
-  so that the discrete stretching law reduces locally to a
-  Hooke-like response. In the present work we do not include
-  any additional material saturation; all nonlinear behavior
-  arises from the geometric dependence of distances and curvature
-  on the brane embedding.
-
-
-\item \textbf{Bending/curvature energy (optional but stabilizing):}
-  For each node $p$, penalize changes of edge directions:
-  \[
-  U_\text{bend}=\frac{\kappa}{2}\sum_{p}\sum_{q<r\in\mathcal N(p)}
-  \big(1-\hat e_{pq}\cdot\hat e_{pr}\big),
-  \quad \hat e_{pq}=\frac{\mathbf R_q-\mathbf R_p}{|\mathbf R_q-\mathbf R_p|}.
-  \]
-  For small angles between neighboring edges, $1-\hat e_{pq}\cdot\hat e_{pr}\approx \tfrac12\theta^2$.
-  Thus $U_\text{bend}$ acts as a discrete approximation to the squared mean curvature $|b|^2$ of the
-  embedding, consistent with the continuum brane picture. This helps maintain coherent toroidal shapes.
-
-\item \textbf{Total energy:} $U=U_\text{str}+U_\text{bend}$.
+\item $\mathcal V,\mathcal E$: node and edge sets; $\mathcal N(p)=\{q:(p,q)\in\mathcal E\}$ neighbor set.
+\item $\mathbf R_p(t)\in\mathbb R^4$: node position; $\ell_{pq}=\|\mathbf R_q-\mathbf R_p\|$ edge length.
+\item $m$: node mass; $k$: spring constant; $\ell_0$: rest length.
+\item $\mathbf F_p$: internal spring force; $\mathbf F^{\mathrm{bc}}_p$: boundary/constraint forces (if used).
+\item $\{\mathbf R^\star_p\}$: pre-tensioned equilibrium; $h_\star$: imposed geometric neighbor spacing; $\varepsilon_0$ pre-strain.
 \end{itemize}
 
-Forces are $\mathbf F_p=-\partial U/\partial \mathbf R_p$. Because $|\mathbf R_q-\mathbf R_p|$ is a \textbf{4D norm}, any deformation in the 4th direction automatically couples to in-brane edge lengths, producing the desired \textbf{geometric lateral contraction}.
+\paragraph{Assumptions (discrete model).}
+\begin{itemize}
+\item Euclidean embedding $\mathbb R^4$; forces depend only on 4D edge lengths.
+\item Stretch-only Hooke springs; no bending/angle/curvature penalties.
+\item Lumped masses at nodes; conservative dynamics unless explicit damping is added.
+\item Pre-tension is enforced by boundary conditions (periodic cell or clamped boundaries); otherwise a finite brane relaxes toward $\ell=\ell_0$.
+\end{itemize}
 
 \paragraph{Discrete-to-continuum parameter mapping}\label{discrete-continuum-mapping}
 
-The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h^3$, where $h$ is the lattice spacing (edge length in the reference FCC configuration). The node mass is $m_p = \rho_m h^3$, with $\rho_m$ the continuum mass density of the brane substrate.
+The continuum parameters introduced in Section~\ref{conceptual-model} relate to the discrete simulation as follows. Each lattice node represents a material volume element of size $h_\star^3$, where $h_\star$ is the imposed geometric neighbor spacing in the pre-tensioned equilibrium. The node mass is $m = \rho_m h_\star^3$, with $\rho_m$ the continuum mass density of the brane substrate.
 
-\textbf{Dimensional consistency (tension and moduli).}
-For a lattice with spacing $h$, node mass $m$, and nearest-neighbor spring constant $k_s$ (units: N/m), the characteristic wave speed scales as
+\textbf{Dimensional consistency (stiffness and wave speed).}
+For a pre-tensioned lattice with geometric spacing $h_\star$, node mass $m$, spring constant $k$ (units: N/m), and rest length $\ell_0<h_\star$, the characteristic wave speed scales as
 \begin{equation}
-c^2 \sim \frac{k_s h^2}{m}.
+c^2 \sim \frac{k h_\star^2}{m}.
 \end{equation}
-Equivalently, with continuum mass density $\rho \sim m/h^3$, the continuum tension parameter has units of Pa (energy per 3-volume) and scales as
+Equivalently, with continuum mass density $\rho_m \sim m/h_\star^3$, the continuum stiffness parameter has units of Pa (energy per 3-volume) and scales as
 \begin{equation}
-T \sim \frac{k_s}{h},
-\qquad \text{so that } c^2 = \frac{T}{\rho}.
+K \sim \frac{k}{h_\star},
+\qquad \text{so that } c^2 = \frac{K}{\rho_m}.
 \end{equation}
-This establishes the consistent dimensional mapping between discrete spring stiffness ($k_s$, in N/m) and continuum tension ($T$, in Pa). Similarly, the shear modulus $\mu$ and bulk modulus $K$ (if present) all carry units of Pa.
-
-The \textbf{bending stiffness} $\kappa$ in the continuum curvature energy $\tfrac{\kappa}{2}|b|^2$ maps to the discrete parameter $\kappa$ in $U_\text{bend}$, with units adjusted by powers of $h$ to maintain dimensional consistency. Finally, the shear modulus $\mu$ in the continuum description can be introduced via additional discrete angular or shear springs if needed, though for simplicity we often set $\mu\to 0$ in the isotropic limit. These mappings are validated by measuring the wave speed $c = \sqrt{T/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
+This establishes the consistent dimensional mapping between discrete spring stiffness ($k$, in N/m) and continuum stiffness ($K$, in Pa). These mappings are validated by measuring the wave speed $c = \sqrt{K/\rho_m}$ from numerical dispersion tests and verifying consistency with the continuum prediction (see Section~\ref{calibration-dispersion-isotropy}).
 
 \subsubsection{Amplitude scale calibration}\label{amplitude-scale-calibration}
 
@@ -583,7 +610,7 @@ relevant dimensionless ratios.
   Here $\rho$ is the continuum mass density and $h^3$ is the material volume represented by a node,
   so that each node effectively carries mass $m_p=\rho h^3$.
   Report drift (target $<10^{-5}$ over long runs, periodic BCs).
-\item \textbf{Implementation note:} No explicit amplitude or strain clamps are applied during time integration. All nonlinear confinement effects arise from the geometric dependence of edge lengths on the 4D embedding. The integrator advances $\mathbf R_p$ and $\mathbf v_p$ based solely on forces $\mathbf F_p = -\partial U/\partial \mathbf R_p$ computed from $U_\text{str} + U_\text{bend}$, ensuring that any emergent localization or threshold behavior arises from the elastic dynamics rather than from artificial hard cutoffs.
+\item \textbf{Implementation note:} No explicit amplitude or strain clamps are applied during time integration. All nonlinear confinement effects arise from the geometric dependence of edge lengths on the 4D embedding. The integrator advances $\mathbf R_p$ and $\mathbf v_p$ based solely on forces $\mathbf F_p = -\partial U/\partial \mathbf R_p$ computed from the pre-tensioned spring energy $U$, ensuring that any emergent localization or threshold behavior arises from the elastic dynamics rather than from artificial hard cutoffs.
 \end{itemize}
 
 \subsubsection{Boundary conditions}\label{boundary-conditions}
@@ -631,16 +658,16 @@ the microscopic dynamics.
 \paragraph{1D photon test with lateral distortion.}
 As a minimal check of the geometric nonlinearity in a realistic regime, we
 implemented a one–dimensional spring chain with Compton–calibrated lattice
-spacing, mass density and tension (fixing the wave speed to $c$). A
-Gaussian wave packet in the normal direction $X^4$ propagates across the
+spacing, mass density and pre-tension (fixing the wave speed to $c$). A
+Gaussian wave packet initialized along a chosen embedding axis after fixing a flat base embedding (coordinate choice) propagates across the
 chain with essentially unchanged shape and speed, reproducing the linear
 photon picture at realistic scales. Because the springs are slightly
 pre-tensioned ($L_0 < h$), the same run also exhibits a small, localized
 co–moving distortion in the lateral separation of nodes. This lateral
-``bulge'' is confined to the region of largest normal gradients and remains
+``bulge'' is confined to the region of largest embedding gradients and remains
 bounded over the simulation time, illustrating how the pre-tensioned
-Hookean brane generates a mild coupling between normal and lateral
-coordinates without destroying photon propagation.
+Hookean brane generates a mild coupling between all embedding
+components without destroying photon propagation.
 
 \subsubsection{Test plan and falsifiable criteria}
 \label{falsifiable-criteria}
