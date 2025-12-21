@@ -5,7 +5,6 @@ Handles creation and management of test run directories with timestamps.
 Each test/experiment gets its own timestamped folder for outputs.
 """
 
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional

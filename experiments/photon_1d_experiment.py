@@ -24,7 +24,6 @@ from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.utils import TestRunManager
 
 # New diagnostic infrastructure
-from branesim.utils.io import export_photon_1d_snapshot_csv, save_result_csv_1d
 from branesim.visualization import plot_all_brane_1d_standard
 
 
@@ -273,26 +272,6 @@ def main():
                 state.positions[:, 0] - initial_positions[:, 0]
             ).cpu().numpy().copy()
             snapshots_v_x[t_phys_s] = state.velocities[:, 0].cpu().numpy().copy()
-
-            # Optional CSV export
-            if export_csv_snapshots:
-                csv_filename = run_manager.get_data_path(
-                    f'photon_1d_snapshot_t{step:06d}.csv'
-                )
-                export_photon_1d_snapshot_csv(
-                    csv_filename,
-                    state,
-                    grid,
-                    initial_positions,
-                    physics.spring_constant,
-                    physics,
-                    h_sim,
-                    mapper,
-                    rest_length_sim=physics.rest_length,
-                )
-
-                if step == 0:
-                    print(f"  ✓ Exporting CSV snapshots ({len(snapshot_steps)} total)")
 
         # Tracking (every 1% of simulation)
         if step % max(1, num_steps // 100) == 0:

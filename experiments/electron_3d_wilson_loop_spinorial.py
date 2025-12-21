@@ -21,11 +21,11 @@ from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.initialization.carrier_packets import make_electron_double_loop_packet
-from branesim.diagnostics.holonomy import (
+from branesim.analytics.holonomy import (
     wilson_loop_holonomy,
     verify_gauge_invariance,
 )
-from branesim.diagnostics.degeneracy import subspace_rank_svd
+from branesim.analytics.degeneracy import subspace_rank_svd
 from branesim.utils import TestRunManager
 
 

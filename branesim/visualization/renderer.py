@@ -7,7 +7,6 @@ This module provides Matplotlib-based rendering for 1D, 2D, and 3D simulations.
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from typing import Optional
 
 from branesim.core.state import BraneState, Dimensionality
 from branesim.core.grid import BraneGrid

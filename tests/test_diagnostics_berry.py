@@ -16,7 +16,7 @@ import torch
 import numpy as np
 import math
 
-from branesim.diagnostics import (
+from branesim.analytics import (
     GridSpec,
     BerryConfig,
     complex_band_state_from_quadrature,

@@ -23,7 +23,7 @@ from branesim.core.dimensions import MassModel
 from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.initialization.carrier_packets import make_photon_circular_packet
-from branesim.diagnostics.degeneracy import (
+from branesim.analytics.degeneracy import (
     subspace_rank_svd,
     verify_narrowband_preparation,
 )

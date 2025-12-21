@@ -7,10 +7,6 @@ from .brane_state_viz import (
     extract_slice_xz,
     extract_slice_yz,
 )
-from .berry_phase_1d import (
-    plot_berry_phase_profiles,
-    plot_berry_connection_profiles,
-)
 from .brane_1d_viz import (
     plot_brane_1d_amplitude_propagation,
     plot_brane_1d_lateral_distortion,
@@ -27,9 +23,6 @@ __all__ = [
     'extract_slice_xy',
     'extract_slice_xz',
     'extract_slice_yz',
-    # Berry phase
-    'plot_berry_phase_profiles',
-    'plot_berry_connection_profiles',
     # Generic 1D brane visualization (preferred)
     'plot_brane_1d_amplitude_propagation',
     'plot_brane_1d_lateral_distortion',
