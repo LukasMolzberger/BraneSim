@@ -23,8 +23,13 @@ from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.utils import TestRunManager
 
-# New diagnostic infrastructure
+# Visualization
 from branesim.visualization import plot_all_brane_1d_standard
+from branesim.visualization.displacement_field_viz import (
+    displacement_frames_from_positions_frames,
+    create_displacement_components_video_1d_in_2d,
+    create_displacement_magnitude_angle_video_1d_in_2d,
+)
 
 
 def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
@@ -247,6 +252,11 @@ def main():
     snapshots_delta_x = {}
     snapshots_v_x = {}
 
+    # Displacement field video frames (collect full position snapshots)
+    frames_X_full = []  # Full 4D positions for each snapshot
+    frames_times_s = []  # Physical times in seconds
+    X0_full = initial_positions.detach().cpu().numpy()  # Reference positions (N,4)
+
     # Tracking
     times_phys_track_s = []
     centers_sim_track = []
@@ -272,6 +282,11 @@ def main():
                 state.positions[:, 0] - initial_positions[:, 0]
             ).cpu().numpy().copy()
             snapshots_v_x[t_phys_s] = state.velocities[:, 0].cpu().numpy().copy()
+
+            # Collect full positions for displacement field videos
+            X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
+            frames_X_full.append(X_phys)
+            frames_times_s.append(t_phys_s)
 
         # Tracking (every 1% of simulation)
         if step % max(1, num_steps // 100) == 0:
@@ -320,6 +335,59 @@ def main():
 
     plot_all_brane_1d_standard(run_data)
     print(f"  ✓ Standard brane plots")
+
+    # Displacement field videos
+    if frames_X_full:
+        print(f"\nGenerating displacement field videos...")
+
+        # Convert reference positions to physical units
+        X0_phys = mapper.to_phys_length(torch.from_numpy(X0_full)).numpy()
+
+        # Compute displacement frames: u = X - X0
+        frames_u_full = displacement_frames_from_positions_frames(frames_X_full, X0_phys)
+
+        # Extract 2D embedding (components 0 and 3: longitudinal and transverse)
+        frames_u_2d = [u[:, [0, 3]] for u in frames_u_full]
+
+        # Determine displacement scale (convert to pm for display)
+        all_u = np.concatenate(frames_u_2d, axis=0)
+        u_max_m = float(np.max(np.abs(all_u)))
+        u_max_pm = u_max_m * 1e12
+
+        print(f"  Max displacement: {u_max_pm:.3f} pm")
+
+        # Video 1: Raw components u^0(x,t) and u^3(x,t)
+        print(f"  Creating displacement components video...")
+        create_displacement_components_video_1d_in_2d(
+            frames_u=frames_u_2d,
+            times=frames_times_s,
+            x_coords=x_nm,  # x in nm
+            output_path=run_manager.get_plot_path("displacement_1d_components.mp4"),
+            fps=20,
+            dpi=140,
+            unit_label_x="nm",
+            unit_label_u="m",  # Will show in meters (scientific notation)
+            title="1D Brane Displacement: Components u⁰ (longitudinal) and u³ (transverse)",
+        )
+        print(f"    ✓ displacement_1d_components.mp4")
+
+        # Video 2: Magnitude and angle split
+        print(f"  Creating magnitude/angle video...")
+        create_displacement_magnitude_angle_video_1d_in_2d(
+            frames_u=frames_u_2d,
+            times=frames_times_s,
+            x_coords=x_nm,
+            output_path=run_manager.get_plot_path("displacement_1d_mag_angle.mp4"),
+            fps=20,
+            dpi=140,
+            unit_label_x="nm",
+            unit_label_a="m",
+            title="1D Brane Displacement: Magnitude |u| and Angle θ",
+            unwrap_along_x=True,
+        )
+        print(f"    ✓ displacement_1d_mag_angle.mp4")
+
+        print(f"  ✓ Displacement field videos generated")
 
     # ========================================================================
     # Summary

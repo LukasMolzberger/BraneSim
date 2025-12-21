@@ -215,6 +215,124 @@ We evolve only periodic displacements about this base,
 \end{equation}
 Let $A_i:=\partial_i\mathbf X_\star\in\mathbb R^4$ denote the constant base tangents.
 
+\subsubsection{4D displacement and momentum as amplitude + $S^3$ direction (and $S^3\simeq SU(2)$)}
+\label{sec:s3-su2-decomposition}
+
+Many diagnostic constructions in this work benefit from separating a 4D vector
+field into (i) a nonnegative scalar magnitude and (ii) a unit direction on the
+3-sphere. This applies both to the 4D displacement field about a chosen base
+embedding and to the 4D canonical momentum density in the Hamiltonian
+formulation.
+
+\paragraph{Displacement field.}
+Given the periodic displacement (Eq.~\eqref{eq:decomposition-affine-plus-periodic})
+\[
+\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
+\]
+define its pointwise magnitude and direction by
+\begin{equation}
+  a_\xi(x,t) := |\boldsymbol\xi(x,t)| \ge 0,
+  \qquad
+  \mathbf n_\xi(x,t) :=
+  \begin{cases}
+    \boldsymbol\xi(x,t)/|\boldsymbol\xi(x,t)|, & \boldsymbol\xi(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \boldsymbol\xi(x,t)=\mathbf 0,
+  \end{cases}
+  \label{eq:xi-amplitude-direction}
+\end{equation}
+so that wherever $\boldsymbol\xi\neq 0$,
+\begin{equation}
+  \boldsymbol\xi(x,t) = a_\xi(x,t)\,\mathbf n_\xi(x,t),
+  \qquad
+  \mathbf n_\xi(x,t)\in S^3\subset\mathbb R^4.
+  \label{eq:xi-factorization}
+\end{equation}
+The scalar $a_\xi$ provides an ``amplitude'' (e.g.\ arrow length or opacity in
+visualizations), while $\mathbf n_\xi$ encodes the instantaneous 4D direction as
+a point on the unit 3-sphere.
+
+\paragraph{Momentum field.}
+In the minimal Hamiltonian setup, the canonical momentum density is
+(Eq.~\eqref{eq:canonical-momentum})
+\[
+\boldsymbol\Pi(x,t)=\rho_m\,\partial_t \mathbf X(x,t)\in\mathbb R^4.
+\]
+Define analogously
+\begin{equation}
+  a_\Pi(x,t) := |\boldsymbol\Pi(x,t)| \ge 0,
+  \qquad
+  \mathbf n_\Pi(x,t) :=
+  \begin{cases}
+    \boldsymbol\Pi(x,t)/|\boldsymbol\Pi(x,t)|, & \boldsymbol\Pi(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \boldsymbol\Pi(x,t)=\mathbf 0,
+  \end{cases}
+  \label{eq:pi-amplitude-direction}
+\end{equation}
+so that $\boldsymbol\Pi=a_\Pi\,\mathbf n_\Pi$ wherever $\boldsymbol\Pi\neq 0$.
+For constant $\rho_m$, $\mathbf n_\Pi$ is the direction of the 4D velocity
+$\partial_t\mathbf X$, and the magnitude $a_\Pi$ controls the kinetic energy
+density via $\mathcal T=\frac{1}{2\rho_m}|\boldsymbol\Pi|^2$
+(cf.\ Eq.~\eqref{eq:brane-hamiltonian-density}).
+
+\paragraph{From $S^3$ directions to unit quaternions.}
+Write a unit 4-vector as $\mathbf n=(n_0,n_1,n_2,n_3)\in S^3$.
+Identifying $\mathbb R^4$ with the quaternion algebra $\mathbb H$,
+we associate $\mathbf n$ with the \emph{unit quaternion}
+\begin{equation}
+  q(\mathbf n) := n_0 + n_1\,\mathbf i + n_2\,\mathbf j + n_3\,\mathbf k,
+  \qquad |q|=1.
+  \label{eq:unit-quaternion}
+\end{equation}
+Thus the direction fields $\mathbf n_\xi$ and $\mathbf n_\Pi$ can be viewed as
+quaternion-valued fields $q_\xi(x,t)$ and $q_\Pi(x,t)$ taking values in the group
+of unit quaternions.
+
+\paragraph{$S^3\simeq SU(2)$ (explicit matrix map).}
+Unit quaternions form a Lie group isomorphic to $SU(2)$.
+An explicit isomorphism is given by mapping $q=a+b\,\mathbf i+c\,\mathbf j+d\,\mathbf k$
+to the complex $2\times 2$ matrix
+\begin{equation}
+  U(q)=
+  \begin{pmatrix}
+    a+i d & c+i b\\
+    -c+i b & a-i d
+  \end{pmatrix},
+  \qquad
+  U(q)^\dagger U(q)=\mathbb I,\ \det U(q)=1.
+  \label{eq:quaternion-to-su2}
+\end{equation}
+Consequently, a unit direction $\mathbf n\in S^3$ may be interpreted
+interchangeably as a unit quaternion $q(\mathbf n)$ or an $SU(2)$ element $U(q)$.
+
+\paragraph{Relation to $SO(3)$ and the double cover (spinorial $4\pi$ periodicity).}
+Although $\mathbf n$ is used here primarily as a compact encoding of a 4D
+direction, the same $SU(2)$ element also parametrizes 3D rotations.
+Represent a 3-vector $\mathbf r=(r_x,r_y,r_z)\in\mathbb R^3$ as a \emph{pure}
+imaginary quaternion $\underline r=r_x\,\mathbf i+r_y\,\mathbf j+r_z\,\mathbf k$.
+Then the action
+\begin{equation}
+  \underline r \ \mapsto\ \underline r' := q\,\underline r\,q^{-1}
+  \label{eq:su2-rotation-action}
+\end{equation}
+is a proper rotation in $\mathbb R^3$. The map $q\mapsto R\in SO(3)$ is a
+\emph{double cover}: $q$ and $-q$ induce the same rotation. Equivalently, with
+the axis--angle parametrization
+\begin{equation}
+  q = \cos(\tfrac{\theta}{2}) + \sin(\tfrac{\theta}{2})\,
+  (\hat u_x\,\mathbf i+\hat u_y\,\mathbf j+\hat u_z\,\mathbf k),
+  \label{eq:axis-angle-quaternion}
+\end{equation}
+a $2\pi$ rotation in $SO(3)$ corresponds to a sign flip $q\mapsto -q$, while a
+full return $q\mapsto q$ requires $4\pi$. This is the standard geometric origin
+of spinorial $4\pi$ periodicity and motivates using $SU(2)\simeq S^3$ valued
+direction fields when diagnosing holonomy-like effects.
+
+\paragraph{Practical note (zeros).}
+At points where $\boldsymbol\xi$ or $\boldsymbol\Pi$ vanish, the direction
+$\mathbf n$ is undefined. In computations and visualizations we therefore mask
+those points (or carry forward the last valid direction) and use the scalar
+magnitude $a$ to suppress spurious direction artifacts.
+
 \paragraph{Assumptions (minimal analytic substrate model).}
 The continuous substrate model used in this paper rests on the following explicit assumptions:
 

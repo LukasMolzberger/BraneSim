@@ -147,6 +147,17 @@ All higher-layer fields (band envelopes, gauge connections, holonomies) are
 computed diagnostically from these arrays and their finite differences. No
 emergent quantity feeds back into the substrate dynamics.
 
+\paragraph{Discrete amplitude--direction decomposition on $S^3$.}
+For diagnostics it is often useful to factor discrete 4D node fields into
+magnitude and direction on $S^3$. With base configuration
+$\mathbf R^\star_p$ (pre-tension) and displacement $\mathbf u_p=\mathbf R_p-\mathbf R^\star_p$,
+define $a_{\!u,p}=|\mathbf u_p|$ and $\mathbf n_{\!u,p}=\mathbf u_p/|\mathbf u_p|$ whenever
+$\mathbf u_p\neq 0$. Likewise define the discrete momentum $\mathbf p_p=m\,\mathbf v_p$
+and factor $\mathbf p_p=a_{\!p,p}\,\mathbf n_{\!p,p}$ with $a_{\!p,p}=|\mathbf p_p|$.
+The directions $\mathbf n_{\!u,p}$ and $\mathbf n_{\!p,p}$ are points on $S^3$ and
+can be mapped to unit quaternions / $SU(2)$ elements as in
+Section~\ref{sec:s3-su2-decomposition}.
+
 \subsubsection{Preparation-first initialization of narrowband carriers}
 \label{sec:init-carriers}
 

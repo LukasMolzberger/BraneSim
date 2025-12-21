@@ -41,7 +41,10 @@ from branesim.visualization.brane_3d_viz import (
     camera_orbit,
 )
 from branesim.visualization.em_field_viz import visualize_em_field_volume_3d
-from branesim.physics.em_to_brane_mapping import ElectrostaticMapping
+from branesim.visualization.displacement_field_viz import (
+    displacement_frames_from_positions_frames,
+    create_displacement_diralpha_slices_videos_3d_in_4d,
+)
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -454,96 +457,6 @@ def main():
         csv_output_dir=run_manager.data_dir
     )
 
-    # ========================================================================
-    # COMPUTE AND VISUALIZE E-FIELD FROM BRANE (FORWARD MAPPING)
-    # ========================================================================
-    print(f"\nComputing E-field from brane using forward mapping...")
-
-    # Extract X⁴ component from brane state and reshape to 3D grid
-    X4_flat_sim = state.get_field_component(3).cpu()  # Get X⁴ in sim units
-    X4_3d_sim = X4_flat_sim.reshape(nx, ny, nz)  # Reshape to 3D grid
-
-    # Convert to physical units
-    X4_3d_phys = mapper.to_phys_length(X4_3d_sim)
-
-    # Initialize the electrostatic mapping
-    # κ_EM is phenomenological - for visualization we can use 1.0
-    kappa_EM = 1.0  # V/m or dimensionless depending on interpretation
-    epsilon_0 = 8.854187817e-12  # F/m
-
-    em_mapper = ElectrostaticMapping(
-        kappa_EM=kappa_EM,
-        epsilon_0=epsilon_0,
-        dx=h_phys,  # Physical grid spacing
-        device=device,
-        dtype=dtype
-    )
-
-    # Compute emergent EM fields from brane: Φ = κ_EM * X⁴, E = -∇Φ
-    print(f"  Computing Φ, E, ρ from X⁴...")
-    Phi, E_field, rho = em_mapper.map_from_brane(X4_3d_phys)
-
-    # Print field statistics
-    E_mag = torch.sqrt(torch.sum(E_field**2, dim=-1))
-    print(f"  Potential Φ range: [{Phi.min():.6e}, {Phi.max():.6e}] V")
-    print(f"  E-field magnitude: [{E_mag.min():.6e}, {E_mag.max():.6e}] V/m")
-    print(f"  Charge density ρ range: [{rho.min():.6e}, {rho.max():.6e}] C/m³")
-
-    # Convert to numpy for visualization
-    E_field_np = E_field.cpu().numpy()
-
-    # Create positions array for visualization (in physical units)
-    coords = grid.get_spatial_coordinates()  # Get coordinates in sim units
-    coords_phys = mapper.to_phys_length(coords).cpu().numpy()  # Convert to physical units
-
-    # For B-field, we set it to zero (electrostatic approximation)
-    # In the future, this could be computed from time derivatives or Lorentz transformations
-    B_field_np = np.zeros_like(E_field_np)
-
-    # Flatten the 3D arrays to (N, 3) format expected by visualize_em_field_volume_3d
-    E_field_flat = E_field_np.reshape(-1, 3)
-    B_field_flat = B_field_np.reshape(-1, 3)
-
-    print(f"  Visualizing E-field in 3D volume...")
-    # Create visualization with appropriate subsampling
-    subsample_factor = 5  # Take every 5th point in each dimension
-    e_paths, b_paths = visualize_em_field_volume_3d(
-        positions=coords_phys,
-        E_field=E_field_flat,
-        B_field=B_field_flat,
-        output_dir=run_manager.plots_dir,
-        grid_shape=(nx, ny, nz),
-        subsample_factor=subsample_factor,
-        arrow_scale=1.0,
-        dpi=150,
-        views=[
-            dict(
-                elev=25, azim=-60,
-                title_e="E-Field from Brane (X⁴) - Oblique View",
-                title_b="B-Field (Zero) - Oblique View",
-                filename_e="initial_e_field_from_brane_oblique.png",
-                filename_b="initial_b_field_from_brane_oblique.png"
-            ),
-            dict(
-                elev=10, azim=30,
-                title_e="E-Field from Brane (X⁴) - Side View",
-                title_b="B-Field (Zero) - Side View",
-                filename_e="initial_e_field_from_brane_side.png",
-                filename_b="initial_b_field_from_brane_side.png"
-            ),
-            dict(
-                elev=80, azim=-90,
-                title_e="E-Field from Brane (X⁴) - Top View",
-                title_b="B-Field (Zero) - Top View",
-                filename_e="initial_e_field_from_brane_top.png",
-                filename_b="initial_b_field_from_brane_top.png"
-            ),
-        ]
-    )
-    print(f"  ✓ Saved E-field visualizations:")
-    for path in e_paths:
-        print(f"    • {path.split('/')[-1]}")
-
     # Run simulation - fixed number of steps
     num_steps = 1000
     simulation_time_sim = num_steps * dt_sim
@@ -582,6 +495,11 @@ def main():
     frame_interval_3d = max(1, num_steps // 100)  # ~100 frames for 3D
     subsample_factor_3d = 2  # Take every 2nd point along each axis
 
+    # Displacement field video frames (collect full position snapshots)
+    frames_X_full = []  # Full 4D positions for displacement field videos
+    frames_times_s = []  # Physical times in seconds
+    X0_full = mapper.to_phys_length(initial_positions).detach().cpu().numpy()  # Reference positions
+
     print_interval = max(1, num_steps // 20)
 
     for step in range(num_steps + 1):
@@ -609,6 +527,12 @@ def main():
             animation_frames_lateral_y.append(lateral_disp_y.copy())
 
             animation_times.append(solver.time)
+
+            # Collect full positions for displacement field videos (same as animation frames)
+            X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
+            frames_X_full.append(X_phys)
+            time_phys = mapper.to_phys_time(solver.time)
+            frames_times_s.append(time_phys)
 
         # Save frames for 3D point cloud animation (subsampled)
         if step % frame_interval_3d == 0:
@@ -942,6 +866,45 @@ def main():
         figsize=(10, 8),
     )
     print(f"  ✓ Saved: photon_3d_point_cloud.mp4")
+
+    # ========================================================================
+    # 7. DISPLACEMENT FIELD SLICE VIDEOS (3D brane in 4D embedding)
+    # ========================================================================
+    if frames_X_full:
+        print(f"\nGenerating displacement field slice videos...")
+
+        # Compute displacement frames: u = X - X0
+        frames_u_full = displacement_frames_from_positions_frames(frames_X_full, X0_full)
+
+        # Determine displacement scale
+        all_u = np.concatenate(frames_u_full, axis=0)
+        u_max_m = float(np.max(np.abs(all_u)))
+        u_max_pm = u_max_m * 1e12
+
+        print(f"  Max displacement: {u_max_pm:.3f} pm")
+
+        # Create 3 slice videos: XY, XZ, YZ with S³ color coding
+        print(f"  Creating displacement diralpha slice videos...")
+        create_displacement_diralpha_slices_videos_3d_in_4d(
+            frames_u=frames_u_full,
+            times=frames_times_s,
+            grid_shape=(nx, ny, nz),
+            spacing=h_phys,
+            output_dir=run_manager.plots_dir,
+            filename_prefix="displacement_3d_diralpha",
+            planes=("xy", "xz", "yz"),
+            fps=20,
+            dpi=120,
+            display_scale=1e9,  # Display in nm
+            unit_label="nm",
+            alpha_gamma=0.5,  # Lower gamma = more visible at low magnitudes
+            alpha_scale=1.0,  # Full opacity scale
+        )
+        print(f"    ✓ displacement_3d_diralpha_xy.mp4")
+        print(f"    ✓ displacement_3d_diralpha_xz.mp4")
+        print(f"    ✓ displacement_3d_diralpha_yz.mp4")
+
+        print(f"  ✓ Displacement field slice videos generated")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

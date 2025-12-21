@@ -27,6 +27,11 @@ from branesim.initialization.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
 )
 from branesim.utils import TestRunManager
+from branesim.visualization.displacement_field_viz import (
+    displacement_frames_from_positions_frames,
+    create_displacement_arrows_video_2d_in_3d,
+    create_displacement_diralpha_video_2d_in_3d,
+)
 
 
 def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
@@ -376,6 +381,11 @@ def main():
     animation_times = []
     frame_interval = max(1, num_steps // 300)  # ~300 frames total
 
+    # Displacement field video frames (collect full position snapshots)
+    frames_X_full = []  # Full position arrays for displacement field videos
+    frames_times_s = []  # Physical times in seconds
+    X0_full = mapper.to_phys_length(initial_positions).detach().cpu().numpy()  # Reference positions
+
     # Physical coordinates for plotting (convert from sim to physical)
     x_coords_phys = np.arange(nx) * h_phys
     y_coords_phys = np.arange(ny) * h_phys
@@ -405,6 +415,12 @@ def main():
             animation_frames_lateral_y.append(lateral_disp_y.copy())
 
             animation_times.append(solver.time)
+
+            # Collect full positions for displacement field videos (same as animation frames)
+            X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
+            frames_X_full.append(X_phys)
+            time_phys = mapper.to_phys_time(solver.time)
+            frames_times_s.append(time_phys)
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             energy = solver.compute_energy(state)
@@ -666,6 +682,59 @@ def main():
     print(f"  ✓ Saved: photon_2d_example_lateral_distortion.mp4")
 
     plt.close(fig_anim_lat)
+
+    # Displacement field videos (2D brane in 3D embedding)
+    if frames_X_full:
+        print(f"\nGenerating displacement field videos...")
+
+        # Compute displacement frames: u = X - X0
+        frames_u_full = displacement_frames_from_positions_frames(frames_X_full, X0_full)
+
+        # Extract 3D embedding (components 0, 1, 3: x, y, amplitude)
+        frames_u_3d = [u[:, [0, 1, 3]] for u in frames_u_full]
+
+        # Determine displacement scale
+        all_u = np.concatenate(frames_u_3d, axis=0)
+        u_max_m = float(np.max(np.abs(all_u)))
+        u_max_pm = u_max_m * 1e12
+
+        print(f"  Max displacement: {u_max_pm:.3f} pm")
+
+        # Video 1: Displacement arrows in 3D view
+        print(f"  Creating displacement arrows video...")
+        create_displacement_arrows_video_2d_in_3d(
+            frames_u=frames_u_3d,
+            times=frames_times_s,
+            grid_shape=(nx, ny),
+            spacing=h_phys,
+            output_path=run_manager.get_plot_path("displacement_2d_arrows.mp4"),
+            subsample=6,  # Subsample more for clarity
+            arrow_fraction_of_extent=0.15,  # Longer arrows for better visibility
+            fps=20,
+            dpi=120,
+            display_scale=1e9,  # Display in nm
+            unit_label="nm",
+        )
+        print(f"    ✓ displacement_2d_arrows.mp4")
+
+        # Video 2: Direction/magnitude split with color coding
+        print(f"  Creating direction/magnitude video...")
+        create_displacement_diralpha_video_2d_in_3d(
+            frames_u=frames_u_3d,
+            times=frames_times_s,
+            grid_shape=(nx, ny),
+            spacing=h_phys,
+            output_path=run_manager.get_plot_path("displacement_2d_diralpha.mp4"),
+            fps=20,
+            dpi=120,
+            display_scale=1e9,
+            unit_label="nm",
+            alpha_gamma=0.5,  # Lower gamma = more visible at low magnitudes
+            alpha_scale=1.0,  # Full opacity scale
+        )
+        print(f"    ✓ displacement_2d_diralpha.mp4")
+
+        print(f"  ✓ Displacement field videos generated")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")
