@@ -536,7 +536,7 @@ This establishes the consistent dimensional mapping between discrete spring stif
 \subsubsection{Amplitude scale calibration}\label{amplitude-scale-calibration}
 
 To instantiate the brane in physical units we must fix not only the wave speed
-$c$ but also the absolute scale of normal displacements $X^4$, which has the
+$c$ but also the absolute scale of transverse displacements (represented by $X^4$ in a convenient embedding gauge), which has the
 same dimension of length as the lateral coordinates. Two complementary routes
 are used to estimate the amplitude scale $A$ of microscopic oscillations.
 
@@ -564,17 +564,13 @@ $A \approx \lambda_C/\sqrt{\pi}$ up to order-unity geometric factors. This
 choice sets the overall substrate mechanical scale (via $\rho$ and $K$) in terms
 of $(m_e,c,\hbar)$.
 
-\paragraph{Route (ii): charge calibration (deferred in the new framework).}
-In the previous draft, the charge magnitude was tied directly to a coarse-grained
-normal-displacement monopole. In the present layered framework, the effective
-electromagnetic sector is reconstructed from Berry geometry of band-isolated modes.
-This shifts the charge calibration problem to fixing the conversion factor
-$\hbar/q$ in Eq.~\eqref{eq:em-potential-from-berry} and identifying how defects
-realize effective sources in the inhomogeneous Maxwell sector. We therefore
-defer a first-principles charge matching to the dedicated numerical tests of
-Section~\ref{falsifiable-criteria}.
+\paragraph{Route (ii): charge calibration (deferred).}
+In this work, the effective electromagnetic sector is reconstructed from Berry geometry of band-isolated modes.
+This shifts the charge calibration problem to (i) fixing the conversion factor $\hbar/q$ in Eq.~\eqref{eq:em-potential-from-berry} and (ii) identifying how defects/degeneracies realize effective sources in the inhomogeneous Maxwell sector.
+We therefore defer a first-principles charge matching to the dedicated numerical tests of Section~\ref{falsifiable-criteria}.
 
 \paragraph{Practical simulation choice.}
+
 In the discrete code we select a lattice spacing $h$ and identify each node with
 a material volume $h^3$ and mass $m_p = \rho h^3$. Given a target amplitude
 scale $A$ from either route, a ``one-quantum'' initialization of a photon-like
@@ -584,7 +580,7 @@ $\tfrac{1}{2}\sum_p m_p |\dot{R}_{p,4}|^2 + U_{\text{elastic}}(\{\mathbf R_p\})$
 matches $\hbar\omega$ (for a photon) or $m_e c^2$ (for an electron) to within a
 specified tolerance. Both calibration routes therefore determine not only the
 mechanical parameters $(\rho,K)$ but also the physically meaningful range of
-normal displacements $X^4$ to be used when setting up initial conditions in
+transverse displacements (the $X^4$ component in the chosen embedding gauge) to be used when setting up initial conditions in
 numerical experiments.
 
 \paragraph{SI units to dimensionless lattice units.}
