@@ -304,6 +304,38 @@ to the complex $2\times 2$ matrix
 Consequently, a unit direction $\mathbf n\in S^3$ may be interpreted
 interchangeably as a unit quaternion $q(\mathbf n)$ or an $SU(2)$ element $U(q)$.
 
+\paragraph{Rotations / isometries of the round $3$-sphere.}
+In this paper $S^3$ denotes the \emph{round} unit $3$-sphere
+$S^3=\{x\in\mathbb R^4:\|x\|=1\}$ with the metric induced from $\mathbb R^4$.
+Every orthogonal transformation $A\in O(4)$ preserves the norm and therefore acts
+as an isometry of $S^3$ by restriction, $x\mapsto Ax$.
+Consequently the full isometry group is
+\begin{equation}
+  \mathrm{Isom}(S^3)\cong O(4),
+  \label{eq:isom-s3-o4}
+\end{equation}
+and the orientation-preserving isometries (``proper rotations'') form
+\begin{equation}
+  \mathrm{Isom}^+(S^3)\cong SO(4).
+  \label{eq:isomplus-s3-so4}
+\end{equation}
+In the quaternion / $SU(2)$ identification $S^3\simeq SU(2)$, the
+orientation-preserving action can be written as independent left and right
+multiplication,
+\begin{equation}
+  q \ \mapsto\ a\,q\,b^{-1},
+  \qquad a,b\in SU(2),
+  \label{eq:left-right-action}
+\end{equation}
+which yields the standard Lie-group identification
+\begin{equation}
+  SO(4)\ \cong\ \bigl(SU(2)_L\times SU(2)_R\bigr)\big/\{\pm(1,1)\}.
+  \label{eq:so4-su2xsu2}
+\end{equation}
+If one fixes a point $q_0\in S^3$, the subgroup of $\mathrm{Isom}^+(S^3)$ that
+leaves $q_0$ invariant (the stabilizer) is isomorphic to $SO(3)$, mirroring the
+usual ``rotations about a point'' intuition.
+
 \paragraph{Relation to $SO(3)$ and the double cover (spinorial $4\pi$ periodicity).}
 Although $\mathbf n$ is used here primarily as a compact encoding of a 4D
 direction, the same $SU(2)$ element also parametrizes 3D rotations.
