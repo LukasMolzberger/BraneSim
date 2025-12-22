@@ -11,18 +11,19 @@ Key features of this ontology:
 \end{itemize}
 
 This section introduces (i) the microscopic substrate model and (ii) a minimal set of derived
-(diagnostic) constructions used later to extract complex mode envelopes and geometric phase from
-substrate waves.
-The microscopic equations of motion are always those of the brane embedding
-$\mathbf X(x,t)$; all derived diagnostic objects (spectral envelopes, Berry
-connections, effective gauge potentials, etc.) are defined as \emph{diagnostic}
-functionals of $\mathbf X$ and $\partial_t\mathbf X$ and never modify the
-substrate dynamics (see also Section~\ref{experimental-setting}).
+constructions that map substrate wave states to geometric phase and candidate gauge variables.
+These constructions are part of the proposed emergence map (substrate $\rightarrow$ effective field
+description) and can later also serve as numerical readouts for validation.
+Crucially, the microscopic equations of motion are always those of the brane embedding
+$\mathbf X(x,t)$; all derived objects (complex envelopes, Berry connections/holonomies, etc.) are
+deterministic functionals of $(\mathbf X,\partial_t\mathbf X)$ and never modify the substrate
+dynamics (see also Section~\ref{experimental-setting}).
 
-\paragraph{Scope of derived diagnostics.}
-Throughout the paper we occasionally introduce derived quantities (complex envelopes, geometric phases)
-as \emph{readout} from the substrate fields $(\mathbf X,\partial_t\mathbf X)$. These objects never modify
-the substrate dynamics; they are used only to organize and interpret measurement results.
+\paragraph{Scope of derived readout fields.}
+Throughout the paper we introduce derived quantities (complex envelopes, geometric phases)
+as part of the bridge from the substrate fields $(\mathbf X,\partial_t\mathbf X)$ to effective
+descriptions. They are computed from substrate snapshots but do not feed back into the
+equations of motion.
 
 The Michelson–Morley null result is naturally explained by Lorentz contraction of matter itself, rendering motion through the medium undetectable. In this view, the observed constancy of light speed reflects a dynamical property of the medium rather than a postulate about spacetime geometry.
 
@@ -169,7 +170,7 @@ Let $A_i:=\partial_i\mathbf X_\star\in\mathbb R^4$ denote the constant base tang
 \subsubsection{4D displacement and momentum as magnitude + $S^3$ direction (and $S^3\simeq SU(2)$)}
 \label{sec:s3-su2-decomposition}
 
-Many diagnostic constructions in this work benefit from separating a 4D vector
+Many constructions in this work benefit from separating a 4D vector
 field into (i) a nonnegative scalar magnitude and (ii) a unit direction on the
 3-sphere. This applies both to the 4D displacement field about a chosen base
 embedding and to the 4D canonical momentum density in the Hamiltonian
@@ -571,7 +572,7 @@ E_{\text{cell}} \;\sim\; \rho_m\,A^2\,\omega_C^2\,\lambda_C^3
 \end{equation}
 where $\omega_C = c/\lambda_C$ is the Compton angular frequency. Thus, the \emph{energy-in-a-Compton-volume} threshold is not a separate postulate but the energetic restatement of the geometric nonlinearity condition $\eta \gtrsim 1$ given the mass-density calibration. Above threshold, the geometric nonlinearity inherent in the full strain tensor can naturally lock in localized high-stretch 4D configurations, turning a propagating photon-like mode into a self-confined, particle-like soliton.
 
-Earlier drafts included a toy intrinsic-curvature estimate for a localized bulge; it is omitted here to keep the focus on the localization threshold and the Berry/holonomy diagnostics.
+Earlier drafts included a toy intrinsic-curvature estimate for a localized bulge; it is omitted here to keep the focus on the localization threshold and the Berry/holonomy construction.
 
 \subsubsection{"Gravity" as effective metric}\label{gravity-as-effective-metric}
 
@@ -585,14 +586,14 @@ For numerical experiments we work on finite brane patches
 $\Omega$ with physically motivated boundary conditions
 (periodic, free, or clamped; see Sec.~\ref{experimental-setting}).
 
-\subsection{From substrate waves to geometric phase diagnostics}
+\subsection{From substrate waves to geometric phase and gauge structure}
 \label{sec:brane-to-berry-to-em}
 
 Our long-term programme is to test whether a purely mechanical brane substrate can
 support phase and degeneracy structures that admit an effective gauge description.
 In this revision we proceed step by step: we define only the \emph{minimal} objects
 needed to talk about geometric (Berry) phase of prepared narrowband wave packets.
-More elaborate diagnostics (curvature maps, defect/source reconstruction, non-Abelian
+More elaborate reconstructions (curvature maps, defect/source localization, non-Abelian
 transport) are deferred.
 
 \subsubsection{Phase-space fields: displacement, velocity, momentum}
@@ -625,7 +626,7 @@ Accordingly we introduce a complex envelope field
 \end{equation}
 to represent the local oscillatory state of a narrowband carrier wave packet.
 In our workflow the narrowband carrier is defined by \emph{initialization} (preparation-first),
-so that the subsequent analysis does not rely on diagnostic band-pass filters or tuned
+so that the subsequent analysis does not rely on post-hoc band-pass filters or tuned
 frequencies. Practically, $u$ is obtained from the real phase-space pair $(\boldsymbol\xi,\mathbf v)$
 by constructing a consistent quadrature (analytic-signal) representation of the prepared carrier.
 
@@ -667,7 +668,7 @@ and evaluate the loop phase as $\Theta[\gamma]=\arg\prod_{(R\to R')\in\gamma} U(
 
 \paragraph{Deferred steps.}
 The identification of the Berry connection with an effective electromagnetic four-potential and the
-reconstruction of Maxwell-like field equations require additional assumptions and diagnostics
+reconstruction of Maxwell-like field equations require additional assumptions and additional numerical reconstruction procedures
 (e.g.\ robust curvature estimation, defect/source localization, and possibly non-Abelian transport in
 degenerate subspaces \cite{WilczekZee1984}). These steps are left for future work; here we restrict to
 the minimal $U(1)$ geometric phase readout on prepared narrowband packets.
