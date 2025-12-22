@@ -77,47 +77,20 @@ as ``free energy'' in their analysis of mass and light
 \cite{vanderMark2000LightHeavy}, but here that slogan is given a concrete
 mechanical realization in terms of explicit brane deformations.
 
-\paragraph{Electromagnetism as Berry geometry: implications and limits.}
-In this manuscript, the electromagnetic sector is reconstructed from the Berry connection and curvature of band-isolated substrate modes (Sections~ef{sec:band-isolation-route2}--ef{sec:berry-pullback-em}), rather than from a direct coarse-graining of a particular embedding component such as a raw transverse-displacement field (often represented by $X^4$ in a convenient gauge).
-This has two immediate implications. First, the relevant $U(1)$ is not a component-wise phase of the substrate, but the single overall phase freedom of an isolated complex polarization line bundle. Second, the homogeneous Maxwell equations become kinematic identities (Bianchi) of the reconstructed curvature, while the inhomogeneous sector becomes a dynamical and defect-driven question: effective sources must emerge from degeneracies/topological defects of the substrate, rather than being postulated.
+\paragraph{Geometric phase readout (Berry) and its current scope.}
+A central motivation of this project is that a purely mechanical substrate may encode nontrivial phase
+transport in the \emph{direction} of a prepared narrowband excitation, even when the underlying fields
+$\mathbf X(x,t)$ and $\partial_t\mathbf X(x,t)$ are real.
+In the present revision we take a deliberately conservative step: we define only the minimal $U(1)$
+Berry connection/phase readout on normalized complex envelopes (Section~\ref{sec:brane-to-berry-to-em})
+and restrict attention to robust loop phases (holonomies) computed from overlaps.
 
-A practical constraint is that Berry geometry is not only a matter of definitions
-but also of \emph{representation order}: if one attempts to project onto an adiabatic
-frame and only afterwards performs Fourier/Wigner-like transforms, geometric-phase
-effects can be numerically suppressed because the transform implicitly acts on
-double-valued (gauge/branch-cut) objects. This is demonstrated explicitly in the
-WA-vs-AW analysis of \cite{Ryabinkin2013QCLGP}. Consequently, our analysis pipeline
-is designed to transform/filter the single-valued substrate fields first and only
-then project onto bands/subspaces, and to compute holonomy/curvature from overlap
-products rather than derivative-of-phase estimates.
-
-However, the model also raises open questions and challenges. The framework now possesses a rigorous variational formulation grounded in a Lagrangian and action principle (Section~\ref{conceptual-model}), which provides the theoretical foundation for the continuum dynamics. Key open problems include:
-\begin{itemize}
-\item \textbf{Derivation of electromagnetic dynamics:}
-While the homogeneous Maxwell sector follows from curvature identities, a
-controlled derivation of the inhomogeneous equations and an effective action for
-$A_\mu^{\mathrm{EM}}$ from integrating out substrate degrees of freedom remains open.
-
-\item \textbf{Band separation in the nonlinear regime:}
-The Berry construction assumes meaningful band isolation. Establishing when this
-remains valid in strongly nonlinear, defect-forming dynamics (and how to define
-a ``photon band'' operationally) is a central technical challenge.
-
-\item \textbf{Defects $\Rightarrow$ non-Abelian holonomy $\Rightarrow$ Dirac sector:}
-Making the link between defect-induced degeneracies (Wilczek--Zee connection),
-spin-$1/2$ holonomy and an effective Dirac spinor description precise requires
-both analytic control and dedicated numerical experiments.
-
-\item \textbf{Charge normalisation and coupling scale:}
-Fixing the conversion factor between geometric connection and physical
-four-potential (Eq.~\eqref{eq:em-potential-from-berry}) and relating it robustly
-to the observed electron charge is still unresolved.
-
-\item \textbf{Entanglement (assumed hidden variables in this work):}
-We explicitly assume a hidden-variable account of long-range correlations and do
-not attempt to address Bell-type constraints here. A concrete substrate-level
-mechanism and its empirical signatures remain open.
-\end{itemize}
+This step already imposes a concrete requirement: the prepared packet must occupy an effectively isolated
+branch on its spectral support (a practical gap condition). Establishing such an isolated band is therefore
+a parameter-and-initialization problem first, and only afterwards an analysis problem.
+More ambitious claims --- mapping the Berry connection to an effective electromagnetic four-potential,
+reconstructing curvature/source distributions, or invoking non-Abelian ($U(N)$) transport near degeneracies ---
+are postponed until the minimal holonomy measurements are numerically stable and reproducible.
 
 \paragraph{Curvature toy models as secondary diagnostics.}
 Toy calculations that translate localized 4D bulges into intrinsic curvature measures can serve as

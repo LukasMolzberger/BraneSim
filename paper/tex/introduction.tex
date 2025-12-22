@@ -61,23 +61,17 @@ Throughout this work we distinguish between a microscopic evolution parameter $t
 evolves with respect to an external time parameter $t$ that is not part of the embedding itself. At the emergent level, observers reconstruct effective spacetime coordinates $x^\mu = (ct, x^i)$ and an approximate Lorentzian metric $g_{\mu\nu}(x)$ from the propagation of waves on the brane. In other words, relativity arises as an effective description of wave kinematics on a pre-existing brane evolving in microscopic time $t$.
 
 \paragraph{Structure of this paper.}
-The structure of the paper follows a substrate--first perspective and is organized
-as a layered model.
-Section~\ref{conceptual-model} defines the microscopic brane substrate (degrees
-of freedom, action, equations of motion) and introduces the analytical
-\emph{spectral-to-Berry-to-gauge} pipeline used to interpret emergent gauge structure.
-Section~\ref{emergent-relativity-and-lorentz-invariance} discusses how Lorentz-like
-kinematics can arise effectively from the linear wave regime of the substrate.
-Section~\ref{sec:internal-structure-of-the-electron} specifies the target internal
-electron structure (toroidal/solitonic) that motivates the later diagnostics.
-Section~\ref{experimental-setting} describes the discrete simulation framework and
-the practical implementation of the pipeline (band isolation, numerical Berry
-connection/curvature, reconstruction of effective gauge fields), including a falsifiable
-test plan.
-Finally, Sections~\ref{discussion} and~\ref{conclusion} summarize limitations, open
-problems, and implications.
-
-The primary focus of this paper is the initialization targets and the Berry/holonomy diagnostic pipeline; curvature toy calculations are treated as optional future work.
+The paper follows a substrate--first perspective.
+Section~\ref{conceptual-model} defines the microscopic brane substrate (degrees of freedom, action, equations of motion)
+and introduces the minimal geometric-phase (Berry) readout we will later apply to prepared narrowband wave packets.
+Section~\ref{emergent-relativity-and-lorentz-invariance} discusses how Lorentz-like kinematics can arise effectively from the
+linear wave regime of the substrate.
+Section~\ref{sec:internal-structure-of-the-electron} specifies the target internal electron structure (toroidal/solitonic)
+that motivates the later experiments.
+Section~\ref{experimental-setting} describes the discrete simulation framework and the preparation of narrowband carriers.
+In this revision, the more elaborate Berry diagnostics (curvature maps, defect/source reconstruction, non-Abelian transport)
+and any full identification with Maxwell theory are deferred; we proceed step by step from stable initialization toward
+minimal geometric phase measurements.
 
 \subsection{Related Works}\label{related-works}
 

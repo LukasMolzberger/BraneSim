@@ -34,10 +34,10 @@ This mirrors the continuum formulation of Eq.~\eqref{eq:decomposition-affine-plu
 \begin{itemize}
 \item \textbf{Lorentz invariance:} Isotropic dispersion $\omega(|\mathbf{k}|)$ measured from wave propagation tests (Section~\ref{calibration-dispersion-isotropy})
 \item \textbf{Gravity:} Induced metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ computed post-hoc from node positions; geodesic deflection ray-traced through $g$
-\item \textbf{Electromagnetism:} Reconstructed from phase/holonomy diagnostics (Berry connection/curvature) of a narrowband mode extracted from $\mathbf{X}(x,t)$, evaluated around stable solitonic configurations
+\item \textbf{Electromagnetism (geometric phase, exploratory):} Minimal $U(1)$ Berry phase / holonomy readout from prepared narrowband complex envelopes derived from $(\mathbf X,\partial_t\mathbf X)$; full field reconstruction is deferred.
 \item \textbf{Nonlinear threshold:} Emergent energy density threshold for soliton nucleation; \emph{not} imposed as a hard cutoff on amplitude or strain
 \item \textbf{Particle stability:} Toroidal solitons that self-confine via nonlinear elasticity; no explicit "particle glue" or confinement potential added
-\item \textbf{Spinor behavior:} $4\pi$ holonomy measured from phase transport around rotated configurations
+\item \textbf{Spinor behavior (future):} Non-Abelian holonomy in degenerate subspaces is a plausible mechanism for $4\pi$ transport, but is deferred in the present step-by-step revision.
 \end{itemize}
 
 \paragraph{No back-reaction from emergent fields.}
@@ -126,37 +126,11 @@ electromagnetism, and gravity.
 \subsection{Preparation and measurement procedures: initialization, degeneracy verification, and holonomy}
 \label{measurement-procedures}
 
-A key methodological commitment of the layered framework is that gauge structure
-(connection, holonomy, effective electromagnetic fields) is \emph{not created}
+A key methodological commitment is that geometric phase readout is \emph{not created}
 by diagnostic band-pass filters. Instead, the relevant narrowband carrier and its
 internal (possibly degenerate) polarization subspace are defined by the
-\emph{substrate initialization}. Diagnostic layers (FFT, Berry, curvature,
-holonomy) are used only to \emph{read out} the phase and degeneracy structure of
-the prepared state, and optional spectral masking is retained solely as a
-cross-check/visualization aid.
-
-\subsubsection{Data products from the substrate solver}
-
-At each time step the solver provides node positions and velocities,
-\begin{equation}
-\mathbf R_p(t) \approx \mathbf X(x_p,t) \in \mathbb R^4,
-\qquad
-\mathbf v_p(t) = \dot{\mathbf R}_p(t) \approx \partial_t \mathbf X(x_p,t).
-\end{equation}
-All higher-layer fields (band envelopes, gauge connections, holonomies) are
-computed diagnostically from these arrays and their finite differences. No
-emergent quantity feeds back into the substrate dynamics.
-
-\paragraph{Discrete amplitude--direction decomposition on $S^3$.}
-For diagnostics it is often useful to factor discrete 4D node fields into
-magnitude and direction on $S^3$. With base configuration
-$\mathbf R^\star_p$ (pre-tension) and displacement $\mathbf u_p=\mathbf R_p-\mathbf R^\star_p$,
-define $a_{\!u,p}=|\mathbf u_p|$ and $\mathbf n_{\!u,p}=\mathbf u_p/|\mathbf u_p|$ whenever
-$\mathbf u_p\neq 0$. Likewise define the discrete momentum $\mathbf p_p=m\,\mathbf v_p$
-and factor $\mathbf p_p=a_{\!p,p}\,\mathbf n_{\!p,p}$ with $a_{\!p,p}=|\mathbf p_p|$.
-The directions $\mathbf n_{\!u,p}$ and $\mathbf n_{\!p,p}$ are points on $S^3$ and
-can be mapped to unit quaternions / $SU(2)$ elements as in
-Section~\ref{sec:s3-su2-decomposition}.
+\emph{substrate initialization}. Any optional FFT masks or branch projections are used
+only as secondary sanity checks and visualization aids.
 
 \subsubsection{Preparation-first initialization of narrowband carriers}
 \label{sec:init-carriers}
@@ -190,226 +164,29 @@ flip (spinorial $4\pi$ periodicity), while two circuits return the state. This
 construction targets a \emph{degenerate} two-dimensional subspace and is tested
 via a non-Abelian Wilson-loop holonomy (Section~\ref{sec:holonomy-wilson}).
 
-\subsubsection{Degeneracy verification without spectral band-pass filtering}
-\label{sec:degeneracy-verification}
+\subsubsection{Minimal geometric-phase readout (U(1))}
+In the present step-by-step revision we restrict attention to prepared narrowband packets
+(Section~\ref{sec:init-carriers}) and do \emph{not} rely on a posteriori spectral band-pass masks
+or dispersion-branch projections to define the relevant complex mode.
+Instead, we construct a complex envelope $u(x,t)\in\mathbb C^4$ from the real phase-space pair
+$(\boldsymbol\xi(x,t),\mathbf v(x,t))$ by a consistent quadrature (analytic-signal) representation
+of the prepared carrier, and normalize $\tilde u=u/\|u\|$.
 
-We verify that the prepared packet occupies a (nearly) degenerate
-$N$-dimensional mode subspace near $\omega_0$ using two complementary diagnostics
-that do not rely on diagnostic band-pass masks:
+The single-band ($U(1)$) geometric phase is meaningful only when the packet effectively occupies
+an isolated branch on its spectral support. In practice we verify this by checking that (i) the
+initialized spectrum is narrow and (ii) nearby branches remain separated by a minimum gap over the
+packet support for the chosen parameters.
 
-\paragraph{(i) Local linearization eigen-scan.}
-On a local patch (or reduced model) we linearize the discrete equations of motion
-around the current substrate configuration and compute a small set of eigenpairs
-near $\omega_0$. Degeneracy is identified by $|\omega_1-\omega_2|/\omega_0 \ll 1$
-together with consistent polarization character.
-
-\paragraph{(ii) Subspace rank / SVD signature from time series.}
-At selected spatial locations we record a short time window (a few carrier
-cycles) and extract the dominant subspace dimension via SVD of the
-multi-component signal. A genuine two-dimensional polarization sector exhibits
-two dominant singular values and a strongly suppressed remainder.
-
-\subsubsection{Band isolation: three practical methods}
-
-We retain the following band-isolation strategies as \emph{optional cross-check}
-pipelines and visualization aids. Primary results rely on preparation-first
-narrowband carriers (Section~\ref{sec:init-carriers}) and on degeneracy/holonomy
-verification that does not depend on spectral masking (Section~\ref{sec:degeneracy-verification}).
-Among the methods below, Method~2 (demodulation at the prepared carrier) serves as
-the default \emph{envelope readout}; Methods~1 and~3 are used mainly for debugging
-and consistency checks.
-
-\paragraph{Method 1: Band-pass mask in $(\mathbf k,\omega)$ space.}
-\begin{enumerate}
-\item Compute the space--time Fourier transform on a spatial patch and time
-  window:
-  \begin{equation}
-  \hat{\xi}^A(\mathbf k,\omega) = \int dt \int d^3x \; \xi^A(\mathbf x,t)
-  \, e^{-i(\mathbf k\cdot\mathbf x - \omega t)},
-  \qquad A=1,\dots,4.
-  \end{equation}
-
-\item Define a band region $\mathcal B \subset (\mathbf k,\omega)$ space (e.g.,
-  $|\omega-\omega_0| \leq \Delta\omega$, $|\mathbf k-\mathbf k_0| \leq \Delta k$).
-
-\item Inverse-transform only the Fourier components in $\mathcal B$:
-  \begin{equation}
-  u^A(x,t) = \int_{\mathcal B} \frac{d^3k\,d\omega}{(2\pi)^4}
-  \hat{\xi}^A(\mathbf k,\omega) \, e^{i(\mathbf k\cdot\mathbf x - \omega t)}.
-  \end{equation}
-
-\item Normalize: $\tilde u(x,t) = u(x,t) / |u(x,t)|$ as in
-  Eq.~\eqref{eq:normalized-mode}.
-\end{enumerate}
-
-\paragraph{Method 2: Demodulation + low-pass filter.}
-\begin{enumerate}
-\item Choose a carrier frequency $\omega_0$ and wavevector $\mathbf k_0$ from the \emph{initialization}
-  (optionally confirmed by FFT cross-checks).
-
-\item Multiply the substrate field by the conjugate carrier:
-  \begin{equation}
-  \xi_{\text{demod}}^A(x,t) = \xi^A(x,t) \, e^{-i(\mathbf k_0\cdot\mathbf x - \omega_0 t)}.
-  \end{equation}
-
-\item Apply spatial and temporal low-pass filters (e.g., Gaussian convolution
-  with width $\sigma_x \sim 1/\Delta k$, $\sigma_t \sim 1/\Delta\omega$) to
-  extract the slowly varying envelope $u^A(x,t)$.
-
-\item Normalize as above.
-\end{enumerate}
-
-\paragraph{Method 3: Dispersion-branch projection (requires local homogeneity).}
-\begin{enumerate}
-\item For a locally translation-invariant substrate region, compute the
-  dynamical matrix $D(\mathbf k)$ (linearized equations of motion in Fourier
-  space) and its eigenpairs $(\omega_n(\mathbf k), u_n(\mathbf k))$.
-
-\item Select a target band $n$ (e.g., the photon-like branch satisfying
-  $\omega_n(\mathbf k) \approx c|\mathbf k|$).
-
-\item Project the measured spectrum onto this band:
-  \begin{equation}
-  \hat{\psi}_n(\mathbf k,\omega) = \langle u_n(\mathbf k), \hat{\xi}(\mathbf k,\omega) \rangle,
-  \label{eq:band-projection}
-  \end{equation}
-  where $\langle \cdot,\cdot \rangle$ denotes the Hermitian inner product.
-
-\item Inverse-transform to obtain the band-projected envelope $u_n(x,t)$ and
-  normalize.
-\end{enumerate}
-
-\paragraph{Implementation note (avoid transforming gauge-dependent eigenvectors).}
-Near crossings/degeneracies the eigenvectors $u_n(\mathbf{k})$ may exhibit gauge
-seams (sign/phase jumps). To avoid any ill-defined transform of such objects, we
-treat $u_n(\mathbf{k})$ only as a \emph{local spectral frame} and project the
-\emph{single-valued transformed substrate field} using the projector
-$P_n(\mathbf{k}) = u_n(\mathbf{k})u_n^\dagger(\mathbf{k})$.
-This enforces the transform-then-project order and mirrors the WA-vs-AW lesson that
-geometric-phase physics can be lost if the order is reversed \cite{Ryabinkin2013QCLGP}.
-
-All three methods yield a normalized complex four-component envelope
-$\tilde u(x,t) \in \mathbb C^4$ with $|\tilde u|=1$. The choice of method
-depends on the analysis context: Method 1 is most robust for arbitrary
-inhomogeneous configurations; Method 2 is computationally efficient for
-known-carrier excitations; Method 3 provides the cleanest connection to
-band-structure theory but requires approximate translation invariance.
-
-\subsubsection{Spacetime gauge connection and curvature}
-
-Given the normalized envelope $\tilde u(x,t)$, we evaluate the spacetime connection
-and curvature using a discrete, gauge-invariant overlap formulation (link variables).
-This avoids numerical artifacts from gauge seams (phase/sign jumps) and is especially
-important near (near-)degeneracies \cite{Ryabinkin2013QCLGP}.
-
-Let $\Delta_\mu$ denote a single grid step in the $\mu$ direction
-($\Delta_0 \equiv \Delta t$, $\Delta_i \equiv \Delta x_i$). Define the $U(1)$ link:
+For numerical holonomy we use the gauge-invariant overlap formulation: for a discrete step
+$R\to R'$ in spacetime,
 \begin{equation}
-U_\mu(x,t)=
-\frac{\langle \tilde u(x,t)\mid \tilde u(x+\Delta_\mu,t)\rangle}
-{\big|\langle \tilde u(x,t)\mid \tilde u(x+\Delta_\mu,t)\rangle\big|}.
-\label{eq:link-variable}
+  U(R\to R') :=
+  \frac{\langle \tilde u(R)\mid \tilde u(R')\rangle}
+       {\big|\langle \tilde u(R)\mid \tilde u(R')\rangle\big|}\in U(1),
 \end{equation}
-A discrete connection estimate is then
-\begin{equation}
-a_\mu(x,t)\;\approx\;\frac{1}{\Delta x^\mu}\,\arg U_\mu(x,t),
-\end{equation}
-where $\Delta x^0 \equiv c\,\Delta t$ and $\Delta x^i\equiv \Delta x_i$.
-
-For curvature we use the plaquette (Wilson loop) phase:
-\begin{equation}
-W_{\mu\nu}(x,t)=
-U_\mu(x,t)\,U_\nu(x+\Delta_\mu,t)\,
-U_\mu^\ast(x+\Delta_\nu,t)\,U_\nu^\ast(x,t),
-\end{equation}
-and set
-\begin{equation}
-f_{\mu\nu}(x,t)\;\approx\;\frac{1}{\Delta x^\mu\,\Delta x^\nu}\,\arg W_{\mu\nu}(x,t).
-\label{eq:plaquette-curvature}
-\end{equation}
-
-\paragraph{Degenerate subspaces (non-Abelian case).}
-If the relevant band is $N$-fold degenerate, we work with an orthonormal frame
-$U(x,t)\in\mathbb{C}^{4\times N}$ spanning the subspace and define the overlap matrix
-$M_\mu(x,t)=U^\dagger(x,t)\,U(x+\Delta_\mu,t)\in\mathbb{C}^{N\times N}$.
-Holonomy is then obtained from ordered products of $M_\mu$ along a loop; the gauge-invariant
-$U(1)$ component can be extracted via $\arg\det(\cdot)$, while the full matrix encodes the
-$U(N)$ (Wilczek--Zee) structure.
-
-\paragraph{Practical validity checks.}
-For each run we report (i) a band-isolation indicator (minimum spectral separation to neighboring
-branches in the selected $(\mathbf{k},\omega)$ region), (ii) continuity of overlaps
-$|\langle \tilde u(x,t),\tilde u(x+\Delta x,t)\rangle|$ and $|\langle \tilde u(x,t),\tilde u(x,t+\Delta t)\rangle|$
-(near-zero overlaps flag crossings/nodes), and (iii) robustness of curvature/holonomy under local
-rephasings $\tilde u\mapsto e^{i\chi(x,t)}\tilde u$. We treat the gauge potential $a_\mu$ as gauge-dependent,
-and regard only plaquette phases (curvature) and closed-loop holonomies as gauge-invariant observables.
-
-\subsubsection{Effective gauge potential and field reconstruction}
-
-We define the effective electromagnetic potential via
-Eq.~\eqref{eq:em-potential-from-berry}:
-\begin{equation}
-A_\mu^{\mathrm{eff}}(x,t) = \frac{\hbar}{q} a_\mu(x,t),
-\end{equation}
-with a conversion factor $\hbar/q$ to be calibrated (see
-Section~\ref{amplitude-scale-calibration}). The associated field-strength tensor
-is
-\begin{equation}
-F_{\mu\nu}^{\mathrm{eff}}(x,t) = \frac{\hbar}{q} f_{\mu\nu}(x,t).
-\end{equation}
-
-We extract spatial electric and magnetic fields as
-\begin{equation}
-E_i = F_{0i}^{\mathrm{eff}},
-\qquad
-B_i = \frac{1}{2} \epsilon_{ijk} F_{jk}^{\mathrm{eff}}.
-\end{equation}
-
-By construction, the homogeneous Maxwell equations
-\begin{equation}
-\nabla \cdot \mathbf B = 0,
-\qquad
-\nabla \times \mathbf E + \partial_t \mathbf B = 0
-\end{equation}
-hold identically (Bianchi identities). The inhomogeneous equations are
-\textbf{not} guaranteed; their validity becomes an empirical test target (see
-Section~\ref{falsifiable-criteria}).
-
-\subsubsection{Holonomy measurement}
-\label{sec:holonomy-wilson}
-
-To measure the geometric holonomy accumulated around a closed loop $\gamma$ in
-spacetime we distinguish the non-degenerate ($N=1$) and degenerate ($N>1$) cases.
-
-\paragraph{Non-degenerate transport ($U(1)$).}
-For $N=1$ we compute the line integral
-\begin{equation}
-\Gamma[\gamma] = \oint_\gamma a_\mu \, dx^\mu
-= \int_{\Sigma} f_{\mu\nu} \, d\Sigma^{\mu\nu},
-\end{equation}
-where $\Sigma$ is any two-surface bounded by $\gamma$ (Stokes' theorem). In
-practice, $\Gamma[\gamma]$ is computed on the discrete grid via link variables:
-for a loop discretized into steps $\Delta_{\mu_j}$ we evaluate
-$\Gamma[\gamma]\approx \arg\prod_j U_{\mu_j}$, equivalently via plaquette phases
-(Eq.~\eqref{eq:plaquette-curvature}). This avoids gauge-fixing and remains stable
-in the presence of seams and near-degeneracies \cite{Ryabinkin2013QCLGP}. The
-resulting holonomy is gauge-invariant and physically observable via interference
-effects.
-
-\paragraph{Degenerate transport ($U(N)$ / Wilczek--Zee).}
-For $N>1$ we use a gauge-invariant \emph{Wilson loop} matrix. Let
-$U_j=[u_1,\dots,u_N]$ be an orthonormal frame spanning the degenerate subspace at
-sample point $j$ along the loop. Define overlap matrices $M_j = U_j^\dagger
-U_{j+1}$ and the holonomy
-\begin{equation}
-W = \prod_j M_j \in U(N).
-\end{equation}
-Gauge-invariant diagnostics include $\mathrm{tr}(W)$ and the eigenphases of $W$.
-
-\paragraph{Electron target signature.}
-For the electron-like double-loop defect (Appendix B) the target spinorial
-signature is $W \approx -I$ after one circuit (state sign flip), and $W^2 \approx
-I$ after two circuits.
+and the loop phase is $\Theta[\gamma]=\arg\prod_{(R\to R')\in\gamma} U(R\to R')$.
+We do not yet attempt curvature maps, defect/source reconstruction, or a full identification
+with Maxwell theory in this paper revision.
 
 \subsubsection{Gravitational diagnostics (unchanged principle)}
 
@@ -565,9 +342,11 @@ choice sets the overall substrate mechanical scale (via $\rho$ and $K$) in terms
 of $(m_e,c,\hbar)$.
 
 \paragraph{Route (ii): charge calibration (deferred).}
-In this work, the effective electromagnetic sector is reconstructed from Berry geometry of band-isolated modes.
-This shifts the charge calibration problem to (i) fixing the conversion factor $\hbar/q$ in Eq.~\eqref{eq:em-potential-from-berry} and (ii) identifying how defects/degeneracies realize effective sources in the inhomogeneous Maxwell sector.
-We therefore defer a first-principles charge matching to the dedicated numerical tests of Section~\ref{falsifiable-criteria}.
+A future goal is to test whether geometric phase readout of prepared narrowband modes can be
+consistently mapped to an effective electromagnetic sector. Since this revision deliberately
+avoids full field reconstruction (effective $A_\mu$, $F_{\mu\nu}$, and source localization),
+we do not attempt a charge calibration here. Charge matching is postponed until the minimal
+holonomy measurements are numerically stable and reproducible.
 
 \paragraph{Practical simulation choice.}
 
@@ -690,7 +469,7 @@ components without destroying photon propagation.
 \subsubsection{Test plan and falsifiable criteria}
 \label{falsifiable-criteria}
 
-All tests are formulated as measurements on simulation outputs. No emergent
+All tests are formulated as measurements on simulation outputs. No derived
 quantity is allowed to feed back into the substrate solver.
 
 \begin{enumerate}
@@ -699,42 +478,15 @@ Measure $\omega(\mathbf k)$ for small-amplitude plane waves in multiple
 directions and verify isotropy and approximately linear dispersion
 $\omega\approx c|\mathbf k|$ up to a documented cutoff.
 
-\item \textbf{Band isolation sanity:}
-Inject a known single-mode excitation and verify that projection
-Eq.~\eqref{eq:band-projection} recovers the correct band amplitude while
-suppressing leakage into other bands below a set tolerance.
+\item \textbf{Preparation sanity (narrowband by construction):}
+Verify that the initialized packet is spectrally narrow on its support (by direct FFT inspection as a sanity check),
+so that the subsequent geometric-phase readout does not require diagnostic band-pass filtering.
 
-\item \textbf{Gauge robustness of Berry numerics:}
-Verify gauge invariance using the overlap (link / Wilson loop) formulation:
-apply random local phase redefinitions $\tilde u\mapsto e^{i\chi(x,t)}\tilde u$ and
-confirm that (i) plaquette phases (curvature) and (ii) loop holonomies are unchanged.
-Additionally, explicitly probe near-crossing configurations to demonstrate that naive
-derivative-of-phase estimates can fail when eigenvector gauges develop seams, consistent
-with the transform-order pathology highlighted in \cite{Ryabinkin2013QCLGP}.
-
-\item \textbf{Berry $\rightarrow$ EM (homogeneous Maxwell laws):}
-Compute $F_{\mu\nu}^{\mathrm{EM}}$ from the pulled-back Berry connection and
-numerically verify $\nabla\cdot\mathbf B\approx 0$ and
-$\partial_t\mathbf B+\nabla\times\mathbf E\approx 0$ away from defects, with
-errors decreasing under refinement.
-
-\item \textbf{Defect localization of effective sources:}
-In runs that form a stable localized soliton (electron candidate), test whether
-violations of the inhomogeneous Maxwell equations (interpreted as effective
-sources) localize at the defect core and vanish in the far field.
-
-\item \textbf{Spinorial holonomy ($4\pi$ behaviour):}
-Transport the reconstructed internal frame around a closed loop enclosing the
-defect and measure the holonomy. The target signature is a $4\pi$ periodicity
-consistent with an emergent spinor sector.
-
-\item \textbf{Aharonov--Bohm type holonomy (optional, medium term):}
-Construct two paths of the same band envelope enclosing a region of nontrivial
-Berry curvature and test whether the relative phase shift matches the path
-integral of the reconstructed effective potential \cite{AharonovBohm1959}.
+\item \textbf{Minimal holonomy sanity (U(1)):}
+Compute loop phases using the overlap formulation and confirm that trivial loops yield vanishing phase within numerical tolerance.
 \end{enumerate}
 
-\subsection{Interpretation layers (clarity note)}\label{interpretation-layers}
+\subsection{Implementation and interpretation notes}
 
 \begin{itemize}
 \item \textbf{Substrate:} single geometric object $\mathbf X(x,t)\in\mathbb R^4$ with dynamics from $\mathcal L(\mathbf X,\partial\mathbf X)$.
