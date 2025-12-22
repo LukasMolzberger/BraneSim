@@ -145,50 +145,43 @@ Hamilton's principle $\delta S=0$ yields the (second-order) substrate PDE
 \end{equation}
 where periodicity implies no boundary/traction terms.
 
-\paragraph{Hamiltonian formulation (canonical fields on a periodic cell).}
-Define the canonical momentum density conjugate to $X^A$:
+\paragraph{Velocity, momentum, and conserved energy (Hamiltonian density).}
+Define the $4$D velocity field
+\begin{equation}
+  v^A(x,t) := \partial_t X^A(x,t),
+  \qquad
+  \mathbf v(x,t) := \partial_t \mathbf X(x,t)\in\mathbb R^4.
+  \label{eq:velocity-field}
+\end{equation}
+If the displacement is defined relative to a time-independent reference embedding
+$\mathbf X_\star(x)$ as $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)$, then
+$\partial_t\boldsymbol\xi(x,t)=\mathbf v(x,t)$.
+
+The canonical momentum density conjugate to $X^A$ is
 \begin{equation}
   \Pi_A := \frac{\partial \mathcal L}{\partial(\partial_t X^A)}
-  = \rho_m\,\partial_t X^A,
-  \qquad A=1,\dots,4.
+  = \rho_m\,v^A,
+  \qquad A=1,\dots,4,
   \label{eq:canonical-momentum}
 \end{equation}
-The Hamiltonian density is
+or in vector form $\boldsymbol\Pi=\rho_m\,\mathbf v$.
+The corresponding (conserved) energy density is
 \begin{equation}
-  \mathcal H(\mathbf X,\boldsymbol\Pi)
-  := \Pi_A\,\partial_t X^A - \mathcal L
-  = \frac{1}{2\rho_m}\,|\boldsymbol\Pi|^2 + W(g(\mathbf X);g^0),
+  \mathcal H(\mathbf X,\mathbf v)
+  = \frac{\rho_m}{2}\,|\mathbf v|^2 + W(g(\mathbf X);g^0)
+  = \frac{1}{2\rho_m}\,|\boldsymbol\Pi|^2 + W(g(\mathbf X);g^0).
   \label{eq:brane-hamiltonian-density}
 \end{equation}
-and the Hamiltonian functional is
-\begin{equation}
-  H[\mathbf X,\boldsymbol\Pi]=\int_{\Omega} d^3x\;\mathcal H(\mathbf X,\boldsymbol\Pi).
-  \label{eq:brane-hamiltonian}
-\end{equation}
-The canonical Poisson bracket for functionals $F,G$ is
-\begin{equation}
-  \{F,G\}
-  =
-  \int_{\Omega} d^3x\left(
-    \frac{\delta F}{\delta X^A}\frac{\delta G}{\delta \Pi_A}
-    -
-    \frac{\delta F}{\delta \Pi_A}\frac{\delta G}{\delta X^A}
-  \right),
-  \label{eq:field-poisson-bracket}
-\end{equation}
-which implies Hamilton's equations
-\begin{align}
-  \partial_t X^A &= \frac{\delta H}{\delta \Pi_A} = \frac{\Pi_A}{\rho_m},
-  \label{eq:hamilton-eq-X}\\
-  \partial_t \Pi_A &= -\frac{\delta H}{\delta X^A} = \partial_i P_{Ai},
-  \label{eq:hamilton-eq-Pi}
-\end{align}
-where $P_{Ai}=2\,S^{ij}\partial_jX^A$ as in Eq.~\eqref{eq:piola-stress}.
-Combining $\Pi_A=\rho_m\partial_t X^A$ with Eq.~\eqref{eq:hamilton-eq-Pi} recovers
-the second-order substrate PDE Eq.~\eqref{eq:equations-of-motion}.
+Equivalently, the energy functional is $H=\int_\Omega d^3x\,\mathcal H$.
+Thus $(\boldsymbol\xi,\boldsymbol\Pi)$ (equivalently $(\boldsymbol\xi,\mathbf v)$)
+is the local canonical phase-space pair produced by the substrate solver and will
+serve as raw input for the complex mode-envelope / Berry-phase construction in
+Sec.~\ref{sec:brane-to-berry-to-em}.
+(An explicit canonical Poisson-bracket formulation is standard for conservative
+field theories and is omitted here for brevity.)
 
 \paragraph{Conservation laws (periodic cell).}
-The Hamiltonian $H$ is conserved in time for the conservative dynamics: $\frac{dH}{dt}=0$.
+The energy $H$ is conserved in time for the conservative dynamics: $\frac{dH}{dt}=0$.
 Translation invariance in the embedding space implies conservation of the total momentum
 \begin{equation}
   \mathbf P_{\text{tot}} = \int_{\Omega} d^3x\, \boldsymbol\Pi(x,t),
@@ -647,8 +640,11 @@ isolation} \cite{Berry1984,WilczekZee1984}.
 \label{sec:spectral-layer}
 
 The substrate displacement field $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_0(x)$
-is real-valued, $\boldsymbol\xi(x,t)\in\mathbb R^4$. To construct a complex
-envelope with a well-defined local phase, we must first isolate a
+is real-valued, $\boldsymbol\xi(x,t)\in\mathbb R^4$.
+In practice we also retain the accompanying velocity / momentum field
+$\mathbf v(x,t)=\partial_t\mathbf X(x,t)$ and $\boldsymbol\Pi(x,t)=\rho_m\mathbf v(x,t)$,
+so that the spectral layer operates on the full local phase-space information.
+To construct a complex envelope with a well-defined local phase, we must first isolate a
 \emph{positive-frequency component}. This can be done via:
 
 \begin{enumerate}

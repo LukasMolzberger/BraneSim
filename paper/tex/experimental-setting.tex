@@ -17,7 +17,7 @@ as independent sources, forces, or constraints.
 \begin{itemize}
 \item The 4D embedding map $\mathbf{X}(x,t) \in \mathbb{R}^4$ discretized as node positions $\mathbf{R}_p(t)$
 \item Elastic energy functional: stretching $U$ (pre-tensioned spring network)
-\item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m \ddot{\mathbf{R}}_p = \mathbf{F}_p$. For the conservative stretch-only model the discrete dynamics is a separable Hamiltonian system (kinetic + potential), so velocity-Verlet is a symplectic integrator for the corresponding discrete Hamiltonian (cf.\ Eqs.~\eqref{eq:brane-hamiltonian}--\eqref{eq:hamilton-eq-Pi} in the continuum limit).
+\item Time evolution via velocity-Verlet integration: $\mathbf{F}_p = -\partial U/\partial \mathbf{R}_p$, $m \ddot{\mathbf{R}}_p = \mathbf{F}_p$. For the conservative stretch-only model the discrete dynamics is a separable Hamiltonian system (kinetic + potential), so velocity-Verlet is a symplectic integrator for the corresponding discrete Hamiltonian (cf.\ Eq.~\eqref{eq:brane-hamiltonian-density} for the kinetic+elastic energy split in the continuum limit).
 \item Boundary conditions (periodic or clamped to maintain pre-tension)
 \item Initial conditions: Gaussian pulses, toroidal configurations, amplitude patterns
 \end{itemize}
