@@ -31,7 +31,6 @@ from matplotlib.animation import FuncAnimation, FFMpegWriter
 from matplotlib.colors import hsv_to_rgb
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from branesim.em import EMState, FourPotentialVerletSolver
 from branesim.core.state import Dimensionality
 from branesim.core.grid import BraneGrid
 from branesim.config.physical_constants import PhysicalConstants
