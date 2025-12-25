@@ -113,26 +113,26 @@ Define the $4$D velocity field
   \label{eq:velocity-field}
 \end{equation}
 If the displacement is defined relative to a time-independent reference embedding
-$\mathbf X_\star(x)$ as $\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)$, then
-$\partial_t\boldsymbol\xi(x,t)=\mathbf v(x,t)$.
+$\mathbf X_\star(x)$ as $\mathbf u(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)$, then
+$\partial_t\mathbf u(x,t)=\mathbf v(x,t)$.
 
 The canonical momentum density conjugate to $X^A$ is
 \begin{equation}
-  \Pi_A := \frac{\partial \mathcal L}{\partial(\partial_t X^A)}
+  p_A := \frac{\partial \mathcal L}{\partial(\partial_t X^A)}
   = \rho_m\,v^A,
   \qquad A=1,\dots,4,
   \label{eq:canonical-momentum}
 \end{equation}
-or in vector form $\boldsymbol\Pi=\rho_m\,\mathbf v$.
+or in vector form $\mathbf p=\rho_m\,\mathbf v$.
 The corresponding (conserved) energy density is
 \begin{equation}
   \mathcal H(\mathbf X,\mathbf v)
   = \frac{\rho_m}{2}\,|\mathbf v|^2 + W(g(\mathbf X);g^0)
-  = \frac{1}{2\rho_m}\,|\boldsymbol\Pi|^2 + W(g(\mathbf X);g^0).
+  = \frac{1}{2\rho_m}\,|\mathbf p|^2 + W(g(\mathbf X);g^0).
   \label{eq:brane-hamiltonian-density}
 \end{equation}
 Equivalently, the energy functional is $H=\int_\Omega d^3x\,\mathcal H$.
-Thus $(\boldsymbol\xi,\boldsymbol\Pi)$ (equivalently $(\boldsymbol\xi,\mathbf v)$)
+Thus $(\mathbf u,\mathbf p)$ (equivalently $(\mathbf u,\mathbf v)$)
 is the local canonical phase-space pair produced by the substrate solver and will
 serve as raw input for the complex mode-envelope / Berry-phase construction in
 Sec.~\ref{sec:brane-to-berry-to-em}.
@@ -143,7 +143,7 @@ field theories and is omitted here for brevity.)
 The energy $H$ is conserved in time for the conservative dynamics: $\frac{dH}{dt}=0$.
 Translation invariance in the embedding space implies conservation of the total momentum
 \begin{equation}
-  \mathbf P_{\text{tot}} = \int_{\Omega} d^3x\, \boldsymbol\Pi(x,t),
+  \mathbf p_{\text{tot}} = \int_{\Omega} d^3x\, \mathbf p(x,t),
   \label{eq:total-momentum}
 \end{equation}
 since $W$ depends only on spatial derivatives $\partial_i\mathbf X$.
@@ -161,8 +161,8 @@ Pre-tension means $g_\star\neq g^0$ (equivalently, $\sigma_{\star,a}\neq 1$ for 
 and it is maintained because the periodic cell (i.e.\ the affine part $A$) is held fixed.
 We evolve only periodic displacements about this base,
 \begin{equation}
-  \mathbf X(x,t)=\mathbf X_\star(x)+\boldsymbol\xi(x,t),
-  \qquad \boldsymbol\xi(\cdot,t)\ \text{periodic on }\Omega.
+  \mathbf X(x,t)=\mathbf X_\star(x)+\mathbf u(x,t),
+  \qquad \mathbf u(\cdot,t)\ \text{periodic on }\Omega.
   \label{eq:decomposition-affine-plus-periodic}
 \end{equation}
 Let $A_i:=\partial_i\mathbf X_\star\in\mathbb R^4$ denote the constant base tangents.
@@ -179,51 +179,51 @@ formulation.
 \paragraph{Displacement field.}
 Given the periodic displacement (Eq.~\eqref{eq:decomposition-affine-plus-periodic})
 \[
-\boldsymbol\xi(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
+\mathbf u(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
 \]
 define its pointwise magnitude and direction by
 \begin{equation}
-  a_\xi(x,t) := |\boldsymbol\xi(x,t)| \ge 0,
+  a_u(x,t) := |\mathbf u(x,t)| \ge 0,
   \qquad
-  \mathbf n_\xi(x,t) :=
+  \mathbf n_u(x,t) :=
   \begin{cases}
-    \boldsymbol\xi(x,t)/|\boldsymbol\xi(x,t)|, & \boldsymbol\xi(x,t)\neq \mathbf 0,\\
-    \text{undefined}, & \boldsymbol\xi(x,t)=\mathbf 0,
+    \mathbf u(x,t)/|\mathbf u(x,t)|, & \mathbf u(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \mathbf u(x,t)=\mathbf 0,
   \end{cases}
   \label{eq:xi-amplitude-direction}
 \end{equation}
-so that wherever $\boldsymbol\xi\neq 0$,
+so that wherever $\mathbf u\neq 0$,
 \begin{equation}
-  \boldsymbol\xi(x,t) = a_\xi(x,t)\,\mathbf n_\xi(x,t),
+  \mathbf u(x,t) = a_u(x,t)\,\mathbf n_u(x,t),
   \qquad
-  \mathbf n_\xi(x,t)\in S^3\subset\mathbb R^4.
+  \mathbf n_u(x,t)\in S^3\subset\mathbb R^4.
   \label{eq:xi-factorization}
 \end{equation}
-The scalar $a_\xi$ provides an ``amplitude'' (e.g.\ arrow length or opacity in
-visualizations), while $\mathbf n_\xi$ encodes the instantaneous 4D direction as
+The scalar $a_u$ provides an ``amplitude'' (e.g.\ arrow length or opacity in
+visualizations), while $\mathbf n_u$ encodes the instantaneous 4D direction as
 a point on the unit 3-sphere.
 
 \paragraph{Momentum field.}
 In the minimal Hamiltonian setup, the canonical momentum density is
 (Eq.~\eqref{eq:canonical-momentum})
 \[
-\boldsymbol\Pi(x,t)=\rho_m\,\partial_t \mathbf X(x,t)\in\mathbb R^4.
+\mathbf p(x,t)=\rho_m\,\partial_t \mathbf X(x,t)\in\mathbb R^4.
 \]
 Define analogously
 \begin{equation}
-  a_\Pi(x,t) := |\boldsymbol\Pi(x,t)| \ge 0,
+  a_p(x,t) := |\mathbf p(x,t)| \ge 0,
   \qquad
-  \mathbf n_\Pi(x,t) :=
+  \mathbf n_p(x,t) :=
   \begin{cases}
-    \boldsymbol\Pi(x,t)/|\boldsymbol\Pi(x,t)|, & \boldsymbol\Pi(x,t)\neq \mathbf 0,\\
-    \text{undefined}, & \boldsymbol\Pi(x,t)=\mathbf 0,
+    \mathbf p(x,t)/|\mathbf p(x,t)|, & \mathbf p(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \mathbf p(x,t)=\mathbf 0,
   \end{cases}
   \label{eq:pi-amplitude-direction}
 \end{equation}
-so that $\boldsymbol\Pi=a_\Pi\,\mathbf n_\Pi$ wherever $\boldsymbol\Pi\neq 0$.
-For constant $\rho_m$, $\mathbf n_\Pi$ is the direction of the 4D velocity
-$\partial_t\mathbf X$, and the magnitude $a_\Pi$ controls the kinetic energy
-density via $\mathcal T=\frac{1}{2\rho_m}|\boldsymbol\Pi|^2$
+so that $\mathbf p=a_p\,\mathbf n_p$ wherever $\mathbf p\neq 0$.
+For constant $\rho_m$, $\mathbf n_p$ is the direction of the 4D velocity
+$\partial_t\mathbf X$, and the magnitude $a_p$ controls the kinetic energy
+density via $\mathcal T=\frac{1}{2\rho_m}|\mathbf p|^2$
 (cf.\ Eq.~\eqref{eq:brane-hamiltonian-density}).
 
 \paragraph{From $S^3$ directions to unit quaternions.}
@@ -235,8 +235,8 @@ we associate $\mathbf n$ with the \emph{unit quaternion}
   \qquad |q|=1.
   \label{eq:unit-quaternion}
 \end{equation}
-Thus the direction fields $\mathbf n_\xi$ and $\mathbf n_\Pi$ can be viewed as
-quaternion-valued fields $q_\xi(x,t)$ and $q_\Pi(x,t)$ taking values in the group
+Thus the direction fields $\mathbf n_u$ and $\mathbf n_p$ can be viewed as
+quaternion-valued fields $q_u(x,t)$ and $q_p(x,t)$ taking values in the group
 of unit quaternions.
 
 \paragraph{$S^3\simeq SU(2)$ (explicit matrix map).}
@@ -312,7 +312,7 @@ of spinorial $4\pi$ periodicity and motivates using $SU(2)\simeq S^3$ valued
 direction fields when diagnosing holonomy-like effects.
 
 \paragraph{Practical note (zeros).}
-At points where $\boldsymbol\xi$ or $\boldsymbol\Pi$ vanish, the direction
+At points where $\mathbf u$ or $\mathbf p$ vanish, the direction
 $\mathbf n$ is undefined. In computations and visualizations we therefore mask
 those points (or carry forward the last valid direction) and use the scalar
 magnitude $a$ to suppress spurious direction artifacts.
@@ -348,7 +348,7 @@ The continuous substrate model used in this paper rests on the following explici
   \item \textbf{Pre-tension is imposed by a fixed periodic cell:}
   pre-tension is represented by an affine base embedding $\mathbf X_\star(x)=Ax+\mathbf b$
   with $g_\star\neq g^0$ and is maintained by holding the macroscopic cell deformation (the affine part $A$) fixed.
-  Only periodic displacements $\boldsymbol\xi$ about this base are evolved,
+  Only periodic displacements $\mathbf u$ about this base are evolved,
   cf.\ Eq.~\eqref{eq:decomposition-affine-plus-periodic}.
 
   \item \textbf{Inertia-only dynamics (no dissipation):}
@@ -368,19 +368,19 @@ The continuous substrate model used in this paper rests on the following explici
 \subsubsection{Second variation and linearized operator about a pre-tensioned base}
 \label{sec:second-variation-linearization}
 
-\paragraph{Metric variations induced by $\boldsymbol\xi$.}
+\paragraph{Metric variations induced by $\mathbf u$.}
 The induced metric expands as $g=g_\star+\delta g + \delta^2 g + \cdots$ with
 \begin{align}
   \delta g_{ij}
   &=
-  A_i\cdot\partial_j\boldsymbol\xi
+  A_i\cdot\partial_j\mathbf u
   +
-  A_j\cdot\partial_i\boldsymbol\xi,
+  A_j\cdot\partial_i\mathbf u,
   \label{eq:delta-metric}
   \\
   \delta^2 g_{ij}
   &=
-  \partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi.
+  \partial_i\mathbf u\cdot\partial_j\mathbf u.
   \label{eq:delta2-metric}
 \end{align}
 
@@ -397,14 +397,14 @@ Evaluate at the base metric $g_\star$:
 Because $\mathbf X_\star$ is an equilibrium on the periodic domain, the linear term vanishes and
 the action expanded to second order is
 \begin{equation}
-  S^{(2)}[\boldsymbol\xi]
+  S^{(2)}[\mathbf u]
   =
   \int dt\int_{\Omega} d^3x\;
   \left[
-    \frac{\rho_m}{2}|\partial_t\boldsymbol\xi|^2
+    \frac{\rho_m}{2}|\partial_t\mathbf u|^2
     -
     \left(
-      S_\star^{ij}\,\partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi
+      S_\star^{ij}\,\partial_i\mathbf u\cdot\partial_j\mathbf u
       +
       \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
     \right)
@@ -415,18 +415,18 @@ The first term in parentheses is the \emph{geometric stiffness} contribution fro
 it vanishes if the base is stress-free ($S_\star^{ij}=0$).
 
 \paragraph{Quadratic Hamiltonian about a pre-tensioned base.}
-For $\mathbf X=\mathbf X_\star+\boldsymbol\xi$ define the perturbation momentum
-$\boldsymbol\pi := \rho_m\,\partial_t\boldsymbol\xi$.
+For $\mathbf X=\mathbf X_\star+\mathbf u$ define the perturbation momentum
+$\mathbf p := \rho_m\,\partial_t\mathbf u$.
 The Hamiltonian expanded to second order is
 \begin{equation}
-  H^{(2)}[\boldsymbol\xi,\boldsymbol\pi]
+  H^{(2)}[\mathbf u,\mathbf p]
   =
   \int_{\Omega} d^3x\;
   \left[
-    \frac{1}{2\rho_m}|\boldsymbol\pi|^2
+    \frac{1}{2\rho_m}|\mathbf p|^2
     +
     \left(
-      S_\star^{ij}\,\partial_i\boldsymbol\xi\cdot\partial_j\boldsymbol\xi
+      S_\star^{ij}\,\partial_i\mathbf u\cdot\partial_j\mathbf u
       +
       \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
     \right)
@@ -440,10 +440,10 @@ Eq.~\eqref{eq:quadratic-action} and makes the geometric-stiffness contribution o
 \paragraph{Linearized equations of motion.}
 The Euler--Lagrange equations from $S^{(2)}$ yield the linear operator
 \begin{equation}
-  \rho_m\,\partial_{tt}\xi^A
+  \rho_m\,\partial_{tt}u^A
   =
   \partial_i\Big(
-    2\,S_\star^{ij}\,\partial_j\xi^A
+    2\,S_\star^{ij}\,\partial_ju^A
     +
     2\,H_\star^{ij\,kl}\,(\delta g_{kl})\,A_j^A
   \Big),
@@ -453,13 +453,13 @@ The Euler--Lagrange equations from $S^{(2)}$ yield the linear operator
 where $\delta g_{kl}$ is given by Eq.~\eqref{eq:delta-metric}. For an affine base state
 ($A_i$, $S_\star$, $H_\star$ constant), this can be written explicitly as a constant-coefficient system:
 \begin{equation}
-  \rho_m\,\partial_{tt}\xi^A
+  \rho_m\,\partial_{tt}u^A
   =
-  2\,S_\star^{ij}\,\partial_i\partial_j\xi^A
+  2\,S_\star^{ij}\,\partial_i\partial_ju^A
   +
   2\,H_\star^{ij\,kl}\,A_j^A\,
   \Big(
-    A_k^B\,\partial_i\partial_l\xi^B + A_l^B\,\partial_i\partial_k\xi^B
+    A_k^B\,\partial_i\partial_lu^B + A_l^B\,\partial_i\partial_ku^B
   \Big).
   \label{eq:linearized-pde-constant-coeff}
 \end{equation}
@@ -473,14 +473,14 @@ This case provides a clean reference point for measuring the emergent wave speed
 
 \paragraph{Spectral formulas (eigen-stretch model).}
 Let $\widehat g_\star=(g^0)^{-1}g_\star$ have eigenvalues $\lambda_{\star,a}$ and
-$g^0$-orthogonal projectors $\Pi_a$ onto the corresponding eigenspaces, with $\sigma_{\star,a}=\sqrt{\lambda_{\star,a}}$.
+$g^0$-orthogonal projectors $\mathcal P_a$ onto the corresponding eigenspaces, with $\sigma_{\star,a}=\sqrt{\lambda_{\star,a}}$.
 Then the base stress can be written compactly as
 \begin{equation}
   S_\star^{ij}
   =
   \sum_{a=1}^3
   \frac{K}{4}\,\frac{\sigma_{\star,a}-1}{\sigma_{\star,a}}\,
-  \big(\Pi_a\big)^{ij}_{(g^0)}.
+  \big(\mathcal P_a\big)^{ij}_{(g^0)}.
   \label{eq:base-stress-spectral}
 \end{equation}
 The second variation is most cleanly expressed in projector form. Let
@@ -491,12 +491,12 @@ For a symmetric perturbation $\delta\widehat g=(g^0)^{-1}\delta g$ one has
 \begin{align}
   D^2W_\star[\delta\widehat g,\delta\widehat g]
   &=
-  \sum_a f''(\lambda_{\star,a})\big(\mathrm{tr}(\Pi_a\,\delta \widehat g)\big)^2
+  \sum_a f''(\lambda_{\star,a})\big(\mathrm{tr}(\mathcal P_a\,\delta \widehat g)\big)^2
   \nonumber\\
   &\quad+
   2\sum_{a<b}
   \frac{f'(\lambda_{\star,a})-f'(\lambda_{\star,b})}{\lambda_{\star,a}-\lambda_{\star,b}}\,
-  \mathrm{tr}\big(\Pi_a\,\delta \widehat g\,\Pi_b\,\delta \widehat g\big),
+  \mathrm{tr}\big(\mathcal P_a\,\delta \widehat g\,\Pi_b\,\delta \widehat g\big),
   \label{eq:second-variation-spectral}
 \end{align}
 with the usual continuous-limit interpretation when eigenvalues are degenerate (projectors onto the degenerate eigenspace).
@@ -509,8 +509,8 @@ we additionally assume:
 
 \begin{enumerate}
   \item \textbf{Small perturbations about the base:}
-  $\mathbf X=\mathbf X_\star+\boldsymbol\xi$ with $\|\partial\boldsymbol\xi\|$ small enough that
-  truncation at second order in $\boldsymbol\xi$ is valid.
+  $\mathbf X=\mathbf X_\star+\mathbf u$ with $\|\partial\mathbf u\|$ small enough that
+  truncation at second order in $\mathbf u$ is valid.
 
   \item \textbf{Uniform base state:}
   the base embedding is affine so that $A_i$, $S_\star^{ij}$, and $H_\star^{ij\,kl}$ are spatially constant,
@@ -519,9 +519,9 @@ we additionally assume:
 
 \subsubsection{Linear wave regime and isotropy (stress-free reference)}\label{linear-wave-regime-and-isotropy}
 
-Linearize about a flat embedding $\mathbf X_\star(x)=(x^1,x^2,x^3,0)$ with small displacement $\boldsymbol\xi(x,t)$ so $\mathbf X=\mathbf X_\star+\boldsymbol\xi$, and retain leading order. For a stress-free base state with $g^\star_{ij}=g^0_{ij}$ (equivalently, setting $\ell_0=1$ as a dimensionless normalization so $g^\star_{ij}=\delta_{ij}$) and homogeneous parameters, one obtains a linear wave equation of the form
+Linearize about a flat embedding $\mathbf X_\star(x)=(x^1,x^2,x^3,0)$ with small displacement $\mathbf u(x,t)$ so $\mathbf X=\mathbf X_\star+\mathbf u$, and retain leading order. For a stress-free base state with $g^\star_{ij}=g^0_{ij}$ (equivalently, setting $\ell_0=1$ as a dimensionless normalization so $g^\star_{ij}=\delta_{ij}$) and homogeneous parameters, one obtains a linear wave equation of the form
 \begin{equation}
-\partial_{tt}\boldsymbol\xi = c^2\Delta\boldsymbol\xi,
+\partial_{tt}\mathbf u = c^2\Delta\mathbf u,
 \label{eq:linear-wave-equation}
 \end{equation}
 where the effective wave speed is determined by the continuum stiffness and density:
@@ -531,7 +531,7 @@ c^2 = \frac{K}{\rho_m}.
 Throughout this work we identify this emergent wave speed with the physical speed of light $c$.
 For a pre-tensioned base with $g_\star\neq g^0$, the linear operator includes additional geometric stiffness terms from the base stress $S_\star^{ij}$, as derived in Eqs.~\eqref{eq:linearized-pde-general}--\eqref{eq:linearized-pde-constant-coeff}.
 
-All \textbf{four components} of $\boldsymbol\xi$ obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large stretches) introduce deviations from this ideal isotropic behavior.
+All \textbf{four components} of $\mathbf u$ obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large stretches) introduce deviations from this ideal isotropic behavior.
 
 The relativistic interpretation of this linear wave regime, and its relation to
 effective Lorentz symmetry, is developed in more detail in
@@ -623,17 +623,17 @@ Let $\mathbf X(x,t)\in\mathbb R^4$ be the brane embedding and choose a time-inde
 reference embedding $\mathbf X_\star(x)$ (e.g.\ the pre-tensioned ground state).
 We define the displacement and velocity fields
 \begin{equation}
-  \boldsymbol\xi(x,t) := \mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
+  \mathbf u(x,t) := \mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
   \qquad
-  \mathbf v(x,t) := \partial_t\mathbf X(x,t)=\partial_t\boldsymbol\xi(x,t)\in\mathbb R^4,
+  \mathbf v(x,t) := \partial_t\mathbf X(x,t)=\partial_t\mathbf u(x,t)\in\mathbb R^4,
   \label{eq:xi-and-velocity}
 \end{equation}
 and (for constant mass density $\rho_m$) the canonical momentum density
 \begin{equation}
-  \boldsymbol\Pi(x,t) := \rho_m\,\mathbf v(x,t)\in\mathbb R^4.
+  \mathbf p(x,t) := \rho_m\,\mathbf v(x,t)\in\mathbb R^4.
   \label{eq:pi-from-velocity}
 \end{equation}
-These two real fields $(\boldsymbol\xi,\mathbf v)$ (equivalently $(\boldsymbol\xi,\boldsymbol\Pi)$)
+These two real fields $(\mathbf u,\mathbf v)$ (equivalently $(\mathbf u,\mathbf p)$)
 constitute the raw phase-space information from which we will construct a complex mode
 representation.
 
@@ -641,15 +641,15 @@ representation.
 A Berry connection is naturally defined on \emph{normalized complex mode directions}.
 Accordingly we introduce a complex envelope field
 \begin{equation}
-  u(x,t)\in\mathbb C^4,
+  \varphi(x,t)\in\mathbb C^4,
   \qquad
-  \tilde u(x,t):=\frac{u(x,t)}{\|u(x,t)\|}\in S^7\subset\mathbb C^4,
+  \tilde \varphi(x,t):=\frac{\varphi(x,t)}{\|\varphi(x,t)\|}\in S^7\subset\mathbb C^4,
   \label{eq:complex-envelope-normalized}
 \end{equation}
 to represent the local oscillatory state of a narrowband carrier wave packet.
 In our workflow the narrowband carrier is defined by \emph{initialization} (preparation-first),
 so that the subsequent analysis does not rely on post-hoc band-pass filters or tuned
-frequencies. Practically, $u$ is obtained from the real phase-space pair $(\boldsymbol\xi,\mathbf v)$
+frequencies. Practically, $\varphi$ is obtained from the real phase-space pair $(\mathbf u,\mathbf v)$
 by constructing a consistent quadrature (analytic-signal) representation of the prepared carrier.
 
 The usual single-band ($U(1)$) geometric phase is meaningful only when the packet occupies an
@@ -662,15 +662,15 @@ not by itself guarantee a gap; in simulations the gap must be verified for the c
 and packet support.
 
 \subsubsection{Berry connection and Berry phase (U(1) case)}
-For a normalized complex envelope $\tilde u(x,t)$ we define the spacetime Berry connection
+For a normalized complex envelope $\tilde \varphi(x,t)$ we define the spacetime Berry connection
 (one-form) by
 \begin{equation}
-  a_\mu(x,t) := \mathrm{Im}\,\langle \tilde u(x,t)\mid \partial_\mu \tilde u(x,t)\rangle,
+  a_\mu(x,t) := \mathrm{Im}\,\langle \tilde \varphi(x,t)\mid \partial_\mu \tilde \varphi(x,t)\rangle,
   \qquad \mu\in\{t,1,2,3\},
   \label{eq:spacetime-berry-connection}
 \end{equation}
 where $\langle\cdot,\cdot\rangle$ is the standard Hermitian inner product on $\mathbb C^4$.
-Under a local phase redefinition (gauge) $\tilde u\mapsto e^{i\chi}\tilde u$, the connection transforms as
+Under a local phase redefinition (gauge) $\tilde \varphi\mapsto e^{i\chi}\tilde \varphi$, the connection transforms as
 $a_\mu\mapsto a_\mu+\partial_\mu\chi$ \cite{Berry1984}.
 
 The geometric phase accumulated along a closed spacetime loop $\gamma$ is
@@ -682,8 +682,8 @@ For numerics it is often preferable to use the gauge-invariant overlap (link) fo
 for a discrete step $R\to R'$ define
 \begin{equation}
   U(R\to R') :=
-  \frac{\langle \tilde u(R)\mid \tilde u(R')\rangle}
-       {\big|\langle \tilde u(R)\mid \tilde u(R')\rangle\big|}\in U(1),
+  \frac{\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle}
+       {\big|\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle\big|}\in U(1),
   \label{eq:u1-link-variable}
 \end{equation}
 and evaluate the loop phase as $\Theta[\gamma]=\arg\prod_{(R\to R')\in\gamma} U(R\to R')$.

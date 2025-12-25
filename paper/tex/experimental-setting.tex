@@ -193,9 +193,9 @@ ridge offset $w_0$ (Appendix~\ref{app:confinement-slice}).
 In the present step-by-step revision we restrict attention to prepared narrowband packets
 (Section~\ref{sec:init-carriers}) and do \emph{not} rely on a posteriori spectral band-pass masks
 or dispersion-branch projections to define the relevant complex mode.
-Instead, we construct a complex envelope $u(x,t)\in\mathbb C^4$ from the real phase-space pair
-$(\boldsymbol\xi(x,t),\mathbf v(x,t))$ by a consistent quadrature (analytic-signal) representation
-of the prepared carrier, and normalize $\tilde u=u/\|u\|$.
+Instead, we construct a complex envelope $\varphi(x,t)\in\mathbb C^4$ from the real phase-space pair
+$(\mathbf u(x,t),\mathbf v(x,t))$ by a consistent quadrature (analytic-signal) representation
+of the prepared carrier, and normalize $\tilde \varphi=\varphi/\|\varphi\|$.
 
 The single-band ($U(1)$) geometric phase is meaningful only when the packet effectively occupies
 an isolated branch on its spectral support. In practice we verify this by checking that (i) the
@@ -206,8 +206,8 @@ For numerical holonomy we use the gauge-invariant overlap formulation: for a dis
 $R\to R'$ in spacetime,
 \begin{equation}
   U(R\to R') :=
-  \frac{\langle \tilde u(R)\mid \tilde u(R')\rangle}
-       {\big|\langle \tilde u(R)\mid \tilde u(R')\rangle\big|}\in U(1),
+  \frac{\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle}
+       {\big|\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle\big|}\in U(1),
 \end{equation}
 and the loop phase is $\Theta[\gamma]=\arg\prod_{(R\to R')\in\gamma} U(R\to R')$.
 We do not yet attempt curvature maps, defect/source reconstruction, or a full identification
