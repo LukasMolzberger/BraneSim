@@ -40,7 +40,6 @@ from branesim.visualization.brane_3d_viz import (
     create_3d_animation,
     camera_orbit,
 )
-from branesim.visualization.em_field_viz import visualize_em_field_volume_3d
 from branesim.visualization.displacement_field_viz import (
     displacement_frames_from_positions_frames,
     create_displacement_diralpha_slices_videos_3d_in_4d,
