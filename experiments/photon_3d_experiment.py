@@ -642,8 +642,8 @@ def main():
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_3d_example_propagation_xy.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_3d_example_propagation_xy.png")
+    plt.savefig(run_manager.get_plot_path('wave_propagation_xy.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: wave_propagation_xy.png")
 
     # ========================================================================
     # 2. ORTHOGONAL SLICES (XZ at middle y, YZ at middle x)
@@ -684,8 +684,8 @@ def main():
             axes2[1, idx].set_xlabel('y [nm]', fontsize=9)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_3d_example_orthogonal_slices.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_3d_example_orthogonal_slices.png")
+    plt.savefig(run_manager.get_plot_path('wave_orthogonal_slices.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: wave_orthogonal_slices.png")
 
     # ========================================================================
     # 3. ENERGY CONSERVATION PLOT
@@ -702,8 +702,8 @@ def main():
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_3d_example_energy.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_3d_example_energy.png")
+    plt.savefig(run_manager.get_plot_path('energy.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: energy.png")
 
     # ========================================================================
     # 4. LATERAL DISTORTION (XY slice with color-coded direction)
@@ -768,8 +768,8 @@ def main():
                 axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_3d_example_lateral_distortion.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_3d_example_lateral_distortion.png")
+    plt.savefig(run_manager.get_plot_path('lateral_distortion.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: lateral_distortion.png")
 
     # ========================================================================
     # 5. ANIMATION (XY slice)
@@ -815,8 +815,8 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save(run_manager.get_plot_path('photon_3d_example.mp4'), writer=writer, dpi=100)
-    print(f"  ✓ Saved: photon_3d_example.mp4")
+    anim.save(run_manager.get_plot_path('wave_propagation.mp4'), writer=writer, dpi=100)
+    print(f"  ✓ Saved: wave_propagation.mp4")
 
     plt.close(fig_anim)
 
@@ -851,7 +851,7 @@ def main():
         )
 
     # Create 3D animation with orbiting camera
-    output_path_3d = run_manager.get_plot_path('photon_3d_point_cloud.mp4')
+    output_path_3d = run_manager.get_plot_path('wave_propagation_point_cloud.mp4')
     create_3d_animation(
         frames_data=frames_data_nm,
         times=times_3d_phys,
@@ -869,7 +869,7 @@ def main():
         camera_motion=camera_motion_func,
         figsize=(10, 8),
     )
-    print(f"  ✓ Saved: photon_3d_point_cloud.mp4")
+    print(f"  ✓ Saved: wave_propagation_point_cloud.mp4")
 
     # ========================================================================
     # 7. DISPLACEMENT FIELD SLICE VIDEOS (3D brane in 4D embedding)

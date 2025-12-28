@@ -506,7 +506,15 @@ def create_displacement_arrows_video_2d_in_3d(
     coords = coords_all[idx]
 
     extent = np.max(coords_all.max(axis=0) - coords_all.min(axis=0))
-    arrow_len = float(arrow_fraction_of_extent * (extent if extent > 0 else 1.0))
+    arrow_scale = float(arrow_fraction_of_extent * (extent if extent > 0 else 1.0))
+
+    # Find global max displacement magnitude for scaling
+    u_max = 0.0
+    for u in frames_u:
+        u_arr = np.asarray(u)
+        u_max = max(u_max, float(np.max(np.linalg.norm(u_arr, axis=1))))
+    if u_max <= 1e-30:
+        u_max = 1.0
 
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection="3d")
@@ -521,9 +529,10 @@ def create_displacement_arrows_video_2d_in_3d(
         v = u3[idx]
         norms = np.linalg.norm(v, axis=1)
         valid = norms > 1e-15  # Much lower threshold to capture full Gaussian envelope
-        v_hat = np.zeros_like(v)
-        v_hat[valid] = v[valid] / norms[valid, None]
-        tips = coords + arrow_len * v_hat
+        # Scale arrows by actual magnitude (not normalized)
+        scale_factors = np.zeros(len(v))
+        scale_factors[valid] = (norms[valid] / u_max) * arrow_scale
+        tips = coords + v * (scale_factors / np.maximum(norms, 1e-30))[:, None]
         return np.stack([coords, tips], axis=1)
 
     u0 = np.asarray(frames_u[0])

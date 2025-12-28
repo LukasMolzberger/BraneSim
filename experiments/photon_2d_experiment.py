@@ -505,8 +505,8 @@ def main():
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_2d_example_propagation.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_example_propagation.png")
+    plt.savefig(run_manager.get_plot_path('wave_propagation.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: wave_propagation.png")
 
     # Energy conservation plot
     fig2, ax = plt.subplots(figsize=(10, 6))
@@ -521,8 +521,8 @@ def main():
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_2d_example_energy.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_example_energy.png")
+    plt.savefig(run_manager.get_plot_path('energy.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: energy.png")
 
     # Create animation
     print(f"\nCreating animation...")
@@ -561,8 +561,8 @@ def main():
 
     # Save animation
     writer = FFMpegWriter(fps=20, bitrate=2000)
-    anim.save(run_manager.get_plot_path('photon_2d_example.mp4'), writer=writer, dpi=100)
-    print(f"  ✓ Saved: photon_2d_example.mp4")
+    anim.save(run_manager.get_plot_path('wave_propagation.mp4'), writer=writer, dpi=100)
+    print(f"  ✓ Saved: wave_propagation.mp4")
 
     plt.close(fig_anim)
 
@@ -624,8 +624,8 @@ def main():
                 axes_lat[idx].set_xlabel('x [nm]', fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(run_manager.get_plot_path('photon_2d_example_lateral_distortion.png'), dpi=150, bbox_inches='tight')
-    print(f"  ✓ Saved: photon_2d_example_lateral_distortion.png")
+    plt.savefig(run_manager.get_plot_path('lateral_distortion.png'), dpi=150, bbox_inches='tight')
+    print(f"  ✓ Saved: lateral_distortion.png")
 
     # Create lateral distortion animation
     print(f"\nCreating lateral distortion animation...")
@@ -683,8 +683,8 @@ def main():
 
     # Save animation
     writer_lat = FFMpegWriter(fps=20, bitrate=2000)
-    anim_lat.save(run_manager.get_plot_path('photon_2d_example_lateral_distortion.mp4'), writer=writer_lat, dpi=100)
-    print(f"  ✓ Saved: photon_2d_example_lateral_distortion.mp4")
+    anim_lat.save(run_manager.get_plot_path('lateral_distortion.mp4'), writer=writer_lat, dpi=100)
+    print(f"  ✓ Saved: lateral_distortion.mp4")
 
     plt.close(fig_anim_lat)
 
@@ -713,8 +713,8 @@ def main():
             grid_shape=(nx, ny),
             spacing=h_phys,
             output_path=run_manager.get_plot_path("displacement_2d_arrows.mp4"),
-            subsample=2,  # Reduced from 6 to capture narrow wave packet
-            arrow_fraction_of_extent=0.12,  # Slightly shorter for density
+            subsample=4,  # Reduced density - every 4th point
+            arrow_fraction_of_extent=0.15,  # Arrow length scale (max magnitude)
             fps=20,
             dpi=120,
             display_scale=1e9,  # Display in nm
