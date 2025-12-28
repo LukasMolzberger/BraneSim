@@ -303,7 +303,7 @@ def create_displacement_arrows_video_3d_in_4d(
         """Create line segments (M,2,3) from coords and projected vectors."""
         v = u_proj[idx]
         norms = np.linalg.norm(v, axis=1)
-        valid = norms > 1e-12
+        valid = norms > 1e-15  # Much lower threshold to capture full Gaussian envelope
         v_hat = np.zeros_like(v)
         v_hat[valid] = v[valid] / norms[valid, None]
         tips = coords + arrow_len * v_hat
@@ -520,7 +520,7 @@ def create_displacement_arrows_video_2d_in_3d(
     def make_segments(u3: np.ndarray) -> np.ndarray:
         v = u3[idx]
         norms = np.linalg.norm(v, axis=1)
-        valid = norms > 1e-12
+        valid = norms > 1e-15  # Much lower threshold to capture full Gaussian envelope
         v_hat = np.zeros_like(v)
         v_hat[valid] = v[valid] / norms[valid, None]
         tips = coords + arrow_len * v_hat

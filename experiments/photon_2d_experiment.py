@@ -708,8 +708,8 @@ def main():
             grid_shape=(nx, ny),
             spacing=h_phys,
             output_path=run_manager.get_plot_path("displacement_2d_arrows.mp4"),
-            subsample=6,  # Subsample more for clarity
-            arrow_fraction_of_extent=0.15,  # Longer arrows for better visibility
+            subsample=2,  # Reduced from 6 to capture narrow wave packet
+            arrow_fraction_of_extent=0.12,  # Slightly shorter for density
             fps=20,
             dpi=120,
             display_scale=1e9,  # Display in nm
@@ -729,7 +729,7 @@ def main():
             dpi=120,
             display_scale=1e9,
             unit_label="nm",
-            alpha_gamma=0.5,  # Lower gamma = more visible at low magnitudes
+            alpha_gamma=0.25,  # Lower gamma = much more visible at low magnitudes
             alpha_scale=1.0,  # Full opacity scale
         )
         print(f"    ✓ displacement_2d_diralpha.mp4")
