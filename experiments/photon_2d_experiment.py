@@ -32,6 +32,8 @@ from branesim.visualization.displacement_field_viz import (
     create_displacement_arrows_video_2d_in_3d,
     create_displacement_diralpha_video_2d_in_3d,
 )
+from branesim.berry import compton_omega0, compute_berry_time_series, create_berry_videos
+
 
 
 def displacement_to_rgb(disp_x, disp_y, max_magnitude=None):
@@ -383,6 +385,7 @@ def main():
 
     # Displacement field video frames (collect full position snapshots)
     frames_X_full = []  # Full position arrays for displacement field videos
+    frames_V_full = []  # Full velocity arrays for Berry diagnostics (physical units)
     frames_times_s = []  # Physical times in seconds
     X0_full = mapper.to_phys_length(initial_positions).detach().cpu().numpy()  # Reference positions
 
@@ -419,6 +422,8 @@ def main():
             # Collect full positions for displacement field videos (same as animation frames)
             X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
             frames_X_full.append(X_phys)
+            V_phys = mapper.to_phys_velocity(state.velocities).detach().cpu().numpy()
+            frames_V_full.append(V_phys)
             time_phys = mapper.to_phys_time(solver.time)
             frames_times_s.append(time_phys)
 
@@ -735,6 +740,48 @@ def main():
         print(f"    ✓ displacement_2d_diralpha.mp4")
 
         print(f"  ✓ Displacement field videos generated")
+        
+        # ====================================================================
+        # Berry diagnostics (U(1) phase + connection)
+        # ====================================================================
+
+        print(f"\nGenerating Berry diagnostics and videos...")
+
+        # Compute displacement and velocity frames (physical units)
+        frames_u_full = displacement_frames_from_positions_frames(frames_X_full, X0_full)
+        frames_v_full = frames_V_full  # already physical units
+
+        # Restrict to the 3D embedding used by the 2D experiment (components 0, 1, 3)
+        frames_u_3d = [u[:, [0, 1, 3]] for u in frames_u_full]
+        frames_v_3d = [v[:, [0, 1, 3]] for v in frames_v_full]
+
+        omega0 = compton_omega0()  # rad/s, from PhysicalConstants.lambda_C
+        berry = compute_berry_time_series(
+            frames_u=frames_u_3d,
+            frames_v=frames_v_3d,
+            times_s=frames_times_s,
+            omega0=omega0,
+            amp_eps_rel=1e-4,
+            overlap_eps_rel=1e-3,
+            alpha_gamma=0.6,
+            alpha_scale=1.0,
+            return_psi=False,
+        )
+
+        create_berry_videos(
+            series=berry,
+            intrinsic_dim=2,
+            output_dir=run_manager.plots_dir,
+            grid_shape_2d=(nx, ny),
+            spacing=h_phys,
+            filename_prefix="berry_2d",
+            fps=20,
+            dpi=120,
+            display_scale=1e9,
+            unit_label="nm",
+        )
+
+        print(f"  ✓ Berry videos generated")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

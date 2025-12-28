@@ -30,12 +30,14 @@ from branesim.visualization.displacement_field_viz import (
     create_displacement_components_video_1d_in_2d,
     create_displacement_magnitude_angle_video_1d_in_2d,
 )
+from branesim.berry import compton_omega0, compute_berry_time_series, create_berry_videos
 
 
 def track_wave_center(state: BraneState, grid: BraneGrid, field_component: int = 3) -> float:
     """Track center of wave energy in simulation units."""
     energy_density = state.velocities[:, field_component] ** 2 + state.positions[:, field_component] ** 2
     total = energy_density.sum()
+
 
     if total > 1e-10:
         x_coords = torch.arange(len(energy_density), device=energy_density.device,
@@ -254,6 +256,7 @@ def main():
 
     # Displacement field video frames (collect full position snapshots)
     frames_X_full = []  # Full 4D positions for each snapshot
+    frames_V_full = []  # Full 4D velocities for each snapshot (physical units)
     frames_times_s = []  # Physical times in seconds
     X0_full = initial_positions.detach().cpu().numpy()  # Reference positions (N,4)
 
@@ -287,6 +290,9 @@ def main():
             X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
             frames_X_full.append(X_phys)
             frames_times_s.append(t_phys_s)
+
+            V_phys = mapper.to_phys_velocity(state.velocities).detach().cpu().numpy()
+            frames_V_full.append(V_phys)
 
         # Tracking (every 1% of simulation)
         if step % max(1, num_steps // 100) == 0:
@@ -388,6 +394,47 @@ def main():
         print(f"    ✓ displacement_1d_mag_angle.mp4")
 
         print(f"  ✓ Displacement field videos generated")
+
+        # ====================================================================
+        # Berry diagnostics (U(1) phase + connection)
+        # ====================================================================
+
+        print(f"\nGenerating Berry diagnostics and videos...")
+
+        # Displacement and velocity frames (physical units)
+        frames_u_full = displacement_frames_from_positions_frames(frames_X_full, X0_phys)
+        frames_v_full = [v.copy() for v in frames_V_full]  # velocities already in physical units
+
+        # Restrict to the 2D embedding used by the 1D experiment (components 0 and 3)
+        frames_u_2d = [u[:, [0, 3]] for u in frames_u_full]
+        frames_v_2d = [v[:, [0, 3]] for v in frames_v_full]
+
+        # Hardcoded Compton carrier (as requested)
+        omega0 = compton_omega0()
+        berry = compute_berry_time_series(
+            frames_u=frames_u_2d,
+            frames_v=frames_v_2d,
+            times_s=frames_times_s,
+            omega0=omega0,
+            amp_eps_rel=1e-4,
+            overlap_eps_rel=1e-3,
+            alpha_gamma=0.6,
+            alpha_scale=1.0,
+            return_psi=False,
+        )
+
+        create_berry_videos(
+            series=berry,
+            intrinsic_dim=1,
+            output_dir=run_manager.plots_dir,
+            x_coords_1d=x_nm,  # already computed for displacement videos
+            filename_prefix="berry_1d",
+            fps=20,
+            dpi=140,
+            unit_label="nm",
+        )
+
+        print(f"  ✓ Berry videos generated")
 
     # ========================================================================
     # Summary
