@@ -66,7 +66,7 @@ Even in pure linear theory, **interference effects** could modulate the local am
 
 Would you like a diagram or simulation sketch of this effect?
 
-![image](img/waves-on-a-string-5-6-2025.png)
+![image](../img/waves-on-a-string-5-6-2025.png)
 
 Here’s a visualization of the setup:
 
