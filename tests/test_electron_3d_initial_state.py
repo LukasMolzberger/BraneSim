@@ -150,50 +150,71 @@ def main() -> None:
     # 3D point cloud orbit video (static field, moving camera)
     # We show the *electron quadrature a* (signed) and also X^4 containment.
     # ------------------------------------------------------------------
+    # NOTE: The orbit video renderer in brane_3d_viz is tuned for *display-scale* values.
+    # If we pass SI meters directly (typically ~1e-15..1e-12), default alpha scaling can
+    # make everything effectively invisible. To avoid "empty" orbit videos, we render
+    # in **nanometers** for both coordinates and values (same convention as the photon
+    # point-cloud animations).
     num_frames = 180
-    times = list(np.linspace(0.0, 1.0, num_frames))
+    times_fs = [0.0 for _ in range(num_frames)]  # static field, time shown is not meaningful here
 
     # 1) Electron quadrature a (signed)
-    a_phys = mapper.to_phys_length(a).detach().cpu().numpy()
-    coords, values = subsample_3d_field(
-        field_3d=a_phys,
+    a_nm = (mapper.to_phys_length(a).detach().cpu().numpy()) * 1e9
+    coords_nm, values_nm = subsample_3d_field(
+        field_3d=a_nm,
         grid_shape=(nx, ny, nz),
-        h_phys=h_phys,
+        h_phys=h_phys * 1e9,
         subsample_factor=2,
     )
-    frames_data = [(coords, values) for _ in range(num_frames)]
+    frames_data = [(coords_nm, values_nm) for _ in range(num_frames)]
     out_path = run_manager.get_plot_path("electron_initial_orbit_quadrature_a.mp4")
     print(f"\nRendering 3D orbit video (quadrature a): {out_path}")
     create_3d_animation(
         frames_data=frames_data,
-        times=times,
+        times=times_fs,
         output_path=out_path,
-        title_template="Electron initial state (static, a) - t = {:.3f} fs",
+        cmap_name="RdBu_r",
+        point_size=5.0,
+        gamma=1.2,
+        alpha_scale=1.0,
+        xlabel="x [nm]",
+        ylabel="y [nm]",
+        zlabel="z [nm]",
+        title_template="Electron initial state (static, quadrature a) - t = {:.3f} fs",
         fps=30,
         dpi=120,
         camera_motion=camera_orbit,
+        figsize=(10, 8),
     )
 
     # 2) X^4 containment displacement
     x4_disp = disp[:, 3]
-    x4_phys = mapper.to_phys_length(x4_disp).detach().cpu().numpy()
-    coords2, values2 = subsample_3d_field(
-        field_3d=x4_phys,
+    x4_nm = (mapper.to_phys_length(x4_disp).detach().cpu().numpy()) * 1e9
+    coords2_nm, values2_nm = subsample_3d_field(
+        field_3d=x4_nm,
         grid_shape=(nx, ny, nz),
-        h_phys=h_phys,
+        h_phys=h_phys * 1e9,
         subsample_factor=2,
     )
-    frames_data2 = [(coords2, values2) for _ in range(num_frames)]
+    frames_data2 = [(coords2_nm, values2_nm) for _ in range(num_frames)]
     out_path2 = run_manager.get_plot_path("electron_initial_orbit_x4_containment.mp4")
     print(f"\nRendering 3D orbit video (X^4 containment): {out_path2}")
     create_3d_animation(
         frames_data=frames_data2,
-        times=times,
+        times=times_fs,
         output_path=out_path2,
-        title_template="Electron initial state (static, X^4) - t = {:.3f} fs",
+        cmap_name="RdBu_r",
+        point_size=5.0,
+        gamma=1.2,
+        alpha_scale=1.0,
+        xlabel="x [nm]",
+        ylabel="y [nm]",
+        zlabel="z [nm]",
+        title_template="Electron initial state (static, X^4 containment) - t = {:.3f} fs",
         fps=30,
         dpi=120,
         camera_motion=camera_orbit,
+        figsize=(10, 8),
     )
 
     print("\n✓ Done")

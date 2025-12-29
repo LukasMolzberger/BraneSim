@@ -852,17 +852,15 @@ def main():
     print(f"  Total 3D frames: {len(animation_frames_3d)}")
     print(f"  Subsampling factor: {subsample_factor_3d} (every {subsample_factor_3d} points)")
 
-    # Convert physical times for 3D frames
-    times_3d_phys = [mapper.to_phys_time(t) for t in animation_times_3d]
+    # Convert times for 3D frames (femtoseconds) for display
+    times_3d_fs = [mapper.to_phys_time(t) * 1e15 for t in animation_times_3d]
 
-    # Convert coordinates to nanometers for all frames
-    frames_data_nm = []
+    # Convert coordinates/values to femtometers for robust visualization at Compton scales
+    frames_data_fm = []
     for coords, values in animation_frames_3d:
-        # Convert to nm
-        coords_nm = coords * 1e9
-        # Convert values to nm
-        values_nm = mapper.to_phys_length(values) * 1e9
-        frames_data_nm.append((coords_nm, values_nm))
+        coords_fm = coords * 1e15  # m -> fm
+        values_fm = mapper.to_phys_length(values) * 1e15  # m -> fm
+        frames_data_fm.append((coords_fm, values_fm))
 
     # Define camera motion: orbit around the brane with slight elevation change
     def camera_motion_func(frame_idx, num_frames):
@@ -878,16 +876,16 @@ def main():
     # Create 3D animation with orbiting camera
     output_path_3d = run_manager.get_plot_path('electron_3d_point_cloud.mp4')
     create_3d_animation(
-        frames_data=frames_data_nm,
-        times=times_3d_phys,
+        frames_data=frames_data_fm,
+        times=times_3d_fs,
         output_path=output_path_3d,
         cmap_name='RdBu_r',
-        point_size=5.0,  # Larger points for better visibility
-        gamma=1.5,  # Lower gamma = less transparent low-amplitude regions
-        alpha_scale=0.75,  # Higher opacity for more intense appearance
-        xlabel='x [nm]',
-        ylabel='y [nm]',
-        zlabel='z [nm]',
+        point_size=6.0,  # Larger points for better visibility
+        gamma=1.0,  # More visible low-amplitude regions
+        alpha_scale=1.0,  # Higher opacity
+        xlabel='x [fm]',
+        ylabel='y [fm]',
+        zlabel='z [fm]',
         title_template='3D Electron (t = {:.2f} fs)',
         fps=20,
         dpi=100,
