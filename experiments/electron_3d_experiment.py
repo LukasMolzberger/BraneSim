@@ -411,18 +411,21 @@ def main():
     # l=1, m=1 tends to produce an equatorial (torus-like) amplitude distribution
     # with a nodal line along the symmetry axis.
     electron_spec = ElectronModeSpec(
-        l=1,
-        m=1,
-        n=1,
+        l=1, m=1, n=1,
         radius=radius_sim,
         amplitude=0.5,
         center=center,
-        field_component=3,  # X^4
         wave_speed=c_sim,
+
+        polarization="all",  # rotating spatial polarization in X^1–X^2
+        containment_component=3,  # X^4 trap
         containment_depth=0.25,
         containment_sigma=0.5 * radius_sim,
         smooth_edge=2.0,
     )
+
+    # Store amplitude for visualization (convert sim → phys)
+    amplitude_phys = mapper.to_phys_length(electron_spec.amplitude)
 
     debug = initialize_electron_mode_3d(
         state=state,

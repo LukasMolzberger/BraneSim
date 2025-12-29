@@ -44,10 +44,14 @@ def main() -> None:
     # Reference mass: keep consistent with other experiments
     m_point = 2.861821e-27  # kg
 
+    # Wave speed (exactly equals c by construction)
+    c_wave = constants.c
+
     mapper = DimensionalMapper(h_phys=h_phys, c_light=constants.c, mass_reference=m_point)
 
     # Simulation units
     h_sim = mapper.to_sim_length(h_phys)  # == 1.0
+    c_sim = mapper.to_sim_velocity(c_wave)
 
     # Domain
     nx = ny = nz = 100
@@ -88,14 +92,14 @@ def main() -> None:
     radius_sim = float(mapper.to_sim_length(constants.lambda_C))
 
     spec = ElectronModeSpec(
-        l=1,
-        m=1,
-        n=1,
+        l=1, m=1, n=1,
         radius=radius_sim,
-        amplitude=0.5,  # visible but modest deformation
+        amplitude=0.5,
         center=center,
-        field_component=3,
-        wave_speed=1.0,
+        wave_speed=c_sim,
+
+        polarization="xy",  # rotating spatial polarization in X^1–X^2
+        containment_component=3,  # X^4 trap
         containment_depth=0.25,
         containment_sigma=0.5 * radius_sim,
         smooth_edge=2.0,
