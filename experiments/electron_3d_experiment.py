@@ -3,12 +3,29 @@
 This experiment is based on `photon_3d_experiment.py`, but replaces the photon
 wave-packet initialization with an **electron-like rotating standing wave**
 seeded by a spherical-harmonic angular pattern and a spherical-Bessel radial
-profile, written into the embedding component X^4.
+profile.
 
-The goal is to create a localized, rotating phase pattern (via real/imag
-quadratures) together with an optional static X^4 deformation well that can act
-as a first-pass containment scaffold.
+Key idea (real-valued simulation)
+---------------------------------
+We construct a complex scalar mode ψ(x)=R(r)Y_{lm}(θ,φ) and realize it as a
+**circularly polarized vector oscillation** on the brane embedding space via two
+orthonormal polarization vectors p1,p2:
+
+    u(x,0) = Re(ψ) p1 + Im(ψ) p2
+    v(x,0) = ω( Im(ψ) p1 - Re(ψ) p2 )
+
+This yields a rotating phase field (for m≠0). To ensure X^4 is *dynamically*
+coupled from the start (and does not appear as a static “blob”), we use a
+polarization plane that includes X^4 (see polarization="spatial_x4").
+
+Containment scaffold (X^4)
+--------------------------
+We also add an optional *static* Gaussian well in X^4 as a first-pass geometric
+containment scaffold. A true long-term confinement equilibrium is a coupled
+nonlinear problem; this experiment adds diagnostics to measure leakage and
+radius growth over time.
 """
+
 
 import sys
 import os
@@ -418,7 +435,7 @@ def main():
         amplitude=0.5,
         center=center,
         wave_speed=c_sim,
-        polarization="spatial",  # distribute oscillation over X^1..X^3
+        polarization="spatial_x4",  # include X^4 in the rotating polarization plane
         containment_component=3,  # X^4 containment scaffold
         containment_depth=0.25,
         containment_sigma=0.5 * radius_sim,
@@ -456,9 +473,30 @@ def main():
         a = (disp * p1_t).sum(dim=1)
         return a.detach().cpu().numpy()
 
+
+    def electron_field_b_numpy() -> np.ndarray:
+        disp = state.positions - initial_positions
+        b = (disp * p2_t).sum(dim=1)
+        return b.detach().cpu().numpy()
     def electron_field_x4_numpy() -> np.ndarray:
         disp = state.positions - initial_positions
         return disp[:, 3].detach().cpu().numpy()
+
+    # --------------------------------------------------------------------
+    # Confinement diagnostics geometry (material/reference radius)
+    # We measure leakage relative to the *reference* sphere radius in the
+    # spatial dimensions (X,Y,Z) using the undeformed flat configuration.
+    # --------------------------------------------------------------------
+    ref_xyz = initial_positions[:, :3].detach().cpu().numpy()
+    center_xyz = np.array(center, dtype=np.float64)
+    r0 = np.linalg.norm(ref_xyz - center_xyz[None, :], axis=1)
+    mask_outside = r0 > float(radius_sim)
+
+    # Initial offsets (t=0 right after initialization)
+    a0 = electron_field_a_numpy()
+    b0 = electron_field_b_numpy()
+    x4_0 = electron_field_x4_numpy()
+
 
     # Compute initial accelerations
     solver.initialize_accelerations(state)
@@ -501,7 +539,20 @@ def main():
     # Tracking
     times_phys = []  # Physical times for plotting
     energies = []
+    leakage_amp = []          # fraction of |psi|^2 outside R
+    leakage_x4 = []           # fraction of X4_dyn^2 outside R
+    r_rms_over_R = []         # RMS radius of |psi| envelope / R
+    r_rms_x4_over_R = []      # RMS radius of X4_dyn / R
 
+    # Confinement diagnostics: measure what fraction of the mode amplitude is
+    # outside the intended electron radius. This is purely a diagnostic (unitless).
+    # We track two quantities:
+    #   1) |psi|^2 = a^2 + b^2 (oscillatory mode amplitude)
+    #   2) X4^2     (static+dynamic X^4 deformation)
+    leakage_amp = []
+    leakage_x4 = []
+
+    # Precompute inside/outside mask in reference space (sim units)
     # Take snapshots at regular intervals (in physical time)
     num_snapshots = 7
     snapshot_times_phys = np.linspace(0, simulation_time_phys, num_snapshots)
@@ -581,6 +632,25 @@ def main():
             times_phys.append(time_phys)
             energies.append(energy['total'])
 
+            # Confinement metrics (remove DC offsets)
+            a = electron_field_a_numpy() - a0
+            b = electron_field_b_numpy() - b0
+            amp2 = a * a + b * b
+            tot = float(np.sum(amp2)) + 1e-30
+            out = float(np.sum(amp2[mask_outside]))
+            leakage_amp.append(out / tot)
+            r_rms = math.sqrt(float(np.sum((r0 * r0) * amp2)) / tot)
+            r_rms_over_R.append(r_rms / float(radius_sim))
+
+            x4_dyn = electron_field_x4_numpy() - x4_0
+            x42 = x4_dyn * x4_dyn
+            totx4 = float(np.sum(x42)) + 1e-30
+            outx4 = float(np.sum(x42[mask_outside]))
+            leakage_x4.append(outx4 / totx4)
+            r_rms_x4 = math.sqrt(float(np.sum((r0 * r0) * x42)) / totx4)
+            r_rms_x4_over_R.append(r_rms_x4 / float(radius_sim))
+
+
         if step % print_interval == 0:
             time_phys = mapper.to_phys_time(solver.time)  # Convert for printing
             print(f"  Step {step:8d}/{num_steps}: t={time_phys:.6e}s, "
@@ -630,7 +700,7 @@ def main():
     # 1. AMPLITUDE FIELD VISUALIZATION (XY slice at middle z)
     # ========================================================================
     fig, axes = plt.subplots(num_snapshots, 1, figsize=(14, 12))
-    fig.suptitle(f'3D Electron - Amplitude Field (XY slice, z={nz//2})',
+    fig.suptitle(f'3D Electron - Quadrature a = u·p1 (XY slice, z={nz//2})',
                  fontsize=16, fontweight='bold')
 
     for idx, (step, t) in enumerate(snapshot_steps.items()):
@@ -645,7 +715,7 @@ def main():
                                         y_coords[0], y_coords[-1]],
                                  cmap='RdBu_r',
                                  vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                 aspect='auto')
+                                 aspect='equal')
 
             axes[idx].set_ylabel('y [nm]', fontsize=11)
             axes[idx].set_xlim(x_coords[0], x_coords[-1])
@@ -661,7 +731,7 @@ def main():
             # Add colorbar
             divider = make_axes_locatable(axes[idx])
             cax = divider.append_axes("right", size="3%", pad=0.05)
-            plt.colorbar(im, cax=cax, label='ξ [nm]')
+            plt.colorbar(im, cax=cax, label='a [nm]')
 
             if idx == num_snapshots - 1:
                 axes[idx].set_xlabel('x [nm]', fontsize=12)
@@ -692,7 +762,7 @@ def main():
                                                 z_coords[0], z_coords[-1]],
                                          cmap='RdBu_r',
                                          vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                                         aspect='auto')
+                                         aspect='equal')
             axes2[0, idx].set_ylabel('z [nm]', fontsize=9)
             axes2[0, idx].set_xlabel('x [nm]', fontsize=9)
             t_fs = t * 1e15
@@ -729,6 +799,54 @@ def main():
     plt.tight_layout()
     plt.savefig(run_manager.get_plot_path('electron_3d_example_energy.png'), dpi=150, bbox_inches='tight')
     print(f"  ✓ Saved: electron_3d_example_energy.png")
+
+    # ========================================================================
+    # 3b. CONFINEMENT DIAGNOSTICS
+    # ========================================================================
+    if leakage_amp:
+        times_fs = np.array(times_phys) * 1e15
+
+        figc, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+        ax1.plot(times_fs, np.array(leakage_amp), linewidth=2,
+                 label='Leakage: |ψ|² outside r>R (from a,b)')
+        ax1.plot(times_fs, np.array(leakage_x4), linewidth=2,
+                 label='Leakage: X4_dyn² outside r>R')
+        ax1.set_ylabel('Fraction outside')
+        ax1.set_ylim(0.0, 1.0)
+        ax1.grid(True, alpha=0.3)
+        ax1.legend(loc='best')
+        ax1.set_title('Confinement diagnostics', fontsize=14, fontweight='bold')
+
+        ax2.plot(times_fs, np.array(r_rms_over_R), linewidth=2, label='RMS radius(|ψ|)/R')
+        ax2.plot(times_fs, np.array(r_rms_x4_over_R), linewidth=2, label='RMS radius(X4_dyn)/R')
+        ax2.set_ylabel('RMS radius / R')
+        ax2.set_xlabel('Time [fs]')
+        ax2.grid(True, alpha=0.3)
+        ax2.legend(loc='best')
+
+        plt.tight_layout()
+        plt.savefig(run_manager.get_plot_path('electron_3d_example_confinement.png'),
+                    dpi=150, bbox_inches='tight')
+        print(f"  ✓ Saved: electron_3d_example_confinement.png")
+        plt.close(figc)
+
+        # Also export a CSV for quick inspection
+        conf_csv_path = os.path.join(run_manager.data_dir, "electron_3d_confinement.csv")
+        conf_mat = np.column_stack([
+            np.array(times_phys, dtype=np.float64),
+            np.array(leakage_amp, dtype=np.float64),
+            np.array(leakage_x4, dtype=np.float64),
+            np.array(r_rms_over_R, dtype=np.float64),
+            np.array(r_rms_x4_over_R, dtype=np.float64),
+        ])
+        header = "t_phys_s,leakage_amp,leakage_x4,r_rms_over_R,r_rms_x4_over_R"
+        np.savetxt(conf_csv_path, conf_mat, delimiter=",", header=header, comments="")
+        print(f"  ✓ Saved: electron_3d_confinement.csv")
+
+
+
+
 
     # ========================================================================
     # 4. LATERAL DISTORTION (XY slice with color-coded direction)
@@ -768,7 +886,7 @@ def main():
             axes_lat[idx].imshow(np.transpose(rgb_image, (1, 0, 2)), origin='lower',
                                 extent=[x_coords[0], x_coords[-1],
                                        y_coords[0], y_coords[-1]],
-                                aspect='auto')
+                                aspect='equal')
 
             axes_lat[idx].set_ylabel('y [nm]', fontsize=11)
             axes_lat[idx].set_xlim(x_coords[0], x_coords[-1])
@@ -802,7 +920,7 @@ def main():
     print(f"\nCreating animation...")
     print(f"  Total frames: {len(animation_frames)}")
 
-    fig_anim, ax_anim = plt.subplots(figsize=(12, 4))
+    fig_anim, ax_anim = plt.subplots(figsize=(7.5, 7.0))
 
     # Initial frame (convert sim → nm)
     field_init_sim = extract_slice_xy(animation_frames[0], (nx, ny, nz))
@@ -811,8 +929,9 @@ def main():
                              extent=[x_coords[0], x_coords[-1],
                                     y_coords[0], y_coords[-1]],
                              cmap='RdBu_r', vmin=-amplitude_nm*1.2, vmax=amplitude_nm*1.2,
-                             aspect='auto', animated=True)
+                             aspect='equal', animated=True)
 
+    ax_anim.set_title('Electron quadrature a = (X-X0)·p1 (XY slice)', fontsize=13)
     ax_anim.set_xlabel('x [nm]', fontsize=12)
     ax_anim.set_ylabel('y [nm]', fontsize=12)
     time_text = ax_anim.text(0.02, 0.95, '', transform=ax_anim.transAxes,
@@ -821,7 +940,7 @@ def main():
 
     divider = make_axes_locatable(ax_anim)
     cax = divider.append_axes("right", size="3%", pad=0.05)
-    plt.colorbar(im_anim, cax=cax, label='ξ [nm]')
+    plt.colorbar(im_anim, cax=cax, label='a [nm]')
     ax_anim.set_title('3D Electron (XY slice, z=middle) - Dimensionless Units',
                      fontsize=14, fontweight='bold')
 
@@ -852,15 +971,17 @@ def main():
     print(f"  Total 3D frames: {len(animation_frames_3d)}")
     print(f"  Subsampling factor: {subsample_factor_3d} (every {subsample_factor_3d} points)")
 
-    # Convert times for 3D frames (femtoseconds) for display
-    times_3d_fs = [mapper.to_phys_time(t) * 1e15 for t in animation_times_3d]
+    # Convert physical times for 3D frames
+    times_3d_phys = [mapper.to_phys_time(t) for t in animation_times_3d]
 
-    # Convert coordinates/values to femtometers for robust visualization at Compton scales
-    frames_data_fm = []
+    # Convert coordinates to nanometers for all frames
+    frames_data_nm = []
     for coords, values in animation_frames_3d:
-        coords_fm = coords * 1e15  # m -> fm
-        values_fm = mapper.to_phys_length(values) * 1e15  # m -> fm
-        frames_data_fm.append((coords_fm, values_fm))
+        # Convert to nm
+        coords_nm = coords * 1e9
+        # Convert values to nm
+        values_nm = mapper.to_phys_length(values) * 1e9
+        frames_data_nm.append((coords_nm, values_nm))
 
     # Define camera motion: orbit around the brane with slight elevation change
     def camera_motion_func(frame_idx, num_frames):
@@ -876,16 +997,16 @@ def main():
     # Create 3D animation with orbiting camera
     output_path_3d = run_manager.get_plot_path('electron_3d_point_cloud.mp4')
     create_3d_animation(
-        frames_data=frames_data_fm,
-        times=times_3d_fs,
+        frames_data=frames_data_nm,
+        times=times_3d_phys,
         output_path=output_path_3d,
         cmap_name='RdBu_r',
-        point_size=6.0,  # Larger points for better visibility
-        gamma=1.0,  # More visible low-amplitude regions
-        alpha_scale=1.0,  # Higher opacity
-        xlabel='x [fm]',
-        ylabel='y [fm]',
-        zlabel='z [fm]',
+        point_size=5.0,  # Larger points for better visibility
+        gamma=1.5,  # Lower gamma = less transparent low-amplitude regions
+        alpha_scale=0.75,  # Higher opacity for more intense appearance
+        xlabel='x [nm]',
+        ylabel='y [nm]',
+        zlabel='z [nm]',
         title_template='3D Electron (t = {:.2f} fs)',
         fps=20,
         dpi=100,
@@ -924,8 +1045,8 @@ def main():
             dpi=120,
             display_scale=1e9,  # Display in nm
             unit_label="nm",
-            alpha_gamma=0.5,  # Lower gamma = more visible at low magnitudes
-            alpha_scale=1.0,  # Full opacity scale
+            alpha_gamma=0.25,  # Lower gamma = more visible at low magnitudes
+            alpha_scale=2.0,  # Full opacity scale
         )
         print(f"    ✓ displacement_3d_diralpha_xy.mp4")
         print(f"    ✓ displacement_3d_diralpha_xz.mp4")
@@ -951,7 +1072,7 @@ def main():
     print(f"  • Primary plots show XY slice at z = {nz//2} (middle of domain)")
     print(f"  • Orthogonal slices show XZ and YZ planes")
     print(f"  • Lateral distortion uses color to encode direction (hue) and brightness for magnitude")
-    print(f"  • The initialized electron mode is a rotating standing-wave pattern in X^4")
+    print(f"  • The initialized electron mode is a rotating standing-wave pattern in the (p1,p2) plane; X^4 is included via polarization and a static well")
 
     # Save configuration
     run_manager.save_config({

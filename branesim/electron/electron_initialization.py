@@ -88,6 +88,7 @@ class ElectronModeSpec:
         Which embedding-plane to use for the rotating mode.
         - "xy", "xz", "yz": simple spatial planes
         - "spatial": a plane spanning all spatial dims (x,y,z)
+        - "spatial_x4": a plane spanning (x,y,z) AND X^4 (both quadratures touch X^4)
         - "all": a plane that also includes X^4
 
     polarization_p1 / polarization_p2 : Optional tuples
@@ -173,6 +174,17 @@ def _default_plane(embed_dim: int, mode: str) -> Tuple[np.ndarray, np.ndarray]:
         p1[0:3] = 1.0
         p2[0] = 1.0
         p2[1] = -1.0
+    elif mode == "spatial_x4":
+        # Like 'spatial', but explicitly couples into X^4 at t=0.
+        # This is useful if you want X^4 to carry a *wave* (not just a static well)
+        # and to have nonzero momentum right away.
+        if embed_dim < 4:
+            return _default_plane(embed_dim, "spatial")
+        p1[0:3] = 1.0
+        p1[3] = 1.0
+        p2[0] = 1.0
+        p2[1] = -1.0
+        p2[3] = 1.0
     elif mode == "all":
         if embed_dim < 4:
             return _default_plane(embed_dim, "spatial")
