@@ -411,21 +411,19 @@ def main():
     # l=1, m=1 tends to produce an equatorial (torus-like) amplitude distribution
     # with a nodal line along the symmetry axis.
     electron_spec = ElectronModeSpec(
-        l=1, m=1, n=1,
+        l=1,
+        m=1,
+        n=1,
         radius=radius_sim,
         amplitude=0.5,
         center=center,
         wave_speed=c_sim,
-
-        polarization="all",  # rotating spatial polarization in X^1–X^2
-        containment_component=3,  # X^4 trap
+        polarization="spatial",  # distribute oscillation over X^1..X^3
+        containment_component=3,  # X^4 containment scaffold
         containment_depth=0.25,
         containment_sigma=0.5 * radius_sim,
         smooth_edge=2.0,
     )
-
-    # Store amplitude for visualization (convert sim → phys)
-    amplitude_phys = mapper.to_phys_length(electron_spec.amplitude)
 
     debug = initialize_electron_mode_3d(
         state=state,
@@ -438,6 +436,30 @@ def main():
     print("  Electron mode parameters:")
     for k, v in (debug or {}).items():
         print(f"    {k}: {v}")
+
+
+    # --------------------------------------------------------------------
+    # Electron field helpers
+    # We seeded a rotating mode into a polarization plane (p1, p2). The
+    # projections a = disp·p1 and b = disp·p2 represent the two quadratures.
+    # Using a as the main scalar field keeps existing signed visualizations.
+    # --------------------------------------------------------------------
+    amplitude_phys = float(
+        mapper.to_phys_length(torch.tensor(electron_spec.amplitude, device=device, dtype=dtype)).item()
+    )
+
+    p1_t = torch.tensor((debug or {}).get("p1", [1.0, 0.0, 0.0, 0.0]), device=device, dtype=dtype)
+    p2_t = torch.tensor((debug or {}).get("p2", [0.0, 1.0, 0.0, 0.0]), device=device, dtype=dtype)
+
+    def electron_field_a_numpy() -> np.ndarray:
+        disp = state.positions - initial_positions
+        a = (disp * p1_t).sum(dim=1)
+        return a.detach().cpu().numpy()
+
+    def electron_field_x4_numpy() -> np.ndarray:
+        disp = state.positions - initial_positions
+        return disp[:, 3].detach().cpu().numpy()
+
     # Compute initial accelerations
     solver.initialize_accelerations(state)
     state.apply_fixed_boundaries()
@@ -511,7 +533,7 @@ def main():
 
     for step in range(num_steps + 1):
         if step in snapshot_steps:
-            field = state.get_field_component(3).cpu().numpy()
+            field = electron_field_a_numpy()
             snapshots[snapshot_steps[step]] = field.copy()
 
             # Store lateral displacements (x, y, z components)
@@ -524,7 +546,7 @@ def main():
 
         # Save frames for animation
         if step % frame_interval == 0:
-            field = state.get_field_component(3).cpu().numpy()
+            field = electron_field_a_numpy()
             animation_frames.append(field.copy())
 
             # Save lateral displacement frames
@@ -543,7 +565,7 @@ def main():
 
         # Save frames for 3D point cloud animation (subsampled)
         if step % frame_interval_3d == 0:
-            field = state.get_field_component(3).cpu().numpy()
+            field = electron_field_a_numpy()
             coords_3d, values_3d = subsample_3d_field(
                 field,
                 (nx, ny, nz),
