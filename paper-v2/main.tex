@@ -1,0 +1,449 @@
+% ============================================================
+%  Emergent Gauge Structure from a 3D Brane in 4D Embedding
+%  (Blank / from-scratch template with derivation placeholders)
+% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{bm}
+\usepackage{physics} % bras/kets, derivatives (optional)
+\usepackage{siunitx}
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue
+}
+
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+% ---------- Macros ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{\mathbb{T}}
+\providecommand{\dd}{\mathrm{d}}
+\providecommand{\ii}{\mathrm{i}}
+\providecommand{\e}{\mathrm{e}}
+
+% Indices:
+%   i,j,k,... intrinsic spatial indices (1..d)
+%   A,B,... embedding indices (1..N)
+%   mu,nu,... spacetime indices (0..3)
+
+\newcommand{\X}{\mathbf{X}}                 % embedding map
+\newcommand{\x}{\mathbf{x}}                 % intrinsic coordinate (space)
+\newcommand{\uvec}{\mathbf{u}}              % displacement field
+\newcommand{\vvec}{\mathbf{v}}              % velocity field
+\newcommand{\A}{\mathbf{A}}                 % gauge potential (spatial)
+\newcommand{\F}{\mathbf{F}}                 % field strength / curvature
+\newcommand{\Lag}{\mathcal{L}}              % Lagrangian density
+\newcommand{\Ham}{\mathcal{H}}              % Hamiltonian density
+
+% Berry / Wilczek–Zee
+\newcommand{\bbA}{\mathcal{A}}              % non-Abelian connection
+\newcommand{\bbF}{\mathcal{F}}              % non-Abelian curvature
+\newcommand{\ab}{a}                         % U(1) Berry connection scalar components a_mu
+\newcommand{\covD}{D}                       % covariant derivative symbol
+
+% QED-like notation
+\newcommand{\psibar}{\bar{\psi}}
+\newcommand{\gamm}{\gamma}
+
+% ---------- Title ----------
+\title{Emergent Gauge Structure and Particle-Like Modes\\
+from a 3D Brane Embedded in 4D Space}
+\author{Author: \textit{(your name)}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document is a from-scratch template for a brane-based deterministic wave model
+in which (i) electromagnetism emerges as a U(1) gauge structure associated with a
+narrowband polarization bundle, and (ii) electron-like excitations emerge as
+localized multi-mode objects whose internal near-degenerate subspace carries a
+non-Abelian (Wilczek--Zee) connection. The template includes (a) paper-grade
+derivation steps and (b) a simulation checklist aligned with the current code
+architecture (\texttt{BraneState}, \texttt{BraneGrid}, \texttt{VelocityVerletSolver},
+\texttt{branesim.berry.analysis}, and the electron initialization pipeline).
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+\section{Scope and Claims (keep this explicit)}
+\label{sec:scope}
+
+\textbf{Goal.} Define a concrete mechanism by which an effective gauge connection
+appears when the brane dynamics is projected onto a narrowband local mode subspace.
+Separate what is \emph{kinematical} (connections from basis transport) from what is
+\emph{dynamical} (Maxwell-like action for the connection).
+
+\textbf{Deliverables.}
+\begin{enumerate}
+  \item A multiscale reduction showing the envelope field obeys covariant derivatives
+        \(\covD_\mu = \partial_\mu + \ii a_\mu + \ii \bbA_\mu\).
+  \item A polarization count demonstrating the EM sector yields exactly two
+        gapless transverse degrees of freedom.
+  \item An effective action argument that produces a Maxwell-like term
+        \(f_{\mu\nu}f^{\mu\nu}\) for the U(1) curvature \(f=\dd a\).
+  \item A simulation protocol that computes time- and space-like Berry connections
+        from \(\uvec,\vvec\) time series and validates Maxwell identities numerically.
+\end{enumerate}
+
+% ============================================================
+\section{Brane Model: Continuous and Discrete Formulations}
+\label{sec:brane_model}
+
+\subsection{Geometry and fields}
+Let the intrinsic brane be a 3D material domain \(\Omega=\T^3\) (periodic cell) or
+a bounded cube with fixed boundary points (clamped).
+The embedding map is
+\[
+\X(\x,t)\in\R^4,\qquad \x=(x^1,x^2,x^3)\in\Omega,\quad t\in\R.
+\]
+We write \(\X=(X^1,X^2,X^3,X^4)\). The reference (rest) configuration is denoted
+\(\X_0(\x)\), and the displacement is \(\uvec(\x,t)=\X(\x,t)-\X_0(\x)\).
+
+\subsection{Reference-metric / rest-length elasticity family}
+\label{subsec:rest_length_family}
+The code base implements a reference-metric (rest-length) elasticity model on a
+regular lattice. In discrete form, each lattice node \(p\) has an embedding vector
+\(\X_p(t)\in\R^4\) with neighbor set \(\mathcal{N}(p)\). A representative spring energy is
+\[
+E_{\text{spring}}
+=
+\sum_{(p,q)} \phi\!\left(\|\X_p-\X_q\| - \ell_0\right),
+\]
+where \(\ell_0\) is the rest length and \(\phi\) is typically quadratic near zero.
+The force is
+\[
+\mathbf{F}_p = -\frac{\partial E_{\text{spring}}}{\partial \X_p}.
+\]
+Time evolution is integrated by Velocity Verlet (symplectic), see
+\texttt{branesim.core.solver.VelocityVerletSolver}.
+
+\paragraph{Continuous idealization (for derivations).}
+A continuum counterpart can be written as a hyperelastic energy density \(W\) in terms
+of the deformation gradient \(F^A{}_i = \partial_i X^A\) and a reference metric
+\(g^0_{ij}\). For this template, the specific \(W\) is left as a modeling choice, but
+the multiscale reduction in later sections only assumes (i) wave propagation with
+speed \(c\) and (ii) a narrowband carrier for the excitation of interest.
+
+\subsection{Dimensional bookkeeping}
+The project separates intrinsic dimension \(d\) and embedding dimension \(N\), see
+\texttt{branesim.core.dimensions.BraneDims} and \texttt{MassModel}.
+For the present paper, \(d=3\), \(N=4\).
+
+% ============================================================
+\section{Narrowband Multiscale Ansatz}
+\label{sec:multiscale}
+
+\subsection{Carrier scale and slow envelope}
+Assume the excitation of interest is narrowband around a fixed angular frequency
+\(\omega_0\). In the project, \(\omega_0\) is hardcoded from the Compton wavelength
+\(\lambda_C\):
+\[
+\omega_0 = \frac{2\pi c}{\lambda_C}.
+\]
+Write the displacement as a slowly modulated carrier:
+\begin{equation}
+\uvec(\x,t)
+\approx
+\Re\!\left[
+\e^{-\ii \omega_0 t}\sum_{a=1}^{r} \Psi^a(\x,t)\, \mathbf{e}_a(\x,t)
+\right],
+\label{eq:ansatz}
+\end{equation}
+where
+\begin{itemize}
+  \item \(\Psi(\x,t)\in\C^{r}\) is a complex envelope (slow in \(t\) relative to \(\omega_0^{-1}\)),
+  \item \(\{\mathbf{e}_a(\x,t)\}_{a=1..r}\subset\R^4\) is a local orthonormal mode frame
+        (polarization / internal basis) spanning the retained subspace,
+  \item \(r=1\) corresponds to a U(1) (rank-1) bundle; \(r>1\) yields a non-Abelian bundle.
+\end{itemize}
+
+\subsection{Complex quadrature from real simulation variables}
+In a real-valued simulator, construct the complex amplitude from displacement and velocity
+(\texttt{branesim.berry.analysis}):
+\begin{equation}
+\mathbf{a}(\x,t) = \sqrt{\omega_0}\,\uvec(\x,t) + \ii\,\frac{\vvec(\x,t)}{\sqrt{\omega_0}}
+\in \C^{E},
+\label{eq:complex_amp}
+\end{equation}
+where \(E\in\{2,3,4\}\) is the number of embedding components used for the analysis.
+Normalize to a ray:
+\[
+\ket{\psi(\x,t)} = \frac{\mathbf{a}(\x,t)}{\|\mathbf{a}(\x,t)\|}.
+\]
+Undefined regions are masked by amplitude thresholds.
+
+% ============================================================
+\section{Connections from Mode-Frame Transport (Berry / Wilczek--Zee)}
+\label{sec:connections}
+
+\subsection{Rank-1 (U(1)) Berry connection}
+For \(r=1\), let \(\ket{u(x)}\) be the normalized local mode, with \(x^\mu=(ct,\x)\).
+Define
+\[
+a_\mu(x) = \ii \braket{u(x)}{\partial_\mu u(x)}.
+\]
+The Berry phase along a path \(\Gamma\) is \(\gamma_B=\int_\Gamma a_\mu\,\dd x^\mu\),
+and the curvature is
+\[
+f_{\mu\nu} = \partial_\mu a_\nu - \partial_\nu a_\mu.
+\]
+
+\subsection{Non-Abelian (Wilczek--Zee) connection for internal electron subspace}
+For \(r>1\), choose an orthonormal basis \(\ket{u_a(x)}\), \(a=1..r\), and define
+\[
+\bbA_\mu^{ab}(x) = \ii \braket{u_a(x)}{\partial_\mu u_b(x)}\in\mathfrak{u}(r).
+\]
+Curvature:
+\[
+\bbF_{\mu\nu} = \partial_\mu \bbA_\nu - \partial_\nu \bbA_\mu - \ii[\bbA_\mu,\bbA_\nu].
+\]
+
+\subsection{Envelope covariant derivative}
+Inserting the ansatz \eqref{eq:ansatz} and projecting onto the retained subspace produces,
+generically, a covariant derivative acting on \(\Psi\):
+\begin{equation}
+\covD_\mu \Psi
+=
+\left(\partial_\mu + \ii a_\mu \mathbf{1}_r + \ii\bbA_\mu\right)\Psi.
+\label{eq:covD}
+\end{equation}
+
+\paragraph{Paper-grade derivation to include (outline).}
+\begin{enumerate}
+  \item Write \(\uvec \approx \Re(\e^{-\ii\omega_0 t} \mathbf{E}\Psi)\) where
+        \(\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_r]\in\R^{4\times r}\).
+  \item Differentiate and project with \(\mathbf{E}^\top\) (or \(\mathbf{E}^\dagger\) in a complexified
+        inner product) to obtain terms of the form \((\mathbf{E}^\top \partial_\mu \mathbf{E})\Psi\).
+  \item Identify the antisymmetric part as the gauge connection; show basis changes
+        \(\mathbf{E}\to \mathbf{E}U(x)\) induce the standard transformation law for \(\bbA_\mu\).
+\end{enumerate}
+
+% ============================================================
+\section{QED-like Effective Lagrangian (Kinematics)}
+\label{sec:qed_like}
+
+\subsection{Local phase symmetry}
+Let \(\psi(x)\) be a Dirac spinor envelope field. Under a local U(1) phase change
+\(\chi(x)\):
+\[
+\psi \to \e^{\ii \frac{q}{\hbar}\chi(x)}\psi,
+\qquad
+A_\mu \to A_\mu - \partial_\mu \chi.
+\]
+
+\subsection{Minimal coupling with Berry-induced potential}
+Identify the physical EM potential with the Berry connection up to units:
+\[
+A_\mu := \frac{\hbar}{q}\,a_\mu
+\quad\Rightarrow\quad
+\partial_\mu + \ii \frac{q}{\hbar}A_\mu = \partial_\mu + \ii a_\mu.
+\]
+
+\subsection{Compact (2-term) and expanded (3-term) forms}
+\paragraph{2-term (compact).}
+\begin{equation}
+\Lag
+=
+\psibar\left(\ii\hbar c\,\gamm^\mu \covD_\mu - mc^2\right)\psi
+-
+\frac{1}{4\mu_0}F_{\mu\nu}F^{\mu\nu},
+\label{eq:Lag_compact}
+\end{equation}
+with \(\covD_\mu=\partial_\mu + \ii\frac{q}{\hbar}A_\mu\).
+
+\paragraph{3-term (expanded).}
+\begin{equation}
+\Lag
+=
+\underbrace{\psibar(\ii\hbar c\,\gamm^\mu \partial_\mu - mc^2)\psi}_{\text{Dirac}}
++
+\underbrace{(-q\,\psibar\gamm^\mu\psi)A_\mu}_{\text{coupling}}
+-
+\underbrace{\frac{1}{4\mu_0}F_{\mu\nu}F^{\mu\nu}}_{\text{EM field}},
+\label{eq:Lag_expanded}
+\end{equation}
+
+\subsection{Including the Wilczek--Zee sector}
+If the electron envelope carries an internal index (dimension \(r\)), replace \(\psi\) with
+\(\Psi\in\C^{4}\otimes\C^{r}\) (Dirac spinor valued in the internal subspace) and use
+\[
+\covD_\mu \Psi = \left(\partial_\mu + \ii a_\mu \mathbf{1}_r + \ii\bbA_\mu\right)\Psi.
+\]
+This is the place to state explicitly what \(r\) represents in the brane model
+(e.g., internal polarization/standing-wave basis supporting spin-like behavior).
+
+% ============================================================
+\section{Dynamics: Where the Maxwell Term Must Come From}
+\label{sec:maxwell_term}
+
+The Berry connection provides gauge-covariant \emph{kinematics}. Electromagnetism requires
+\emph{dynamics} for \(a_\mu\). In this model, the Maxwell-like term must emerge as an
+effective action after coarse-graining brane degrees of freedom.
+
+\subsection{Effective action sketch (to be made explicit)}
+\begin{enumerate}
+  \item Split brane variables into fast carrier-scale modes and slow envelope/mode-frame variables.
+  \item Integrate out fast modes (or average over a cycle) to obtain an effective energy
+        in terms of envelope gradients and frame curvature.
+  \item Show the leading gauge-invariant quadratic term is \(f_{\mu\nu}f^{\mu\nu}\) with a
+        computable prefactor (mapping to \(\mu_0\), \(\epsilon_0\), and an effective coupling).
+\end{enumerate}
+
+\subsection{Polarization count and suppression of extra embedding modes}
+State the mechanism that restricts the EM sector to two transverse polarizations:
+\begin{itemize}
+  \item Choose an EM subbundle built from a 2D transverse polarization plane in the
+        \emph{3D physical space} (tangent to the brane), consistent with observations.
+  \item Show that excitations involving the fourth embedding component are either gapped,
+        confined to the electron sector, or otherwise dynamically suppressed.
+\end{itemize}
+
+% ============================================================
+\section{Simulation Protocol (Aligned with Current Code)}
+\label{sec:simulation}
+
+\subsection{Relevant code modules}
+This checklist assumes the following modules and concepts exist as in the current project:
+\begin{itemize}
+  \item \texttt{branesim.core.state.BraneState}: positions/velocities/accelerations, rest positions.
+  \item \texttt{branesim.core.grid.BraneGrid}: topology, neighbor indices, spatial coordinates.
+  \item \texttt{branesim.core.solver.VelocityVerletSolver}: integration and energy diagnostics.
+  \item \texttt{branesim.berry.analysis}: \texttt{compute\_berry\_time\_series} (time connection proxy).
+  \item \texttt{branesim.electron.electron\_initialization}: rotating spherical-harmonic seed.
+  \item Visualization utilities for displacement slices and videos.
+\end{itemize}
+
+\subsection{Checklist A: Data to record (minimal)}
+\begin{enumerate}
+  \item Record frames at stride \(s\): \(\X_p(t_k)\), \(\dot{\X}_p(t_k)\), and \(t_k\).
+  \item Store \(\X_{0,p}\) (rest positions) to compute displacements \(\uvec_p = \X_p-\X_{0,p}\).
+  \item Decide the embedding components \(E\) used for Berry analysis:
+        \begin{itemize}
+          \item EM: typically \(E=2\) (a transverse polarization plane in 3D space).
+          \item Electron: \(E=2\) or \(E=4\) depending on whether the internal plane includes \(X^4\)
+                (\texttt{polarization="spatial\_x4"} in the initializer).
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Checklist B: Temporal Berry phase / connection (already implemented)}
+Use \texttt{branesim.berry.analysis.compute\_berry\_time\_series}:
+\begin{enumerate}
+  \item Build \(\uvec_k\in\R^{N\times E}\) and \(\vvec_k\in\R^{N\times E}\) per frame \(k\).
+  \item Call \texttt{compute\_berry\_time\_series(frames\_u, frames\_v, times\_s)}.
+  \item Save outputs: phase \(\gamma(t)\), increments \(\Delta\gamma\), connection proxy \(A_t\),
+        amplitude and alpha mask for visualization.
+\end{enumerate}
+
+\subsection{Checklist C: Spatial Berry connection (to implement next)}
+To validate Maxwell structure you need spatial components \(a_i(\x,t)\).
+A robust discrete approach uses neighbor overlaps (gauge-invariant on loops):
+\begin{enumerate}
+  \item For each frame \(k\), compute normalized rays \(\psi_p\in\C^E\) at each lattice point \(p\).
+  \item For each directed neighbor link \(p\to q\) (axis-aligned preferred):
+        define discrete edge phase
+        \[
+        \theta_{p\to q} = \arg\!\big(\langle \psi_p \mid \psi_q\rangle\big).
+        \]
+        Then \(a_i \approx \theta/h\) for a step of length \(h\) along axis \(i\).
+  \item Define a plaquette curvature (discrete \(f_{ij}\)) by summing edge phases around a loop:
+        \[
+        f_{ij} \approx \frac{1}{h^2}\Big(\theta_{p\to p+\hat{i}}+\theta_{p+\hat{i}\to p+\hat{i}+\hat{j}}
+        -\theta_{p+\hat{j}\to p+\hat{i}+\hat{j}}-\theta_{p\to p+\hat{j}}\Big).
+        \]
+  \item Validate gauge invariance numerically: plaquette sum is invariant under
+        \(\psi_p\to \e^{\ii\alpha_p}\psi_p\).
+\end{enumerate}
+
+\subsection{Checklist D: Maxwell-like validation tests}
+Using \(f_{\mu\nu}\) from temporal and spatial differences:
+\begin{enumerate}
+  \item Define emergent fields: \(E_i \sim f_{i0}\), \(B_i \sim \tfrac12 \epsilon_{ijk} f_{jk}\).
+  \item Check identities on the grid (finite differences):
+        \(\nabla\cdot \mathbf{B}\approx 0\), and \(\partial_t \mathbf{B} + \nabla\times\mathbf{E}\approx 0\).
+  \item For photon experiments, verify propagation speed and energy flux alignment.
+  \item For electron experiments, verify localization and stability metrics:
+        leakage, RMS radius, energy drift (matching existing diagnostics).
+\end{enumerate}
+
+\subsection{Checklist E: Mapping to existing experiment scripts}
+\begin{itemize}
+  \item Electron: \texttt{electron\_3d\_experiment.py} uses
+        \texttt{initialize\_electron\_mode\_3d} with polarization options including \texttt{"spatial\_x4"}.
+  \item Berry time series: use the recorded \(\uvec,\vvec\) frames from the experiment’s logging stride.
+  \item Visualization: reuse displacement slice video pipeline; add Berry phase/alpha as an overlay.
+\end{itemize}
+
+% ============================================================
+\section{Planned Results Section Structure}
+\label{sec:results_plan}
+
+\begin{enumerate}
+  \item \textbf{Photon sector:} show two-polarization behavior and gauge-invariant curvature patterns.
+  \item \textbf{Maxwell tests:} numerical residuals for Faraday and \(\nabla\cdot\mathbf{B}\).
+  \item \textbf{Electron sector:} stability region over parameter sweeps (rest length, well depth, sigma, amplitude).
+  \item \textbf{Internal holonomy:} demonstrate non-Abelian transport in a controlled deformation cycle (future work).
+\end{enumerate}
+
+% ============================================================
+\section{Discussion and Failure Modes (state these early)}
+\label{sec:discussion}
+
+List what would falsify or strongly constrain the model:
+\begin{itemize}
+  \item Extra gapless polarizations that cannot be suppressed without fine tuning.
+  \item Strong anisotropy / dispersion incompatible with experimental bounds.
+  \item Inability to obtain a Maxwell-like effective action at leading order.
+  \item Electron mode instability or inability to reproduce spin-like holonomy.
+\end{itemize}
+
+% ============================================================
+\appendix
+\section{Discrete Berry Curvature on a Lattice (derivation details)}
+\label{app:discrete_curvature}
+
+Provide a clean derivation of edge phases and plaquette sums, including handling of
+undefined (low-amplitude) regions and numerical stabilization (overlap thresholds).
+
+\section{Symbol Dictionary}
+\label{app:dictionary}
+
+\begin{tabular}{ll}
+\(\Omega\) & intrinsic domain (periodic cell or bounded cube) \\
+\(\X(\x,t)\) & embedding map \(\Omega\to\R^4\) \\
+\(\X_0(\x)\) & rest configuration \\
+\(\uvec=\X-\X_0\) & displacement field \\
+\(\vvec=\partial_t \uvec\) & velocity field \\
+\(\omega_0\) & carrier angular frequency (Compton-based in project) \\
+\(\mathbf{a}\) & complex amplitude \(\sqrt{\omega_0}\uvec + \ii \vvec/\sqrt{\omega_0}\) \\
+\(\ket{\psi}\) & normalized ray \(\mathbf{a}/\|\mathbf{a}\|\) \\
+\(a_\mu\) & U(1) Berry connection \(\ii\braket{u}{\partial_\mu u}\) \\
+\(f_{\mu\nu}\) & U(1) curvature \(\partial_\mu a_\nu-\partial_\nu a_\mu\) \\
+\(\bbA_\mu\) & Wilczek--Zee connection (matrix) \\
+\(\bbF_{\mu\nu}\) & Wilczek--Zee curvature \(\partial_\mu\bbA_\nu-\partial_\nu\bbA_\mu-\ii[\bbA_\mu,\bbA_\nu]\) \\
+\end{tabular}
+
+% Uncomment if you use BibTeX:
+% \bibliographystyle{unsrt}
+% \bibliography{refs}
+
+\end{document}
