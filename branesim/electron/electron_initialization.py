@@ -34,9 +34,7 @@ component (default: X^4) as a first-pass containment scaffold:
     w(r) = -depth * exp( -r^2 / (2 σ^2) )
 
 A fully self-consistent equilibrium between wave leakage and geometric
-containment is a coupled nonlinear problem (field + deformation) and will
-generally require numerical relaxation/optimization; this module only provides
-an initializer.
+containment is a coupled nonlinear problem (field + deformation) and will generally require a self-consistent numerical solve/optimization; this module only provides an initializer.
 
 Dependencies
 ------------
