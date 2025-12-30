@@ -333,6 +333,129 @@ This checklist assumes the following modules and concepts exist as in the curren
   \item Visualization utilities for displacement slices and videos.
 \end{itemize}
 
+\subsection{Electron initialization (rotating spherical-harmonic cavity seed)}
+\label{subsec:electron_init}
+
+This project initializes an ``electron'' as a localized, rotating standing-wave pattern on the 3D brane,
+embedded in \(\R^4\). The initializer is designed to (i) create a controlled angular phase winding
+(\(m\neq 0\)) in the intrinsic \((x,y,z)\) coordinates, (ii) realize that complex phase rotation in a
+\emph{real-valued} simulator by using two quadratures, and (iii) ensure immediate coupling between the
+spatial embedding components \((X^1,X^2,X^3)\) and the transverse embedding component \(X^4\) through
+the 4D rest-length spring geometry.
+
+\paragraph{Reference-space spherical coordinates.}
+All mode functions are evaluated in the intrinsic/reference coordinates \(\x\in\Omega\subset\R^3\).
+Given a chosen center \(\x_c\in\R^3\), define \(\mathbf{r}=\x-\x_c\), \(r=\|\mathbf{r}\|\), and
+\[
+\theta=\arccos\!\left(\frac{z}{r}\right),\qquad
+\phi=\operatorname{atan2}(y,x),
+\]
+with the usual inverse mapping
+\(
+x=r\sin\theta\cos\phi,\;
+y=r\sin\theta\sin\phi,\;
+z=r\cos\theta.
+\)
+
+\paragraph{Angular factor \(Y_{\ell m}\).}
+The angular structure is given by the spherical harmonic \(Y_{\ell m}(\theta,\phi)\), with standard
+properties:
+\begin{align}
+\int_{S^2} Y_{\ell m}(\Omega)\,Y_{\ell' m'}^*(\Omega)\,d\Omega &= \delta_{\ell\ell'}\delta_{mm'},\\
+\sum_{\ell=0}^{\infty}\sum_{m=-\ell}^{\ell} Y_{\ell m}(\Omega)\,Y_{\ell m}^*(\Omega')
+&= \delta(\Omega-\Omega'),\\
+Y_{\ell m}(\theta,\phi+2\pi) &= Y_{\ell m}(\theta,\phi),
+\end{align}
+and \(Y_{\ell m}\) is bounded and single-valued on \(S^2\) for integer \(\ell\ge 0\), \(|m|\le \ell\).
+Choosing \(m\neq 0\) creates a nontrivial azimuthal phase winding \(\sim e^{im\phi}\), which is the
+seed for a circulating phase gradient around the symmetry axis.
+
+\paragraph{Radial factor \(R_{\ell n}\).}
+We use a spherical-Bessel standing-wave profile
+\[
+R_{\ell n}(r)= j_\ell(k_{\ell n} r)\,w(r),
+\qquad
+k_{\ell n}=\frac{\alpha_{\ell n}}{a},
+\]
+where \(j_\ell\) is the spherical Bessel function, \(\alpha_{\ell n}\) is the \(n\)-th positive root of
+\(j_\ell(\alpha)=0\), and \(a\) is the chosen electron radius (cavity radius) in intrinsic units.
+The window \(w(r)\) is a smooth taper to avoid a hard discontinuity at \(r=a\); in code we use a
+\(\tanh\)-ramp,
+\[
+w(r)=\frac12\left[1-\tanh\!\left(\frac{r-a}{a/s}\right)\right],
+\]
+with softness parameter \(s>0\) (larger \(s\) yields a softer edge).
+
+\paragraph{Complex mode and real quadratures.}
+Define the complex scalar mode
+\[
+\psi(\x)=R_{\ell n}(r)\,Y_{\ell m}(\theta,\phi),
+\qquad
+\psi(\x,t)=\psi(\x)\,e^{-i\omega t}.
+\]
+A real-valued integrator represents the rotating phase by embedding \(\Re\psi\) and \(\Im\psi\) into a
+2D polarization plane in \(\R^4\). Let \(\mathbf{p}_1,\mathbf{p}_2\in\R^4\) be orthonormal vectors spanning this
+plane (\(\mathbf{p}_i\cdot\mathbf{p}_j=\delta_{ij}\)). The initializer sets
+\begin{align}
+\uvec(\x,0) &= A\big(\Re\psi(\x)\,\mathbf{p}_1+\Im\psi(\x)\,\mathbf{p}_2\big),\\
+\vvec(\x,0) &= A\,\omega\big(\Im\psi(\x)\,\mathbf{p}_1-\Re\psi(\x)\,\mathbf{p}_2\big),
+\end{align}
+which corresponds to a local circular rotation in the \((\mathbf{p}_1,\mathbf{p}_2)\) plane at angular frequency
+\(\omega\). We choose
+\[
+\omega = c_{\mathrm{wave}}\,k_{\ell n},
+\]
+with \(c_{\mathrm{wave}}\) the brane wave speed in the (dimensionless) simulation calibration
+(\(c_{\mathrm{wave}}=1\) in the current unit convention).
+
+\paragraph{Amplitude normalization.}
+The raw displacement field is scaled such that the maximum Euclidean norm of \(\uvec(\x,0)\) equals the
+requested amplitude \(A\), i.e. \(A=\max_{\x}\|\uvec(\x,0)\|\) after normalization.
+
+\paragraph{Polarization choices and \(X^4\) coupling.}
+The code supports several fixed polarization presets (e.g. \texttt{xy}, \texttt{xz}, \texttt{yz},
+\texttt{spatial}, \texttt{all}) and also accepts user-specified \(\mathbf{p}_1,\mathbf{p}_2\).
+For electron seeding we typically use \texttt{spatial\_x4}, i.e. a plane that has support in the spatial
+coordinates \emph{and} in \(X^4\). This ensures that \(X^4\) carries oscillatory content and momentum at
+\(t=0\) and couples immediately to \((X^1,X^2,X^3)\) through the 4D rest-length spring geometry.
+
+\paragraph{Optional containment scaffold in \(X^4\).}
+In addition to the rotating seed, we optionally add a static Gaussian deformation in a chosen embedding
+component (default: \(X^4\)),
+\[
+u_{\mathrm{well}}(r)=-D\exp\!\left(-\frac{r^2}{2\sigma^2}\right),
+\]
+added to \(X^{c_0}\) for some component index \(c_0\in\{1,2,3,4\}\).
+This ``well'' is an initial geometric deformation (not an external potential). Any such deformation
+changes neighbor distances in \(\R^4\) and therefore feeds back into the dynamics via the same rest-length
+elasticity law that governs the full brane.
+
+
+\paragraph{Initializer parameter set (implementation-facing).}
+The electron seed is fully specified by the following parameters:
+\begin{itemize}
+  \item \(\ell,m,n\): spherical-harmonic degree/order and radial root index.
+  \item \(a\): electron radius (intrinsic cavity radius) used in \(k_{\ell n}=\alpha_{\ell n}/a\).
+  \item \(\x_c\): electron center in intrinsic coordinates.
+  \item \(A\): target displacement amplitude after normalization.
+  \item \(c_{\mathrm{wave}}\): wave speed used to set \(\omega=c_{\mathrm{wave}}k_{\ell n}\) (unity in current calibration).
+  \item Polarization choice: either a preset plane (e.g. \texttt{spatial\_x4}) or explicit orthonormal vectors
+        \(\mathbf{p}_1,\mathbf{p}_2\in\R^4\).
+  \item \(s\): taper softness used in the window \(w(r)\) at the edge \(r\approx a\).
+  \item Optional containment scaffold parameters: component index \(c_0\), depth \(D\), and width \(\sigma\) of the
+        Gaussian well added to \(X^{c_0}\).
+  \item Flags: whether to set initial velocities from the rotating quadrature formula (\texttt{set\_velocities}) and
+        whether to rescale the seed to match the requested amplitude (\texttt{normalize}).
+\end{itemize}
+
+\paragraph{Design intent and current limitations.}
+This initialization provides a reproducible, parameterized starting configuration with a controllable
+azimuthal winding number \(m\) and a well-defined rotating phase in a real-valued simulation.
+A long-lived confined ``electron'' would correspond to a self-consistent nonlinear eigenmode of the
+coupled 4D rest-length elasticity system. The initializer alone does not enforce that equilibrium; it
+provides the candidate initial condition from which such equilibria can be sought and tested.
+
+
 \subsection{Checklist A: Data to record (minimal)}
 \begin{enumerate}
   \item Record frames at stride \(s\): \(\X_p(t_k)\), \(\dot{\X}_p(t_k)\), and \(t_k\).
@@ -440,6 +563,17 @@ undefined (low-amplitude) regions and numerical stabilization (overlap threshold
 \(f_{\mu\nu}\) & U(1) curvature \(\partial_\mu a_\nu-\partial_\nu a_\mu\) \\
 \(\bbA_\mu\) & Wilczek--Zee connection (matrix) \\
 \(\bbF_{\mu\nu}\) & Wilczek--Zee curvature \(\partial_\mu\bbA_\nu-\partial_\nu\bbA_\mu-\ii[\bbA_\mu,\bbA_\nu]\) \\
+\(Y_{\ell m}\) & spherical harmonic on \(S^2\) \\
+\(\ell,m\) & harmonic degree/order (\(|m|\le \ell\)) \\
+\(j_\ell\) & spherical Bessel function (first kind) \\
+\(\alpha_{\ell n}\) & \(n\)-th positive root of \(j_\ell(\alpha)=0\) \\
+\(a\) & chosen electron radius (intrinsic cavity radius) \\
+\(k_{\ell n}\) & radial wavenumber \(\alpha_{\ell n}/a\) \\
+\(\omega\) & electron seed angular frequency \(c_{\mathrm{wave}}k_{\ell n}\) \\
+\(\x_c\) & electron center in intrinsic coordinates \\
+\(\mathbf{p}_1,\mathbf{p}_2\) & orthonormal polarization vectors in \(\R^4\) \\
+\(A\) & displacement amplitude scale used for normalization \\
+\(D,\sigma\) & Gaussian containment depth/width in embedding component \(X^{c_0}\) \\
 \end{tabular}
 
 % Uncomment if you use BibTeX:
