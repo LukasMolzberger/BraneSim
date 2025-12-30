@@ -28,7 +28,7 @@ def _plot_1d_snapshots_generic(
     run : Brane1DRunData
         Run data containing coordinates and run_manager
     data_by_t : dict[float, np.ndarray]
-        Dictionary mapping time (fs) to data array [N] in desired units
+        Dictionary mapping time (as) to data array [N] in desired units
     ylabel : str
         Y-axis label with units
     title : str
@@ -43,8 +43,8 @@ def _plot_1d_snapshots_generic(
         Whether to add red markers at boundaries
     """
     x_nm = run.x_coords_phys_m * 1e9  # Convert m → nm
-    times_fs = sorted(data_by_t.keys())
-    n = len(times_fs)
+    times_as = sorted(data_by_t.keys())
+    n = len(times_as)
 
     fig, axes = plt.subplots(n, 1, figsize=(14, max(4, 3 * n)))
     if n == 1:
@@ -53,11 +53,11 @@ def _plot_1d_snapshots_generic(
     fig.suptitle(title, fontsize=16, fontweight='bold')
 
     # Compute global y-limits for consistent scaling
-    max_val = max([np.abs(data_by_t[t]).max() for t in times_fs])
+    max_val = max([np.abs(data_by_t[t]).max() for t in times_as])
     ylim = ylim_factor * max_val
 
-    for ax, t_fs in zip(axes, times_fs):
-        data = data_by_t[t_fs]
+    for ax, t_as in zip(axes, times_as):
+        data = data_by_t[t_as]
 
         # Main plot
         ax.plot(x_nm, data, linewidth=2)
@@ -77,7 +77,7 @@ def _plot_1d_snapshots_generic(
         ax.grid(True, alpha=0.3)
 
         # Time label
-        ax.text(0.02, 0.95, f't = {t_fs:.3f} fs',
+        ax.text(0.02, 0.95, f't = {t_as:.3f} as',
                 transform=ax.transAxes,
                 fontsize=12, verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -104,10 +104,10 @@ def plot_brane_1d_amplitude_propagation(run: "Photon1DRunData") -> None:
     # Convert sim → phys → nm
     data_by_t_nm = {}
     for t_phys_s in run.snapshot_times_phys_s:
-        t_fs = t_phys_s * 1e15
+        t_as = t_phys_s * 1e18
         xi_sim = run.snapshots_xi[t_phys_s]
         xi_phys_m = run.mapper.to_phys_length(xi_sim)
-        data_by_t_nm[t_fs] = xi_phys_m * 1e9  # m → nm
+        data_by_t_nm[t_as] = xi_phys_m * 1e9  # m → nm
 
     _plot_1d_snapshots_generic(
         run,
@@ -133,10 +133,10 @@ def plot_brane_1d_lateral_distortion(run: "Photon1DRunData") -> None:
     # Convert sim → phys → pm
     data_by_t_pm = {}
     for t_phys_s in run.snapshot_times_phys_s:
-        t_fs = t_phys_s * 1e15
+        t_as = t_phys_s * 1e18
         delta_x_sim = run.snapshots_delta_x[t_phys_s]
         delta_x_phys_m = run.mapper.to_phys_length(delta_x_sim)
-        data_by_t_pm[t_fs] = delta_x_phys_m * 1e12  # m → pm
+        data_by_t_pm[t_as] = delta_x_phys_m * 1e12  # m → pm
 
     _plot_1d_snapshots_generic(
         run,
@@ -162,10 +162,10 @@ def plot_brane_1d_amplitude_velocity(run: "Brane1DRunData") -> None:
     # Convert sim → phys (m/s)
     data_by_t_ms = {}
     for t_phys_s in run.snapshot_times_phys_s:
-        t_fs = t_phys_s * 1e15
+        t_as = t_phys_s * 1e18
         v_xi_sim = run.snapshots_v_xi[t_phys_s]
         v_xi_phys_ms = run.mapper.to_phys_velocity(v_xi_sim)
-        data_by_t_ms[t_fs] = v_xi_phys_ms
+        data_by_t_ms[t_as] = v_xi_phys_ms
 
     _plot_1d_snapshots_generic(
         run,
@@ -191,10 +191,10 @@ def plot_brane_1d_lateral_velocity(run: "Brane1DRunData") -> None:
     # Convert sim → phys (m/s)
     data_by_t_ms = {}
     for t_phys_s in run.snapshot_times_phys_s:
-        t_fs = t_phys_s * 1e15
+        t_as = t_phys_s * 1e18
         v_x_sim = run.snapshots_v_x[t_phys_s]
         v_x_phys_ms = run.mapper.to_phys_velocity(v_x_sim)
-        data_by_t_ms[t_fs] = v_x_phys_ms
+        data_by_t_ms[t_as] = v_x_phys_ms
 
     _plot_1d_snapshots_generic(
         run,
@@ -221,16 +221,16 @@ def plot_brane_1d_tracking_analysis(run: "Photon1DRunData") -> None:
     run : Brane1DRunData
         Run data with tracking history
     """
-    times_fs = np.array(run.times_phys_track_s) * 1e15
+    times_as = np.array(run.times_phys_track_s) * 1e18
     centers_phys_m = run.mapper.to_phys_length(np.array(run.centers_sim_track))
     centers_nm = centers_phys_m * 1e9
     energies = np.array(run.energies_track_J)
 
     fig, axes = plt.subplots(2, 1, figsize=(12, 8))
 
-    # Position vs time (in nm and fs)
-    axes[0].plot(times_fs, centers_nm, 'b-', linewidth=2, label='Wave center')
-    axes[0].set_xlabel('Time [fs]', fontsize=12)
+    # Position vs time (in nm and as)
+    axes[0].plot(times_as, centers_nm, 'b-', linewidth=2, label='Wave center')
+    axes[0].set_xlabel('Time [as]', fontsize=12)
     axes[0].set_ylabel('Wave Center [nm]', fontsize=12)
     axes[0].set_title('Wave Propagation at Speed of Light', fontsize=14, fontweight='bold')
     axes[0].grid(True, alpha=0.3)
@@ -238,9 +238,9 @@ def plot_brane_1d_tracking_analysis(run: "Photon1DRunData") -> None:
 
     # Energy conservation
     initial_energy = energies[0]
-    axes[1].plot(times_fs, energies / initial_energy, 'g-', linewidth=2)
+    axes[1].plot(times_as, energies / initial_energy, 'g-', linewidth=2)
     axes[1].axhline(y=1.0, color='r', linestyle='--', linewidth=1, alpha=0.5)
-    axes[1].set_xlabel('Time [fs]', fontsize=12)
+    axes[1].set_xlabel('Time [as]', fontsize=12)
     axes[1].set_ylabel('E(t) / E(0)', fontsize=12)
     axes[1].set_title('Energy Conservation', fontsize=14, fontweight='bold')
     axes[1].grid(True, alpha=0.3)

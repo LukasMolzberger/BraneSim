@@ -525,7 +525,7 @@ def main():
     )
 
     # Run simulation - fixed number of steps
-    num_steps = 1000
+    num_steps = 500
     simulation_time_sim = num_steps * dt_sim
     simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys_x / constants.c
@@ -539,8 +539,6 @@ def main():
     # Tracking
     times_phys = []  # Physical times for plotting
     energies = []
-    leakage_amp = []          # fraction of |psi|^2 outside R
-    leakage_x4 = []           # fraction of X4_dyn^2 outside R
     r_rms_over_R = []         # RMS radius of |psi| envelope / R
     r_rms_x4_over_R = []      # RMS radius of X4_dyn / R
 

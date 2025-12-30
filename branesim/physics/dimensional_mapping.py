@@ -218,9 +218,9 @@ class DimensionalMapper:
         """Convert simulation length to nanometers."""
         return self.to_phys_length(length_sim) * 1e9
 
-    def to_femtoseconds(self, time_sim: ScalarOrArray) -> ScalarOrArray:
-        """Convert simulation time to femtoseconds."""
-        return self.to_phys_time(time_sim) * 1e15
+    def to_attoseconds(self, time_sim: ScalarOrArray) -> ScalarOrArray:
+        """Convert simulation time to attoseconds."""
+        return self.to_phys_time(time_sim) * 1e18
 
     def to_picometers(self, length_sim: ScalarOrArray) -> ScalarOrArray:
         """Convert simulation length to picometers."""

@@ -318,11 +318,11 @@ def create_displacement_arrows_video_3d_in_4d(
     ax.add_collection3d(lc)
 
     # Title text.
-    t0_fs = float(times[0]) * 1e15
+    t0_as = float(times[0]) * 1e18
     title = ax.text2D(
         0.5,
         0.95,
-        title_template.format(t=t0_fs),
+        title_template.format(t=t0_as),
         transform=ax.transAxes,
         ha="center",
         fontsize=13,
@@ -336,8 +336,8 @@ def create_displacement_arrows_video_3d_in_4d(
         lc.set_segments(seg)
         elev, azim = cam(frame_idx, len(frames_u))
         ax.view_init(elev=elev, azim=azim)
-        t_fs = float(times[frame_idx]) * 1e15
-        title.set_text(title_template.format(t=t_fs))
+        t_as = float(times[frame_idx]) * 1e18
+        title.set_text(title_template.format(t=t_as))
         return (lc, title)
 
     anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=False)
@@ -462,8 +462,8 @@ def create_displacement_diralpha_slices_videos_3d_in_4d(
             alpha = alpha_from_magnitude(a, a_max=a_max, gamma=alpha_gamma, alpha_scale=alpha_scale)
             rgba = np.concatenate([rgb, alpha[..., None]], axis=-1)
             im.set_data(rgba.swapaxes(0, 1))
-            t_fs = float(times[frame_idx]) * 1e15
-            time_text.set_text(f"t = {t_fs:.3f} fs")
+            t_as = float(times[frame_idx]) * 1e18
+            time_text.set_text(f"t = {t_as:.3f} as")
             return (im, time_text)
 
         anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=True)
@@ -540,8 +540,8 @@ def create_displacement_arrows_video_2d_in_3d(
     lc = Line3DCollection(seg0, colors="C0", linewidths=1.1, alpha=0.85)
     ax.add_collection3d(lc)
 
-    t0_fs = float(times[0]) * 1e15
-    title = ax.text2D(0.5, 0.95, title_template.format(t=t0_fs), transform=ax.transAxes,
+    t0_as = float(times[0]) * 1e18
+    title = ax.text2D(0.5, 0.95, title_template.format(t=t0_as), transform=ax.transAxes,
                       ha="center", fontsize=13, fontweight="bold")
 
     def update(frame_idx: int):
@@ -549,8 +549,8 @@ def create_displacement_arrows_video_2d_in_3d(
         lc.set_segments(make_segments(u))
         elev, azim = cam(frame_idx, len(frames_u))
         ax.view_init(elev=elev, azim=azim)
-        t_fs = float(times[frame_idx]) * 1e15
-        title.set_text(title_template.format(t=t_fs))
+        t_as = float(times[frame_idx]) * 1e18
+        title.set_text(title_template.format(t=t_as))
         return (lc, title)
 
     anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=False)
@@ -626,8 +626,8 @@ def create_displacement_diralpha_video_2d_in_3d(
         alpha = alpha_from_magnitude(a, a_max=a_max, gamma=alpha_gamma, alpha_scale=alpha_scale)
         rgba = np.concatenate([rgb, alpha[..., None]], axis=-1)
         im.set_data(rgba.swapaxes(0, 1))
-        t_fs = float(times[frame_idx]) * 1e15
-        time_text.set_text(f"t = {t_fs:.3f} fs")
+        t_as = float(times[frame_idx]) * 1e18
+        time_text.set_text(f"t = {t_as:.3f} as")
         return (im, time_text)
 
     anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=True)
@@ -692,8 +692,8 @@ def create_displacement_components_video_1d_in_2d(
         u = np.asarray(frames_u[frame_idx])
         line1.set_ydata(u[:, 0])
         line2.set_ydata(u[:, 1])
-        t_fs = float(times[frame_idx]) * 1e15
-        time_text.set_text(f"t = {t_fs:.3f} fs")
+        t_as = float(times[frame_idx]) * 1e18
+        time_text.set_text(f"t = {t_as:.3f} as")
         return (line1, line2, time_text)
 
     anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=True)
@@ -796,8 +796,8 @@ def create_displacement_magnitude_angle_video_1d_in_2d(
         # Update angle line with masked data
         line_th.set_data(x_masked, th_masked)
 
-        t_fs = float(times[frame_idx]) * 1e15
-        time_text.set_text(f"t = {t_fs:.3f} fs")
+        t_as = float(times[frame_idx]) * 1e18
+        time_text.set_text(f"t = {t_as:.3f} as")
         return (line_a, line_th, time_text)
 
     anim = FuncAnimation(fig, update, frames=len(frames_u), interval=1000 / fps, blit=True)
