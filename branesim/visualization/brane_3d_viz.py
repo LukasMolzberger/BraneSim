@@ -157,9 +157,16 @@ def setup_3d_axes(
         equal_aspect: Whether to use equal aspect ratio
         margin_factor: Expand limits by this factor
     """
-    # Compute extent
-    x_min, y_min, z_min = coords.min(axis=0)
-    x_max, y_max, z_max = coords.max(axis=0)
+    coords = np.asarray(coords)
+    finite_mask = np.isfinite(coords).all(axis=1)
+    if finite_mask.any():
+        coords_use = coords[finite_mask]
+    else:
+        coords_use = np.array([[0.0, 0.0, 0.0]])
+
+    # Compute extent from finite data only
+    x_min, y_min, z_min = coords_use.min(axis=0)
+    x_max, y_max, z_max = coords_use.max(axis=0)
 
     x_range = x_max - x_min
     y_range = y_max - y_min
@@ -171,6 +178,8 @@ def setup_3d_axes(
         y_mid = 0.5 * (y_max + y_min)
         z_mid = 0.5 * (z_max + z_min)
 
+        if max_range <= 0 or not np.isfinite(max_range):
+            max_range = 1.0
         half_range = 0.5 * max_range * margin_factor
         ax.set_xlim(x_mid - half_range, x_mid + half_range)
         ax.set_ylim(y_mid - half_range, y_mid + half_range)

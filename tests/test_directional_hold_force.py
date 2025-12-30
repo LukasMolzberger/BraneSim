@@ -2,7 +2,8 @@
 
 Directional hold-force measurement (X^4 vs. lateral) with **physical outputs**.
 
-- Displacements are reported in **nanometers [nm]**.
+- The brane model uses **SI units internally** (meters, seconds, Newtons).
+- Displacements are reported in **nanometers [nm]** for readability.
 - Forces are reported in **Newtons [N]**.
 
 Protocol (per direction)
@@ -41,12 +42,8 @@ import matplotlib.pyplot as plt
 # -----------------------------------------------------------------------------
 # TestRunManager
 # -----------------------------------------------------------------------------
-try:
-    from branesim.utils.test_run_manager import TestRunManager
-except Exception as e:
-    raise ImportError(
-        "Could not import TestRunManager. Ensure branesim/utils/test_run_manager.py exists."
-    ) from e
+from branesim.utils.test_run_manager import TestRunManager
+
 
 # -----------------------------------------------------------------------------
 # Project imports
@@ -58,7 +55,6 @@ from branesim.core.dimensions import MassModel
 from branesim.core.solver import VelocityVerletSolver
 
 from branesim.config.physical_constants import PhysicalConstants
-from branesim.physics.dimensional_mapping import DimensionalMapper
 
 # Point cloud visualization (used for videos)
 from branesim.visualization.brane_3d_viz import create_3d_animation, camera_orbit
@@ -73,9 +69,8 @@ class PhysicalConfig:
 
     Notes
     -----
-    The simulation itself is performed in dimensionless simulation units for
-    numerical stability, using `DimensionalMapper`. All reported quantities are
-    converted to physical units (nm, N).
+    The simulation is performed directly in SI units (m, s, N) using the project's
+    physical parameter calibration. Outputs are reported in nm and N.
     """
 
     # Domain (lattice points)
@@ -84,7 +79,7 @@ class PhysicalConfig:
     # Physical scale choice: lattice spacing h_phys = lambda_C / points_per_lambdaC
     points_per_lambdaC: int = 20
 
-    # Mass per lattice node (physical kg) used as mapper mass reference.
+    # Mass per lattice node (physical kg). Used to set the physical density rho = m_point / h^3.
     m_point: float = 2.861821e-27
 
     # Quasi-static displacement ramp
@@ -100,6 +95,10 @@ class PhysicalConfig:
     fps: int = 20
     frame_stride: int = 2          # keep every Nth displacement step as a frame
     subsample_factor_3d: int = 2   # take every kth point along each intrinsic axis
+
+    # Visualization: always include a dense local patch around the center
+    patch_radius: int = 6           # in intrinsic grid steps (Chebyshev radius)
+    include_coarse_background: bool = True
 
     # Point cloud appearance
     point_size: float = 4.0
@@ -128,6 +127,31 @@ def _subsample_indices_3d(grid_coords: torch.Tensor, subsample_factor: int) -> t
     )
     return torch.nonzero(mask, as_tuple=False).squeeze(1)
 
+def _viz_indices_3d(
+    grid_coords: torch.Tensor,
+    subsample_factor: int,
+    center_idx: int,
+    patch_radius: int,
+    include_coarse_background: bool = True,
+) -> torch.Tensor:
+    """Indices for visualization: union of a dense local patch + optional coarse background."""
+    center = grid_coords[center_idx]  # [3]
+    diffs = (grid_coords - center).abs()
+    local_mask = (diffs.max(dim=1).values <= patch_radius)
+
+    if include_coarse_background and subsample_factor > 1:
+        coarse = (
+            (grid_coords[:, 0] % subsample_factor == 0)
+            & (grid_coords[:, 1] % subsample_factor == 0)
+            & (grid_coords[:, 2] % subsample_factor == 0)
+        )
+        mask = local_mask | coarse
+    else:
+        mask = local_mask
+
+    return torch.nonzero(mask, as_tuple=False).squeeze(1)
+
+
 
 def _clamp_center(state: BraneState, center_idx: int, target: torch.Tensor) -> None:
     """Hard clamp the center node to `target` and zero its kinematics."""
@@ -138,50 +162,46 @@ def _clamp_center(state: BraneState, center_idx: int, target: torch.Tensor) -> N
 
 
 def _build_mapper_and_sim_params(cfg: PhysicalConfig) -> Dict[str, Any]:
+    """Build **physical (SI)** parameters for the run.
+
+    NOTE: The current branesim core uses SI units internally:
+        - positions in meters
+        - spring constants in N/m
+        - rest lengths in meters
+        - time step dt in seconds
+
+    Therefore we compute everything directly in SI and do **not** apply any
+    dimensionless mapping here.
+    """
     constants = PhysicalConstants()
 
     # Physical lattice spacing
     h_phys = constants.lambda_C / cfg.points_per_lambdaC
 
-    mapper = DimensionalMapper(
-        h_phys=h_phys,
-        c_light=constants.c,
-        mass_reference=cfg.m_point,
-    )
-
-    # In this convention, h_sim == 1.0
-    h_sim = float(mapper.to_sim_length(h_phys))
-
     # Density corresponding to m_point on a 3D lattice cell (physical)
     rho_phys = cfg.m_point / (h_phys ** 3)
 
-    # Convert density to simulation units for MassModel.from_density
-    density_scale = mapper.mass_scale / (mapper.length_scale ** 3)
-    rho_sim = float(rho_phys / density_scale)
-
-    # Rest length (phys) from the project's calibrated fraction; then convert
+    # Rest length (physical)
     L0_phys = constants.compute_rest_length(h_phys)
-    L0_sim = float(mapper.to_sim_length(L0_phys))
 
-    # Target tension T = rho * c^2 in physical units, map to spring constant
+    # Target tension T = rho * c^2 in physical units, map to spring constant k [N/m]
     T_target = constants.compute_target_tension(rho_phys)
     frac = constants.rest_length_frac
     k_phys = float((T_target * h_phys) / max(1e-30, (1.0 - frac)))
-    k_sim = float(mapper.to_sim_spring_constant(k_phys))
 
-    dt_s = float(mapper.to_phys_time(cfg.dt_sim))
+    # Time step (already in seconds; keep name for backward-compat)
+    dt_s = float(cfg.dt_sim)
 
     return {
         "constants": constants,
-        "mapper": mapper,
         "h_phys": float(h_phys),
-        "h_sim": float(h_sim),
+        "h_sim": float(h_phys),  # kept for compatibility; this is physical spacing [m]
         "rho_phys": float(rho_phys),
-        "rho_sim": float(rho_sim),
+        "rho_sim": float(rho_phys),  # kept for compatibility; this is physical density
         "rest_length_phys": float(L0_phys),
-        "rest_length_sim": float(L0_sim),
+        "rest_length_sim": float(L0_phys),
         "spring_k_phys": float(k_phys),
-        "spring_k_sim": float(k_sim),
+        "spring_k_sim": float(k_phys),
         "dt_s": float(dt_s),
     }
 
@@ -193,7 +213,7 @@ def _make_system(cfg: PhysicalConfig, derived: Dict[str, Any]):
     h_sim = derived["h_sim"]
 
     state = BraneState(cfg.grid_shape, dim, device=device, dtype=torch.float32)
-    state.initialize_flat_configuration(h_sim)
+    state.initialize_flat_configuration(h_sim)  # spacing [m]
     state.set_fixed_boundaries()  # fix all outer faces
 
     grid = BraneGrid(cfg.grid_shape, dim, h_sim, device=device)
@@ -209,7 +229,7 @@ def _make_system(cfg: PhysicalConfig, derived: Dict[str, Any]):
         spacing=h_sim,
     )
 
-    solver = VelocityVerletSolver(dt=cfg.dt_sim, mass_model=mass_model, physics=physics, grid=grid)
+    solver = VelocityVerletSolver(dt=derived["dt_s"], mass_model=mass_model, physics=physics, grid=grid)
     solver.initialize_accelerations(state)
 
     return state, grid, physics, solver
@@ -217,7 +237,6 @@ def _make_system(cfg: PhysicalConfig, derived: Dict[str, Any]):
 
 def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run: TestRunManager) -> None:
     derived = _build_mapper_and_sim_params(cfg)
-    mapper: DimensionalMapper = derived["mapper"]
 
     state, grid, physics, solver = _make_system(cfg, derived)
 
@@ -226,7 +245,7 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
     direction = direction / torch.norm(direction)
 
     center_idx = _center_index_from_coords(state.grid_coords, cfg.grid_shape)
-    subs_idx = _subsample_indices_3d(state.grid_coords, cfg.subsample_factor_3d)
+    subs_idx = _viz_indices_3d(state.grid_coords, cfg.subsample_factor_3d, center_idx, cfg.patch_radius, cfg.include_coarse_background)
 
     X0 = state.rest_positions.clone()  # [N,4] (sim)
 
@@ -270,20 +289,32 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
             delta_dir_sim = (X_sim - X0_cpu) @ direction_cpu  # [N]
 
             # coords: deformed xyz positions (sim) -> nm
-            coords_nm = mapper.to_phys_length(X_sim[subs_idx.cpu().numpy(), :3]) * NM
+            coords_m = X_sim[subs_idx.cpu().numpy()]
+
+            # Choose a 3D projection so the *moved* direction is visually obvious:
+            # - X^4 run: show (X, Y, X^4) so the clamp motion becomes a geometric axis.
+            # - Lateral run (we use X direction): show (Y, Z, X) so the clamp motion is "vertical".
+            if name == 'x4':
+                coords_m = coords_m[:, [0, 1, 3]]
+            elif name == 'lat':
+                coords_m = coords_m[:, [1, 2, 0]]
+            else:
+                coords_m = coords_m[:, :3]
+
+            coords_nm = coords_m * NM
 
             # values: displacement along direction (sim) -> nm
-            values_nm = mapper.to_phys_length(delta_dir_sim[subs_idx.cpu().numpy()]) * NM
+            values_nm = delta_dir_sim[subs_idx.cpu().numpy()] * NM
 
             frames_data_nm.append((coords_nm, values_nm))
 
             # title parameter: clamp displacement in nm
-            d_nm = float(mapper.to_phys_length(d_sim) * NM)
+            d_nm = float(d_sim * NM)
             frame_disp_nm.append(d_nm)
 
     # Convert final curves to nm + N
-    disps_nm = mapper.to_phys_length(disps_sim) * NM
-    hold_N = mapper.to_phys_force(hold_sim)
+    disps_nm = disps_sim * NM
+    hold_N = hold_sim  # already Newtons
 
     # Save plot
     fig = plt.figure(figsize=(6.2, 4.2))
@@ -317,10 +348,7 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
         spring_k_phys=derived["spring_k_phys"],
         spring_k_sim=derived["spring_k_sim"],
         rest_length_phys_nm=derived["rest_length_phys"] * NM,
-        rest_length_sim=derived["rest_length_sim"],
-        length_scale=mapper.length_scale,
-        time_scale=mapper.time_scale,
-        mass_scale=mapper.mass_scale,
+        rest_length_sim=derived["rest_length_sim"]
     )
 
     # Create 3D point cloud animation
@@ -364,7 +392,6 @@ def test_directional_hold_force_physical():
     cfg = PhysicalConfig()
 
     derived = _build_mapper_and_sim_params(cfg)
-    mapper: DimensionalMapper = derived["mapper"]
 
     run.save_config({
         **cfg.__dict__,
@@ -377,7 +404,6 @@ def test_directional_hold_force_physical():
         "spring_k_sim": derived["spring_k_sim"],
         "rest_length_phys_nm": derived["rest_length_phys"] * NM, 
         "rest_length_sim": derived["rest_length_sim"],
-        "mapper": repr(mapper),
         "protocol": "quasi-static displacement clamp of center node; report Δ in nm; point-cloud MP4",
     })
     print(run.get_summary())
@@ -397,7 +423,6 @@ def _main():
     cfg = PhysicalConfig()
 
     derived = _build_mapper_and_sim_params(cfg)
-    mapper: DimensionalMapper = derived["mapper"]
 
     run.save_config({
         **cfg.__dict__,
@@ -410,7 +435,6 @@ def _main():
         "spring_k_sim": derived["spring_k_sim"],
         "rest_length_phys_nm": derived["rest_length_phys"] * NM, 
         "rest_length_sim": derived["rest_length_sim"],
-        "mapper": repr(mapper),
         "protocol": "quasi-static displacement clamp of center node; report Δ in nm; point-cloud MP4",
     })
     print(run.get_summary())

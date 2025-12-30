@@ -57,6 +57,10 @@ from branesim.visualization.brane_3d_viz import (
     create_3d_animation,
     camera_orbit,
 )
+from branesim.visualization.brane_volume_viz import (
+    downsample_volume,
+    create_3d_volume_animation,
+)
 from branesim.visualization.displacement_field_viz import (
     displacement_frames_from_positions_frames,
     create_displacement_diralpha_slices_videos_3d_in_4d,
@@ -571,6 +575,9 @@ def main():
     animation_times_3d = []
     frame_interval_3d = max(1, num_steps // 100)  # ~100 frames for 3D
     subsample_factor_3d = 2  # Take every 2nd point along each axis
+    subsample_factor_volume = 2  # Downsample volume for voxel rendering
+    animation_frames_volume = []
+    animation_times_volume = []
 
     # Displacement field video frames (collect full position snapshots)
     frames_X_full = []  # Full 4D positions for displacement field videos
@@ -622,6 +629,13 @@ def main():
             )
             animation_frames_3d.append((coords_3d, values_3d))
             animation_times_3d.append(solver.time)
+            volume = downsample_volume(
+                field,
+                (nx, ny, nz),
+                subsample_factor=subsample_factor_volume,
+            )
+            animation_frames_volume.append(volume)
+            animation_times_volume.append(solver.time)
 
         if step % max(1, num_steps // 100) == 0:  # Track 100 points
             energy = solver.compute_energy(state)
@@ -1011,6 +1025,40 @@ def main():
         figsize=(10, 8),
     )
     print(f"  ✓ Saved: electron_3d_point_cloud.mp4")
+
+    # ========================================================================
+    # 6b. 3D VOLUMETRIC RENDERING
+    # ========================================================================
+    print(f"\nCreating 3D volumetric rendering...")
+    print(f"  Total 3D volume frames: {len(animation_frames_volume)}")
+    print(f"  Volume subsampling factor: {subsample_factor_volume} (every {subsample_factor_volume} points)")
+
+    times_volume_phys = [mapper.to_phys_time(t) for t in animation_times_volume]
+    volume_frames_nm = [
+        mapper.to_phys_length(frame) * 1e9 for frame in animation_frames_volume
+    ]
+    volume_spacing_nm = h_phys * subsample_factor_volume * 1e9
+
+    output_path_volume = run_manager.get_plot_path('electron_3d_volume.mp4')
+    create_3d_volume_animation(
+        frames=volume_frames_nm,
+        times=times_volume_phys,
+        spacing=volume_spacing_nm,
+        output_path=output_path_volume,
+        cmap_name='RdBu_r',
+        fps=20,
+        dpi=140,
+        camera_motion=camera_motion_func,
+        density_threshold=0.07,
+        alpha_scale=0.95,
+        gamma=1.15,
+        xlabel='x [nm]',
+        ylabel='y [nm]',
+        zlabel='z [nm]',
+        title_template='3D Electron Volume (t = {:.2f} fs)',
+        figsize=(10, 8),
+    )
+    print(f"  ✓ Saved: electron_3d_volume.mp4")
 
     # ========================================================================
     # 7. DISPLACEMENT FIELD SLICE VIDEOS (3D brane in 4D embedding)
