@@ -21,7 +21,7 @@ polarization plane that includes X^4 (see polarization="spatial_x4").
 Containment scaffold (X^4)
 --------------------------
 We also add an optional *static* Gaussian well in X^4 as a first-pass geometric
-containment scaffold. A true long-term confinement equilibrium is a coupled
+containment. A true long-term confinement equilibrium is a coupled
 nonlinear problem; this experiment adds diagnostics to measure leakage and
 radius growth over time.
 """
@@ -522,7 +522,7 @@ def main():
     )
 
     # Run simulation - fixed number of steps
-    num_steps = 500
+    num_steps = 1000
     simulation_time_sim = num_steps * dt_sim
     simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys_x / constants.c
@@ -536,6 +536,8 @@ def main():
     # Tracking
     times_phys = []  # Physical times for plotting
     energies = []
+    leakage_amp = []          # fraction of |psi|^2 outside R
+    leakage_x4 = []           # fraction of X4_dyn^2 outside R
     r_rms_over_R = []         # RMS radius of |psi| envelope / R
     r_rms_x4_over_R = []      # RMS radius of X4_dyn / R
 
@@ -716,9 +718,9 @@ def main():
             axes[idx].set_xlim(x_coords[0], x_coords[-1])
             axes[idx].set_ylim(y_coords[0], y_coords[-1])
 
-            # Time in attoseconds
-            t_as = t * 1e18
-            axes[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
                           transform=axes[idx].transAxes,
                           fontsize=12, verticalalignment='top',
                           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -760,8 +762,8 @@ def main():
                                          aspect='equal')
             axes2[0, idx].set_ylabel('z [nm]', fontsize=9)
             axes2[0, idx].set_xlabel('x [nm]', fontsize=9)
-            t_as = t * 1e18
-            axes2[0, idx].set_title(f't = {t_as:.2f} as', fontsize=10)
+            t_fs = t * 1e15
+            axes2[0, idx].set_title(f't = {t_fs:.2f} fs', fontsize=10)
 
             # Plot YZ slice
             im_yz = axes2[1, idx].imshow(field_yz_nm.T, origin='lower',
@@ -782,11 +784,11 @@ def main():
     # ========================================================================
     fig3, ax = plt.subplots(figsize=(10, 6))
 
-    times_as = np.array(times_phys) * 1e18  # Already in physical units
+    times_fs = np.array(times_phys) * 1e15  # Already in physical units
     energy_array = np.array(energies)
-    ax.plot(times_as, energy_array / initial_energy['total'], 'g-', linewidth=2)
+    ax.plot(times_fs, energy_array / initial_energy['total'], 'g-', linewidth=2)
     ax.axhline(y=1.0, color='r', linestyle='--', linewidth=1, alpha=0.5)
-    ax.set_xlabel('Time [as]', fontsize=12)
+    ax.set_xlabel('Time [fs]', fontsize=12)
     ax.set_ylabel('E(t) / E(0)', fontsize=12)
     ax.set_title('Energy Conservation', fontsize=14, fontweight='bold')
     ax.grid(True, alpha=0.3)
@@ -799,13 +801,13 @@ def main():
     # 3b. CONFINEMENT DIAGNOSTICS
     # ========================================================================
     if leakage_amp:
-        times_as = np.array(times_phys) * 1e18
+        times_fs = np.array(times_phys) * 1e15
 
         figc, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
-        ax1.plot(times_as, np.array(leakage_amp), linewidth=2,
+        ax1.plot(times_fs, np.array(leakage_amp), linewidth=2,
                  label='Leakage: |ψ|² outside r>R (from a,b)')
-        ax1.plot(times_as, np.array(leakage_x4), linewidth=2,
+        ax1.plot(times_fs, np.array(leakage_x4), linewidth=2,
                  label='Leakage: X4_dyn² outside r>R')
         ax1.set_ylabel('Fraction outside')
         ax1.set_ylim(0.0, 1.0)
@@ -813,10 +815,10 @@ def main():
         ax1.legend(loc='best')
         ax1.set_title('Confinement diagnostics', fontsize=14, fontweight='bold')
 
-        ax2.plot(times_as, np.array(r_rms_over_R), linewidth=2, label='RMS radius(|ψ|)/R')
-        ax2.plot(times_as, np.array(r_rms_x4_over_R), linewidth=2, label='RMS radius(X4_dyn)/R')
+        ax2.plot(times_fs, np.array(r_rms_over_R), linewidth=2, label='RMS radius(|ψ|)/R')
+        ax2.plot(times_fs, np.array(r_rms_x4_over_R), linewidth=2, label='RMS radius(X4_dyn)/R')
         ax2.set_ylabel('RMS radius / R')
-        ax2.set_xlabel('Time [as]')
+        ax2.set_xlabel('Time [fs]')
         ax2.grid(True, alpha=0.3)
         ax2.legend(loc='best')
 
@@ -887,9 +889,9 @@ def main():
             axes_lat[idx].set_xlim(x_coords[0], x_coords[-1])
             axes_lat[idx].set_ylim(y_coords[0], y_coords[-1])
 
-            # Time in attoseconds
-            t_as = t * 1e18
-            axes_lat[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
+            # Time in femtoseconds
+            t_fs = t * 1e15
+            axes_lat[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
                               transform=axes_lat[idx].transAxes,
                               fontsize=12, verticalalignment='top',
                               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -945,8 +947,8 @@ def main():
         field_nm = mapper.to_phys_length(field_sim) * 1e9  # Convert sim → phys → nm
         im_anim.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
-        t_as = mapper.to_phys_time(t_sim) * 1e18  # Convert sim → phys → as
-        time_text.set_text(f't = {t_as:.3f} as')
+        t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
+        time_text.set_text(f't = {t_fs:.3f} fs')
         return [im_anim, time_text]
 
     anim = FuncAnimation(fig_anim, animate, frames=len(animation_frames),
@@ -1002,7 +1004,7 @@ def main():
         xlabel='x [nm]',
         ylabel='y [nm]',
         zlabel='z [nm]',
-        title_template='3D Electron (t = {:.2f} as)',
+        title_template='3D Electron (t = {:.2f} fs)',
         fps=20,
         dpi=100,
         camera_motion=camera_motion_func,
@@ -1061,7 +1063,7 @@ def main():
     if debug:
         print(f"  k = {debug.get('k', float('nan')):.6e} (1/sim_length)")
         print(f"  ω = {debug.get('omega', float('nan')):.6e} (1/sim_time)")
-    print(f"  Simulation time: {simulation_time_phys*1e18:.3f} attoseconds")
+    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
 
     print(f"\nVisualization Notes:")
     print(f"  • Primary plots show XY slice at z = {nz//2} (middle of domain)")
