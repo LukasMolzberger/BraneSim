@@ -522,7 +522,7 @@ def main():
     )
 
     # Run simulation - fixed number of steps
-    num_steps = 1000
+    num_steps = 500
     simulation_time_sim = num_steps * dt_sim
     simulation_time_phys = mapper.to_phys_time(simulation_time_sim)
     crossing_time_phys = domain_length_phys_x / constants.c
