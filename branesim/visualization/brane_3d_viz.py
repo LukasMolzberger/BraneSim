@@ -228,7 +228,7 @@ def create_3d_animation(
     xlabel: str = 'x [nm]',
     ylabel: str = 'y [nm]',
     zlabel: str = 'z [nm]',
-    title_template: str = '3D Field - t = {:.3f} fs',
+    title_template: str = '3D Field - t = {:.3f} as',
     fps: int = 20,
     dpi: int = 100,
     camera_motion: Optional[Callable[[int, int], Tuple[float, float]]] = None,
@@ -286,15 +286,15 @@ def create_3d_animation(
     )
 
     # Title text - initialize with first frame time
-    time_0_fs = times[0] * 1e15
-    time_text = ax.text2D(0.5, 0.95, title_template.format(time_0_fs),
+    time_0_as = times[0] * 1e18
+    time_text = ax.text2D(0.5, 0.95, title_template.format(time_0_as),
                          transform=ax.transAxes,
                          ha='center', fontsize=13, fontweight='bold')
 
     def update(frame_idx):
         """Update function for animation."""
         coords, values = frames_data[frame_idx]
-        time_fs = times[frame_idx] * 1e15
+        time_as = times[frame_idx] * 1e18
 
         # Update scatter data
         scatter._offsets3d = (coords[:, 0], coords[:, 1], coords[:, 2])
@@ -307,7 +307,7 @@ def create_3d_animation(
             ax.view_init(elev=elev, azim=azim)
 
         # Update title
-        time_text.set_text(title_template.format(time_fs))
+        time_text.set_text(title_template.format(time_as))
 
         return scatter, time_text
 

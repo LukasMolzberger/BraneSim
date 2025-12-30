@@ -97,10 +97,6 @@ def main() -> None:
         wave_speed=1.0,
         # key change: excite a spatial polarization plane (not only X^4)
         polarization="spatial_x4",
-        # keep X^4 as static containment scaffold
-        containment_component=3,
-        containment_depth=0.25,
-        containment_sigma=0.5 * radius_sim,
         smooth_edge=2.0,
     )
 
@@ -175,7 +171,7 @@ def main() -> None:
         xlabel='x [pm]',
         ylabel='y [pm]',
         zlabel='z [pm]',
-        title_template="Electron initial state (static, quadrature a) - t = {:.3f} fs",
+        title_template="Electron initial state (static, quadrature a) - t = {:.3f} as",
         fps=30,
         dpi=120,
         camera_motion=camera_orbit,
@@ -197,7 +193,7 @@ def main() -> None:
         frames_data=frames_data2,
         times=times,
         output_path=out_path2,
-        title_template="Electron initial state (static, X^4) - t = {:.3f} fs",
+        title_template="Electron initial state (static, X^4) - t = {:.3f} as",
         fps=30,
         dpi=120,
         camera_motion=camera_orbit,

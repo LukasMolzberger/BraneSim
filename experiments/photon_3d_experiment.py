@@ -626,9 +626,9 @@ def main():
             axes[idx].set_xlim(x_coords[0], x_coords[-1])
             axes[idx].set_ylim(y_coords[0], y_coords[-1])
 
-            # Time in femtoseconds
-            t_fs = t * 1e15
-            axes[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            # Time in attoseconds
+            t_as = t * 1e18
+            axes[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
                           transform=axes[idx].transAxes,
                           fontsize=12, verticalalignment='top',
                           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -670,8 +670,8 @@ def main():
                                          aspect='auto')
             axes2[0, idx].set_ylabel('z [nm]', fontsize=9)
             axes2[0, idx].set_xlabel('x [nm]', fontsize=9)
-            t_fs = t * 1e15
-            axes2[0, idx].set_title(f't = {t_fs:.2f} fs', fontsize=10)
+            t_as = t * 1e18
+            axes2[0, idx].set_title(f't = {t_as:.2f} as', fontsize=10)
 
             # Plot YZ slice
             im_yz = axes2[1, idx].imshow(field_yz_nm.T, origin='lower',
@@ -692,11 +692,11 @@ def main():
     # ========================================================================
     fig3, ax = plt.subplots(figsize=(10, 6))
 
-    times_fs = np.array(times_phys) * 1e15  # Already in physical units
+    times_as = np.array(times_phys) * 1e18  # Already in physical units
     energy_array = np.array(energies)
-    ax.plot(times_fs, energy_array / initial_energy['total'], 'g-', linewidth=2)
+    ax.plot(times_as, energy_array / initial_energy['total'], 'g-', linewidth=2)
     ax.axhline(y=1.0, color='r', linestyle='--', linewidth=1, alpha=0.5)
-    ax.set_xlabel('Time [fs]', fontsize=12)
+    ax.set_xlabel('Time [as]', fontsize=12)
     ax.set_ylabel('E(t) / E(0)', fontsize=12)
     ax.set_title('Energy Conservation', fontsize=14, fontweight='bold')
     ax.grid(True, alpha=0.3)
@@ -749,9 +749,9 @@ def main():
             axes_lat[idx].set_xlim(x_coords[0], x_coords[-1])
             axes_lat[idx].set_ylim(y_coords[0], y_coords[-1])
 
-            # Time in femtoseconds
-            t_fs = t * 1e15
-            axes_lat[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            # Time in attoseconds
+            t_as = t * 1e18
+            axes_lat[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
                               transform=axes_lat[idx].transAxes,
                               fontsize=12, verticalalignment='top',
                               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -806,8 +806,8 @@ def main():
         field_nm = mapper.to_phys_length(field_sim) * 1e9  # Convert sim → phys → nm
         im_anim.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
-        t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
-        time_text.set_text(f't = {t_fs:.3f} fs')
+        t_as = mapper.to_phys_time(t_sim) * 1e18  # Convert sim → phys → as
+        time_text.set_text(f't = {t_as:.3f} as')
         return [im_anim, time_text]
 
     anim = FuncAnimation(fig_anim, animate, frames=len(animation_frames),
@@ -863,7 +863,7 @@ def main():
         xlabel='x [nm]',
         ylabel='y [nm]',
         zlabel='z [nm]',
-        title_template='3D Photon (t = {:.2f} fs)',
+        title_template='3D Photon (t = {:.2f} as)',
         fps=20,
         dpi=100,
         camera_motion=camera_motion_func,
@@ -957,7 +957,7 @@ def main():
     print(f"  Domain size: {domain_length_phys_x*1e9:.3f} × {domain_length_phys_y*1e9:.3f} × {domain_length_phys_z*1e9:.3f} nm")
     print(f"  Domain size: {domain_length_phys_x/constants.lambda_C:.0f} × {domain_length_phys_y/constants.lambda_C:.0f} × {domain_length_phys_z/constants.lambda_C:.0f} λ_C")
     print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm")
-    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
+    print(f"  Simulation time: {simulation_time_phys*1e18:.3f} attoseconds")
 
     print(f"\nVisualization Notes:")
     print(f"  • Primary plots show XY slice at z = {nz//2} (middle of waveguide)")

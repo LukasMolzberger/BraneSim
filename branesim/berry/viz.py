@@ -115,9 +115,9 @@ def create_berry_video_1d(
         rgba = np.concatenate([phase_to_rgb(values[k]), alpha[k, :, None]], axis=-1)
         sc.set_offsets(np.c_[x, values[k]])
         sc.set_color(rgba)
-        t_fs = times[k] * 1e15
-        time_text.set_text(f"t = {t_fs:.3f} fs")
-        ax.set_title(title_template.format(t=t_fs))
+        t_as = times[k] * 1e18
+        time_text.set_text(f"t = {t_as:.3f} as")
+        ax.set_title(title_template.format(t=t_as))
         return (sc, time_text)
 
     anim = FuncAnimation(fig, update, frames=T, interval=1000 / fps, blit=False)
@@ -146,7 +146,7 @@ def create_berry_videos_1d(
         times_s=series.times_s,
         x_coords=x_coords,
         output_path=out_phase,
-        title_template="Berry phase γ (t = {t:.3f} fs)",
+        title_template="Berry phase γ (t = {t:.3f} as)",
         ylabel="γ [rad]",
         fps=fps,
         dpi=dpi,
@@ -160,7 +160,7 @@ def create_berry_videos_1d(
         times_s=series.times_s,
         x_coords=x_coords,
         output_path=out_conn,
-        title_template="Berry connection A_t (t = {t:.3f} fs)",
+        title_template="Berry connection A_t (t = {t:.3f} as)",
         ylabel="A_t [rad/s]",
         fps=fps,
         dpi=dpi,
@@ -248,8 +248,8 @@ def create_berry_video_2d(
         a = alpha[k].reshape(nx, ny)
         rgba = scalar_to_rgba(v, a)
         im.set_data(rgba.swapaxes(0, 1))
-        t_fs = times[k] * 1e15
-        time_text.set_text(f"t = {t_fs:.3f} fs")
+        t_as = times[k] * 1e18
+        time_text.set_text(f"t = {t_as:.3f} as")
         return (im, time_text)
 
     anim = FuncAnimation(fig, update, frames=T, interval=1000 / fps, blit=True)
@@ -409,8 +409,8 @@ def create_berry_slices_videos_3d(
             a = _extract_slice_scalar(alpha[k], grid_shape, plane)
             rgba = scalar_to_rgba(v, a)
             im.set_data(rgba.swapaxes(0, 1))
-            t_fs = times[k] * 1e15
-            time_text.set_text(f"t = {t_fs:.3f} fs")
+            t_as = times[k] * 1e18
+            time_text.set_text(f"t = {t_as:.3f} as")
             return (im, time_text)
 
         anim = FuncAnimation(fig, update, frames=T, interval=1000 / fps, blit=True)

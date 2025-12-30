@@ -242,7 +242,7 @@ def main():
     print(f"\nSimulation Setup Complete:")
     print(f"  Total steps: {num_steps:,}")
     print(f"  Snapshots: {len(snapshot_steps)} times")
-    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} fs")
+    print(f"  Simulation time: {simulation_time_phys*1e18:.3f} as")
 
     # ========================================================================
     # Storage for Results
@@ -447,7 +447,7 @@ def main():
     print(f"\nPhysical Interpretation:")
     print(f"  Domain size: {domain_length_phys*1e9:.3f} nm ({num_wavelengths} wavelengths)")
     print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm (Compton)")
-    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} fs")
+    print(f"  Simulation time: {simulation_time_phys*1e18:.3f} as")
     print(f"  Snapshots: {len(snapshots_xi)} times")
 
 

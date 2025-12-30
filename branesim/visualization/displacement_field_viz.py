@@ -258,7 +258,7 @@ def create_displacement_arrows_video_3d_in_4d(
     dpi: int = 120,
     display_scale: float = 1e9,
     unit_label: str = "nm",
-    title_template: str = "Displacement arrows (t = {t:.2f} fs)",
+    title_template: str = "Displacement arrows (t = {t:.2f} as)",
     camera_motion: Optional[Callable[[int, int], Tuple[float, float]]] = None,
 ) -> None:
     """Video: 3D arrows for a 3D brane embedded in 4D (u projected to 3D).
@@ -492,7 +492,7 @@ def create_displacement_arrows_video_2d_in_3d(
     dpi: int = 140,
     display_scale: float = 1e9,
     unit_label: str = "nm",
-    title_template: str = "Displacement arrows (t = {t:.2f} fs)",
+    title_template: str = "Displacement arrows (t = {t:.2f} as)",
     camera_motion: Optional[Callable[[int, int], Tuple[float, float]]] = None,
 ) -> None:
     """Video: 3D arrows for a 2D brane embedded in 3D."""

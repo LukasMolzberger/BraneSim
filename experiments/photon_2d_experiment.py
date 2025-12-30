@@ -491,9 +491,9 @@ def main():
             axes[idx].set_xlim(x_nm[0], x_nm[-1])
             axes[idx].set_ylim(y_nm[0], y_nm[-1])
 
-            # Time in femtoseconds
-            t_fs = t * 1e15
-            axes[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            # Time in attoseconds
+            t_as = t * 1e18
+            axes[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
                           transform=axes[idx].transAxes,
                           fontsize=12, verticalalignment='top',
                           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -552,8 +552,8 @@ def main():
         field_nm = mapper.to_phys_length(field_sim) * 1e9  # Convert sim → phys → nm
         im_anim.set_array(field_nm.T)
         t_sim = animation_times[frame_idx]
-        t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
-        time_text.set_text(f't = {t_fs:.3f} fs')
+        t_as = mapper.to_phys_time(t_sim) * 1e18  # Convert sim → phys → as
+        time_text.set_text(f't = {t_as:.3f} as')
         return [im_anim, time_text]
 
     anim = FuncAnimation(fig_anim, animate, frames=len(animation_frames),
@@ -605,9 +605,9 @@ def main():
             axes_lat[idx].set_xlim(x_nm[0], x_nm[-1])
             axes_lat[idx].set_ylim(y_nm[0], y_nm[-1])
 
-            # Time in femtoseconds
-            t_fs = t * 1e15
-            axes_lat[idx].text(0.02, 0.95, f't = {t_fs:.3f} fs',
+            # Time in attoseconds
+            t_as = t * 1e18
+            axes_lat[idx].text(0.02, 0.95, f't = {t_as:.3f} as',
                               transform=axes_lat[idx].transAxes,
                               fontsize=12, verticalalignment='top',
                               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
@@ -674,8 +674,8 @@ def main():
         # Transpose spatial dimensions only, keep color channel last
         im_anim_lat.set_array(np.transpose(rgb_image, (1, 0, 2)))
         t_sim = animation_times[frame_idx]
-        t_fs = mapper.to_phys_time(t_sim) * 1e15  # Convert sim → phys → fs
-        time_text_lat.set_text(f't = {t_fs:.3f} fs')
+        t_as = mapper.to_phys_time(t_sim) * 1e18  # Convert sim → phys → as
+        time_text_lat.set_text(f't = {t_as:.3f} as')
         return [im_anim_lat, time_text_lat]
 
     anim_lat = FuncAnimation(fig_anim_lat, animate_lateral, frames=len(animation_frames_lateral_x),
@@ -790,7 +790,7 @@ def main():
     print(f"  Domain size: {domain_length_phys*1e9:.3f} × {domain_length_phys * ny / nx *1e9:.3f} nm")
     print(f"  Domain size: {domain_length_phys/constants.lambda_C:.0f} × {domain_length_phys * ny / nx / constants.lambda_C:.0f} λ_C")
     print(f"  Wavelength: {wavelength_phys*1e9:.3f} nm")
-    print(f"  Simulation time: {simulation_time_phys*1e15:.3f} femtoseconds")
+    print(f"  Simulation time: {simulation_time_phys*1e18:.3f} attoseconds")
 
     # Save configuration
     run_manager.save_config({
