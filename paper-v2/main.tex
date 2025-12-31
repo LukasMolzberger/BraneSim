@@ -106,258 +106,48 @@ Separate what is \emph{kinematical} (connections from basis transport) from what
 \end{enumerate}
 
 % ============================================================
-\section{Conceptual Model: 3D Brane Embedded in 4D Space}
-\label{sec:conceptual-model}
+\section{Brane Model: Continuous and Discrete Formulations}
+\label{sec:brane_model}
 
-\subsection{Kinematics and Geometry}
-We model the substrate as a three-dimensional material manifold (the ``brane'')
-embedded in a four-dimensional Euclidean space, with time treated as an external
-parameter. Let
+\subsection{Geometry and fields}
+Let the intrinsic brane be a 3D material domain \(\Omega=\T^3\) (periodic cell) or
+a bounded cube with fixed boundary points (clamped).
+The embedding map is
 \[
-t \in \R,\qquad
-\sigma = (\sigma^1,\sigma^2,\sigma^3)\in \Omega\subset\R^3
+\X(\x,t)\in\R^4,\qquad \x=(x^1,x^2,x^3)\in\Omega,\quad t\in\R.
 \]
-denote time and material (Lagrangian) coordinates on the brane, respectively.
-The brane configuration is given by an embedding map
-\[
-X:\R\times\Omega \to \R^4,\qquad
-(t,\sigma)\mapsto X(t,\sigma)=\big(X^1,X^2,X^3,X^4\big).
-\]
-Material tangent vectors are
-\[
-\partial_i X := \frac{\partial X}{\partial\sigma^i}\in\R^4,\qquad i=1,2,3,
-\]
-and they induce the metric
-\[
-g_{ij}(t,\sigma) := \partial_i X(t,\sigma)\cdot \partial_j X(t,\sigma),
-\]
-where $\cdot$ denotes the Euclidean inner product on $\R^4$.
+We write \(\X=(X^1,X^2,X^3,X^4)\). The reference (rest) configuration is denoted
+\(\X_0(\x)\), and the displacement is \(\uvec(\x,t)=\X(\x,t)-\X_0(\x)\).
 
-A useful (but not required) decomposition is the static-reference form
+\subsection{Reference-metric / rest-length elasticity family}
+\label{subsec:rest_length_family}
+The code base implements a reference-metric (rest-length) elasticity model on a
+regular lattice. In discrete form, each lattice node \(p\) has an embedding vector
+\(\X_p(t)\in\R^4\) with neighbor set \(\mathcal{N}(p)\). A representative spring energy is
 \[
-X(t,\sigma)=
-\begin{pmatrix}\sigma^1\\ \sigma^2\\ \sigma^3\\ 0\end{pmatrix}
-+
-\begin{pmatrix}u^1(t,\sigma)\\ u^2(t,\sigma)\\ u^3(t,\sigma)\\ w(t,\sigma)\end{pmatrix},
-\]
-where $u=(u^1,u^2,u^3)$ is the in-brane displacement and $w=X^4$ is the
-extra-dimensional displacement. The model's dimensional coupling is geometric:
-all four components enter $\partial_i X$ and therefore contribute to local stretch,
-elastic energy, and force.
-
-\subsection{Directional Stretch and Geometric Coupling}
-To match the structure of a nearest-neighbor spring lattice in the continuum limit,
-we introduce directional stretch magnitudes
-\[
-a_i(t,\sigma):=\|\partial_i X(t,\sigma)\|
-=\sqrt{\partial_i X\cdot\partial_i X},\qquad i=1,2,3,
-\]
-and a reference spacing $a_0>0$. Crucially,
-\[
-a_i^2=\sum_{A=1}^{4}(\partial_i X^A)^2
-=\sum_{\alpha=1}^{3}(\partial_i X^\alpha)^2 + (\partial_i X^4)^2,
-\]
-so gradients in the extra dimension ($X^4$) modify $a_i$ and thus modify the
-effective tension in \emph{all} directions. This is the fundamental coupling
-mechanism between in-brane motion and extra-dimensional excitation.
-
-\subsection{Continuous Lagrangian}
-Let $\rho>0$ be the mass density with respect to material volume $d^3\sigma$.
-We choose a directional stored-energy density
-\[
-W(\partial X) := \frac{\kappa}{2}\sum_{i=1}^{3}\big(\|\partial_i X\|-a_0\big)^2,
-\]
-with stiffness parameter $\kappa>0$. The action functional is
-\[
-S[X]=\int \! L[X]\,dt,\qquad
-L[X]=\int_{\Omega}\left(\frac{\rho}{2}\|\partial_t X\|^2 - W(\partial X)\right)\,d^3\sigma,
-\]
-i.e.
-\[
-L[X]=\int_{\Omega}\left(
-\frac{\rho}{2}\,\|\partial_t X\|^2
--\frac{\kappa}{2}\sum_{i=1}^{3}\big(\|\partial_i X\|-a_0\big)^2
-\right)\,d^3\sigma.
-\]
-This Lagrangian is a direct continuum analogue of a rest-length spring network:
-nonlinearity enters solely through the geometric stretch $\|\partial_i X\|$ in the
-embedding space.
-
-\subsection{Euler--Lagrange Equations}
-Taking variations $X\mapsto X+\varepsilon\eta$ with compactly supported $\eta$ (or
-appropriate boundary conditions), the Euler--Lagrange equations are
-\[
-\rho\,\partial_t^2 X
+E_{\text{spring}}
 =
-\sum_{i=1}^{3}\partial_i\!\left[
-\kappa\left(1-\frac{a_0}{\|\partial_i X\|}\right)\partial_i X
-\right].
+\sum_{(p,q)} \phi\!\left(\|\X_p-\X_q\| - \ell_0\right),
 \]
-This is a nonlinear wave system in $\R^4$.
-The coupling between in-brane motion and $X^4$ is explicit: the factor
-$\|\partial_i X\|$ contains all four embedding components.
+where \(\ell_0\) is the rest length and \(\phi\) is typically quadratic near zero.
+The force is
+\[
+\mathbf{F}_p = -\frac{\partial E_{\text{spring}}}{\partial \X_p}.
+\]
+Time evolution is integrated by Velocity Verlet (symplectic), see
+\texttt{branesim.core.solver.VelocityVerletSolver}.
 
-\subsection{Linearized Wave Limit and Calibration}
-Near a homogeneous reference state with $\|\partial_i X\|\approx a_0$,
-one obtains a linear wave-like regime in each embedding component,
-\[
-\rho\,\partial_t^2 X^A \approx T\,\Delta_{\sigma} X^A,\qquad A=1,2,3,4,
-\]
-with $\Delta_{\sigma}=\sum_{i=1}^3\partial_i^2$ and an effective tension scale $T$
-(set by the chosen reference configuration and $\kappa$). The corresponding
-characteristic wave speed is
-\[
-c \approx \sqrt{\frac{T}{\rho}}.
-\]
-In the discrete model below, the analogous calibration is expressed in terms of
-$k/m$ and the lattice spacing.
+\paragraph{Continuous idealization (for derivations).}
+A continuum counterpart can be written as a hyperelastic energy density \(W\) in terms
+of the deformation gradient \(F^A{}_i = \partial_i X^A\) and a reference metric
+\(g^0_{ij}\). For this template, the specific \(W\) is left as a modeling choice, but
+the multiscale reduction in later sections only assumes (i) wave propagation with
+speed \(c\) and (ii) a narrowband carrier for the excitation of interest.
 
-\subsection{Boundary Conditions and Pre-tension}
-The model supports different boundary conditions depending on the intended
-experiment, e.g. periodic boundaries in one or more material directions or
-Dirichlet (clamped) boundaries on $\partial\Omega$.
-A pre-tensioned brane is obtained when the initial configuration is not at rest
-with respect to the reference spacing (continuum: $\|\partial_i X\|\neq a_0$;
-discrete: neighbor distances $\|x_m-x_n\|\neq \ell_0$). This pre-tension is then
-maintained by the chosen boundary conditions.
-
-% ============================================================
-\section{Experimental Settings: Discrete Brane Lattice Model}
-\label{sec:experimental-settings}
-
-\subsection{Lattice, Degrees of Freedom, and Neighbor Topology}
-For simulations we discretize the brane as a 3D lattice of nodes
-\[
-n=(n_1,n_2,n_3)\in \{0,\dots,N_1-1\}\times\{0,\dots,N_2-1\}\times\{0,\dots,N_3-1\}.
-\]
-Each node carries a position in the embedding space,
-\[
-x_n(t)\in\R^4,\qquad x_n=(x_n^1,x_n^2,x_n^3,x_n^4).
-\]
-We choose a neighbor set $\mathcal{N}(n)$, typically the $6$ axis-adjacent neighbors
-(nearest neighbors) for computational efficiency. The set of undirected edges is
-denoted by $E$.
-
-\subsection{Spring Energy and Rest-length Coupling}
-Each edge $(n,m)\in E$ is assigned a spring with constant $k>0$ and rest length
-$\ell_0>0$. Define
-\[
-d_{nm}:=x_m-x_n,\qquad r_{nm}:=\|d_{nm}\|
-=\sqrt{\sum_{A=1}^{4}(d_{nm}^A)^2}.
-\]
-The total potential energy is
-\[
-V(x)=\frac{k}{2}\sum_{(n,m)\in E}\big(\|x_m-x_n\|-\ell_0\big)^2.
-\]
-The geometric coupling between in-brane motion and the extra dimension is
-automatic: writing $d_{nm}=(\Delta r,\Delta w)$ with $\Delta r\in\R^3$ and
-$\Delta w\in\R$ yields
-\[
-r_{nm}=\sqrt{\|\Delta r\|^2+(\Delta w)^2}.
-\]
-Thus any excitation in $x^4$ modifies spring stretch and therefore changes forces
-in the brane directions, and vice versa, without introducing additional ad-hoc
-interaction terms.
-
-\subsection{Equations of Motion}
-Let $m>0$ be the point mass per node. The conservative equations of motion are
-\[
-m\,\ddot x_n = -\nabla_{x_n} V(x).
-\]
-For the spring network above, the contribution of neighbor $m\in\mathcal{N}(n)$ is
-\[
-F_{n\leftarrow m}
-=
-k\left(1-\frac{\ell_0}{\|x_m-x_n\|}\right)(x_m-x_n),
-\]
-and the total nodal force is the sum
-\[
-m\,\ddot x_n
-=
-\sum_{m\in\mathcal{N}(n)}
-k\left(1-\frac{\ell_0}{\|x_m-x_n\|}\right)(x_m-x_n).
-\]
-Component-wise this reads
-\[
-m\,\ddot x_n^A
-=
-\sum_{m\in\mathcal{N}(n)}
-k\left(1-\frac{\ell_0}{r_{nm}}\right)(x_m^A-x_n^A),
-\qquad A=1,2,3,4.
-\]
-Optional numerical damping (used only for specific relaxation protocols) can be
-introduced as an additional term $-\gamma\,\dot x_n$ with $\gamma\ge 0$.
-
-\subsection{Boundary Conditions and Pre-tension in the Discrete Setting}
-Periodic boundary conditions identify opposite faces of the lattice. Clamped
-boundaries fix a subset of nodes to prescribed values $x_n(t)=x_n^{\mathrm{bdry}}$.
-Pre-tension is implemented by choosing an initial neighbor spacing $a$ (as realized
-by the initial embedding) different from the rest length $\ell_0$; the resulting
-initial stress is then maintained by the boundary conditions.
-
-\subsection{Time Integration}
-We evolve the second-order system using a symplectic method such as velocity Verlet,
-\[
-x_n(t+\Delta t)=x_n(t)+v_n(t)\Delta t+\frac{1}{2}a_n(t)\Delta t^2,
-\]
-\[
-a_n(t+\Delta t)=\frac{1}{m}F_n(x(t+\Delta t)),
-\]
-\[
-v_n(t+\Delta t)=v_n(t)+\frac{1}{2}\big(a_n(t)+a_n(t+\Delta t)\big)\Delta t.
-\]
-The time step $\Delta t$ is chosen to resolve the fastest lattice modes implied by
-$(k,m)$ and the neighbor topology.
-
-\subsection{Discrete--Continuum Correspondence and Speed Calibration}
-Let $a$ denote the lattice spacing of the initial brane configuration. A standard
-order-of-magnitude mapping is
-\[
-m \approx \rho\,a^3,\qquad c \sim a\sqrt{\frac{k}{m}},
-\]
-so calibrating a target propagation speed $c$ corresponds to setting $k/m$.
-Pre-tension is governed by the ratio $\ell_0/a$ and strongly affects nonlinear
-regimes relevant for confinement and the emergence of effective gauge structure.
-
-\begin{table}[t]
-\centering
-\caption{Brane configuration and dynamics parameters in the continuous and discrete formulations.}
-\label{tab:brane-params}
-\begin{tabular}{lll}
-\hline
-\textbf{Concept} & \textbf{Continuous model} & \textbf{Discrete lattice model} \\
-\hline
-Time & $t\in\R$ & $t_n = n\,\Delta t$ \\
-Material domain & $\Omega\subset\R^3$ & grid indices $n=(n_1,n_2,n_3)$ \\
-Material coordinate & $\sigma=(\sigma^1,\sigma^2,\sigma^3)$ &
-$n\in\{0,\dots,N_1{-}1\}\times\{0,\dots,N_2{-}1\}\times\{0,\dots,N_3{-}1\}$ \\
-Embedding space & $X(t,\sigma)\in\R^4$ & $x_n(t)\in\R^4$ \\
-Embedding components & $X^A,\ A=1..4$ & $x_n^A,\ A=1..4$ \\
-Velocity & $\partial_t X$ & $v_n=\dot x_n$ \\
-Acceleration & $\partial_t^2 X$ & $a_n=\ddot x_n$ \\
-\hline
-Mass density / mass & $\rho$ (per $d^3\sigma$) & $m$ (per node) \\
-Stiffness parameter & $\kappa$ & $k$ \\
-Reference spacing / rest length & $a_0$ & $\ell_0$ \\
-Initial lattice spacing (geometry) & (implicit in $X(t_0,\sigma)$) & $a$ (initial neighbor distance) \\
-Directional stretch & $a_i=\|\partial_i X\|$ & $r_{nm}=\|x_m-x_n\|$ \\
-Neighbor topology & directions $i=1,2,3$ & neighbor set $\mathcal{N}(n)$, edge set $E$ \\
-\hline
-Potential energy density &
-$W=\frac{\kappa}{2}\sum_i(\|\partial_i X\|-a_0)^2$ &
-$V=\frac{k}{2}\sum_{(n,m)\in E}(\|x_m-x_n\|-\ell_0)^2$ \\
-Kinetic energy density & $\frac{\rho}{2}\|\partial_t X\|^2$ & $\sum_n \frac{m}{2}\|v_n\|^2$ \\
-Equations of motion &
-$\rho\,\partial_t^2 X=\sum_i \partial_i\!\Big[\kappa(1-\frac{a_0}{\|\partial_i X\|})\partial_i X\Big]$ &
-$m\,\ddot x_n=\sum_{m\in\mathcal{N}(n)} k(1-\frac{\ell_0}{\|x_m-x_n\|})(x_m-x_n)$ \\
-\hline
-Wave speed calibration (typical) & $c\approx \sqrt{T/\rho}$ (effective $T$ from $\kappa,a_0$) & $c\sim a\sqrt{k/m}$ \\
-Pre-tension control & $\|\partial_i X\|\neq a_0$ initially & $a\neq \ell_0$ initially \\
-Boundary conditions & periodic / Dirichlet / mixed & periodic / clamped nodes / mixed \\
-Time integrator & PDE integrator (e.g., symplectic) & velocity Verlet, etc. \\
-\hline
-\end{tabular}
-\end{table}
+\subsection{Dimensional bookkeeping}
+The project separates intrinsic dimension \(d\) and embedding dimension \(N\), see
+\texttt{branesim.core.dimensions.BraneDims} and \texttt{MassModel}.
+For the present paper, \(d=3\), \(N=4\).
 
 % ============================================================
 \section{Narrowband Multiscale Ansatz}
