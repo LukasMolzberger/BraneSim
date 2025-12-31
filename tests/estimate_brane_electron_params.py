@@ -1,21 +1,37 @@
 #!/usr/bin/env python3
 """
-Option-1 (Cauchy–Born) parameter estimation for the brane-electron test mode.
+Option 2 (St. Venant–Kirchhoff) parameter estimator for a brane-electron test ansatz.
 
-Model:
+No microstructure: no h, no bond sets.
+
+Geometry:
   X(q,t) = (q, w(q,t)) in R^4, q in R^3
-  W(grad w) = (1/Vcell) sum_a 0.5*k_a * ( sqrt(|a|^2 + (grad w·a)^2 ) - alpha|a| )^2
+  g = I + grad w (grad w)^T
+Reference metric:
+  g0 = alpha^2 I,   0 < alpha < 1   (pre-stress / pre-tension analogue)
+Strain:
+  C = g0^{-1} g = alpha^{-2} g
+  E = 1/2 (C - I)
+StVK energy:
+  W = mu tr(E^2) + (lambda/2)(tr E)^2
+with lambda = 2 mu nu / (1 - 2 nu) for isotropic 3D material.
 
-Electron test ansatz:
-  w(t,r) = A * exp(-r^2/(2 a^2)) * cos(omega t)
+Ansatz:
+  w(t,r) = A exp(-r^2/(2a^2)) cos(omega t)
+with a=lambda_C, omega=omega_C.
 
-Pipeline:
-  - Choose h, alpha, bond weights
-  - Calibrate k0 from wave speed c (linearization about grad w = 0)
-  - Either:
-      Mode A (recommended): choose eps = A/a, solve rho from E = m_e c^2
-      Mode B: fix rho, solve A from E = m_e c^2
-  - Compute a self-consistency residual norm for the ansatz at t=0
+Calibration:
+  small-slope transverse wave speed:  c^2 = K/rho  with K = mu * F(alpha,nu)
+  => for rho=1: mu1 = c^2 / F(alpha,nu)
+
+Energy normalization (Mode A):
+  choose eps = A/a
+  compute E1 with rho=1 (and mu1, lambda1)
+  set rho = E0 / E1, and then mu = rho*mu1, lambda = rho*lambda1
+
+Reports:
+  - rho, mu, lambda
+  - dimensionless relative residual at t=0
 """
 
 from __future__ import annotations
@@ -34,243 +50,145 @@ omega_C = E0 / hbar
 lambda_C = hbar / (m_e * c)
 
 # ----------------------------
-# Bond set (unique, no double-count)
+# StVK helpers
 # ----------------------------
-def bond_set(h: float):
+def lame_from_mu_nu(mu: float, nu: float) -> float:
+    if not (0.0 < nu < 0.5):
+        raise ValueError("Poisson ratio nu must be in (0, 0.5).")
+    return 2.0 * mu * nu / (1.0 - 2.0 * nu)
+
+def F_alpha_nu(alpha: float, nu: float) -> float:
     """
-    Return list of bonds a (3-vector) and category labels: 'axis','face','body'
-    Unique half-set sufficient for energy density (no double counting).
+    Factor such that K = mu * F(alpha,nu) is the quadratic coefficient in W ~ W0 + 0.5 K |grad w|^2
+    for the Monge-gauge transverse field with reference metric g0=alpha^2 I.
     """
-    bonds = []
+    if not (0.0 < alpha < 1.0):
+        raise ValueError("alpha must be in (0,1) to produce pre-stress and a finite linear wave speed.")
+    ar = alpha**(-2)  # alpha^{-2}
+    return (ar - 1.0) * ar * ((1.0 + nu) / (1.0 - 2.0 * nu))
 
-    # 3 axis bonds
-    bonds += [(np.array([h, 0, 0], dtype=float), "axis")]
-    bonds += [(np.array([0, h, 0], dtype=float), "axis")]
-    bonds += [(np.array([0, 0, h], dtype=float), "axis")]
-
-    # 6 face diagonals: (h, ±h, 0) etc
-    bonds += [(np.array([h,  h, 0], dtype=float), "face")]
-    bonds += [(np.array([h, -h, 0], dtype=float), "face")]
-    bonds += [(np.array([h, 0,  h], dtype=float), "face")]
-    bonds += [(np.array([h, 0, -h], dtype=float), "face")]
-    bonds += [(np.array([0,  h,  h], dtype=float), "face")]
-    bonds += [(np.array([0,  h, -h], dtype=float), "face")]
-
-    # 4 body diagonals with x positive: (h, ±h, ±h)
-    for sy in (+1, -1):
-        for sz in (+1, -1):
-            bonds += [(np.array([h, sy*h, sz*h], dtype=float), "body")]
-
-    return bonds
-
-# ----------------------------
-# Linear calibration: k0 from c
-# ----------------------------
-def k0_from_c(rho: float, h: float, alpha: float, w_axis: float, w_face: float, w_body: float) -> float:
+def W_stvk_from_wr(wr: float, alpha: float, mu: float, lam: float) -> float:
     """
-    Compute base spring constant k0 such that small-slope wave speed is c.
-    Uses linearization:
-      c^2 = K/rho,  K = (1-alpha)/Vcell * (1/3) sum_a k_a |a|^2
-      k_a = k0 * w_cat
+    For spherical symmetry grad w = wr r_hat, the induced metric has eigenvalues:
+      g: (1+wr^2, 1, 1)
+    With g0=alpha^2 I => C = alpha^{-2} g has eigenvalues:
+      C: (ar(1+wr^2), ar, ar), ar=alpha^{-2}
+    Strain eigenvalues:
+      e_r = 0.5*(ar(1+wr^2) - 1)
+      e_t = 0.5*(ar - 1)   (twice)
+    Then
+      trE = e_r + 2 e_t
+      trE2 = e_r^2 + 2 e_t^2
+      W = mu trE2 + 0.5 lam (trE)^2
     """
-    if not (alpha < 1.0):
-        raise ValueError("Need alpha < 1 for linear (pre-tension) stiffness around grad w = 0.")
+    ar = alpha**(-2)
+    et = 0.5 * (ar - 1.0)
+    er = et + 0.5 * ar * (wr*wr)
 
-    Vcell = h**3
-    bonds = bond_set(h)
+    trE = er + 2.0 * et
+    trE2 = er*er + 2.0 * et*et
+    return mu * trE2 + 0.5 * lam * (trE*trE)
 
-    # S = sum_a w_cat |a|^2
-    S = 0.0
-    for a, cat in bonds:
-        L2 = float(a @ a)
-        w = w_axis if cat == "axis" else (w_face if cat == "face" else w_body)
-        S += w * L2
-
-    # k0
-    k0 = (3.0 * rho * c**2 * Vcell) / ((1.0 - alpha) * S)
-    return k0
-
-# ----------------------------
-# Energy density W for given scalar radial gradient wr = dw/dr and time phase
-# ----------------------------
-def W_density_from_wr(
-    wr: float,
-    h: float,
-    alpha: float,
-    k0: float,
-    w_axis: float,
-    w_face: float,
-    w_body: float,
-    n_mu: int = 48,
-) -> float:
+def p_stvk_from_wr(wr: float, alpha: float, mu: float, lam: float) -> float:
     """
-    Compute W for spherical symmetry where grad w = wr * r_hat.
-    We must average over the orientation between r_hat and each bond direction.
-    For a given bond vector a with length L, r_hat·a = L * mu, mu in [-1,1] uniform.
-    Then:
-      ell = sqrt(L^2 + (wr * L * mu)^2) = L*sqrt(1 + (wr*mu)^2)
-      delta = ell - alpha*L
-      U = 0.5*k_a*delta^2
-    W = (1/Vcell) * sum_a <U>_mu
+    p(wr) = dW/dwr for spherical symmetry.
+    Uses analytic derivative.
+
+    Using x = wr^2:
+      dW/dwr = 2 wr * dW/dx
     """
-    Vcell = h**3
-    bonds = bond_set(h)
+    ar = alpha**(-2)
+    et = 0.5 * (ar - 1.0)
+    x = wr*wr
 
-    # Gauss-Legendre quadrature for mu in [-1,1]
-    mu, w_mu = np.polynomial.legendre.leggauss(n_mu)
+    # trE = 3 et + 0.5 ar x
+    trE = 3.0*et + 0.5*ar*x
 
-    W_sum = 0.0
-    for a, cat in bonds:
-        L = float(np.linalg.norm(a))
-        wcat = w_axis if cat == "axis" else (w_face if cat == "face" else w_body)
-        k_a = k0 * wcat
+    # d(trE)/dx = 0.5 ar
+    # d(trE^2)/dx = 2 trE * dtrE/dx = trE * ar
+    # trE2 = 3 et^2 + et ar x + 0.25 ar^2 x^2
+    # d(trE2)/dx = et ar + 0.5 ar^2 x
+    dWdx = mu * (et*ar + 0.5*(ar*ar)*x) + 0.5*lam * (trE * ar)
 
-        # ell(mu) = L*sqrt(1 + (wr*mu)^2)
-        s = wr * mu
-        ell = L * np.sqrt(1.0 + s*s)
-        delta = ell - alpha * L
-        U = 0.5 * k_a * (delta*delta)
-
-        # average over mu (uniform): (1/2)∫_{-1}^1 U dmu
-        U_avg = 0.5 * float(np.sum(w_mu * U))
-        W_sum += U_avg
-
-    return W_sum / Vcell
+    return 2.0 * wr * dWdx
 
 # ----------------------------
-# Electron ansatz and energy integration
+# Ansatz profile
 # ----------------------------
-def gaussian_profile(r: np.ndarray, a: float) -> np.ndarray:
-    return np.exp(-0.5 * (r/a)**2)
+def f_gauss(r: np.ndarray, a: float) -> np.ndarray:
+    return np.exp(-0.5*(r/a)**2)
 
-def gaussian_profile_dr(r: np.ndarray, a: float) -> np.ndarray:
-    # d/dr exp(-r^2/(2a^2)) = -(r/a^2)*exp(...)
-    return -(r/(a*a)) * np.exp(-0.5 * (r/a)**2)
+def f_gauss_dr(r: np.ndarray, a: float) -> np.ndarray:
+    return -(r/(a*a)) * np.exp(-0.5*(r/a)**2)
 
+# ----------------------------
+# Energy integral (time-averaged), using EXCESS W - W(0)
+# ----------------------------
 def total_energy_time_averaged(
     rho: float,
-    h: float,
     alpha: float,
-    k0: float,
-    w_axis: float,
-    w_face: float,
-    w_body: float,
+    mu: float,
+    lam: float,
     A: float,
     a: float,
     omega: float,
     Rmax_factor: float = 10.0,
     nr: int = 4000,
-    nt: int = 48,
-    n_mu: int = 48,
+    nt: int = 64,
 ) -> float:
-    """
-    Compute time-averaged total energy for w(t,r) = A*f(r)*cos(omega t), f Gaussian.
-
-    E = ∫ 4π r^2 [ <0.5 rho (wt)^2> + <W(grad w)> ] dr
-    Kinetic average done analytically. Potential average sampled in time.
-    """
     Rmax = Rmax_factor * a
     r = np.linspace(0.0, Rmax, nr)
-    dr = r[1] - r[0]
 
-    f = gaussian_profile(r, a)
-    fp = gaussian_profile_dr(r, a)
+    f = f_gauss(r, a)
+    fp = f_gauss_dr(r, a)
 
-    # Kinetic average: <0.5 rho (wt)^2> = 0.25 rho omega^2 A^2 f^2
+    # kinetic average: <0.5 rho wt^2> = 0.25 rho omega^2 A^2 f^2
     kin = 0.25 * rho * (omega**2) * (A**2) * (f*f)
 
-    # Potential average: sample time phases
+    # baseline W0 at wr=0
+    W0 = W_stvk_from_wr(0.0, alpha, mu, lam)
+
+    # time-average potential by sampling phase
     phases = np.linspace(0.0, 2.0*math.pi, nt, endpoint=False)
-    W_accum = np.zeros_like(r)
+    Wacc = np.zeros_like(r)
     for ph in phases:
         cosph = math.cos(ph)
-        wr = (A * fp) * cosph  # radial derivative
-        # compute W at each r point
-        # (vectorize over r by looping; keep it simple/robust)
-        for i in range(nr):
-            W_accum[i] += W_density_from_wr(
-                wr=float(wr[i]),
-                h=h,
-                alpha=alpha,
-                k0=k0,
-                w_axis=w_axis,
-                w_face=w_face,
-                w_body=w_body,
-                n_mu=n_mu,
-            )
+        wr = (A * fp) * cosph
+        # vectorize W(wr)
+        Wvals = np.array([W_stvk_from_wr(float(wri), alpha, mu, lam) for wri in wr], dtype=float)
+        Wacc += Wvals
 
-    W_avg = W_accum / nt
+    Wavg = (Wacc / nt) - W0
+    Wavg = np.maximum(Wavg, 0.0)
 
-    integrand = 4.0*math.pi * r*r * (kin + W_avg)
-    # trapezoidal integration
-    E = float(np.trapz(integrand, r))
-    return E
+    integrand = 4.0*math.pi * r*r * (kin + Wavg)
+    return float(np.trapezoid(integrand, r))
 
 # ----------------------------
-# Residual norm for "is this an approximate solution?"
+# Dimensionless relative residual at t=0
 # ----------------------------
-def p_from_wr_numeric(
-    wr: float,
-    h: float,
-    alpha: float,
-    k0: float,
-    w_axis: float,
-    w_face: float,
-    w_body: float,
-    n_mu: int = 48,
-    dwr: float = 1e-6,
-) -> float:
-    """
-    p(wr) = dW/dwr (instantaneous, no time average) for spherical symmetry.
-    Finite difference derivative of W_density_from_wr.
-    """
-    Wp = W_density_from_wr(wr + dwr, h, alpha, k0, w_axis, w_face, w_body, n_mu=n_mu)
-    Wm = W_density_from_wr(wr - dwr, h, alpha, k0, w_axis, w_face, w_body, n_mu=n_mu)
-    return (Wp - Wm) / (2.0*dwr)
-
-def residual_norm_at_t0(
+def relative_residual_rms_at_t0(
     rho: float,
-    h: float,
     alpha: float,
-    k0: float,
-    w_axis: float,
-    w_face: float,
-    w_body: float,
+    mu: float,
+    lam: float,
     A: float,
     a: float,
     omega: float,
     Rmax_factor: float = 10.0,
-    nr: int = 2000,
-    n_mu: int = 48,
+    nr: int = 2500,
 ) -> float:
-    """
-    Compute an L2-like residual norm for the ansatz at t=0 (cos=1):
-      res(r) = rho*(-omega^2 w) - (1/r^2) d/dr (r^2 p(wr))
-    where p(wr) = dW/dwr (instantaneous).
-
-    Returns sqrt( ∫ res(r)^2 4π r^2 dr / ∫ 4π r^2 dr ) for normalization.
-    """
     Rmax = Rmax_factor * a
-    r = np.linspace(1e-12, Rmax, nr)  # avoid r=0 singularity
-    f = gaussian_profile(r, a)
-    fp = gaussian_profile_dr(r, a)
+    r = np.linspace(1e-12, Rmax, nr)
+
+    f = f_gauss(r, a)
+    fp = f_gauss_dr(r, a)
 
     w = A * f
     wr = A * fp
 
-    # compute p(wr) pointwise
-    p = np.zeros_like(r)
-    for i in range(nr):
-        p[i] = p_from_wr_numeric(
-            wr=float(wr[i]),
-            h=h,
-            alpha=alpha,
-            k0=k0,
-            w_axis=w_axis,
-            w_face=w_face,
-            w_body=w_body,
-            n_mu=n_mu,
-        )
+    # p(wr) pointwise
+    p = np.array([p_stvk_from_wr(float(wri), alpha, mu, lam) for wri in wr], dtype=float)
 
     # divergence in spherical: (1/r^2) d/dr (r^2 p)
     rp2p = (r*r) * p
@@ -280,92 +198,83 @@ def residual_norm_at_t0(
 
     res = rho * (-omega**2 * w) - div
 
+    scale = rho * (omega**2) * np.maximum(np.abs(w), 1e-30)
+    rel = res / scale
+
     wgt = 4.0*math.pi * r*r
-    num = float(np.trapz((res*res)*wgt, r))
-    den = float(np.trapz(wgt, r))
+    num = float(np.trapezoid((rel*rel)*wgt, r))
+    den = float(np.trapezoid(wgt, r))
     return math.sqrt(num/den)
 
 # ----------------------------
-# Main estimation routines
+# Mode A estimator
 # ----------------------------
-def estimate_mode_A(
-    alpha: float,
-    eps: float,
-    N: int,
-    w_axis: float = 1.0,
-    w_face: float = 1.0,
-    w_body: float = 1.0,
-):
-    """
-    Mode A: Choose eps=A/a and solve rho from E=E0, with a=lambda_C and omega=omega_C.
-    """
+def estimate_mode_A(alpha: float, nu: float, eps: float, Rmax_factor: float = 10.0):
     a = lambda_C
     omega = omega_C
-    h = a / N
     A = eps * a
 
-    # Compute k0 for rho=1
+    # Calibrate mu for rho=1 so that small-slope wave speed is c:
+    # K = mu * F(alpha,nu), c^2 = K/rho
+    F = F_alpha_nu(alpha, nu)
     rho1 = 1.0
-    k0_1 = k0_from_c(rho=rho1, h=h, alpha=alpha, w_axis=w_axis, w_face=w_face, w_body=w_body)
+    mu1 = rho1 * c**2 / F
+    lam1 = lame_from_mu_nu(mu1, nu)
 
     # Energy for rho=1
     E1 = total_energy_time_averaged(
-        rho=rho1, h=h, alpha=alpha, k0=k0_1,
-        w_axis=w_axis, w_face=w_face, w_body=w_body,
+        rho=rho1, alpha=alpha, mu=mu1, lam=lam1,
         A=A, a=a, omega=omega,
-        nr=1500, nt=32, n_mu=32, Rmax_factor=10.0
+        Rmax_factor=Rmax_factor, nr=3500, nt=64
     )
+    if E1 <= 0.0:
+        raise RuntimeError(f"E1 <= 0 (E1={E1}). Try larger eps or different alpha/nu.")
 
+    # Scale rho to hit E0, and scale mu,lam linearly with rho (keeps c fixed because mu/rho stays constant)
     rho = E0 / E1
-    k0 = rho * k0_1
+    mu = rho * mu1
+    lam = rho * lam1
 
-    res = residual_norm_at_t0(
-        rho=rho, h=h, alpha=alpha, k0=k0,
-        w_axis=w_axis, w_face=w_face, w_body=w_body,
+    relres = relative_residual_rms_at_t0(
+        rho=rho, alpha=alpha, mu=mu, lam=lam,
         A=A, a=a, omega=omega,
-        nr=1200, n_mu=24, Rmax_factor=10.0
+        Rmax_factor=Rmax_factor, nr=2000
     )
 
     return {
-        "mode": "A",
         "alpha": alpha,
+        "nu": nu,
         "eps": eps,
-        "N": N,
-        "h": h,
         "a": a,
         "A": A,
         "omega": omega,
         "rho": rho,
-        "k0": k0,
-        "E_check": E0,
-        "residual_norm": res,
+        "mu": mu,
+        "lambda": lam,
+        "E_target": E0,
+        "E1_rho_eq_1": E1,
+        "relative_residual_rms": relres,
+        "F(alpha,nu)": F,
     }
 
-def estimate_sweep_alpha(
-    alphas: np.ndarray,
-    eps: float,
-    N: int,
-    w_axis: float = 1.0,
-    w_face: float = 1.0,
-    w_body: float = 1.0,
-):
-    out = []
-    for alpha in alphas:
-        out.append(estimate_mode_A(alpha=float(alpha), eps=eps, N=N, w_axis=w_axis, w_face=w_face, w_body=w_body))
-        print(f"alpha={alpha:.4f} -> rho={out[-1]['rho']:.3e}, k0={out[-1]['k0']:.3e}, residual={out[-1]['residual_norm']:.3e}")
-    return out
-
 if __name__ == "__main__":
-    # Example run
-    # You should sweep alpha and eps. alpha controls pre-tension/coupling; eps controls amplitude scale.
-    alphas = np.linspace(0.90, 0.995, 6)   # keep < 1
-    eps = 0.25                             # A/a
-    N = 30                                 # h = lambda_C/N
+    # Example sweep
+    alphas = np.linspace(0.90, 0.99, 6)  # must be < 1
+    nu = 0.25
+    eps = 0.25
 
-    results = estimate_sweep_alpha(alphas, eps=eps, N=N, w_axis=1.0, w_face=1.0, w_body=1.0)
+    results = []
+    for alpha in alphas:
+        d = estimate_mode_A(float(alpha), nu=nu, eps=eps, Rmax_factor=10.0)
+        results.append(d)
+        print(
+            f"alpha={d['alpha']:.6f} nu={d['nu']:.3f} eps={d['eps']:.3f} -> "
+            f"rho={d['rho']:.3e}, mu={d['mu']:.3e} Pa, lambda={d['lambda']:.3e} Pa, "
+            f"E1(rho=1)={d['E1_rho_eq_1']:.3e}, rel_res={d['relative_residual_rms']:.3e}"
+        )
 
-    best = min(results, key=lambda d: d["residual_norm"])
-    print("\nBEST (min residual):")
+    best = min(results, key=lambda x: x["relative_residual_rms"])
+    print("\nBEST (min relative residual):")
     for k, v in best.items():
         if isinstance(v, float):
             print(f"  {k}: {v:.6e}")
