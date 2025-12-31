@@ -126,6 +126,121 @@ in $\mathbb{R}^4$.
 All admissible variations are periodic (for $\mathbb{T}^3$) or satisfy the
 appropriate boundary conditions (for clamped boundaries).
 
+% ------------------------------------------------------------
+\subsection{Spherical material coordinates (coordinate change only)}
+\label{subsec:spherical_material_coords}
+% ------------------------------------------------------------
+
+\paragraph{Important: this is only a coordinate change.}
+All dynamical statements remain those of the coordinate-free formulation
+\(\X:\Omega\times\R\to\R^4\) with induced metric \(g_{ij}=\partial_i\X\cdot\partial_j\X\).
+We now introduce spherical coordinates on the \emph{intrinsic/material} domain
+\(\Omega\subset\R^3\) as a convenient chart for localized excitations.
+This does \emph{not} constrain the embedding \(\X\): the components \(X^1,X^2,X^3,X^4\)
+remain general functions of the intrinsic coordinates.
+
+\paragraph{Change of intrinsic coordinates.}
+Let \(\x=(x^1,x^2,x^3)\) be Cartesian material coordinates on \(\Omega\).
+On a local patch (away from the axis singularities) we use
+\[
+q^a=(r,\theta,\phi),\qquad
+x^1=r\sin\theta\cos\phi,\;\;
+x^2=r\sin\theta\sin\phi,\;\;
+x^3=r\cos\theta,
+\]
+with \(r\ge 0\), \(\theta\in[0,\pi]\), \(\phi\in[0,2\pi)\).
+The Jacobian is
+\[
+\dd^3x = J(q)\,\dd r\,\dd\theta\,\dd\phi,
+\qquad
+J(q)=r^2\sin\theta.
+\]
+
+\paragraph{Euclidean material metric in spherical coordinates.}
+The Euclidean metric \(\delta\) on the material space \(\R^3\) has components
+\[
+\delta_{ab}(q)=\mathrm{diag}\!\big(1,\; r^2,\; r^2\sin^2\theta\big),
+\qquad a,b\in\{r,\theta,\phi\}.
+\]
+Thus statements like \(g^0_{ij}\propto \delta_{ij}\) remain \emph{isotropic} and
+coordinate-independent; only the component form changes under the coordinate map.
+
+\paragraph{Embedding map and induced metric in the spherical chart.}
+We now write the same embedding field as
+\[
+\X=\X(q,t)=\big(X^1(q,t),X^2(q,t),X^3(q,t),X^4(q,t)\big)\in\R^4.
+\]
+The induced metric is still
+\[
+g_{ab}(q,t)=\partial_a\X(q,t)\cdot\partial_b\X(q,t),
+\qquad a,b\in\{r,\theta,\phi\}.
+\]
+No approximation is made here; this is purely a change of variables.
+
+\paragraph{Reference metric, equilibrium scale, and coupling parameter.}
+In Cartesian material coordinates we use the isotropic reference metric
+\(g^0_{ij}=\ell_0^2\delta_{ij}\). In the spherical chart this becomes
+\[
+g^0_{ab}(q)=\ell_0^2\,\delta_{ab}(q)
+=\ell_0^2\,\mathrm{diag}\!\big(1,\; r^2,\; r^2\sin^2\theta\big).
+\]
+If boundary conditions enforce an equilibrium geometric scale \(h_\star\) (uniform in all
+directions), the corresponding equilibrium metric reads
+\[
+g^\star_{ab}(q)=h_\star^2\,\delta_{ab}(q).
+\]
+We retain the single, direction-free coupling knob
+\[
+\alpha := \frac{\ell_0}{h_\star}\in(0,1],
+\qquad
+\varepsilon := \alpha^{-1}-1=\frac{h_\star-\ell_0}{\ell_0}.
+\]
+This parameter is unchanged by the coordinate choice.
+
+% ------------------------------------------------------------
+\subsection{Continuous Lagrangian in spherical material coordinates}
+\label{subsec:continuous_lagrangian_spherical}
+% ------------------------------------------------------------
+
+\paragraph{Coordinate-free Lagrangian density (unchanged physics).}
+Let \(\rho_m\) be the brane mass density. The Lagrangian density is
+\[
+\Lag(\X,\partial_t\X,\nabla\X)=\frac{\rho_m}{2}\,|\partial_t\X|^2 - W(g;g^0),
+\qquad
+g_{ab}=\partial_a\X\cdot\partial_b\X,
+\]
+where \(W\) is any isotropic hyperelastic energy density minimized at \(g=g^0\)
+(equivalently: \(W\) depends only on invariants / principal stretches of
+\(\widehat g=(g^0)^{-1}g\)). This matches the rest-length spring family in the
+small-strain limit; the coordinate choice does not modify \(W\).
+
+\paragraph{Action in spherical material coordinates.}
+Using \(\dd^3x = J(q)\,\dd r\,\dd\theta\,\dd\phi\) with \(J=r^2\sin\theta\), the action is
+\[
+S[\X]=\int \dd t\int_{\Omega}\dd^3x\;\Lag
+=\int \dd t\int_{\Omega_q}\dd r\,\dd\theta\,\dd\phi\; J(q)\,
+\Big(\frac{\rho_m}{2}|\partial_t\X|^2 - W(g;g^0)\Big),
+\]
+where \(\Omega_q\) is the intrinsic domain expressed in \((r,\theta,\phi)\).
+
+\paragraph{Euler--Lagrange equations (same dynamics, component form only).}
+Define
+\[
+S^{ab}:=\frac{\partial W}{\partial g_{ab}},
+\qquad
+P_A^{\;a}:=\frac{\partial W}{\partial(\partial_a X^A)} = 2\,S^{ab}\,\partial_b X^A,
+\qquad A=1,\dots,4.
+\]
+Then the equations of motion in the spherical chart read
+\[
+\rho_m\,\partial_{tt}X^A
+=\frac{1}{J(q)}\,\partial_a\!\Big(J(q)\,P_A^{\;a}\Big),
+\qquad A=1,\dots,4,
+\qquad J(q)=r^2\sin\theta.
+\]
+This is exactly the Cartesian divergence form \(\rho_m \partial_{tt}X^A=\partial_i P_A^{\;i}\),
+written in spherical material coordinates via the standard Jacobian factor.
+
 \subsection{Isometric geometry: induced metric and reference metric}
 The induced metric on the brane is
 \begin{equation}
