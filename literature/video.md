@@ -5,3 +5,4 @@ https://www.youtube.com/watch?v=bU6E_jk5wU8 Introduction to geometric phase effe
 https://www.youtube.com/watch?v=mhy-ZKSARxI Visualize Spectral Decomposition | SEE Matrix, Chapter 2
 https://www.youtube.com/watch?v=g4qa1KCyGfc Spherical Harmonics and the Multipole Expansion
 https://www.youtube.com/watch?v=oEq9ROl9Umk Lecture 18: The Laplace Operator (Discrete Differential Geometry)
+https://www.youtube.com/watch?v=6tZXSl1dL5A Electrons Don't Actually Orbit Like This

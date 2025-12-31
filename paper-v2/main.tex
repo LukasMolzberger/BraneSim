@@ -177,6 +177,31 @@ g_{ab}(q,t)=\partial_a\X(q,t)\cdot\partial_b\X(q,t),
 \]
 No approximation is made here; this is purely a change of variables.
 
+\paragraph{Optional: static gauge (transverse height field) for later use.}
+For later sections focused on transverse confinement via the geometric nonlinearity in \(X^4\),
+it is convenient to consider the \emph{static gauge} as a special case of the general embedding:
+we identify the first three embedding components with the standard Euclidean chart of the
+material space and treat the fourth component as a scalar height field,
+\[
+(X^1,X^2,X^3)(q,t) = (x^1(q),x^2(q),x^3(q)),
+\qquad
+X^4(q,t)=u(q,t).
+\]
+In the spherical material chart this means
+\[
+(x^1,x^2,x^3)=(r\sin\theta\cos\phi,\; r\sin\theta\sin\phi,\; r\cos\theta),
+\qquad
+\X(q,t)=\big(x^1(q),x^2(q),x^3(q),u(q,t)\big).
+\]
+This is \emph{not} imposed in the model; it is merely a useful representation when in-brane
+deformations are negligible compared to transverse excitation. In this gauge the induced metric
+simplifies to the geometric-nonlinearity form
+\[
+g_{ab}(q,t)=\delta_{ab}(q) + \partial_a u(q,t)\,\partial_b u(q,t),
+\qquad a,b\in\{r,\theta,\phi\},
+\]
+so all transverse gradients feed back into the stretch energy \(W(g;g^0)\) through \(g_{ab}\).
+
 \paragraph{Reference metric, equilibrium scale, and coupling parameter.}
 In Cartesian material coordinates we use the isotropic reference metric
 \(g^0_{ij}=\ell_0^2\delta_{ij}\). In the spherical chart this becomes
