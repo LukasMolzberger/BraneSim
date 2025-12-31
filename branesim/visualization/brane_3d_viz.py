@@ -62,6 +62,7 @@ def field_to_colors(
     vmax: Optional[float] = None,
     gamma: float = 1.5,
     alpha_scale: float = 0.8,
+    min_alpha: float = 0.0,
 ) -> np.ndarray:
     """
     Map field values to RGBA colors with opacity based on magnitude.
@@ -72,6 +73,7 @@ def field_to_colors(
         vmin, vmax: Value range for color mapping (None = auto from data)
         gamma: Gamma correction for opacity (higher = more transparent low values)
         alpha_scale: Overall opacity multiplier
+        min_alpha: Minimum alpha applied to all points
 
     Returns:
         colors: (N, 4) RGBA array
@@ -94,7 +96,10 @@ def field_to_colors(
 
     # Set opacity based on absolute magnitude (with gamma correction)
     magnitude_norm = np.abs(values) / (np.abs(values).max() + 1e-12)
-    colors[:, 3] = alpha_scale * (magnitude_norm ** gamma)
+    alpha = alpha_scale * (magnitude_norm ** gamma)
+    if min_alpha > 0.0:
+        alpha = np.maximum(alpha, min_alpha)
+    colors[:, 3] = alpha
 
     return colors
 
@@ -107,6 +112,7 @@ def render_3d_field(
     point_size: float = 4.0,
     gamma: float = 1.5,
     alpha_scale: float = 0.8,
+    min_alpha: float = 0.0,
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
 ) -> None:
@@ -121,9 +127,10 @@ def render_3d_field(
         point_size: Scatter point size
         gamma: Opacity gamma correction
         alpha_scale: Overall opacity
+        min_alpha: Minimum alpha applied to all points
         vmin, vmax: Color scale limits
     """
-    colors = field_to_colors(values, cmap_name, vmin, vmax, gamma, alpha_scale)
+    colors = field_to_colors(values, cmap_name, vmin, vmax, gamma, alpha_scale, min_alpha)
 
     ax.scatter(
         coords[:, 0],
@@ -234,10 +241,12 @@ def create_3d_animation(
     point_size: float = 4.0,
     gamma: float = 1.5,
     alpha_scale: float = 0.8,
+    min_alpha: float = 0.0,
     xlabel: str = 'x [nm]',
     ylabel: str = 'y [nm]',
     zlabel: str = 'z [nm]',
     title_template: str = '3D Field - t = {:.3f} as',
+    time_scale: float = 1e18,
     fps: int = 20,
     dpi: int = 100,
     camera_motion: Optional[Callable[[int, int], Tuple[float, float]]] = None,
@@ -256,6 +265,7 @@ def create_3d_animation(
         alpha_scale: Overall opacity
         xlabel, ylabel, zlabel: Axis labels
         title_template: Title template with {:.3f} placeholder for time
+        time_scale: Multiplier applied to `times` for title display
         fps: Frames per second
         dpi: Output resolution
         camera_motion: Optional function(frame_idx, num_frames) -> (elev, azim)
@@ -283,7 +293,7 @@ def create_3d_animation(
         ax.view_init(elev=20, azim=-60)
 
     # Create initial scatter
-    colors_0 = field_to_colors(values_0, cmap_name, vmin, vmax, gamma, alpha_scale)
+    colors_0 = field_to_colors(values_0, cmap_name, vmin, vmax, gamma, alpha_scale, min_alpha)
     scatter = ax.scatter(
         coords_0[:, 0],
         coords_0[:, 1],
@@ -295,7 +305,7 @@ def create_3d_animation(
     )
 
     # Title text - initialize with first frame time
-    time_0_as = times[0] * 1e18
+    time_0_as = times[0] * time_scale
     time_text = ax.text2D(0.5, 0.95, title_template.format(time_0_as),
                          transform=ax.transAxes,
                          ha='center', fontsize=13, fontweight='bold')
@@ -303,11 +313,11 @@ def create_3d_animation(
     def update(frame_idx):
         """Update function for animation."""
         coords, values = frames_data[frame_idx]
-        time_as = times[frame_idx] * 1e18
+        time_as = times[frame_idx] * time_scale
 
         # Update scatter data
         scatter._offsets3d = (coords[:, 0], coords[:, 1], coords[:, 2])
-        colors = field_to_colors(values, cmap_name, vmin, vmax, gamma, alpha_scale)
+        colors = field_to_colors(values, cmap_name, vmin, vmax, gamma, alpha_scale, min_alpha)
         scatter.set_color(colors)
 
         # Update camera if motion specified

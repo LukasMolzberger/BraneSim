@@ -55,6 +55,7 @@ from branesim.core.dimensions import MassModel
 from branesim.core.solver import VelocityVerletSolver
 
 from branesim.config.physical_constants import PhysicalConstants
+from branesim.physics.dimensional_mapping import DimensionalMapper
 
 # Point cloud visualization (used for videos)
 from branesim.visualization.brane_3d_viz import create_3d_animation, camera_orbit
@@ -83,12 +84,12 @@ class PhysicalConfig:
     m_point: float = 2.861821e-27
 
     # Quasi-static displacement ramp
-    d_max_in_spacing: float = 0.5
+    d_max_in_spacing: float = 5.0
     ramp_increments: int = 180
-    relax_steps_per_increment: int = 80
+    relax_steps_per_increment: int = 160
 
-    # Numerics (simulation time step + simple damping)
-    dt_sim: float = 5e-3
+    # Numerics (CFL time step + simple damping)
+    cfl_factor: float = 0.1
     damping_per_step: float = 0.02
 
     # Video (point cloud)
@@ -96,14 +97,20 @@ class PhysicalConfig:
     frame_stride: int = 2          # keep every Nth displacement step as a frame
     subsample_factor_3d: int = 2   # take every kth point along each intrinsic axis
 
+    # Display units for plots/videos (default: femtometers)
+    display_unit_name: str = "fm"
+    display_unit_scale: float = 1e15  # meters -> display units
+
     # Visualization: always include a dense local patch around the center
-    patch_radius: int = 6           # in intrinsic grid steps (Chebyshev radius)
+    patch_radius: int = 8           # in intrinsic grid steps (Chebyshev radius)
     include_coarse_background: bool = True
+    center_on_rest: bool = True
 
     # Point cloud appearance
-    point_size: float = 4.0
-    gamma: float = 1.3
-    alpha_scale: float = 0.8
+    point_size: float = 5.5
+    gamma: float = 1.1
+    alpha_scale: float = 0.9
+    min_alpha: float = 0.15
 
 
 def _center_index_from_coords(grid_coords: torch.Tensor, grid_shape: Tuple[int, ...]) -> int:
@@ -178,6 +185,13 @@ def _build_mapper_and_sim_params(cfg: PhysicalConfig) -> Dict[str, Any]:
     # Physical lattice spacing
     h_phys = constants.lambda_C / cfg.points_per_lambdaC
 
+    # Dimensional mapper for stable sim units
+    mapper = DimensionalMapper(
+        h_phys=h_phys,
+        c_light=constants.c,
+        mass_reference=cfg.m_point,
+    )
+
     # Density corresponding to m_point on a 3D lattice cell (physical)
     rho_phys = cfg.m_point / (h_phys ** 3)
 
@@ -189,30 +203,48 @@ def _build_mapper_and_sim_params(cfg: PhysicalConfig) -> Dict[str, Any]:
     frac = constants.rest_length_frac
     k_phys = float((T_target * h_phys) / max(1e-30, (1.0 - frac)))
 
-    # Time step (already in seconds; keep name for backward-compat)
-    dt_s = float(cfg.dt_sim)
+    # Sim parameters
+    h_sim = float(mapper.to_sim_length(h_phys))  # = 1.0
+    rest_length_sim = float(mapper.to_sim_length(L0_phys))
+    k_sim = float(mapper.to_sim_spring_constant(k_phys))
+    m_sim = float(mapper.to_sim_mass(cfg.m_point))
+    rho_sim = float(m_sim / (h_sim ** 3))
+
+    # CFL time step in physical + sim units
+    dt_phys = float(cfg.cfl_factor * h_phys / constants.c)
+    dt_sim = float(mapper.to_sim_time(dt_phys))
 
     return {
         "constants": constants,
+        "mapper": mapper,
         "h_phys": float(h_phys),
-        "h_sim": float(h_phys),  # kept for compatibility; this is physical spacing [m]
+        "h_sim": float(h_sim),
         "rho_phys": float(rho_phys),
-        "rho_sim": float(rho_phys),  # kept for compatibility; this is physical density
+        "rho_sim": float(rho_sim),
         "rest_length_phys": float(L0_phys),
-        "rest_length_sim": float(L0_phys),
+        "rest_length_sim": float(rest_length_sim),
         "spring_k_phys": float(k_phys),
-        "spring_k_sim": float(k_phys),
-        "dt_s": float(dt_s),
+        "spring_k_sim": float(k_sim),
+        "dt_phys": float(dt_phys),
+        "dt_sim": float(dt_sim),
     }
 
 
 def _make_system(cfg: PhysicalConfig, derived: Dict[str, Any]):
     dim = Dimensionality.THREE_D
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        dtype = torch.float32
+    elif torch.backends.mps.is_available():
+        device = torch.device('mps')
+        dtype = torch.float32
+    else:
+        device = torch.device('cpu')
+        dtype = torch.float64
 
     h_sim = derived["h_sim"]
 
-    state = BraneState(cfg.grid_shape, dim, device=device, dtype=torch.float32)
+    state = BraneState(cfg.grid_shape, dim, device=device, dtype=dtype)
     state.initialize_flat_configuration(h_sim)  # spacing [m]
     state.set_fixed_boundaries()  # fix all outer faces
 
@@ -229,7 +261,7 @@ def _make_system(cfg: PhysicalConfig, derived: Dict[str, Any]):
         spacing=h_sim,
     )
 
-    solver = VelocityVerletSolver(dt=derived["dt_s"], mass_model=mass_model, physics=physics, grid=grid)
+    solver = VelocityVerletSolver(dt=derived["dt_sim"], mass_model=mass_model, physics=physics, grid=grid)
     solver.initialize_accelerations(state)
 
     return state, grid, physics, solver
@@ -247,6 +279,8 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
     center_idx = _center_index_from_coords(state.grid_coords, cfg.grid_shape)
     subs_idx = _viz_indices_3d(state.grid_coords, cfg.subsample_factor_3d, center_idx, cfg.patch_radius, cfg.include_coarse_background)
 
+    mapper = derived["mapper"]
+
     X0 = state.rest_positions.clone()  # [N,4] (sim)
 
     # Displacement ramp in sim units
@@ -255,12 +289,13 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
     hold_sim = np.zeros_like(disps_sim)
 
     # Point cloud frames
-    frames_data_nm: List[Tuple[np.ndarray, np.ndarray]] = []
-    frame_disp_nm: List[float] = []
+    frames_data_display: List[Tuple[np.ndarray, np.ndarray]] = []
+    frame_disp_display: List[float] = []
 
     # For measuring displacement field along direction
     direction_cpu = direction.detach().cpu().numpy().astype(np.float64)
     X0_cpu = X0.detach().cpu().numpy().astype(np.float64)
+    center_rest_cpu = X0_cpu[center_idx]
 
     for i, d_sim in enumerate(disps_sim):
         target = X0[center_idx] + float(d_sim) * direction
@@ -287,41 +322,57 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
 
             # displacement field along direction (sim length units)
             delta_dir_sim = (X_sim - X0_cpu) @ direction_cpu  # [N]
+            delta_dir_phys = mapper.to_phys_length(delta_dir_sim)
 
             # coords: deformed xyz positions (sim) -> nm
-            coords_m = X_sim[subs_idx.cpu().numpy()]
+            coords_m = mapper.to_phys_length(X_sim[subs_idx.cpu().numpy()])
 
             # Choose a 3D projection so the *moved* direction is visually obvious:
             # - X^4 run: show (X, Y, X^4) so the clamp motion becomes a geometric axis.
             # - Lateral run (we use X direction): show (Y, Z, X) so the clamp motion is "vertical".
             if name == 'x4':
-                coords_m = coords_m[:, [0, 1, 3]]
+                axes = np.array([0, 1, 3])
             elif name == 'lat':
-                coords_m = coords_m[:, [1, 2, 0]]
+                axes = np.array([1, 2, 0])
             else:
-                coords_m = coords_m[:, :3]
+                axes = np.array([0, 1, 2])
 
-            coords_nm = coords_m * NM
+            coords_m = coords_m[:, axes]
+            if cfg.center_on_rest:
+                coords_m = coords_m - mapper.to_phys_length(center_rest_cpu[axes])
+
+            coords_display = coords_m * cfg.display_unit_scale
 
             # values: displacement along direction (sim) -> nm
-            values_nm = delta_dir_sim[subs_idx.cpu().numpy()] * NM
+            values_display = delta_dir_phys[subs_idx.cpu().numpy()] * cfg.display_unit_scale
 
-            frames_data_nm.append((coords_nm, values_nm))
+            frames_data_display.append((coords_display, values_display))
 
             # title parameter: clamp displacement in nm
-            d_nm = float(d_sim * NM)
-            frame_disp_nm.append(d_nm)
+            d_display = float(mapper.to_phys_length(d_sim) * cfg.display_unit_scale)
+            frame_disp_display.append(d_display)
 
-    # Convert final curves to nm + N
-    disps_nm = disps_sim * NM
-    hold_N = hold_sim  # already Newtons
+    # Convert final curves to display units + N
+    disps_phys_m = mapper.to_phys_length(disps_sim)
+    disps_display = disps_phys_m * cfg.display_unit_scale
+    hold_N = mapper.to_phys_force(hold_sim)
+
+    X_final = state.positions.detach().cpu().numpy().astype(np.float64)
+    delta_dir_final = mapper.to_phys_length((X_final - X0_cpu) @ direction_cpu)
+    max_abs_disp_sim = float(np.max(np.abs(delta_dir_final)))
+    center_disp_sim = float(delta_dir_final[center_idx])
+
+    print(
+        f"[directional_hold_force_physical] {name} max |Δ| = {max_abs_disp_sim * cfg.display_unit_scale:.3f} "
+        f"{cfg.display_unit_name}, center Δ = {center_disp_sim * cfg.display_unit_scale:.3f} {cfg.display_unit_name}"
+    )
 
     # Save plot
     fig = plt.figure(figsize=(6.2, 4.2))
     ax = fig.add_subplot(1, 1, 1)
-    ax.plot(disps_nm, hold_N)
+    ax.plot(disps_display, hold_N)
     ax.set_title(f"Holding force curve ({name})")
-    ax.set_xlabel("Displacement [nm]")
+    ax.set_xlabel(f"Displacement [{cfg.display_unit_name}]")
     ax.set_ylabel("Holding force [N]")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
@@ -336,12 +387,13 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
         data_path,
         disps_sim=disps_sim,
         hold_sim=hold_sim,
-        disps_nm=disps_nm,
+        disps_phys_m=disps_phys_m,
+        disps_display=disps_display,
         hold_N=hold_N,
         h_phys_nm=derived["h_phys"] * NM,
         h_sim=derived["h_sim"],
-        dt_sim=cfg.dt_sim,
-        dt_s=derived["dt_s"],
+        dt_sim=derived["dt_sim"],
+        dt_phys=derived["dt_phys"],
         m_point=cfg.m_point,
         rho_phys=derived["rho_phys"],
         rho_sim=derived["rho_sim"],
@@ -363,23 +415,34 @@ def run_measurement(direction: torch.Tensor, name: str, cfg: PhysicalConfig, run
         )
 
     out_mp4 = run.get_plot_path(f"hold_force_point_cloud_{name}.mp4")
+    if name == 'x4':
+        xlabel, ylabel, zlabel = f"x [{cfg.display_unit_name}]", f"y [{cfg.display_unit_name}]", f"x^4 [{cfg.display_unit_name}]"
+    elif name == 'lat':
+        xlabel, ylabel, zlabel = f"y [{cfg.display_unit_name}]", f"z [{cfg.display_unit_name}]", f"x [{cfg.display_unit_name}]"
+    else:
+        xlabel, ylabel, zlabel = f"x [{cfg.display_unit_name}]", f"y [{cfg.display_unit_name}]", f"z [{cfg.display_unit_name}]"
+
     create_3d_animation(
-        frames_data=frames_data_nm,
-        times=frame_disp_nm,
+        frames_data=frames_data_display,
+        times=frame_disp_display,
         output_path=out_mp4,
         cmap_name='RdBu_r',
         point_size=cfg.point_size,
         gamma=cfg.gamma,
         alpha_scale=cfg.alpha_scale,
-        xlabel='x [nm]',
-        ylabel='y [nm]',
-        zlabel='z [nm]',
-        title_template=f"{name} pull (Δ = {{:.3f}} nm)",
+        min_alpha=cfg.min_alpha,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        zlabel=zlabel,
+        title_template=f"{name} pull (Δ = {{:.3f}} {cfg.display_unit_name})",
+        time_scale=1.0,
         fps=cfg.fps,
         dpi=110,
         camera_motion=camera_motion_func,
         figsize=(10, 8),
     )
+
+    print(f"[directional_hold_force_physical] saved {curve_path} and {out_mp4}")
 
 
 def test_directional_hold_force_physical():
@@ -397,14 +460,15 @@ def test_directional_hold_force_physical():
         **cfg.__dict__,
         "h_phys_nm": derived["h_phys"] * NM,
         "h_sim": derived["h_sim"],
-        "dt_s": derived["dt_s"],
+        "dt_sim": derived["dt_sim"],
+        "dt_phys": derived["dt_phys"],
         "rho_phys_kg_per_m3": derived["rho_phys"],
         "rho_sim": derived["rho_sim"],
         "spring_k_phys_N_per_m": derived["spring_k_phys"],
         "spring_k_sim": derived["spring_k_sim"],
         "rest_length_phys_nm": derived["rest_length_phys"] * NM, 
         "rest_length_sim": derived["rest_length_sim"],
-        "protocol": "quasi-static displacement clamp of center node; report Δ in nm; point-cloud MP4",
+        "protocol": "quasi-static displacement clamp of center node; report Δ in display units; point-cloud MP4",
     })
     print(run.get_summary())
 
@@ -428,14 +492,15 @@ def _main():
         **cfg.__dict__,
         "h_phys_nm": derived["h_phys"] * NM,
         "h_sim": derived["h_sim"],
-        "dt_s": derived["dt_s"],
+        "dt_sim": derived["dt_sim"],
+        "dt_phys": derived["dt_phys"],
         "rho_phys_kg_per_m3": derived["rho_phys"],
         "rho_sim": derived["rho_sim"],
         "spring_k_phys_N_per_m": derived["spring_k_phys"],
         "spring_k_sim": derived["spring_k_sim"],
         "rest_length_phys_nm": derived["rest_length_phys"] * NM, 
         "rest_length_sim": derived["rest_length_sim"],
-        "protocol": "quasi-static displacement clamp of center node; report Δ in nm; point-cloud MP4",
+        "protocol": "quasi-static displacement clamp of center node; report Δ in display units; point-cloud MP4",
     })
     print(run.get_summary())
 

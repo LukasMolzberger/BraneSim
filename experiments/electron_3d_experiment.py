@@ -575,7 +575,8 @@ def main():
     animation_times_3d = []
     frame_interval_3d = max(1, num_steps // 100)  # ~100 frames for 3D
     subsample_factor_3d = 2  # Take every 2nd point along each axis
-    subsample_factor_volume = 2  # Downsample volume for voxel rendering
+    subsample_factor_volume = 1  # Full resolution volume rendering
+    frame_interval_volume = 1  # Match simulation time resolution
     animation_frames_volume = []
     animation_times_volume = []
 
@@ -629,6 +630,8 @@ def main():
             )
             animation_frames_3d.append((coords_3d, values_3d))
             animation_times_3d.append(solver.time)
+        if step % frame_interval_volume == 0:
+            field = electron_field_a_numpy()
             volume = downsample_volume(
                 field,
                 (nx, ny, nz),
@@ -1047,14 +1050,13 @@ def main():
         output_path=output_path_volume,
         cmap_name='RdBu_r',
         fps=20,
-        dpi=140,
+        dpi=160,
         camera_motion=camera_motion_func,
-        density_threshold=0.07,
-        alpha_scale=0.95,
-        gamma=1.15,
-        xlabel='x [nm]',
-        ylabel='y [nm]',
-        zlabel='z [nm]',
+        density_threshold=0.05,
+        alpha_scale=1.0,
+        gamma=0.9,
+        background_color='black',
+        show_axes=False,
         title_template='3D Electron Volume (t = {:.2f} fs)',
         figsize=(10, 8),
     )

@@ -66,6 +66,7 @@ def _setup_volume_axes(
     xlabel: str,
     ylabel: str,
     zlabel: str,
+    show_axes: bool,
 ) -> None:
     """
     Configure 3D axes for volume rendering.
@@ -75,10 +76,19 @@ def _setup_volume_axes(
     ax.set_ylim(0.0, ny * spacing)
     ax.set_zlim(0.0, nz * spacing)
     ax.set_box_aspect([nx, ny, nz])
-    ax.set_xlabel(xlabel, fontsize=11)
-    ax.set_ylabel(ylabel, fontsize=11)
-    ax.set_zlabel(zlabel, fontsize=11)
     ax.grid(False)
+    if show_axes:
+        ax.set_xlabel(xlabel, fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=11)
+        ax.set_zlabel(zlabel, fontsize=11)
+    else:
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_zlabel("")
+        ax.set_axis_off()
 
 
 def create_3d_volume_animation(
@@ -98,6 +108,8 @@ def create_3d_volume_animation(
     ylabel: str = "y [nm]",
     zlabel: str = "z [nm]",
     title_template: str = "3D Electron Volume (t = {:.2f} fs)",
+    background_color: str = "white",
+    show_axes: bool = True,
 ) -> None:
     """
     Create an animated volumetric rendering using voxels.
@@ -124,7 +136,9 @@ def create_3d_volume_animation(
     grid_shape = frames[0].shape
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111, projection="3d")
-    _setup_volume_axes(ax, grid_shape, spacing, xlabel, ylabel, zlabel)
+    fig.patch.set_facecolor(background_color)
+    ax.set_facecolor(background_color)
+    _setup_volume_axes(ax, grid_shape, spacing, xlabel, ylabel, zlabel, show_axes)
 
     # Precompute voxel corner coordinates
     x_edges = np.arange(grid_shape[0] + 1) * spacing
@@ -142,24 +156,13 @@ def create_3d_volume_animation(
     if camera_motion is None:
         camera_motion = camera_orbit
 
-    # Title text
-    time_0_fs = times[0] * 1e15
-    time_text = ax.text2D(
-        0.5,
-        0.95,
-        title_template.format(time_0_fs),
-        transform=ax.transAxes,
-        ha="center",
-        fontsize=13,
-        fontweight="bold",
-    )
-
     def update(frame_idx: int):
         values = frames[frame_idx]
         time_fs = times[frame_idx] * 1e15
 
-        ax.collections.clear()
-        ax.patches.clear()
+        ax.cla()
+        ax.set_facecolor(background_color)
+        _setup_volume_axes(ax, grid_shape, spacing, xlabel, ylabel, zlabel, show_axes)
 
         mask, colors = _volume_to_rgba(
             values,
@@ -174,8 +177,18 @@ def create_3d_volume_animation(
 
         elev, azim = camera_motion(frame_idx, len(frames))
         ax.view_init(elev=elev, azim=azim)
-        time_text.set_text(title_template.format(time_fs))
-        return ax.collections + [time_text]
+        if show_axes:
+            time_text = ax.text2D(
+                0.5,
+                0.95,
+                title_template.format(time_fs),
+                transform=ax.transAxes,
+                ha="center",
+                fontsize=13,
+                fontweight="bold",
+            )
+            return ax.collections + [time_text]
+        return ax.collections
 
     anim = FuncAnimation(
         fig,
