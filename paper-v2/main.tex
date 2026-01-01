@@ -849,31 +849,168 @@ This is the place to state explicitly what \(r\) represents in the brane model
 (e.g., internal polarization/standing-wave basis supporting spin-like behavior).
 
 % ============================================================
-\section{Dynamics: Where the Maxwell Term Must Come From}
+
+\section{Dynamics: Emergent Maxwell Term from Coarse-Graining}
 \label{sec:maxwell_term}
 
-The Berry connection provides gauge-covariant \emph{kinematics}. Electromagnetism requires
-\emph{dynamics} for \(a_\mu\). In this model, the Maxwell-like term must emerge as an
-effective action after coarse-graining brane degrees of freedom.
+Sections~\ref{sec:connections} and~\eqref{eq:covD} provide \emph{gauge-covariant kinematics}:
+a slowly varying mode-frame produces a connection \(a_\mu\) (or \(\bbA_\mu\)) and
+the envelope dynamics depends on it through the covariant derivative.
+Electromagnetism, however, is not only kinematics. It requires an autonomous field equation
+for the connection---equivalently, an effective action for \(a_\mu\) whose Euler--Lagrange
+equations are Maxwell-like.
 
-\subsection{Effective action sketch}
-This subsection states the minimal derivation steps required; completing the coarse-graining calculation is part of the remaining work.
+This section provides a ``paper-grade'' derivation at the level of an \emph{effective field theory}
+(EFT): we state the approximation regime precisely, perform the standard multi-scale reduction,
+and show that the \emph{leading} local, gauge-invariant, quadratic term in the resulting effective
+action is necessarily of Maxwell/Yang--Mills form. The only part not closed analytically is the
+numerical value of the prefactor, which is a material/geometry constant of the brane and can be
+measured in simulation.
+
+\subsection{Assumptions (explicit approximation regime)}
+We work in a regime where the following hold.
 \begin{enumerate}
-  \item Split brane variables into fast carrier-scale modes and slow envelope/mode-frame variables.
-  \item Integrate out fast modes (or average over a cycle) to obtain an effective energy
-        in terms of envelope gradients and frame curvature.
-  \item Show the leading gauge-invariant quadratic term is \(f_{\mu\nu}f^{\mu\nu}\) with a
-        computable prefactor (mapping to \(\mu_0\), \(\epsilon_0\), and an effective coupling).
+  \item \textbf{Separation of scales.} There exists a carrier frequency \(\omega_0\) (Compton-scale in our calibration)
+        and slow envelope variations such that \(\|\partial_\mu \Psi\|\ll \omega_0\|\Psi\|\) and
+        \(\|\partial_\mu \mathbf{E}\|\ll \omega_0\|\mathbf{E}\|\), where \(\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_n]\)
+        is an orthonormal local mode-frame spanning the relevant \(n\)-dimensional internal subspace.
+  \item \textbf{Near-linearity at the carrier scale.} Around the chosen background configuration \(\X^\star\),
+        the carrier-scale dynamics is well-approximated by the quadratic expansion of the brane action.
+        Nonlinearities remain essential for confinement (electron sector) but appear as slow, envelope-scale effects
+        in the present reduction.
+  \item \textbf{Locality and isotropy at coarse scales.} After averaging over a few carrier periods and a few lattice spacings,
+        the resulting EFT is local and (approximately) Lorentz-invariant with characteristic speed \(c\), as already enforced
+        by the \(T=\rho c^2\) calibration and the isotropic discrete stencil.
+  \item \textbf{Gauge redundancy = frame choice.} The frame \(\mathbf{E}\) is only defined up to a local rotation
+        \(\mathbf{E}(x)\to \mathbf{E}(x)\,U(x)\) with \(U(x)\in U(1)\) (or \(U(n)\) in the Wilczek--Zee case),
+        and physical predictions may not depend on this choice.
+  \item \textbf{No explicit symmetry breaking in the EM sector.} There is no term in the coarse-grained energy that fixes a preferred
+        absolute phase (rank-1) or absolute internal orientation (rank-\(n\)) of the EM mode-frame. (If such a term existed, it would generate
+        a Proca-like mass; see below.)
 \end{enumerate}
 
+\subsection{Multi-scale reduction and covariant envelope terms (recap)}
+Start from the brane action
+\[
+S[\X]=\int \dd t \int_{\Omega}\!\left[\frac{\rho}{2}\,|\partial_t\X|^2 - W\!\big(g(\X);g^0\big)\right]\dd^3x,
+\qquad g_{ij}=\partial_i\X\cdot\partial_j\X.
+\]
+Linearizing around a background \(\X^\star\) yields a second-order operator \(\mathcal{L}\) such that (schematically)
+\(\rho\,\partial_{tt}\uvec + \mathcal{L}\uvec = 0\), where \(\uvec\) is the small displacement.
+In the narrowband regime we use the ansatz (cf.~Sec.~\ref{sec:connections})
+\begin{equation}
+\uvec(x,t)\;\approx\;\Re\!\left[\e^{-\ii\omega_0 t}\,\mathbf{E}(x)\,\Psi(x)\right],
+\qquad
+\mathbf{E}^\top\mathbf{E}=\mathbb{I}_n,
+\label{eq:narrowband_ansatz}
+\end{equation}
+where \(\Psi(x)\in\C^n\) is the complex envelope in the chosen mode-frame.
+Projecting the averaged Lagrangian onto the span of \(\mathbf{E}\) and keeping only leading terms in the slow-variation expansion gives
+\begin{equation}
+S_{\rm env}[\Psi;\bbA]\;=\;\int \dd^4x\;\Big(
+\frac{\kappa}{2}\,(D_\mu\Psi)^\dagger (D^\mu\Psi) - V_{\rm eff}(\Psi)
++\cdots\Big),
+\label{eq:Seff_env}
+\end{equation}
+with covariant derivative
+\(
+D_\mu\Psi = (\partial_\mu + \ii\,\bbA_\mu)\Psi
+\)
+and connection
+\(
+\bbA_\mu = \ii\,\mathbf{E}^\dagger\partial_\mu \mathbf{E}
+\)
+(up to the inner-product convention used for the projected complexified subspace).
+The dots denote higher-derivative corrections suppressed by \(\omega_0^{-1}\).
+Equation~\eqref{eq:Seff_env} is the \emph{matter} part of the effective theory. We now derive the \emph{field} part.
+
+\subsection{From brane energy to a curvature penalty}
+The key point is that \(\bbA_\mu\) is not an independent fundamental field: it is a collective coordinate describing
+how the local internal mode-frame twists in spacetime. Any coarse-grained energy associated with such twisting must respect
+the gauge redundancy \(\mathbf{E}\to \mathbf{E}U(x)\).
+Consequently, the effective action for \(\bbA_\mu\) can only be built from gauge-invariant tensors, i.e.
+the curvature
+\begin{equation}
+\bbF_{\mu\nu} = \partial_\mu \bbA_\nu - \partial_\nu \bbA_\mu - \ii[\bbA_\mu,\bbA_\nu]
+\qquad (\,\text{rank }n\,),
+\label{eq:curvature_def}
+\end{equation}
+or \(f_{\mu\nu}=\partial_\mu a_\nu-\partial_\nu a_\mu\) in the rank-1 case.
+
+Under the locality + derivative-expansion assumptions, the leading term in the pure-connection EFT is the lowest-order
+scalar that is (i) gauge invariant, (ii) parity even, and (iii) quadratic in fields and derivatives. Up to total derivatives,
+this is uniquely
+\begin{equation}
+S_{\rm gauge}[\bbA]\;=\;-\frac{1}{2g_{\rm eff}^2}\int \dd^4x\;\tr\!\left(\bbF_{\mu\nu}\bbF^{\mu\nu}\right)
+\quad\text{(rank \(n\))},
+\label{eq:Seff_YM}
+\end{equation}
+reducing to the Maxwell form for \(n=1\),
+\begin{equation}
+S_{\rm gauge}[a]\;=\;-\frac{1}{4\mu_0^{\rm eff}}\int \dd^4x\; f_{\mu\nu}f^{\mu\nu}.
+\label{eq:Seff_Maxwell}
+\end{equation}
+The prefactors \(g_{\rm eff}\) or \(\mu_0^{\rm eff}\) are not free constants in the full model: they are determined by the
+elastic response of the brane and the details of the coarse-graining. In practice, they can be obtained by a numerical ``calibration experiment''
+(see Sec.~\ref{sec:maxwell_calibration}).
+
+\paragraph{Why the Maxwell/Yang--Mills form is inevitable in this regime.}
+Any local quadratic action for a connection has the schematic structure
+\(\int \bbA_\mu\,\Pi^{\mu\nu}(\partial)\,\bbA_\nu\).
+Gauge invariance under \(\bbA_\mu\to U^{-1}\bbA_\mu U + \ii U^{-1}\partial_\mu U\) forces \(\Pi^{\mu\nu}\) to be transverse,
+i.e. proportional to \(\eta^{\mu\nu}\partial^2-\partial^\mu\partial^\nu\) at leading derivative order.
+This transversality is exactly what is encoded by \(\tr(\bbF_{\mu\nu}\bbF^{\mu\nu})\).
+Thus, once (i) gauge redundancy and (ii) locality are accepted, the Maxwell/Yang--Mills term is the universal leading operator.
+
+\subsection{Field equations and sources}
+Varying \(S_{\rm gauge}+S_{\rm env}\) with respect to the connection yields Maxwell/Yang--Mills equations with a source term
+coming from the envelope sector:
+\begin{align}
+\partial_\mu f^{\mu\nu} &= \mu_0^{\rm eff}\, j^\nu
+\qquad\text{(rank \(1\))},\\
+D_\mu \bbF^{\mu\nu} &= g_{\rm eff}^2\, \mathbf{J}^\nu
+\qquad\text{(rank \(n\))},
+\end{align}
+where \(j^\nu\) (or \(\mathbf{J}^\nu\)) is the Noether current associated with the gauge redundancy of the projected envelope action.
+In the rank-1 case, to compare with the standard QED normalization one may identify the physical potential by a scale factor
+\(A_\mu = (\hbar/q)\,a_\mu\), which turns the Berry curvature into the usual field tensor \(F_{\mu\nu}=\partial_\mu A_\nu-\partial_\nu A_\mu\)
+and makes the coupling constant appear in the matter term rather than in the definition of the connection (cf.~Sec.~\ref{sec:qed_like}).
+
+\subsection{Why the emergent gauge field is massless here}
+A mass term would have the form \(\int m_A^2\,\tr(\bbA_\mu\bbA^\mu)\) (Proca).
+Such a term is \emph{not} gauge invariant and therefore cannot appear in the EFT unless the gauge redundancy is explicitly or spontaneously broken.
+Under Assumption~(5), the first allowed pure-connection operator is \(\tr(\bbF_{\mu\nu}\bbF^{\mu\nu})\), which describes a massless gauge field
+with two propagating transverse polarizations (after gauge fixing and constraints).
+This provides the precise sense in which ``the Berry gauge field is automatically massless'' in the present framework:
+masslessness is protected by the frame-gauge redundancy rather than by an additional postulate.
+
 \subsection{Polarization count and suppression of extra embedding modes}
-State the mechanism that restricts the EM sector to two transverse polarizations:
+In 3+1 dimensions, a massless \(U(1)\) gauge field has two physical polarizations.
+The remaining components are removed by gauge choice and the Gauss constraint.
+In our brane picture this corresponds to selecting the \emph{EM subbundle} as a two-dimensional transverse polarization plane
+tangent to the physical 3D brane, and treating other embedding-direction excitations as belonging to different sectors:
 \begin{itemize}
-  \item Choose an EM subbundle built from a 2D transverse polarization plane in the
-        \emph{3D physical space} (tangent to the brane), consistent with observations.
-  \item Show that excitations involving the fourth embedding component are either gapped,
-        confined to the electron sector, or otherwise dynamically suppressed.
+  \item \textbf{Longitudinal/timelike components} of \(a_\mu\) do not represent additional propagating modes; they enforce constraints
+        (e.g. Gauss law) once a gauge is fixed.
+  \item \textbf{Out-of-plane polarization (fourth embedding component).} Excitations predominantly in the fourth embedding direction
+        are not assigned to the EM subbundle. They can be (i) energetically gapped by the background configuration and boundary conditions,
+        (ii) localized as part of confined particle modes, or (iii) suppressed by the choice of projection defining \(\mathbf{E}\).
+        Which mechanism dominates is a quantitative question addressed by simulation diagnostics.
 \end{itemize}
+
+\subsection{Calibration in simulation: extracting the effective permeability from energy vs curvature}
+\label{sec:maxwell_calibration}
+Equation~\eqref{eq:Seff_Maxwell} is predictive once its prefactor is fixed.
+A direct numerical way to obtain \(\mu_0^{\rm eff}\) is:
+\begin{enumerate}
+  \item Prepare a configuration with a controlled, slowly varying twist of the local EM mode-frame (e.g. by boundary driving or by constructing
+        a long-wavelength packet in the EM subbundle).
+  \item Compute the coarse-grained curvature \(f_{\mu\nu}\) (or \(\bbF_{\mu\nu}\)) from the measured mode-frame transport
+        using the discrete analog of~\eqref{eq:curvature_def}.
+  \item Measure the corresponding coarse-grained brane energy increment \(\Delta E\) relative to a reference configuration with \(f_{\mu\nu}\approx 0\).
+  \item Fit \(\Delta E\) to \(\frac{1}{4\mu_0^{\rm eff}}\int f_{\mu\nu}f^{\mu\nu}\,\dd^3x\) (for static configurations) or the full spacetime action
+        (for propagating pulses). The same experiment also checks that the propagation speed of small EM packets matches \(c\) within numerical error.
+\end{enumerate}
 
 % ============================================================
 \section{Simulation Protocol (Reference Implementation)}
