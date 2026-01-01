@@ -19,7 +19,7 @@ class PhysicalConstants:
 
     This class contains:
     1. Universal physical constants (c, ℏ, G, etc.)
-    2. Calibrated microscopic parameters (rest_length_frac)
+    2. Calibrated microscopic parameters (pre_stretch_alpha)
     3. Derived quantities (λ_C, target tension, bending stiffness)
     """
 
@@ -58,9 +58,9 @@ class PhysicalConstants:
     # 2. Gravitational coupling matches G (from κ = c³/(8πG))
     # 3. Rest length is physically consistent with continuum theory
 
-    rest_length_frac: float = 2.321269e-07
+    pre_stretch_alpha: float = 2.321269e-07
     """
-    Dimensionless rest length ratio L₀/a.
+    Dimensionless pre-stretch ratio L₀/a (alpha = L₀ / h_star).
 
     This is the ratio of spring rest length L₀ to lattice spacing a.
 
@@ -154,9 +154,9 @@ class PhysicalConstants:
             L₀: Rest length [m]
 
         Usage:
-            L₀ = rest_length_frac × a
+            L₀ = pre_stretch_alpha × a
         """
-        return self.rest_length_frac * lattice_spacing
+        return self.pre_stretch_alpha * lattice_spacing
 
     def __repr__(self) -> str:
         """String representation showing key constants."""
@@ -167,7 +167,7 @@ class PhysicalConstants:
             f"  m_e = {self.m_e:.6e} kg\n"
             f"  G = {self.G:.6e} m³/(kg·s²)\n"
             f"  λ_C = {self.lambda_C:.6e} m\n"
-            f"  rest_length_frac = {self.rest_length_frac:.6e}\n"
+            f"  pre_stretch_alpha = {self.pre_stretch_alpha:.6e}\n"
             f")"
         )
 
@@ -187,7 +187,8 @@ G = CONSTANTS.G
 epsilon0 = CONSTANTS.epsilon0
 mu0 = CONSTANTS.mu0
 lambda_C = CONSTANTS.lambda_C
-rest_length_frac = CONSTANTS.rest_length_frac
+pre_stretch_alpha = CONSTANTS.pre_stretch_alpha
+rest_length_frac = CONSTANTS.pre_stretch_alpha
 
 
 # ============================================================================
@@ -207,10 +208,10 @@ Usage Examples:
 
 2. Import module-level constants (for quick access):
    ```python
-   from branesim.config.physical_constants import c, lambda_C, rest_length_frac
+   from branesim.config.physical_constants import c, lambda_C, pre_stretch_alpha
 
    h = lambda_C / 20  # Grid spacing
-   L0 = rest_length_frac * h  # Rest length
+   L0 = pre_stretch_alpha * h  # Rest length
    ```
 
 3. Compute derived quantities:
@@ -221,7 +222,7 @@ Usage Examples:
    ```
 
 Calibration Procedure:
-  To recalibrate rest_length_frac for different simulation parameters:
+  To recalibrate pre_stretch_alpha for different simulation parameters:
 
   ```bash
   python -m branesim.tools.calibrate_physical_rest_length \
@@ -231,7 +232,7 @@ Calibration Procedure:
     --output-json config/rest_length_physical.json
   ```
 
-  Then update the rest_length_frac value in this file with the calibrated result.
+  Then update the pre_stretch_alpha value in this file with the calibrated result.
 
 Architecture Notes:
   - This module contains ONLY physical constants and calibrated parameters

@@ -99,7 +99,7 @@ def main():
     # 1D brane parameters
     rho_D = m_point / (h_phys ** D)
     T_D = rho_D * constants.c**2
-    rest_length_phys = constants.rest_length_frac * h_phys
+    rest_length_phys = constants.pre_stretch_alpha * h_phys
     c_wave = constants.c
     k_spring = T_D * (h_phys ** (D - 2))
 

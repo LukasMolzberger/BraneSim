@@ -279,8 +279,8 @@ def main():
     T_D = rho_D * constants.c**2  # Pa (elastic modulus - computed from c² = T_D/rho_D)
 
     # Rest length from physically calibrated constant
-    # L0 = rest_length_frac × a, where rest_length_frac is from continuum calibration
-    rest_length_phys = constants.rest_length_frac * h_phys
+    # L0 = pre_stretch_alpha × a, where pre_stretch_alpha is from continuum calibration
+    rest_length_phys = constants.pre_stretch_alpha * h_phys
 
     # Wave speed (exactly equals c by construction)
     c_wave = constants.c

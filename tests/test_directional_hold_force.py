@@ -200,7 +200,7 @@ def _build_mapper_and_sim_params(cfg: PhysicalConfig) -> Dict[str, Any]:
 
     # Target tension T = rho * c^2 in physical units, map to spring constant k [N/m]
     T_target = constants.compute_target_tension(rho_phys)
-    frac = constants.rest_length_frac
+    frac = constants.pre_stretch_alpha
     k_phys = float((T_target * h_phys) / max(1e-30, (1.0 - frac)))
 
     # Sim parameters

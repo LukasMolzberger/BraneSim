@@ -48,6 +48,12 @@ from typing import Dict, Tuple, Optional
 import numpy as np
 from scipy.optimize import minimize
 
+
+# numpy integration helper: supports both numpy<2.0 (trapz) and numpy>=2.0 (trapezoid)
+def _trapz(y: np.ndarray, x: np.ndarray) -> float:
+    if hasattr(np, "trapezoid"):
+        return float(_trapz(y, x))
+    return float(np.trapz(y, x))
 # ----------------------------
 # Physical constants (SI)
 # ----------------------------
@@ -243,7 +249,7 @@ def total_energy_time_averaged(
     Wavg = np.maximum(Wavg, 0.0)
 
     integrand = 4.0 * math.pi * r * r * (kin + Wavg)
-    return float(np.trapezoid(integrand, r))
+    return float(_trapz(integrand, r))
 
 
 def residuals(
@@ -277,8 +283,8 @@ def residuals(
     res_w = rho * (-omega * omega) * w - div_pw
     scale_w = np.maximum(np.abs(rho * omega * omega * w) + np.abs(div_pw), 1e-30)
     rel_w = res_w / scale_w
-    rel_w_rms = math.sqrt(float(np.trapezoid((rel_w * rel_w) * 4 * math.pi * r * r, r)) /
-                          float(np.trapezoid(4 * math.pi * r * r, r)))
+    rel_w_rms = math.sqrt(float(_trapz((rel_w * rel_w) * 4 * math.pi * r * r, r)) /
+                          float(_trapz(4 * math.pi * r * r, r)))
 
     # --- R residual: time/angle avg approximated by phase average only (as in v1) ---
     # The contraction ansatz is purely radial; the wr term carries the phase.
@@ -303,8 +309,8 @@ def residuals(
     res_R = div_pRp - dR
     scale_R = np.maximum(np.abs(div_pRp) + np.abs(dR), 1e-30)
     rel_R = res_R / scale_R
-    rel_R_rms = math.sqrt(float(np.trapezoid((rel_R * rel_R) * 4 * math.pi * r * r, r)) /
-                          float(np.trapezoid(4 * math.pi * r * r, r)))
+    rel_R_rms = math.sqrt(float(_trapz((rel_R * rel_R) * 4 * math.pi * r * r, r)) /
+                          float(_trapz(4 * math.pi * r * r, r)))
 
     return rel_w_rms, rel_R_rms
 
@@ -381,6 +387,8 @@ class EstimatorConfig:
     policy: str
     rho: float
     s_min: float
+    slope_penalty: float
+    slope_hard: bool
     min_inplane_speed: float
     max_internal_speed: float
     speed_penalty: float
@@ -435,7 +443,18 @@ def objective_from_params(alpha: float, nu: float, beta: float, a: float, cfg: E
         energy_kwargs=energy_kwargs,
     )
     if eps_sol is None:
-        return 1e9, {**diag, **{"mu": mu, "lambda": lam, "cT": cT, "cL": cL, "cw": cw, "fail": 2.0}}
+        # Return a graded penalty (not a flat 1e9) so optimizers can move.
+        E_beta = total_energy_time_averaged(cfg.rho, alpha, mu, lam, eps=0.0, beta=beta, a=a, **energy_kwargs)
+        diag.update({"E_beta": E_beta})
+        pen_local = 0.0
+        if np.isfinite(E_beta) and E_beta >= E0:
+            pen_local += 200.0 * ((E_beta / E0) - 1.0) ** 2
+            obj = 1e3 + pen + pen_local
+            diag.update({"penalty": pen + pen_local, "objective": obj, "fail": 2.1})
+            return obj, diag
+        obj = 1e6 + pen
+        diag.update({"penalty": pen, "objective": obj, "fail": 2.0})
+        return obj, diag
 
     eps = eps_sol.eps
     diag.update({"eps": eps, "E": eps_sol.E_final, "E_beta": eps_sol.E_beta, "E_coeff": eps_sol.E_coeff})
@@ -445,8 +464,12 @@ def objective_from_params(alpha: float, nu: float, beta: float, a: float, cfg: E
     slope_max = eps * math.exp(-0.5)
     diag["slope_max"] = slope_max
     if slope_max < cfg.s_min:
-        # treat as infeasible (hard)
-        return 1e9, {**diag, "fail": 3.0}
+        if cfg.slope_hard:
+            obj = 1e9
+            diag.update({"penalty": pen, "objective": obj, "fail": 3.0})
+            return obj, diag
+        if cfg.slope_penalty > 0.0 and cfg.s_min > 0.0:
+            pen += cfg.slope_penalty * ((cfg.s_min - slope_max) / cfg.s_min) ** 2
 
     # residuals
     res_kwargs = dict(Rmax_factor=cfg.res_Rmax_factor, nr=cfg.res_nr, nt_avg=cfg.res_nt)
@@ -512,7 +535,12 @@ def main() -> None:
     ap.add_argument("--policy", choices=["S", "W", "L"], default="S", help="speed calibration policy")
     ap.add_argument("--rho", type=float, default=float(m_e / (lambda_C ** 3)),
                     help="fixed brane density rho in kg/m^3 (default: m_e/lambda_C^3)")
-    ap.add_argument("--s-min", type=float, default=0.3, help="minimum slope_max (~eps*e^-1/2) to ensure nonlinearity is active")
+    ap.add_argument("--s-min", type=float, default=0.0,
+                    help="target minimum slope_max (~eps*e^-1/2). Used with --slope-penalty or --slope-hard.")
+    ap.add_argument("--slope-penalty", type=float, default=50.0,
+                    help="soft penalty weight for slope_max falling below s-min (0 disables)")
+    ap.add_argument("--slope-hard", action="store_true",
+                    help="treat slope_max < s-min as hard infeasibility")
     ap.add_argument("--min-inplane-speed", type=float, default=0.1, help="minimum allowed min(cT,cL) as fraction of c")
     ap.add_argument("--max-internal-speed", type=float, default=30.0, help="maximum allowed max(cT,cL,cw) as multiple of c")
     ap.add_argument("--speed-penalty", type=float, default=0.0, help="soft penalty weight to keep all speeds near c (0 disables)")
@@ -549,6 +577,8 @@ def main() -> None:
         policy=args.policy,
         rho=float(args.rho),
         s_min=float(args.s_min),
+        slope_penalty=float(args.slope_penalty),
+        slope_hard=bool(args.slope_hard),
         min_inplane_speed=float(args.min_inplane_speed),
         max_internal_speed=float(args.max_internal_speed),
         speed_penalty=float(args.speed_penalty),
@@ -576,14 +606,14 @@ def main() -> None:
     x0 = {
         "alpha": 0.5 * (bounds["alpha"][0] + bounds["alpha"][1]),
         "nu": 0.5 * (bounds["nu"][0] + bounds["nu"][1]),
-        "beta": 0.5 * (bounds["beta"][0] + bounds["beta"][1]),
+        "beta": max(bounds["beta"][0], 1e-10),
         "a": math.exp(0.5 * (bounds["log_a"][0] + bounds["log_a"][1])),
     }
 
     # small random jitter to avoid symmetry traps (optional)
     x0["alpha"] = float(np.clip(x0["alpha"] * (1.0 + 0.02 * rng.standard_normal()), *bounds["alpha"]))
     x0["nu"] = float(np.clip(x0["nu"] * (1.0 + 0.05 * rng.standard_normal()), *bounds["nu"]))
-    x0["beta"] = float(np.clip(x0["beta"] * (1.0 + 0.20 * rng.standard_normal()), *bounds["beta"]))
+    x0["beta"] = float(np.clip(x0["beta"], *bounds["beta"]))
     x0["a"] = float(np.clip(x0["a"] * (1.0 + 0.10 * rng.standard_normal()),
                             math.exp(bounds["log_a"][0]), math.exp(bounds["log_a"][1])))
 
@@ -597,6 +627,8 @@ def main() -> None:
     print(f"  beta   = {diag.get('beta'):.6e}")
     print(f"  a      = {diag.get('a'):.6e}   (a/lambda_C = {diag.get('a')/lambda_C:.6e})")
     print(f"  eps    = {diag.get('eps', float('nan')):.6e}   (A/a)")
+    if 'fail' in diag:
+        print(f"  fail   = {diag.get('fail')}")
     print(f"  slope_max = {diag.get('slope_max', float('nan')):.6e}")
     print(f"  rho    = {diag.get('rho'):.6e} kg/m^3")
     print(f"  mu     = {diag.get('mu'):.6e} Pa")
