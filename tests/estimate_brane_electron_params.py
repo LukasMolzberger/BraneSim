@@ -275,8 +275,8 @@ def mode_A_scale(alpha: float, nu: float, eps: float, beta: float, a: float):
 def pack(alpha, nu, eps, beta, a):
     return np.array([
         math.log(alpha/(1.0-alpha)),                 # alpha in (0,1)
-        math.log((nu-0.01)/(0.49-nu)),               # nu in (0.01,0.49)
-        math.log(eps),                               # eps > 0
+        math.log((nu-0.05)/(0.45-nu)),               # nu in (0.05,0.45)
+        math.log((eps-0.05)/(1.0-eps)),              # eps in (0.05,1.0)
         math.asinh(beta),                            # beta unbounded
         math.log(a / lambda_C),                      # a > 0 relative
     ], dtype=float)
@@ -287,12 +287,15 @@ def unpack(x):
     sig_a = 1.0/(1.0+math.exp(-x[0]))
     alpha = amin + (amax-amin)*sig_a
 
-    # nu in (0.01, 0.49)
-    nmin, nmax = 0.01, 0.49
+    # nu in (0.05, 0.45)
+    nmin, nmax = 0.05, 0.45
     sig_n = 1.0/(1.0+math.exp(-x[1]))
     nu = nmin + (nmax-nmin)*sig_n
 
-    eps = math.exp(x[2])
+    # eps in (0.05, 1.0)
+    eps_min, eps_max = 5e-2, 1.0
+    sig_e = 1.0/(1.0+math.exp(-x[2]))
+    eps = eps_min + (eps_max-eps_min)*sig_e
     beta = math.sinh(x[3])
     a = lambda_C * math.exp(x[4])
     return alpha, nu, eps, beta, a
@@ -311,10 +314,12 @@ def objective(x):
     pen = 0.0
     # keep a not too extreme (soft)
     pen += 0.05 * (math.log(a/lambda_C)**2)
-    # discourage absurd eps (soft)
-    pen += 0.05 * (max(0.0, eps-1.0)**2)
     # discourage huge beta (soft)
     pen += 0.02 * (beta**2)
+    # regularize rho around a natural scale to avoid eps -> 0 loophole
+    rho_star = m_e / (lambda_C**3)
+    w_rho = 0.2
+    pen += w_rho * (math.log10(rho / rho_star)**2)
 
     # combine residuals
     return (rel_w + rel_R) + pen

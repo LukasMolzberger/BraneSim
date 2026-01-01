@@ -13,7 +13,6 @@
 \usepackage{amsmath,amssymb,amsfonts,mathtools}
 \usepackage{bm}
 \usepackage{physics} % bras/kets, derivatives (optional)
-\usepackage{siunitx}
 
 \usepackage{graphicx}
 \usepackage{subcaption}
@@ -305,17 +304,45 @@ $\ell_0^2\delta_{ij}$. This pre-stress is the clean control parameter that
 sets the strength of transverse--lateral coupling via the geometric nonlinearity
 of $g_{ij}(\mathbf{X})$.
 
-\subsection{Isotropic stretch-only hyperelastic energy}
-We postulate a \emph{stretch-only} (no bending term) isotropic energy density
-minimized at $g=g^0$:
+\subsection{Constitutive law (Option 2): St.\ Venant--Kirchhoff (Green--Lagrange strain)}
+\label{subsec:stvk}
+
+We adopt a continuum \emph{hyperelastic} law that is strictly isotropic and contains \emph{no microstructure}:
+the constitutive response depends only on invariants of the induced metric relative to an isotropic reference metric.
+This is the continuum analogue of the ``quadratic metric'' approach and is sufficient for deriving a self-adjoint
+eigenproblem on a spherically symmetric background.
+
+\paragraph{Relative metric and Green--Lagrange strain.}
+Define the relative metric (Cauchy--Green analogue)
+\[
+C := (g^0)^{-1}g,
+\qquad
+E := \frac12(C-I).
+\]
+Here \(E\) is the Green--Lagrange strain tensor.
+
+\paragraph{StVK energy density.}
+We use the St.\ Venant--Kirchhoff strain energy density
 \begin{equation}
-  W(g;g^0)=\frac{K}{2}\sum_{a=1}^3(\sigma_a-1)^2,
-  \qquad \sigma_a=\sqrt{\lambda_a(\widehat g)}.
-  \label{eq:eigenstretch_energy}
+W(g;g^0)=\mu\,\mathrm{tr}(E^2)+\frac{\lambda}{2}\,\big(\mathrm{tr}\,E\big)^2,
+\label{eq:stvk_energy}
 \end{equation}
-Here $K>0$ is the (3D) substrate stiffness with units of Pa (energy per volume).
-This form is \emph{isometric} in the sense that $W$ depends only on the
-rotational invariants (principal stretches) of the relative metric $\widehat g$.
+with Lam\'e parameters \(\mu>0\) and \(\lambda\) (units: Pa). Using Poisson ratio \(\nu\in(0,1/2)\),
+\[
+\nu=\frac{\lambda}{2(\lambda+\mu)},
+\qquad
+\lambda=\frac{2\mu\nu}{1-2\nu}.
+\]
+
+\paragraph{Continuum analogue of pre-tension (the \(\alpha\) knob).}
+The reference metric \(g^0=\ell_0^2\delta\) encodes the \emph{stress-free} geometric scale.
+If boundary conditions enforce a ground-state scale \(h_\star\) (uniform), then
+\[
+\alpha:=\frac{\ell_0}{h_\star}\in(0,1]
+\]
+measures the mismatch between the stress-free scale and the held scale. For \(\alpha<1\) the brane is uniformly
+\emph{pre-stressed} (continuum ``pre-tension''), which controls how strongly transverse gradients backreact
+on in-brane stresses through the geometric nonlinearity of \(g_{ij}(\X)\).
 
 \subsection{Lagrangian, action, and equations of motion}
 Let $\rho_m>0$ be the brane mass density (kg/m$^3$). The Lagrangian density is
@@ -355,11 +382,14 @@ $\mathbf{X}^\star(\mathbf{x})=(h_\star x^1,h_\star x^2,h_\star x^3,0)$ and write
 $\mathbf{X}=\mathbf{X}^\star+\mathbf{u}$ with small $\mathbf{u}(\mathbf{x},t)\in\mathbb{R}^4$.
 Then, to leading order,
 \begin{equation}
-  \rho_m\,\partial_{tt}\mathbf{u} \;=\; K\,\Delta\mathbf{u} \;+\; \mathcal{O}(\|\nabla \mathbf{u}\|^2),
+  \rho_m\,\partial_{tt}\mathbf{u} \;=\; \mathcal{C}(\alpha,\lambda,\mu)\,\Delta\mathbf{u}
+  \;+\;\mathcal{O}(\|\nabla\mathbf{u}\|^2),
   \qquad
-  c^2=\frac{K}{\rho_m}.
+  c^2=\frac{\mathcal{C}(\alpha,\lambda,\mu)}{\rho_m}.
   \label{eq:linear_wave}
 \end{equation}
+Here \(\mathcal{C}(\alpha,\lambda,\mu)\) is the effective small-amplitude stiffness about the pre-stressed background.
+In practice we calibrate parameters so that the relevant narrowband propagation speed equals the observed \(c\).
 This is \emph{rotationally invariant in the intrinsic 3D} because the operator is
 the standard Laplacian $\Delta$.
 
@@ -370,8 +400,113 @@ metric, hence into $W$, hence into the in-brane stresses. The magnitude of the
 resulting coupling in the small-amplitude regime is controlled by the pre-stretch
 parameter $\alpha$ (or equivalently $\varepsilon$) through the background stress.
 
+\subsection{Electron-like modes as a self-adjoint eigenproblem (no ad-hoc constraints)}
+\label{subsec:selfadjoint_eigenproblem}
+
+In textbook derivations of atomic orbitals, constraints such as periodicity, orthonormality, completeness,
+and regularity are often presented as if they must be imposed externally. In our brane model we do \emph{not}
+modify the governing equations to ``bake in'' such constraints. Instead we ensure two structural properties:
+
+\begin{enumerate}
+\item the linearized operator about the chosen background is \emph{self-adjoint} under the correct inner product,
+\item the background configuration used for linearization is \emph{spherically symmetric}.
+\end{enumerate}
+
+Then orthonormality, completeness, periodicity, and well-behavedness follow automatically as standard results
+of spectral theory.
+
+\paragraph{Self-adjoint operator and inner product.}
+Let \(\X^\star\) be a stationary background embedding and write \(\X=\X^\star+\eta\).
+The second variation of the action defines a linear operator \(\mathcal{L}\) such that
+\[
+\rho_m\,\partial_{tt}\eta=-\mathcal{L}\eta.
+\]
+Under periodic boundaries or clamped boundaries, \(\mathcal{L}\) is symmetric with respect to the mass-weighted
+inner product
+\begin{equation}
+\langle \eta,\zeta\rangle :=\int_{\Omega_q}\rho_m\,(\eta\cdot\zeta)\,J(q)\,\dd r\,\dd\theta\,\dd\phi,
+\qquad
+J(q)=r^2\sin\theta,
+\label{eq:inner_product_mass}
+\end{equation}
+and thus admits a real spectrum with an orthonormal eigenbasis (after specifying the operator domain).
+
+\paragraph{Spherical symmetry and spherical harmonics.}
+If \(\X^\star\) is spherically symmetric in intrinsic coordinates, \(\mathcal{L}\) commutes with intrinsic
+rotations \(SO(3)\). Consequently eigenmodes separate into radial and angular factors, and the angular
+operator reduces to the Laplace--Beltrami operator on \(S^2\). Its eigenfunctions are the complex spherical
+harmonics \(Y_{\ell m}(\theta,\phi)\), whose orthonormality, completeness on the sphere, \(2\pi\)-periodicity
+in \(\phi\), and regularity at the poles are automatic properties of the self-adjoint eigenproblem.
+
+\subsection{Amplitude scaling and energy normalization}
+\label{subsec:amplitude_scaling}
+
+The linear eigenproblem fixes mode \emph{shapes} and frequencies but not overall amplitude:
+if \(\eta\) is a mode, so is \(c\,\eta\). Physical amplitudes are selected only when nonlinearities are included
+and the total energy is fixed. For an electron-like excitation we impose the rest-energy normalization
+\begin{equation}
+\overline{E}[\X] \;=\; m_e c^2,
+\label{eq:rest_energy_normalization}
+\end{equation}
+where \(\overline{E}\) denotes the cycle-averaged \emph{excess} energy above the pre-stressed ground state.
+
+In the small-slope regime both kinetic and elastic excess energies scale quadratically with an amplitude
+parameter \(A\) (schematically \(\overline{E}\propto A^2\)). The confinement strength depends on how much energy
+is effectively coupled into the transverse component, which is controlled by the background pre-stress
+(\(\alpha<1\)) and the nonlinear dependence of \(g_{ij}(\X)\) on transverse gradients.
+
+\subsection{Parameter-determination package (analytic scaling + numerical closure)}
+\label{subsec:parameter_package}
+
+We require parameter choices that reproduce (i) the characteristic propagation speed \(c\),
+(ii) an electron-scale frequency \(\omega_C=m_e c^2/\hbar\), (iii) an electron-scale localization length
+\(a\sim\lambda_C=\hbar/(m_e c)\), and (iv) a confined, self-consistent nonlinear mode.
+
+\subsubsection{Analytical scaling relations}
+Choose a localization scale \(a\) and amplitude ratio \(\varepsilon:=A/a\).
+Fix a Poisson ratio \(\nu\) (equivalently \(\lambda/\mu\)) and a pre-stress parameter \(\alpha<1\).
+Then small-amplitude calibration provides a relation of the form
+\[
+c^2=\frac{\mathcal{C}(\alpha,\lambda,\mu)}{\rho_m},
+\]
+which fixes one modulus-to-density ratio. The remaining absolute scale is fixed by the energy condition
+\(\overline{E}=m_e c^2\), which in the weakly nonlinear regime scales as
+\[
+\overline{E}\;=\;A^2\,\mathcal{E}(\alpha,\nu,a,\omega_C;\rho_m{=}1),
+\]
+so that \(\rho_m\) (and hence \(\mu,\lambda\)) can be determined by enforcing \(m_e c^2\).
+
+\subsubsection{Numerical recipes (when closed forms do not exist)}
+For candidate parameters we compute:
+\begin{enumerate}
+\item the cycle-averaged excess energy \(\overline{E}\) by quadrature over \(r\) and phase sampling over one period,
+\item the Euler--Lagrange residual norm at a fixed phase (e.g.\ \(t=0\)) as a self-consistency diagnostic,
+\item (optionally) a coupled spherical ansatz including both transverse and radial responses
+(e.g.\ \(X=(R(r)\hat r,w(r,t))\)) to ensure transverse--lateral exchange is not excluded by construction.
+\end{enumerate}
+
+All quantities are computed in physical units; discretization is used only for numerical quadrature and does not
+introduce microstructure into the constitutive law.
+
+\subsection{Remaining parameter fit as an optimization problem (gradient descent)}
+\label{subsec:optimization}
+
+After enforcing the target scales (\(c,\omega_C,a\sim\lambda_C,\overline{E}=m_e c^2\)), the remaining parameters
+are determined by minimizing a self-consistency objective. Let \(\vartheta\) denote the free parameter vector
+(e.g.\ \(\vartheta=(\alpha,\nu,\varepsilon,a,\ldots)\) or including additional shape parameters).
+Define residual fields \(\mathrm{Res}(\vartheta)\) obtained by inserting a trial configuration into the
+Euler--Lagrange operator. We minimize an objective of the form
+\begin{equation}
+J(\vartheta)= w_1\|\mathrm{Res}_w(\vartheta)\|^2 + w_2\|\mathrm{Res}_R(\vartheta)\|^2 + \mathrm{Reg}(\vartheta),
+\label{eq:objective}
+\end{equation}
+where \(\mathrm{Reg}\) enforces physically meaningful bounds (e.g.\ excluding the trivial \(A\to 0\) solution
+compensated by unphysical modulus or density scaling). In practice \(J\) is minimized numerically by
+gradient-based methods (finite differences or automatic differentiation) or robust derivative-free methods
+(Powell/Nelder--Mead) followed by gradient refinement.
+
 % ============================================================
-\section{Experimental Settings: Discrete Brane Dynamics in $\mathbb{R}^4$}
+\section{Experimental Settings: Discrete Brane Dynamics in \texorpdfstring{$\mathbb{R}^4$}{R4}}
 \label{sec:experimental_settings_discrete}
 % ============================================================
 
@@ -721,6 +856,8 @@ Y_{\ell m}(\theta,\phi+2\pi) &= Y_{\ell m}(\theta,\phi),
 and \(Y_{\ell m}\) is bounded and single-valued on \(S^2\) for integer \(\ell\ge 0\), \(|m|\le \ell\).
 Choosing \(m\neq 0\) creates a nontrivial azimuthal phase winding \(\sim e^{im\phi}\), which is the
 seed for a circulating phase gradient around the symmetry axis.
+In the continuum theory, these properties are not imposed by modifying the equations; they arise automatically
+because the linearized operator about a spherically symmetric background is self-adjoint and rotation-invariant.
 
 \paragraph{Radial factor \(R_{\ell n}\).}
 We use a spherical-Bessel standing-wave profile
@@ -796,8 +933,8 @@ The electron seed is fully specified by the following parameters:
   \item \(s\): taper softness used in the window \(w(r)\) at the edge \(r\approx a\).
   \item Optional containment scaffold parameters: component index \(c_0\), depth \(D\), and width \(\sigma\) of the
         Gaussian well added to \(X^{c_0}\).
-  \item Flags: whether to set initial velocities from the rotating quadrature formula (\texttt{set\_velocities}) and
-        whether to rescale the seed to match the requested amplitude (\texttt{normalize}).
+  \item Flag \texttt{set\_velocities}: whether to set initial velocities from the rotating quadrature formula.
+  \item Flag \texttt{normalize}: whether to rescale the seed to match the requested amplitude.
 \end{itemize}
 
 \paragraph{Design intent and current limitations.}
