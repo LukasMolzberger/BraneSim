@@ -523,60 +523,6 @@ independent degree of freedom but a reparametrization of mode-frame transport (S
         the strength of internal branch mixing and the induced connection/holonomy.
 \end{enumerate}
 
-\subsection{Parameter-determination package (analytic scaling + numerical closure)}
-\label{subsec:parameter_package}
-
-We require parameter choices that reproduce (i) the characteristic propagation speed \(c\),
-(ii) an electron-scale frequency \(\omega_C=m_e c^2/\hbar\), (iii) an electron-scale localization length
-\(a\sim\lambda_C=\hbar/(m_e c)\), and (iv) a confined, self-consistent nonlinear mode.
-
-\subsubsection{Analytical scaling relations}
-Choose a localization scale \(a\) and amplitude ratio \(\chi:=A/a\).
-Fix a Poisson ratio \(\nu\) (equivalently \(\lambda/\mu\)) and a pre-stress parameter \(\alpha<1\).
-Then small-amplitude calibration provides a relation of the form
-\[
-c^2=\frac{\mathcal{C}(\alpha,\lambda,\mu)}{\rho_m},
-\]
-which fixes one modulus-to-density ratio. The remaining absolute scale is fixed by the energy condition
-\(\overline{E}=m_e c^2\), which in the weakly nonlinear regime scales as
-\[
-\overline{E}\;=\;A^2\,\mathcal{E}(\alpha,\nu,a,\omega_C;\rho_m{=}1),
-\]
-so that \(\rho_m\) (and hence \(\mu,\lambda\)) can be determined by enforcing \(m_e c^2\).
-
-\subsubsection{Numerical recipes (when closed forms do not exist)}
-For candidate parameters we compute:
-\begin{enumerate}
-\item the cycle-averaged excess energy \(\overline{E}\) by quadrature over \(r\) and phase sampling over one period,
-\item the Euler--Lagrange residual norm at a fixed phase (e.g.\ \(t=0\)) as a self-consistency diagnostic,
-\item (optionally) a coupled spherical ansatz including both transverse and radial responses
-(e.g.\ \(X=(R(r)\hat r,w(r,t))\)) to ensure transverse--lateral exchange is not excluded by construction.
-\end{enumerate}
-
-All quantities are computed in physical units; discretization is used only for numerical quadrature and does not
-introduce microstructure into the constitutive law.
-
-\subsection{Remaining parameter fit as an optimization problem (gradient descent)}
-\label{subsec:optimization}
-
-After enforcing the target scales (\(c,\omega_C,a\sim\lambda_C,\overline{E}=m_e c^2\)), the remaining parameters
-are determined by minimizing a self-consistency objective. Let \(\vartheta\) denote the free parameter vector
-(e.g.\ \(\vartheta=(\alpha,\nu,\varepsilon,a,\ldots)\) or including additional shape parameters).
-Define residual fields \(\mathrm{Res}(\vartheta)\) obtained by inserting a trial configuration into the
-Euler--Lagrange operator. We minimize an objective of the form
-\begin{equation}
-J(\vartheta)= w_1\|\mathrm{Res}_w(\vartheta)\|^2 + w_2\|\mathrm{Res}_R(\vartheta)\|^2 + \mathrm{Reg}(\vartheta),
-\label{eq:objective}
-\end{equation}
-where \(\mathrm{Reg}\) enforces physically meaningful bounds (e.g.\ excluding the trivial \(A\to 0\) solution
-compensated by unphysical modulus or density scaling). In practice \(J\) is minimized numerically by
-gradient-based methods (finite differences or automatic differentiation) or robust derivative-free methods
-(Powell/Nelder--Mead) followed by gradient refinement.
-
-% ============================================================
-\section{Experimental Settings: Discrete Brane Dynamics in \texorpdfstring{$\mathbb{R}^4$}{R4}}
-\label{sec:experimental_settings_discrete}
-% ============================================================
 
 \subsection{Discrete degrees of freedom}
 We discretize $\Omega$ by a 3D lattice of nodes $p\in\mathcal{V}$.
@@ -1016,17 +962,6 @@ A direct numerical way to obtain \(\mu_0^{\rm eff}\) is:
 \section{Simulation Protocol (Reference Implementation)}
 \label{sec:simulation}
 
-\subsection{Relevant code modules}
-This checklist assumes the following modules and concepts exist in the reference implementation:
-\begin{itemize}
-  \item \texttt{branesim.core.state.BraneState}: positions/velocities/accelerations, rest positions.
-  \item \texttt{branesim.core.grid.BraneGrid}: topology, neighbor indices, spatial coordinates.
-  \item \texttt{branesim.core.solver.VelocityVerletSolver}: integration and energy diagnostics.
-  \item \texttt{branesim.berry.analysis}: \texttt{compute\_berry\_time\_series} (time connection proxy).
-  \item \texttt{branesim.electron.electron\_initialization}: rotating spherical-harmonic seed.
-  \item Visualization utilities for displacement slices and videos.
-\end{itemize}
-
 \subsection{Electron initialization (rotating spherical-harmonic cavity seed)}
 \label{subsec:electron_init}
 
@@ -1137,98 +1072,6 @@ A long-lived confined ``electron'' would correspond to a self-consistent nonline
 coupled 4D rest-length elasticity system. The initializer alone does not enforce that equilibrium; it
 provides the candidate initial condition from which such equilibria can be sought and tested.
 
-
-\subsection{Checklist A: Data to record (minimal)}
-\begin{enumerate}
-  \item Record frames at stride \(s\): \(\X_p(t_k)\), \(\dot{\X}_p(t_k)\), and \(t_k\).
-  \item Store \(\X_{0,p}\) (rest positions) to compute displacements \(\uvec_p = \X_p-\X_{0,p}\).
-  \item Decide the embedding components \(E\) used for Berry analysis:
-        \begin{itemize}
-          \item EM: typically \(E=2\) (a transverse polarization plane in 3D space).
-          \item Electron: \(E=2\) or \(E=4\) depending on whether the internal plane includes \(X^4\)
-                (\texttt{polarization="spatial\_x4"} in the initializer).
-        \end{itemize}
-\end{enumerate}
-
-\subsection{Checklist B: Temporal Berry phase / connection (already implemented)}
-Use \texttt{branesim.berry.analysis.compute\_berry\_time\_series}:
-\begin{enumerate}
-  \item Build \(\uvec_k\in\R^{N\times E}\) and \(\vvec_k\in\R^{N\times E}\) per frame \(k\).
-  \item Call \texttt{compute\_berry\_time\_series(frames\_u, frames\_v, times\_s)}.
-  \item Save outputs: phase \(\gamma(t)\), increments \(\Delta\gamma\), connection proxy \(A_t\),
-        amplitude and alpha mask for visualization.
-\end{enumerate}
-
-\subsection{Checklist C: Spatial Berry connection}
-In the reference implementation, only the temporal Berry phase is currently computed; the spatial connection below specifies the next required diagnostic.
-To validate Maxwell structure you need spatial components \(a_i(\x,t)\).
-A robust discrete approach uses neighbor overlaps (gauge-invariant on loops):
-\begin{enumerate}
-  \item For each frame \(k\), compute normalized rays \(\psi_p\in\C^E\) at each lattice point \(p\).
-  \item For each directed neighbor link \(p\to q\) (axis-aligned preferred):
-        define discrete edge phase
-        \[
-        \theta_{p\to q} = \arg\!\big(\langle \psi_p \mid \psi_q\rangle\big).
-        \]
-        Then \(a_i \approx \theta/h\) for a step of length \(h\) along axis \(i\).
-  \item Define a plaquette curvature (discrete \(f_{ij}\)) by summing edge phases around a loop:
-        \[
-        f_{ij} \approx \frac{1}{h^2}\Big(\theta_{p\to p+\hat{i}}+\theta_{p+\hat{i}\to p+\hat{i}+\hat{j}}
-        -\theta_{p+\hat{j}\to p+\hat{i}+\hat{j}}-\theta_{p\to p+\hat{j}}\Big).
-        \]
-  \item Validate gauge invariance numerically: plaquette sum is invariant under
-        \(\psi_p\to \e^{\ii\alpha_p}\psi_p\).
-\end{enumerate}
-
-\subsection{Checklist D: Maxwell-like validation tests}
-Using \(f_{\mu\nu}\) from temporal and spatial differences:
-\begin{enumerate}
-  \item Define emergent fields: \(E_i \sim f_{i0}\), \(B_i \sim \tfrac12 \epsilon_{ijk} f_{jk}\).
-  \item Check identities on the grid (finite differences):
-        \(\nabla\cdot \mathbf{B}\approx 0\), and \(\partial_t \mathbf{B} + \nabla\times\mathbf{E}\approx 0\).
-  \item For photon experiments, verify propagation speed and energy flux alignment.
-  \item For electron experiments, verify localization and stability metrics:
-        leakage, RMS radius, energy drift (matching existing diagnostics).
-\end{enumerate}
-
-\subsection{Checklist E: Mapping to existing experiment scripts}
-\begin{itemize}
-  \item Electron: \texttt{electron\_3d\_experiment.py} uses
-        \texttt{initialize\_electron\_mode\_3d} with polarization options including \texttt{"spatial\_x4"}.
-  \item Berry time series: use the recorded \(\uvec,\vvec\) frames from the experiment’s logging stride.
-  \item Visualization: reuse displacement slice video pipeline; add Berry phase/alpha as an overlay.
-\end{itemize}
-
-% ============================================================
-\section{Results Roadmap}
-\label{sec:results_plan}
-
-\begin{enumerate}
-  \item \textbf{Photon sector:} show two-polarization behavior and gauge-invariant curvature patterns.
-  \item \textbf{Maxwell tests:} numerical residuals for Faraday and \(\nabla\cdot\mathbf{B}\).
-  \item \textbf{Electron sector:} stability region over parameter sweeps (rest length, well depth, sigma, amplitude).
-  \item \textbf{Internal holonomy:} demonstrate non-Abelian transport in a controlled deformation cycle (future work).
-\end{enumerate}
-
-% ============================================================
-\section{Falsification Criteria and Failure Modes}
-\label{sec:discussion}
-
-List what would falsify or strongly constrain the model:
-\begin{itemize}
-  \item Extra gapless polarizations that cannot be suppressed without fine tuning.
-  \item Strong anisotropy / dispersion incompatible with experimental bounds.
-  \item Inability to obtain a Maxwell-like effective action at leading order.
-  \item Electron mode instability or inability to reproduce spin-like holonomy.
-\end{itemize}
-
-% ============================================================
-\appendix
-\section{Discrete Berry Curvature on a Lattice (derivation details)}
-\label{app:discrete_curvature}
-
-Provide a clean derivation of edge phases and plaquette sums, including handling of
-undefined (low-amplitude) regions and numerical stabilization (overlap thresholds).
 
 \section{Symbol Dictionary}
 \label{app:dictionary}
