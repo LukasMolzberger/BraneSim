@@ -433,10 +433,16 @@ and thus admits a real spectrum with an orthonormal eigenbasis (after specifying
 
 \paragraph{Spherical symmetry and spherical harmonics.}
 If \(\X^\star\) is spherically symmetric in intrinsic coordinates, \(\mathcal{L}\) commutes with intrinsic
-rotations \(SO(3)\). Consequently eigenmodes separate into radial and angular factors, and the angular
-operator reduces to the Laplace--Beltrami operator on \(S^2\). Its eigenfunctions are the complex spherical
-harmonics \(Y_{\ell m}(\theta,\phi)\), whose orthonormality, completeness on the sphere, \(2\pi\)-periodicity
-in \(\phi\), and regularity at the poles are automatic properties of the self-adjoint eigenproblem.
+rotations \(SO(3)\). Consequently eigenmodes can be chosen to transform in irreducible representations of \(SO(3)\),
+so the angular dependence is diagonalized by the \(SO(3)\) Casimir operator \(L^2\).
+In spherical coordinates this Casimir has the coordinate form of the spherical Laplacian,
+\(L^2=-\Delta_{S^2}\), i.e.\ the Laplace--Beltrami operator of the \emph{round} metric on \(S^2\).
+This is a symmetry/basis statement about the angular sector and does \emph{not} assume a different
+constitutive model for the brane substrate.
+
+Its eigenfunctions are the complex spherical harmonics \(Y_{\ell m}(\theta,\phi)\), whose orthonormality,
+completeness on the sphere, \(2\pi\)-periodicity in \(\phi\), and regularity at the poles are automatic
+properties of the corresponding self-adjoint eigenproblem.
 
 \subsection{Amplitude scaling and energy normalization}
 \label{subsec:amplitude_scaling}
@@ -454,6 +460,43 @@ In the small-slope regime both kinetic and elastic excess energies scale quadrat
 parameter \(A\) (schematically \(\overline{E}\propto A^2\)). The confinement strength depends on how much energy
 is effectively coupled into the transverse component, which is controlled by the background pre-stress
 (\(\alpha<1\)) and the nonlinear dependence of \(g_{ij}(\X)\) on transverse gradients.
+
+
+\subsection{Two confinement hypotheses (transverse polarization vs.\ connection-mediated self-trapping)}
+\label{subsec:confinement_hypotheses}
+
+The substrate equations \eqref{eq:continuous_eom} permit multiple \emph{interpretations} of what stabilizes an
+electron-like localized excitation against dispersion. We state two internally consistent hypotheses that are
+distinguishable by numerical experiments. In both cases there is no fundamental point charge; ``charge'' is a
+label of the far-field phase/holonomy structure derived from the brane waves.
+
+\paragraph{Hypothesis A (transverse-sector confinement; \(X^4\) as primary binder).}
+Localization is dominated by nonlinear geometric coupling into the transverse embedding component \(X^4\)
+(controlled by the pre-stress parameter \(\alpha\)). The confined object is a self-consistent nonlinear standing
+wave whose core necessarily carries substantial \(X^4\) gradients/polarization, while the emergent U(1) phase and
+(optionally) a Wilczek--Zee connection arise as \emph{readouts} of the internal near-degenerate mode subspace
+(Sec.~\ref{sec:connections}) and characterize the long-range interaction.
+
+\paragraph{Hypothesis B (connection-mediated self-trapping; gauge structure as the effective binder).}
+Localization is dominated by \(\alpha\)-controlled mixing between internal polarization branches of the same
+substrate excitation. In the reduced envelope description this mixing appears as a gauge connection acting
+through covariant derivatives (rank \(r=1\) U(1) Berry, or \(r>1\) Wilczek--Zee), and strong spatial variation of the
+local mode frame induces an effective geometric potential/curvature energy that can arrest dispersion.
+Microscopically the dynamics is still entirely that of \eqref{eq:continuous_eom}; the ``gauge field'' is not an
+independent degree of freedom but a reparametrization of mode-frame transport (Sec.~\ref{sec:connections}).
+
+\paragraph{Operational discriminants (simulation checks).}
+\begin{enumerate}
+  \item \textbf{Suppress transverse motion.} Constrain \(X^4\equiv 0\) (or heavily penalize \(\nabla X^4\)):
+        Hypothesis~A predicts loss of confinement; Hypothesis~B allows partial confinement if the relevant
+        internal mixing persists within the remaining components/subspace.
+  \item \textbf{Energy partition vs.\ curvature.} Hypothesis~A predicts a persistent core energy fraction in
+        \(X^4\)-gradients; Hypothesis~B predicts confinement correlates more strongly with large Berry/Wilczek--Zee
+        curvature \((f_{\mu\nu},\bbF_{\mu\nu})\) and with near-degeneracy/branch-mixing measures.
+  \item \textbf{\(\alpha\)-dependence.} Vary \(\alpha\) while holding the carrier frequency fixed:
+        Hypothesis~A ties confinement primarily to transverse coupling strength; Hypothesis~B ties it primarily to
+        the strength of internal branch mixing and the induced connection/holonomy.
+\end{enumerate}
 
 \subsection{Parameter-determination package (analytic scaling + numerical closure)}
 \label{subsec:parameter_package}
