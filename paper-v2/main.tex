@@ -1,6 +1,5 @@
 % ============================================================
 %  Emergent Gauge Structure from a 3D Brane in 4D Embedding
-%  (Blank / from-scratch template with derivation placeholders)
 % ============================================================
 \documentclass[11pt,a4paper]{article}
 
@@ -70,42 +69,67 @@ from a 3D Brane Embedded in 4D Space}
 \maketitle
 
 \begin{abstract}
-This document is a from-scratch template for a brane-based deterministic wave model
-in which (i) electromagnetism emerges as a U(1) gauge structure associated with a
-narrowband polarization bundle, and (ii) electron-like excitations emerge as
-localized multi-mode objects whose internal near-degenerate subspace carries a
-non-Abelian (Wilczek--Zee) connection. The template includes (a) paper-grade
-derivation steps and (b) a simulation checklist aligned with the current code
-architecture (\texttt{BraneState}, \texttt{BraneGrid}, \texttt{VelocityVerletSolver},
-\texttt{branesim.berry.analysis}, and the electron initialization pipeline).
+We propose a deterministic wave model in which the fundamental substrate is a three-dimensional elastic brane
+embedded in $\mathbb{R}^4$, evolved in an external time parameter.
+Electromagnetism is treated as an \emph{emergent} gauge structure that appears when the real brane dynamics is
+projected onto a narrowband, locally transported polarization (or near-degenerate internal) subspace, yielding
+a U(1) Berry connection and, for higher-rank subspaces, a Wilczek--Zee connection.
+Electron-like excitations are treated as localized, self-consistent nonlinear modes of the same substrate.
+We present (i) the continuous hyperelastic formulation and its discrete spring-lattice approximation,
+(ii) the narrowband multiscale ansatz and the induced connections, and
+(iii) simulation protocols that compute gauge-invariant curvatures and test Maxwell-type identities and
+confinement stability in a reference implementation.
 \end{abstract}
 
 \tableofcontents
 \newpage
 
 % ============================================================
-\section{Scope and Claims (keep this explicit)}
+\section{Scope and Claims}
 \label{sec:scope}
 
-\textbf{Goal.} Define a concrete mechanism by which an effective gauge connection
-appears when the brane dynamics is projected onto a narrowband local mode subspace.
-Separate what is \emph{kinematical} (connections from basis transport) from what is
-\emph{dynamical} (Maxwell-like action for the connection).
+This paper develops a \emph{mechanistic} link between a concrete brane substrate model and effective gauge
+structures obtained by mode-space projection. The scope is intentionally narrow: we focus on (a) the emergence
+of a U(1) (and optionally Wilczek--Zee) connection from narrowband mode-frame transport, and (b) the existence
+and numerical stability of localized ``electron-like'' excitations in the same substrate.
 
-\textbf{Deliverables.}
+\subsection*{Core claims}
 \begin{enumerate}
-  \item A multiscale reduction showing the envelope field obeys covariant derivatives
-        \(\covD_\mu = \partial_\mu + \ii a_\mu + \ii \bbA_\mu\).
-  \item A polarization count demonstrating the EM sector yields exactly two
-        gapless transverse degrees of freedom.
-  \item An effective action argument that produces a Maxwell-like term
-        \(f_{\mu\nu}f^{\mu\nu}\) for the U(1) curvature \(f=\dd a\).
-  \item A simulation protocol that computes time- and space-like Berry connections
-        from \(\uvec,\vvec\) time series and validates Maxwell identities numerically.
+  \item \textbf{Substrate model (defined precisely).} The fundamental degrees of freedom are an embedding map
+        $\X(\x,t):\Omega\subset\mathbb{R}^3\to\mathbb{R}^4$ with a strictly isotropic hyperelastic energy
+        $W(g;g^0)$ built from the induced metric $g_{ij}=\partial_i\X\cdot\partial_j\X$ relative to an isotropic
+        reference metric $g^0_{ij}=\ell_0^2\delta_{ij}$. A single dimension-free parameter
+        $\alpha=\ell_0/h_\star$ controls uniform pre-stress via boundary-enforced geometric scale $h_\star$.
+  \item \textbf{Connections are kinematical.} For narrowband solutions, projecting the real brane fields onto a
+        locally transported $n$-dimensional mode subspace produces a covariant derivative
+        $\covD_\mu=\partial_\mu+\ii a_\mu\mathbf{1}_n+\ii\bbA_\mu$, where $a_\mu$ is the U(1) Berry connection and
+        $\bbA_\mu$ is a Wilczek--Zee connection when $n>1$. These connections encode \emph{basis transport} of the
+        retained subspace and are not assumed as additional fundamental fields.
+  \item \textbf{Localized modes are posed as a self-adjoint eigenproblem plus nonlinearity.} Linearization about a
+        stationary, spherically symmetric background yields a self-adjoint operator under the mass-weighted
+        inner product. Standard spectral results then provide orthonormality/completeness and justify spherical
+        harmonic angular structure as a consequence of $SO(3)$ symmetry (not as an imposed constraint).
+  \item \textbf{Testable numerical consequences.} The paper specifies gauge-invariant lattice estimators of
+        curvature (plaquette phases) and concrete validation tests (Maxwell identities, polarization counting,
+        confinement stability and parameter dependence) for a discrete reference implementation.
 \end{enumerate}
+
+\subsection*{Non-claims (boundaries of the present work)}
+\begin{itemize}
+  \item We do \emph{not} claim a completed derivation of the Standard Model, quantum statistics, or measurement
+        theory. The Berry/Wilczek--Zee machinery is used here only as a geometrical reduction tool for a
+        narrowband sector of the substrate dynamics.
+  \item We do \emph{not} assume a point charge or an independent electromagnetic field at the fundamental level.
+        Any effective Maxwell term must arise from coarse-graining; Section~\ref{sec:maxwell_term} states what
+        must be derived and what is currently a program.
+  \item Relativistic invariance is not postulated at the substrate level (time is an external parameter); only
+        effective, sector-specific wave propagation properties are compared to relativistic phenomenology.
+\end{itemize}
+
 
 % ============================================================
 \section{Conceptual Model: Continuous 3D Brane in 4D Embedding}
+
 \label{sec:conceptual_model_continuous}
 % ============================================================
 
@@ -436,6 +460,7 @@ If \(\X^\star\) is spherically symmetric in intrinsic coordinates, \(\mathcal{L}
 rotations \(SO(3)\). Consequently eigenmodes can be chosen to transform in irreducible representations of \(SO(3)\),
 so the angular dependence is diagonalized by the \(SO(3)\) Casimir operator \(L^2\).
 In spherical coordinates this Casimir has the coordinate form of the spherical Laplacian,
+This appearance of the Laplace--Beltrami operator is purely a consequence of $SO(3)$ symmetry (angular momentum algebra): it fixes the angular basis, while the radial operator and eigenvalues still depend on the chosen hyperelastic constitutive law and background pre-stress.
 \(L^2=-\Delta_{S^2}\), i.e.\ the Laplace--Beltrami operator of the \emph{round} metric on \(S^2\).
 This is a symmetry/basis statement about the angular sector and does \emph{not} assume a different
 constitutive model for the brane substrate.
@@ -480,7 +505,7 @@ wave whose core necessarily carries substantial \(X^4\) gradients/polarization, 
 \paragraph{Hypothesis B (connection-mediated self-trapping; gauge structure as the effective binder).}
 Localization is dominated by \(\alpha\)-controlled mixing between internal polarization branches of the same
 substrate excitation. In the reduced envelope description this mixing appears as a gauge connection acting
-through covariant derivatives (rank \(r=1\) U(1) Berry, or \(r>1\) Wilczek--Zee), and strong spatial variation of the
+through covariant derivatives (rank \(n=1\) U(1) Berry, or \(n>1\) Wilczek--Zee), and strong spatial variation of the
 local mode frame induces an effective geometric potential/curvature energy that can arrest dispersion.
 Microscopically the dynamics is still entirely that of \eqref{eq:continuous_eom}; the ``gauge field'' is not an
 independent degree of freedom but a reparametrization of mode-frame transport (Sec.~\ref{sec:connections}).
@@ -506,7 +531,7 @@ We require parameter choices that reproduce (i) the characteristic propagation s
 \(a\sim\lambda_C=\hbar/(m_e c)\), and (iv) a confined, self-consistent nonlinear mode.
 
 \subsubsection{Analytical scaling relations}
-Choose a localization scale \(a\) and amplitude ratio \(\varepsilon:=A/a\).
+Choose a localization scale \(a\) and amplitude ratio \(\chi:=A/a\).
 Fix a Poisson ratio \(\nu\) (equivalently \(\lambda/\mu\)) and a pre-stress parameter \(\alpha<1\).
 Then small-amplitude calibration provides a relation of the form
 \[
@@ -688,23 +713,24 @@ Assume the excitation of interest is narrowband around a fixed angular frequency
 \(\omega_0\). In the project, \(\omega_0\) is hardcoded from the Compton wavelength
 \(\lambda_C\):
 \[
-\omega_0 = \frac{2\pi c}{\lambda_C}.
+\bar\lambda_C := \frac{\hbar}{m_e c},\qquad \omega_0=\omega_C:=\frac{c}{\bar\lambda_C}=\frac{m_e c^2}{\hbar}.
 \]
+(If one uses the non-reduced Compton wavelength \(\lambda_C=h/(m_e c)\), then \(\omega_C=2\pi c/\lambda_C\).)
 Write the displacement as a slowly modulated carrier:
 \begin{equation}
 \uvec(\x,t)
 \approx
 \Re\!\left[
-\e^{-\ii \omega_0 t}\sum_{a=1}^{r} \Psi^a(\x,t)\, \mathbf{e}_a(\x,t)
+\e^{-\ii \omega_0 t}\sum_{a=1}^{n} \Psi^a(\x,t)\, \mathbf{e}_a(\x,t)
 \right],
 \label{eq:ansatz}
 \end{equation}
 where
 \begin{itemize}
-  \item \(\Psi(\x,t)\in\C^{r}\) is a complex envelope (slow in \(t\) relative to \(\omega_0^{-1}\)),
+  \item \(\Psi(\x,t)\in\C^{n}\) is a complex envelope (slow in \(t\) relative to \(\omega_0^{-1}\)),
   \item \(\{\mathbf{e}_a(\x,t)\}_{a=1..r}\subset\R^4\) is a local orthonormal mode frame
         (polarization / internal basis) spanning the retained subspace,
-  \item \(r=1\) corresponds to a U(1) (rank-1) bundle; \(r>1\) yields a non-Abelian bundle.
+  \item \(n=1\) corresponds to a U(1) (rank-1) bundle; \(n>1\) yields a non-Abelian bundle.
 \end{itemize}
 
 \subsection{Complex quadrature from real simulation variables}
@@ -727,7 +753,7 @@ Undefined regions are masked by amplitude thresholds.
 \label{sec:connections}
 
 \subsection{Rank-1 (U(1)) Berry connection}
-For \(r=1\), let \(\ket{u(x)}\) be the normalized local mode, with \(x^\mu=(ct,\x)\).
+For \(n=1\), let \(\ket{u(x)}\) be the normalized local mode, with \(x^\mu=(ct,\x)\).
 Define
 \[
 a_\mu(x) = \ii \braket{u(x)}{\partial_\mu u(x)}.
@@ -739,9 +765,9 @@ f_{\mu\nu} = \partial_\mu a_\nu - \partial_\nu a_\mu.
 \]
 
 \subsection{Non-Abelian (Wilczek--Zee) connection for internal electron subspace}
-For \(r>1\), choose an orthonormal basis \(\ket{u_a(x)}\), \(a=1..r\), and define
+For \(n>1\), choose an orthonormal basis \(\ket{u_a(x)}\), \(a=1..r\), and define
 \[
-\bbA_\mu^{ab}(x) = \ii \braket{u_a(x)}{\partial_\mu u_b(x)}\in\mathfrak{u}(r).
+\bbA_\mu^{ab}(x) = \ii \braket{u_a(x)}{\partial_\mu u_b(x)}\in\mathfrak{u}(n).
 \]
 Curvature:
 \[
@@ -754,11 +780,11 @@ generically, a covariant derivative acting on \(\Psi\):
 \begin{equation}
 \covD_\mu \Psi
 =
-\left(\partial_\mu + \ii a_\mu \mathbf{1}_r + \ii\bbA_\mu\right)\Psi.
+\left(\partial_\mu + \ii a_\mu \mathbf{1}_n + \ii\bbA_\mu\right)\Psi.
 \label{eq:covD}
 \end{equation}
 
-\paragraph{Paper-grade derivation to include (outline).}
+\paragraph{Derivation sketch.}
 \begin{enumerate}
   \item Write \(\uvec \approx \Re(\e^{-\ii\omega_0 t} \mathbf{E}\Psi)\) where
         \(\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_r]\in\R^{4\times r}\).
@@ -815,9 +841,9 @@ with \(\covD_\mu=\partial_\mu + \ii\frac{q}{\hbar}A_\mu\).
 
 \subsection{Including the Wilczek--Zee sector}
 If the electron envelope carries an internal index (dimension \(r\)), replace \(\psi\) with
-\(\Psi\in\C^{4}\otimes\C^{r}\) (Dirac spinor valued in the internal subspace) and use
+\(\Psi\in\C^{4}\otimes\C^{n}\) (Dirac spinor valued in the internal subspace) and use
 \[
-\covD_\mu \Psi = \left(\partial_\mu + \ii a_\mu \mathbf{1}_r + \ii\bbA_\mu\right)\Psi.
+\covD_\mu \Psi = \left(\partial_\mu + \ii a_\mu \mathbf{1}_n + \ii\bbA_\mu\right)\Psi.
 \]
 This is the place to state explicitly what \(r\) represents in the brane model
 (e.g., internal polarization/standing-wave basis supporting spin-like behavior).
@@ -830,7 +856,8 @@ The Berry connection provides gauge-covariant \emph{kinematics}. Electromagnetis
 \emph{dynamics} for \(a_\mu\). In this model, the Maxwell-like term must emerge as an
 effective action after coarse-graining brane degrees of freedom.
 
-\subsection{Effective action sketch (to be made explicit)}
+\subsection{Effective action sketch}
+This subsection states the minimal derivation steps required; completing the coarse-graining calculation is part of the remaining work.
 \begin{enumerate}
   \item Split brane variables into fast carrier-scale modes and slow envelope/mode-frame variables.
   \item Integrate out fast modes (or average over a cycle) to obtain an effective energy
@@ -849,11 +876,11 @@ State the mechanism that restricts the EM sector to two transverse polarizations
 \end{itemize}
 
 % ============================================================
-\section{Simulation Protocol (Aligned with Current Code)}
+\section{Simulation Protocol (Reference Implementation)}
 \label{sec:simulation}
 
 \subsection{Relevant code modules}
-This checklist assumes the following modules and concepts exist as in the current project:
+This checklist assumes the following modules and concepts exist in the reference implementation:
 \begin{itemize}
   \item \texttt{branesim.core.state.BraneState}: positions/velocities/accelerations, rest positions.
   \item \texttt{branesim.core.grid.BraneGrid}: topology, neighbor indices, spatial coordinates.
@@ -866,7 +893,7 @@ This checklist assumes the following modules and concepts exist as in the curren
 \subsection{Electron initialization (rotating spherical-harmonic cavity seed)}
 \label{subsec:electron_init}
 
-This project initializes an ``electron'' as a localized, rotating standing-wave pattern on the 3D brane,
+The reference implementation initializes an ``electron'' as a localized, rotating standing-wave pattern on the 3D brane,
 embedded in \(\R^4\). The initializer is designed to (i) create a controlled angular phase winding
 (\(m\neq 0\)) in the intrinsic \((x,y,z)\) coordinates, (ii) realize that complex phase rotation in a
 \emph{real-valued} simulator by using two quadratures, and (iii) ensure immediate coupling between the
@@ -903,7 +930,7 @@ In the continuum theory, these properties are not imposed by modifying the equat
 because the linearized operator about a spherically symmetric background is self-adjoint and rotation-invariant.
 
 \paragraph{Radial factor \(R_{\ell n}\).}
-We use a spherical-Bessel standing-wave profile
+We use a spherical-Bessel standing-wave profile as a \emph{convenient seed basis} (exact for a scalar Laplacian with Dirichlet boundary conditions); the true linear eigenfunctions in the hyperelastic model are obtained by solving the corresponding self-adjoint radial eigenproblem numerically.
 \[
 R_{\ell n}(r)= j_\ell(k_{\ell n} r)\,w(r),
 \qquad
@@ -951,18 +978,6 @@ For electron seeding we typically use \texttt{spatial\_x4}, i.e. a plane that ha
 coordinates \emph{and} in \(X^4\). This ensures that \(X^4\) carries oscillatory content and momentum at
 \(t=0\) and couples immediately to \((X^1,X^2,X^3)\) through the 4D rest-length spring geometry.
 
-\paragraph{Optional containment scaffold in \(X^4\).}
-In addition to the rotating seed, we optionally add a static Gaussian deformation in a chosen embedding
-component (default: \(X^4\)),
-\[
-u_{\mathrm{well}}(r)=-D\exp\!\left(-\frac{r^2}{2\sigma^2}\right),
-\]
-added to \(X^{c_0}\) for some component index \(c_0\in\{1,2,3,4\}\).
-This ``well'' is an initial geometric deformation (not an external potential). Any such deformation
-changes neighbor distances in \(\R^4\) and therefore feeds back into the dynamics via the same rest-length
-elasticity law that governs the full brane.
-
-
 \paragraph{Initializer parameter set (implementation-facing).}
 The electron seed is fully specified by the following parameters:
 \begin{itemize}
@@ -974,8 +989,6 @@ The electron seed is fully specified by the following parameters:
   \item Polarization choice: either a preset plane (e.g. \texttt{spatial\_x4}) or explicit orthonormal vectors
         \(\mathbf{p}_1,\mathbf{p}_2\in\R^4\).
   \item \(s\): taper softness used in the window \(w(r)\) at the edge \(r\approx a\).
-  \item Optional containment scaffold parameters: component index \(c_0\), depth \(D\), and width \(\sigma\) of the
-        Gaussian well added to \(X^{c_0}\).
   \item Flag \texttt{set\_velocities}: whether to set initial velocities from the rotating quadrature formula.
   \item Flag \texttt{normalize}: whether to rescale the seed to match the requested amplitude.
 \end{itemize}
@@ -1009,7 +1022,8 @@ Use \texttt{branesim.berry.analysis.compute\_berry\_time\_series}:
         amplitude and alpha mask for visualization.
 \end{enumerate}
 
-\subsection{Checklist C: Spatial Berry connection (to implement next)}
+\subsection{Checklist C: Spatial Berry connection}
+In the reference implementation, only the temporal Berry phase is currently computed; the spatial connection below specifies the next required diagnostic.
 To validate Maxwell structure you need spatial components \(a_i(\x,t)\).
 A robust discrete approach uses neighbor overlaps (gauge-invariant on loops):
 \begin{enumerate}
@@ -1049,7 +1063,7 @@ Using \(f_{\mu\nu}\) from temporal and spatial differences:
 \end{itemize}
 
 % ============================================================
-\section{Planned Results Section Structure}
+\section{Results Roadmap}
 \label{sec:results_plan}
 
 \begin{enumerate}
@@ -1060,7 +1074,7 @@ Using \(f_{\mu\nu}\) from temporal and spatial differences:
 \end{enumerate}
 
 % ============================================================
-\section{Discussion and Failure Modes (state these early)}
+\section{Falsification Criteria and Failure Modes}
 \label{sec:discussion}
 
 List what would falsify or strongly constrain the model:
@@ -1105,7 +1119,7 @@ undefined (low-amplitude) regions and numerical stabilization (overlap threshold
 \(\x_c\) & electron center in intrinsic coordinates \\
 \(\mathbf{p}_1,\mathbf{p}_2\) & orthonormal polarization vectors in \(\R^4\) \\
 \(A\) & displacement amplitude scale used for normalization \\
-\(D,\sigma\) & Gaussian containment depth/width in embedding component \(X^{c_0}\) \\
+\(\chi\) & dimensionless amplitude ratio \(A/a\) used in scaling arguments \\
 \end{tabular}
 
 % Uncomment if you use BibTeX:
