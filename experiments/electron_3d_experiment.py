@@ -575,7 +575,7 @@ def main():
     animation_times_3d = []
     frame_interval_3d = max(1, num_steps // 100)  # ~100 frames for 3D
     subsample_factor_3d = 2  # Take every 2nd point along each axis
-    subsample_factor_volume = 1  # Full resolution volume rendering
+    subsample_factor_volume = 2  # Full resolution volume rendering
     frame_interval_volume = 1  # Match simulation time resolution
     animation_frames_volume = []
     animation_times_volume = []
@@ -1055,6 +1055,7 @@ def main():
         density_threshold=0.05,
         alpha_scale=1.0,
         gamma=0.9,
+        color_gamma=0.8,
         background_color='black',
         show_axes=False,
         title_template='3D Electron Volume (t = {:.2f} fs)',

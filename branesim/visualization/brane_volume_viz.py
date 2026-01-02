@@ -40,18 +40,21 @@ def _volume_to_rgba(
     vmin: float,
     vmax: float,
     gamma: float,
+    color_gamma: float,
     alpha_scale: float,
     density_threshold: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Map volume values to RGBA colors and a mask.
     """
-    denom = max(vmax - vmin, 1e-12)
-    normalized = np.clip((values - vmin) / denom, 0.0, 1.0)
+    abs_max = max(np.abs(vmin), np.abs(vmax), 1e-12)
+    signed = np.clip(values / abs_max, -1.0, 1.0)
+    if color_gamma != 1.0:
+        signed = np.sign(signed) * (np.abs(signed) ** color_gamma)
+    normalized = 0.5 + 0.5 * signed
     cmap = plt.get_cmap(cmap_name)
     colors = cmap(normalized)
 
-    abs_max = max(np.abs(vmin), np.abs(vmax), 1e-12)
     magnitude = np.abs(values) / abs_max
     colors[..., 3] = alpha_scale * (magnitude ** gamma)
 
@@ -103,6 +106,7 @@ def create_3d_volume_animation(
     density_threshold: float = 0.08,
     alpha_scale: float = 0.9,
     gamma: float = 1.1,
+    color_gamma: float = 1.0,
     figsize: Tuple[int, int] = (10, 8),
     xlabel: str = "x [nm]",
     ylabel: str = "y [nm]",
@@ -126,6 +130,7 @@ def create_3d_volume_animation(
         density_threshold: Normalized magnitude threshold for rendering voxels
         alpha_scale: Overall opacity multiplier
         gamma: Opacity gamma correction
+        color_gamma: Color contrast gamma (<1 boosts saturation)
         figsize: Figure size in inches
         xlabel, ylabel, zlabel: Axis labels
         title_template: Title template with {:.2f} placeholder for time (fs)
@@ -170,6 +175,7 @@ def create_3d_volume_animation(
             vmin=vmin,
             vmax=vmax,
             gamma=gamma,
+            color_gamma=color_gamma,
             alpha_scale=alpha_scale,
             density_threshold=density_threshold,
         )
