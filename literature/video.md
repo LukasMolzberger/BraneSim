@@ -6,3 +6,4 @@ https://www.youtube.com/watch?v=mhy-ZKSARxI Visualize Spectral Decomposition | S
 https://www.youtube.com/watch?v=g4qa1KCyGfc Spherical Harmonics and the Multipole Expansion
 https://www.youtube.com/watch?v=oEq9ROl9Umk Lecture 18: The Laplace Operator (Discrete Differential Geometry)
 https://www.youtube.com/watch?v=6tZXSl1dL5A Electrons Don't Actually Orbit Like This
+https://www.youtube.com/watch?v=EIqKG5TiSYs Phase Velocity versus Group Velocity: Wave Dispersion
