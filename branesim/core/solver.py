@@ -185,7 +185,7 @@ class VelocityVerletSolver:
             Tuple of (expected_c, computed_c, relative_error)
             where:
                 expected_c = 3×10⁸ m/s (physical constant)
-                computed_c = wave speed from current parameters
+                computed_c = linearized lattice wave speed from current parameters
                 relative_error = |computed_c - expected_c| / expected_c
         """
         from branesim.config.physical_constants import PhysicalConstants
@@ -201,13 +201,10 @@ class VelocityVerletSolver:
         # Get density in proper units for the intrinsic dimension
         rho = self.mass_model.density
 
-        if self.grid.dimension.value == 1:
-            T_0 = k * (h - L_0)
-            mu = rho  # kg/m for 1D
-            computed_c = (T_0 / mu) ** 0.5
-        else:
-            tension = k * L_0
-            computed_c = (tension / rho) ** 0.5
+        # Linearized lattice wave speed (continuum correspondence)
+        # c^2 ~ k * h^(2-D) / rho, where D is the intrinsic dimension.
+        D = self.grid.dimension.value
+        computed_c = (k * (h ** (2 - D)) / rho) ** 0.5
 
         relative_error = abs(computed_c - expected_c) / expected_c
 

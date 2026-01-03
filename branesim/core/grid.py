@@ -7,7 +7,7 @@ simulations, supporting 1D, 2D, and 3D grids with dimension-agnostic operations.
 
 import torch
 import numpy as np
-from typing import Tuple
+from typing import Tuple, List
 from branesim.core.state import Dimensionality
 
 
@@ -25,6 +25,9 @@ class BraneGrid:
         num_points: int, total number of points
         max_neighbors: int, maximum neighbors per point (2/8/26 for 1D/2D/3D)
         neighbors: [N, max_neighbors] tensor of neighbor indices (-1 for invalid)
+        neighbor_offsets: [max_neighbors, D] tensor of neighbor offsets in lattice units
+        neighbor_offset_norms: [max_neighbors] tensor of |delta| values
+        neighbor_weights: [max_neighbors] tensor of isotropic weights 1/|delta|^2
         is_boundary: [N] boolean tensor marking boundary points
         periodic_axes: Tuple[bool, ...] indicating which axes are periodic
         device: torch.device
@@ -73,6 +76,12 @@ class BraneGrid:
         else:  # THREE_D
             self.max_neighbors = 26  # 3x3x3 - 1
 
+        # Precompute neighbor offsets and isotropic weights (paper v2 stencil)
+        self._offsets_list = self._build_neighbor_offsets_list()
+        self.neighbor_offsets = torch.tensor(self._offsets_list, device=self.device, dtype=torch.int64)
+        self.neighbor_offset_norms = torch.norm(self.neighbor_offsets.to(torch.float32), dim=1)
+        self.neighbor_weights = 1.0 / (self.neighbor_offset_norms ** 2)
+
         # Build neighbor connectivity
         self.neighbors = self._build_neighbor_indices()
 
@@ -94,6 +103,29 @@ class BraneGrid:
             return self._build_neighbors_2d()
         else:  # THREE_D
             return self._build_neighbors_3d()
+
+    def _build_neighbor_offsets_list(self) -> List[Tuple[int, ...]]:
+        """
+        Build ordered neighbor offset list for the chosen dimensionality.
+
+        Order must match the neighbor index ordering used in _build_neighbors_*.
+        """
+        if self.dimension == Dimensionality.ONE_D:
+            return [(-1,), (1,)]
+        if self.dimension == Dimensionality.TWO_D:
+            return [
+                (-1, -1), (-1, 0), (-1, 1),
+                (0, -1),           (0, 1),
+                (1, -1),  (1, 0),  (1, 1)
+            ]
+
+        offsets = []
+        for di in [-1, 0, 1]:
+            for dj in [-1, 0, 1]:
+                for dk in [-1, 0, 1]:
+                    if not (di == 0 and dj == 0 and dk == 0):
+                        offsets.append((di, dj, dk))
+        return offsets
 
     def _build_neighbors_1d(self) -> torch.Tensor:
         """
@@ -143,11 +175,7 @@ class BraneGrid:
         periodic_x, periodic_y = self.periodic_axes
 
         # Neighbor offsets (di, dj)
-        offsets = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1),           (0, 1),
-            (1, -1),  (1, 0),  (1, 1)
-        ]
+        offsets = self._offsets_list
 
         for i in range(nx):
             for j in range(ny):
@@ -192,13 +220,8 @@ class BraneGrid:
 
         periodic_x, periodic_y, periodic_z = self.periodic_axes
 
-        # Generate all 26 offsets
-        offsets = []
-        for di in [-1, 0, 1]:
-            for dj in [-1, 0, 1]:
-                for dk in [-1, 0, 1]:
-                    if not (di == 0 and dj == 0 and dk == 0):
-                        offsets.append((di, dj, dk))
+        # Generate all 26 offsets (ordered)
+        offsets = self._offsets_list
 
         for i in range(nx):
             for j in range(ny):

@@ -425,6 +425,7 @@ def main():
             "k_spring_N_per_m": k_spring,
             "rest_length_phys_m": rest_length_phys,
             "rest_length_sim": rest_length_sim,
+            "pre_stretch_alpha": constants.pre_stretch_alpha,
             "dt_phys_s": dt_phys,
             "dt_sim": dt_sim,
             "nx": nx,
@@ -450,6 +451,14 @@ def main():
             "L0": "Spring rest length (pre-stretch).",
             "rho_3": "Volume mass density for 3D brane.",
             "T_3": "Effective 3D elastic modulus.",
+        },
+        paper_mapping={
+            "h_phys_m": "h_* (ground-state geometric spacing, Sec. Coupling/pre-stretch).",
+            "rest_length_phys_m": "ell_0 (spring rest length), alpha = ell_0 / h_*.",
+            "pre_stretch_alpha": "alpha (pre-stretch parameter, Eq. coupling alpha).",
+            "rho_3_kg_per_m3": "rho_m (mass density in continuum equations).",
+            "T_3_Pa": "T (effective modulus in linearized wave equation).",
+            "k_spring_N_per_m": "k (spring constant in discrete model).",
         },
         figures=[
             FigureSpec(

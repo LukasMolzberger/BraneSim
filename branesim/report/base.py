@@ -30,6 +30,7 @@ class ReportData:
     assumptions: List[str] = field(default_factory=list)
     derived: Dict[str, Scalar] = field(default_factory=dict)
     dictionary: Dict[str, str] = field(default_factory=dict)
+    paper_mapping: Dict[str, str] = field(default_factory=dict)
     figures: List[FigureSpec] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
     metadata: Dict[str, Scalar] = field(default_factory=dict)

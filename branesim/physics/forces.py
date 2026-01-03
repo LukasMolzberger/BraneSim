@@ -21,8 +21,8 @@ class SpringForceComputer:
         - Linear: φ'(ε) = k * ε
 
     Attributes:
-        spring_constant: float (k), spring constant in N/m
-        rest_length: float (L_0), rest length in meters
+        spring_constant: float (k), spring constant in N/m for unit-offset neighbors
+        rest_length: float (L_0), rest length in meters for unit-offset neighbors
     """
 
     def __init__(
@@ -34,8 +34,8 @@ class SpringForceComputer:
         Initialize spring force computer.
 
         Args:
-            spring_constant: Spring constant k [N/m]
-            rest_length: Rest length L_0 [m]
+            spring_constant: Spring constant k [N/m] for unit-offset neighbors
+            rest_length: Rest length L_0 [m] for unit-offset neighbors
         """
         self.spring_constant = spring_constant
         self.rest_length = rest_length
@@ -46,6 +46,9 @@ class SpringForceComputer:
 
         Vectorized implementation that loops over neighbor slots rather than points.
         Uses masking to handle boundary points efficiently.
+
+        Applies isotropic-stencil weights (k_delta = k / |delta|^2) and
+        offset-scaled rest lengths (L0_delta = L0 * |delta|).
 
         Args:
             state: BraneState with current positions
@@ -79,11 +82,13 @@ class SpringForceComputer:
             delta = q_pos - p_pos
             distance = torch.norm(delta, dim=1, keepdim=True)  # [N_valid, 1]
 
-            # Compute strain [N_valid, 1]
-            strain = distance - self.rest_length
+            # Compute strain [N_valid, 1] with offset-scaled rest length
+            rest_length = self.rest_length * grid.neighbor_offset_norms[neighbor_idx].to(state.dtype)
+            strain = distance - rest_length
 
-            # φ'(ε) = k*ε
-            force_mag = self.spring_constant * strain
+            # φ'(ε) = k_delta * ε with isotropic stencil weights
+            k_eff = self.spring_constant * grid.neighbor_weights[neighbor_idx].to(state.dtype)
+            force_mag = k_eff * strain
 
             # Force direction: delta / distance (add small epsilon to avoid division by zero)
             force_dir = delta / distance
@@ -130,11 +135,13 @@ class SpringForceComputer:
             # Compute strain
             delta = q_pos - p_pos
             distance = torch.norm(delta, dim=1)
-            strain = distance - self.rest_length
+            rest_length = self.rest_length * grid.neighbor_offset_norms[neighbor_idx].to(state.dtype)
+            strain = distance - rest_length
 
             # Compute potential energy for these links
             # φ(ε) = (k / 2) * ε²
-            link_energy = 0.5 * self.spring_constant * strain ** 2
+            k_eff = self.spring_constant * grid.neighbor_weights[neighbor_idx].to(state.dtype)
+            link_energy = 0.5 * k_eff * strain ** 2
 
             total_energy += torch.sum(link_energy)
 

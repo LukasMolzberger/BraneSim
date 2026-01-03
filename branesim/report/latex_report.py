@@ -105,6 +105,10 @@ class LatexReportGenerator:
             rows = [(k, v) for k, v in report.dictionary.items()]
             doc.extend([r"\section*{Dictionary}", _render_table(rows)])
 
+        if report.paper_mapping:
+            rows = [(k, v) for k, v in report.paper_mapping.items()]
+            doc.extend([r"\section*{Paper v2 Variable Mapping}", _render_table(rows)])
+
         if report.figures:
             doc.append(r"\section*{Figures}")
             doc.append(r"\begin{itemize}")
