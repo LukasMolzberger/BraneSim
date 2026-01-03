@@ -156,17 +156,42 @@ Then the induced metric becomes
   g_{ij}=h_\star^2\,\delta_{ij}+\partial_i u\,\partial_j u,
   \label{eq:metric-graph}
 \end{equation}
-where $h_\star$ denotes the held ground-state scale introduced in \Cref{eq:alpha-def} (equivalently, one may rescale coordinates so that $h_\star=1$),
-a large-amplitude transverse profile necessarily produces an \emph{in-brane} strain contribution of order
+where $h_\star$ denotes the held ground-state scale introduced in \Cref{eq:alpha-def}
+(equivalently, one may rescale coordinates so that $h_\star=1$).
+A large-amplitude transverse profile necessarily produces an \emph{in-brane} strain contribution of order
 $|\nabla u|^2$ even if the lateral components remain close to their ground state.
+
+\paragraph{Pythagorean lengthening and lateral contraction (informal picture).}
+For a small material displacement $\dd x$, the ambient line element of the graph embedding satisfies
+\begin{equation}
+  \dd s^2 = h_\star^2\,|\dd x|^2 + (\nabla u\cdot \dd x)^2.
+  \label{eq:line-element-graph}
+\end{equation}
+Thus any region with nonzero slope $\nabla u$ necessarily \emph{lengthens} intrinsic distances compared to the flat
+configuration.
+In a discrete spring-lattice realization this is the familiar Pythagorean effect
+$|\Delta \vecX|=\sqrt{|\Delta x|^2+(\Delta u)^2}$: transverse variation increases spring length even when lateral
+coordinates are unchanged.
+If the medium is pre-tensioned ($\alpha<1$), the additional length is paid for by increased tensile stress,
+which produces net lateral forces that pull material points \emph{toward} the region of transverse excitation.
+For a localized bump or rotating transverse pattern, the surrounding brane therefore develops an inward bias
+(contraction) rather than an outward pressure.
+
+In this qualitative sense, the ``gravitational mass'' of an excitation is tied to the elastic energy stored in
+transverse gradients (and, more generally, to embedded deformation energy), while the ``gravitational field'' is the
+slowly varying in-brane strain/dilation pattern sourced by that energy.
+The sign is fixed by geometry: increasing transverse arc length increases elastic energy and therefore increases
+tension, which pulls laterally inward.
+
 With homogeneous pre-stress ($\alpha<1$), this geometrically induced strain backreacts on the in-brane stress field
 through the constitutive law, effectively coupling transverse excitation energy into slow modulations of the
 in-brane configuration.
 
 This provides a concrete mechanism for a long-range channel often described informally as ``gravity'' in the present
-program: localized transverse gradients can act as sources of slowly varying background strain/dilation, and linear
-wave packets propagating on top of that background experience branch-dependent effective coefficients
+program: localized transverse gradients can act as sources of slowly varying background strain (contraction/dilation),
+and linear wave packets propagating on top of that background experience branch-dependent effective coefficients
 (cf.\ \Cref{sec:emergent-relativity}).
 In a weak-field, slowly varying regime one may therefore seek a Newtonian-limit reduction in which a scalar potential
 built from coarse-grained strain (or elastic energy density) obeys a Poisson-type equation.
-Deriving such a reduction quantitatively is an open problem of the present theory fragment.
+Deriving such a reduction quantitatively (and relating the resulting coupling constant to $G$) is an open problem of
+the present theory fragment.

@@ -21,6 +21,15 @@ Springs connect near neighbors; including diagonals improves isotropy.
 A uniform prestretch parameter $\alpha$ sets the spring rest lengths relative to the lattice spacing,
 representing homogeneous pre-tension.
 
+
+\paragraph{Discrete analogue of the contraction (``gravity'') channel.}
+Spring extensions are computed from the full ambient distance $|\Delta \vecX|$ in $\R^4$.
+Therefore a transverse variation in the fourth component increases spring lengths via the Pythagorean relation
+$|\Delta \vecX|=\sqrt{|\Delta x|^2+(\Delta u)^2}$, which produces lateral restoring forces even when the lateral
+coordinates are unchanged.
+Under pre-tension this leads to a net inward bias (contraction) around localized transverse excitation, mirroring the
+continuum discussion in \Cref{subsec:gravity-channel}.
+
 \subsection{Time integration and invariants}
 
 A symplectic or near-symplectic second-order integrator (e.g.\ Velocity Verlet) is used.
