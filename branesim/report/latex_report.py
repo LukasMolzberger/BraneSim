@@ -47,6 +47,23 @@ def _render_table(rows: Iterable[tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
+def _render_symbol_table(rows: Iterable[tuple[str, str, str]]) -> str:
+    lines = [
+        r"\begin{longtable}{p{0.28\linewidth}p{0.2\linewidth}p{0.47\linewidth}}",
+        r"\toprule",
+        r"\textbf{Implementation} & \textbf{Paper Symbol} & \textbf{Description} \\",
+        r"\midrule",
+        r"\endhead",
+    ]
+    for key, symbol, desc in rows:
+        key_text = _latex_escape(key)
+        symbol_text = symbol if symbol else "--"
+        desc_text = _latex_escape(desc)
+        lines.append(f"{key_text} & {symbol_text} & {desc_text} \\\\")
+    lines.extend([r"\bottomrule", r"\end{longtable}"])
+    return "\n".join(lines)
+
+
 class LatexReportGenerator:
     """Generate a .tex report with parameters, assumptions, and notes."""
 
@@ -101,13 +118,15 @@ class LatexReportGenerator:
             rows = [(k, _format_value(v)) for k, v in report.derived.items()]
             doc.extend([r"\section*{Derived Measurements}", _render_table(rows)])
 
-        if report.dictionary:
-            rows = [(k, v) for k, v in report.dictionary.items()]
-            doc.extend([r"\section*{Dictionary}", _render_table(rows)])
-
-        if report.paper_mapping:
-            rows = [(k, v) for k, v in report.paper_mapping.items()]
-            doc.extend([r"\section*{Paper v2 Variable Mapping}", _render_table(rows)])
+        symbol_rows = list(report.symbol_map)
+        if not symbol_rows:
+            symbol_rows = []
+            for key, desc in report.dictionary.items():
+                symbol_rows.append((key, "", desc))
+            for key, desc in report.paper_mapping.items():
+                symbol_rows.append((key, "", desc))
+        if symbol_rows:
+            doc.extend([r"\section*{Symbol Mapping}", _render_symbol_table(symbol_rows)])
 
         if report.figures:
             doc.append(r"\section*{Figures}")

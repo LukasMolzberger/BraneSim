@@ -1,0 +1,67 @@
+\section{From mode-frame transport to gauge-covariant envelope dynamics}
+\label{sec:effective-field}
+
+\subsection{Narrowband multiscale ansatz}
+
+Assume an excitation narrowband around a carrier frequency $\omega_0$.
+Write the substrate displacement as a slowly varying complex envelope times a local mode frame:
+\begin{equation}
+  \vecu(x,t)\;\approx\;
+  \mathrm{Re}\!\left[
+    e^{-i\omega_0 t}\sum_{a=1}^{n}\Psi^a(x,t)\,\mathbf{e}_a(x,t)
+  \right],
+  \label{eq:multiscale-ansatz}
+\end{equation}
+where $\Psi(x,t)\in\mathbb{C}^n$ varies slowly compared to $\omega_0^{-1}$ and
+$\{\mathbf{e}_a(x,t)\}_{a=1..n}$ is an orthonormal frame spanning the retained polarization subspace.
+For $n=1$ this is a complex line bundle (Abelian case); for $n>1$ it is a rank-$n$ bundle (non-Abelian case).
+
+\subsection{Connection induced by the moving frame}
+
+Define the matrix-valued connection
+\begin{equation}
+  (\mathcal{A}_\mu)_{ab} := -i\,\mathbf{e}_a^\dagger\,\partial_\mu \mathbf{e}_b ,
+  \qquad \mu\in\{t,1,2,3\},
+  \label{eq:frame-connection}
+\end{equation}
+which reduces to the Abelian Berry connection for $n=1$.
+A change of local frame $\mathbf{e}_a\mapsto U_{ab}(x,t)\mathbf{e}_b$ induces the gauge transformation
+\begin{equation}
+  \mathcal{A}_\mu \mapsto U^\dagger \mathcal{A}_\mu U - i\,U^\dagger(\partial_\mu U),
+\end{equation}
+with curvature $\mathcal{F}_{\mu\nu}=\partial_\mu\mathcal{A}_\nu-\partial_\nu\mathcal{A}_\mu-i[\mathcal{A}_\mu,\mathcal{A}_\nu]$
+\citep{WilczekZee1984,Cisowski2022}.
+
+\subsection{Gauge-covariant envelope derivatives}
+
+Because derivatives act on both $\Psi$ and the basis $\mathbf{e}_a$, the slow dynamics of the envelope naturally
+involves the covariant derivative
+\begin{equation}
+  D_\mu \Psi := \partial_\mu \Psi + i\,\mathcal{A}_\mu \Psi.
+  \label{eq:covariant-derivative}
+\end{equation}
+This is a purely kinematic statement: it follows from the multiscale decomposition \eqref{eq:multiscale-ansatz}
+and does not assume any particular ``electromagnetic'' interpretation.
+
+\subsection{Hypothesis: coarse-grained field dynamics}
+
+To obtain a genuine field theory for the connection, one must show that $\mathcal{A}_\mu$ acquires autonomous
+dynamics under coarse-graining. A common pattern in effective theories is that integrating out fast substrate degrees
+of freedom generates gauge-invariant kinetic terms built from curvature.
+Motivated by this structure, we propose the following \emph{testable hypothesis}:
+
+\begin{quote}
+In regimes where the multiscale separation holds and where the polarization bundle is smooth,
+the coarse-grained action for the slow sector contains a leading gauge-invariant term
+proportional to $\mathrm{tr}(\mathcal{F}_{\mu\nu}\mathcal{F}^{\mu\nu})$.
+In the Abelian case this reduces to $F_{\mu\nu}F^{\mu\nu}$.
+\end{quote}
+
+If validated, this would produce Maxwell-like equations as Euler--Lagrange equations for the effective field.
+The hypothesis is deliberately stated operationally: it can be tested by measuring whether curvature disturbances
+propagate as approximately sourceless waves outside localized modes (\Cref{sec:validation}).
+
+\paragraph{Why keep this as a hypothesis.}
+While geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,Bliokh2015SpinOrbit,Cisowski2022},
+the emergence of a \emph{propagating} gauge field requires additional dynamical conditions.
+The paper therefore treats the Maxwell-term emergence as a falsifiable target rather than a derived theorem.

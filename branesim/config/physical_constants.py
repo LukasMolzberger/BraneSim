@@ -58,7 +58,7 @@ class PhysicalConstants:
     # 2. Gravitational coupling matches G (from κ = c³/(8πG))
     # 3. Rest length is physically consistent with continuum theory
 
-    pre_stretch_alpha: float = 1.0
+    pre_stretch_alpha: float = 0.2
     """
     Dimensionless pre-stretch ratio L₀/a (alpha = L₀ / h_star).
 

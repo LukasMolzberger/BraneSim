@@ -1,0 +1,39 @@
+\section{Discrete reference implementation (appendix)}
+\label{app:discrete}
+
+This appendix records a \emph{reference} discrete implementation intended to approximate the continuum model.
+It is not part of the conceptual claims in the main text.
+
+\subsection{Purpose and philosophy}
+
+The discrete model is used to:
+\begin{itemize}
+\item test isotropy numerically (including diagonal couplings as an approximation to rotational invariance),
+\item extract dispersion relations for small-amplitude waves,
+\item compute geometric-phase diagnostics from simulated polarized wave packets,
+\item search for and stress-test localized modes.
+\end{itemize}
+
+\subsection{Lattice kinematics (summary)}
+
+A cubic lattice of nodes approximates $\Omega\subset\R^3$. Each node carries a 4D position $\vecX_{ijk}(t)\in\R^4$.
+Springs connect near neighbors; including diagonals improves isotropy.
+A uniform prestretch parameter $\alpha$ sets the spring rest lengths relative to the lattice spacing,
+representing homogeneous pre-tension.
+
+\subsection{Time integration and invariants}
+
+A symplectic or near-symplectic second-order integrator (e.g.\ Velocity Verlet) is used.
+Conservation checks include total energy drift and momentum balance, with attention to boundary conditions.
+
+\subsection{Geometric-phase extraction in the discrete setting}
+
+Given a narrowband simulated wave, a local polarization state $\bm{\epsilon}$ can be estimated from
+phase-aligned projections onto an internal basis (e.g.\ transverse directions).
+Then $A_\mu$ and $F_{\mu\nu}$ are computed by discrete derivatives, and loop holonomies are evaluated by discrete line integrals.
+
+\subsection{Recommended reporting}
+
+To reduce ambiguity, report:
+grid size, timestep, boundary conditions, constitutive/spring law, prestretch $\alpha$,
+measured dispersion curves, and numerical stability metrics alongside any holonomy results.

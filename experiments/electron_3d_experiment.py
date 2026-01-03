@@ -66,6 +66,7 @@ from branesim.visualization.displacement_field_viz import (
     displacement_frames_from_positions_frames,
     create_displacement_diralpha_slices_videos_3d_in_4d,
 )
+from branesim.berry import compton_omega0, compute_berry_time_series, create_berry_videos
 
 
 def displacement_to_rgb_3d(disp_x, disp_y, max_magnitude=None):
@@ -512,26 +513,27 @@ def main():
             "computed_wave_speed_m_per_s": computed_c,
             "wave_speed_relative_error": relative_error,
         },
-        dictionary={
-            "h": "Lattice spacing (physical grid spacing).",
-            "L0": "Spring rest length (pre-stretch).",
-            "rho_3": "Volume mass density for 3D brane.",
-            "T_3": "Effective 3D elastic modulus.",
-        },
-        paper_mapping={
-            "h_phys_m": "h_* (ground-state geometric spacing, Sec. Coupling/pre-stretch).",
-            "rest_length_phys_m": "ell_0 (spring rest length), alpha = ell_0 / h_*.",
-            "pre_stretch_alpha": "alpha (pre-stretch parameter, Eq. coupling alpha).",
-            "rho_3_kg_per_m3": "rho_m (mass density in continuum equations).",
-            "T_3_Pa": "T (effective modulus in linearized wave equation).",
-            "k_spring_N_per_m": "k (spring constant in discrete model).",
-            "radius_sim": "a (electron cavity radius).",
-            "electron_l": "ell (spherical harmonic degree).",
-            "electron_m": "m (spherical harmonic order).",
-            "electron_n": "n (radial root index).",
-            "electron_amplitude": "A (displacement amplitude scale).",
-            "electron_polarization": "polarization plane (p1, p2 in R^4).",
-        },
+        symbol_map=[
+            ("wavelength_phys_m", r"\(\lambda_C\)", "Compton wavelength used as characteristic scale."),
+            ("h_phys_m", r"\(h_\star\)", "Ground-state geometric spacing (paper v2: coupling/pre-stretch)."),
+            ("rest_length_phys_m", r"\(\ell_0\)", "Spring rest length."),
+            ("pre_stretch_alpha", r"\(\alpha=\ell_0/h_\star\)", "Pre-stretch parameter; alpha<1 yields uniform pre-tension."),
+            ("rho_3_kg_per_m3", r"\(\rho_m\)", "Volume mass density in the continuum wave equation."),
+            ("T_3_Pa", r"\(T\)", "Effective modulus in the linearized wave equation."),
+            ("k_spring_N_per_m", r"\(k\)", "Discrete spring constant in the lattice model."),
+            ("cfl_factor", r"\(\mathrm{CFL}\)", "CFL-like factor used to set the time step."),
+            ("dt_phys_s", r"\(\Delta t\)", "Physical time step used by the integrator."),
+            ("radius_sim", r"\(a\)", "Electron cavity radius in intrinsic units."),
+            ("electron_l", r"\(\ell\)", "Spherical harmonic degree."),
+            ("electron_m", r"\(m\)", "Spherical harmonic order."),
+            ("electron_n", r"\(n\)", "Radial root index for the Bessel seed."),
+            ("electron_amplitude", r"\(A\)", "Displacement amplitude scale after normalization."),
+            ("electron_smooth_edge", r"\(s\)", "Taper softness in the radial window."),
+            ("electron_polarization", r"\(\mathbf{p}_1,\mathbf{p}_2\)", "Orthonormal polarization vectors in R^4."),
+        ],
+        notes=[
+            "Berry diagnostics use a hardcoded Compton carrier omega0 and the complex amplitude a = sqrt(omega0) u + i v / sqrt(omega0).",
+        ],
         figures=[
             FigureSpec(
                 path=run_manager.get_plot_path("electron_3d_example_propagation_xy.png"),
@@ -544,6 +546,14 @@ def main():
             FigureSpec(
                 path=run_manager.get_plot_path("electron_3d_example.mp4"),
                 caption="Electron propagation animation.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("berry_electron_3d_phase_xy.mp4"),
+                caption="Berry phase (XY slice) with amplitude mask.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("berry_electron_3d_connection_xy.mp4"),
+                caption="Berry connection A_t (XY slice) with amplitude mask.",
             ),
         ],
     )
@@ -676,6 +686,7 @@ def main():
 
     # Displacement field video frames (collect full position snapshots)
     frames_X_full = []  # Full 4D positions for displacement field videos
+    frames_V_full = []  # Full 4D velocities (physical units) for Berry analysis
     frames_times_s = []  # Physical times in seconds
     X0_full = mapper.to_phys_length(initial_positions).detach().cpu().numpy()  # Reference positions
 
@@ -709,7 +720,9 @@ def main():
 
             # Collect full positions for displacement field videos (same as animation frames)
             X_phys = mapper.to_phys_length(state.positions).detach().cpu().numpy()
+            V_phys = mapper.to_phys_velocity(state.velocities).detach().cpu().numpy()
             frames_X_full.append(X_phys)
+            frames_V_full.append(V_phys)
             time_phys = mapper.to_phys_time(solver.time)
             frames_times_s.append(time_phys)
 
@@ -1195,6 +1208,41 @@ def main():
         print(f"    ✓ displacement_3d_diralpha_yz.mp4")
 
         print(f"  ✓ Displacement field slice videos generated")
+
+        # ====================================================================
+        # Berry diagnostics (U(1) phase + connection)
+        # ====================================================================
+
+        print(f"\nGenerating Berry diagnostics and videos...")
+
+        frames_v_full = frames_V_full  # already in physical units
+        omega0 = compton_omega0()  # rad/s, from PhysicalConstants.lambda_C
+        berry = compute_berry_time_series(
+            frames_u=frames_u_full,
+            frames_v=frames_v_full,
+            times_s=frames_times_s,
+            omega0=omega0,
+            amp_eps_rel=1e-4,
+            overlap_eps_rel=1e-3,
+            alpha_gamma=0.6,
+            alpha_scale=1.0,
+            return_psi=False,
+        )
+
+        create_berry_videos(
+            series=berry,
+            intrinsic_dim=3,
+            output_dir=run_manager.plots_dir,
+            grid_shape_3d=(nx, ny, nz),
+            spacing=h_phys,
+            filename_prefix="berry_electron_3d",
+            fps=20,
+            dpi=120,
+            display_scale=1e9,
+            unit_label="nm",
+        )
+
+        print(f"  ✓ Berry videos generated")
 
     print(f"\n{'=' * 70}")
     print("Simulation complete!")

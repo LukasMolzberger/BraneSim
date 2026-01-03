@@ -1,0 +1,58 @@
+\section{Localized modes and self-adjoint eigenproblems}
+\label{sec:localized}
+
+A core goal of the substrate program is to explain particle-like behavior (localization, discrete spectra,
+internal ``spin/charge''-like structure) as properties of confined wave states rather than point particles.
+
+\subsection{Background configurations and symmetry}
+
+Let $\vecX_0(x)$ be a time-independent background embedding representing a localized deformation region
+(e.g., a spherically symmetric ``bulge'' in the embedding). The background should be constructed so that:
+\begin{enumerate}
+\item it is \emph{spherically symmetric} in the brane coordinates (invariants depend only on $r=|x|$),
+\item it yields a well-posed linearization operator (stability and self-adjointness),
+\item boundary conditions are physical (e.g., decay at infinity or radiation conditions on large domains).
+\end{enumerate}
+
+\subsection{Linearization as a self-adjoint operator}
+
+Consider perturbations $\vecX=\vecX_0+\delta\vecX$.
+The second variation of the action yields an operator of the general form
+\begin{equation}
+  \rho_m\,\partial_t^2\,\delta X^A = \mathcal{L}^A_{\;\;B}\,\delta X^B,
+  \label{eq:linearized-operator}
+\end{equation}
+where $\mathcal{L}$ is a (generally variable-coefficient) spatial differential operator determined by
+$\vecX_0$ and the constitutive law. If $\mathcal{L}$ is self-adjoint under an inner product
+\begin{equation}
+  \langle \delta\vecX, \delta\vecY\rangle := \int_\Omega \delta X^A\,\delta Y^A\, w(x)\,\mathrm{d}^3x,
+  \label{eq:inner-product}
+\end{equation}
+with appropriate weight $w(x)$ (typically derived from the kinetic term and the background),
+then standard spectral theory applies: orthogonality, completeness (on suitable domains), and real eigenvalues.
+This avoids imposing ``well-behavedness'' by hand.
+
+\subsection{Mode decomposition and angular structure}
+
+If $\vecX_0$ is spherically symmetric in the brane coordinates, $\mathcal{L}$ commutes with rotations,
+and eigenmodes can be decomposed into radial and angular parts.
+At the estimator level this often leads to spherical-harmonic angular structure,
+but the precise angular operator depends on the constitutive choice and background coupling.
+The paper therefore treats angular eigenfunctions as \emph{derived} from the operator problem
+rather than assumed from a Laplace--Beltrami ansatz.
+
+\subsection{Geometric nonlinearity and self-confinement}
+
+Beyond the linear regime, the induced metric \eqref{eq:induced-metric} produces geometric nonlinearities.
+In particular, transverse excursions in the embedding alter in-brane distances (via Pythagorean coupling),
+which modifies local tension and can create effective trapping potentials for certain modes.
+This provides a plausible route to self-confinement in a purely mechanical substrate,
+subject to numerical validation (\Cref{sec:validation}).
+
+\subsection{Connection to geometric-phase diagnostics}
+
+Localized modes can carry internal polarization structure (multi-component standing waves).
+The Berry/Wilczek--Zee connections of \Cref{sec:geophase} can then be evaluated on:
+(i) loops around the localized region (holonomy diagnostics), and
+(ii) adiabatic deformations of the localized mode family (parameter-space diagnostics).
+This creates a concrete bridge between ``particle identity'' and emergent gauge variables.

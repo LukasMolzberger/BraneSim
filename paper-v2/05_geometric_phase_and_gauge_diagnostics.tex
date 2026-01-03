@@ -1,0 +1,72 @@
+\section{Geometric phase and gauge diagnostics}
+\label{sec:geophase}
+
+\subsection{Narrowband multi-component waves and polarization transport}
+
+Assume the substrate supports a narrowband wave packet whose dominant oscillation can be expressed
+locally as
+\begin{equation}
+  \vecu(x,t) \approx \mathrm{Re}\Big\{ a(x,t)\,\bm{\epsilon}(x,t)\,e^{i\theta(x,t)} \Big\},
+  \qquad
+  \theta(x,t)=\veck\cdot x-\omega t,
+  \label{eq:quasi-monochromatic}
+\end{equation}
+where $\bm{\epsilon}(x,t)\in\mathbb{C}^N$ is a \emph{normalized} polarization state ($\bm{\epsilon}^\dagger\bm{\epsilon}=1$),
+$a(x,t)\ge 0$ is a slowly varying amplitude, and $N$ counts the relevant internal components
+(e.g., transverse directions in the embedding plus any effective internal basis used for coarse-graining).
+
+The phase $\theta$ contains the fast oscillation; the \emph{geometric} information is encoded in how
+$\bm{\epsilon}$ varies under transport in $(x,t)$.
+
+\subsection{Berry / Pancharatnam--Berry connection}
+
+Define the Berry connection one-form
+\begin{equation}
+  A_\mu := -i\,\bm{\epsilon}^\dagger \partial_\mu \bm{\epsilon},
+  \qquad \mu\in\{t,1,2,3\},
+  \label{eq:berry-connection}
+\end{equation}
+and its curvature
+\begin{equation}
+  F_{\mu\nu} := \partial_\mu A_\nu - \partial_\nu A_\mu.
+  \label{eq:berry-curvature}
+\end{equation}
+Under a local phase change $\bm{\epsilon}\mapsto e^{i\chi(x,t)}\bm{\epsilon}$,
+the connection transforms as $A_\mu\mapsto A_\mu+\partial_\mu \chi$ while $F_{\mu\nu}$ is invariant.
+This is the standard $U(1)$ gauge freedom \citep{Berry1984,Pancharatnam1956,Cisowski2022}.
+
+\paragraph{Gauge-invariant holonomy.}
+For a closed loop $\gamma$ in configuration space,
+\begin{equation}
+  \Phi_\gamma := \oint_\gamma A_\mu\,\mathrm{d}x^\mu
+\end{equation}
+is gauge-invariant modulo $2\pi$ and equals the Berry phase accumulated along $\gamma$.
+A key diagnostic is whether such loop phases behave \emph{field-like} (i.e., depend locally
+on enclosed curvature and satisfy consistent evolution laws).
+
+\subsection{Non-Abelian (Wilczek--Zee) connection for degenerate subspaces}
+
+If the substrate supports a $k$-dimensional (near-)degenerate subspace of modes
+$\{\bm{\epsilon}_a\}_{a=1}^k$ spanning a local vector bundle, define the matrix-valued connection
+\begin{equation}
+  (\mathcal{A}_\mu)_{ab} := -i\,\bm{\epsilon}_a^\dagger\,\partial_\mu \bm{\epsilon}_b,
+  \label{eq:wz-connection}
+\end{equation}
+and curvature $\mathcal{F}_{\mu\nu}=\partial_\mu\mathcal{A}_\nu-\partial_\nu\mathcal{A}_\mu-i[\mathcal{A}_\mu,\mathcal{A}_\nu]$.
+A change of local basis $\bm{\epsilon}_a\mapsto U_{ab}(x,t)\bm{\epsilon}_b$ with $U\in U(k)$ produces the
+usual non-Abelian gauge transformation \citep{WilczekZee1984}.
+This provides a principled way to encode multi-component ``internal'' structure without introducing
+additional fundamental fields.
+
+\subsection{Interpretation in the substrate program}
+
+The model does \emph{not} assume that $A_\mu$ is electromagnetism. Instead:
+\begin{itemize}
+\item $A_\mu$ is a well-defined geometric object extracted from the substrate wave state.
+\item $F_{\mu\nu}$ is a gauge-invariant diagnostic that can be tested for locality and propagation laws.
+\item If, in regimes outside localized excitations, $F_{\mu\nu}$ obeys effective sourceless dynamics
+and couples to localized modes through phase transport, then an emergent gauge interpretation becomes plausible.
+\end{itemize}
+
+The advantage of this viewpoint is methodological: geometric-phase quantities can be computed from
+either continuum solutions or discrete simulations, providing a bridge from substrate to effective fields.

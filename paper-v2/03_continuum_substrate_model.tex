@@ -1,0 +1,64 @@
+\section{Continuum substrate model}
+\label{sec:continuum-model}
+
+\subsection{Kinematics and induced metric}
+
+Let $x=(x^1,x^2,x^3)\in\Omega\subset\R^3$ denote reference coordinates of the brane.
+The embedding $\vecX(x,t)\in\R^4$ induces a (time-dependent) metric on the brane:
+\begin{equation}
+  g_{ij}(x,t) := \partial_i \vecX(x,t)\cdot \partial_j \vecX(x,t), \qquad i,j=1,2,3.
+  \label{eq:induced-metric}
+\end{equation}
+Rotational invariance within the brane follows if the stored energy depends on invariants of $g$
+relative to a reference metric $\bar g$.
+
+\paragraph{Pre-tension as a reference-metric mismatch.}
+To model a homogeneous pre-tension (the continuum analogue of a prestretched lattice),
+we introduce a reference metric $\bar g_{ij}=\alpha^2\,\delta_{ij}$ with $\alpha\in(0,1]$.
+Embedding the brane in a configuration close to $g_{ij}\approx \delta_{ij}$ then represents an
+initial state that is ``larger'' than its preferred metric and therefore carries tension.
+This parametrization is an estimator-level device; alternative but equivalent parametrizations
+(e.g., multiplicative pre-deformation gradients) can be substituted \citep{Ogden1984,Holzapfel2000}.
+
+\subsection{Action principle}
+
+We consider an action
+\begin{equation}
+  S[\vecX] = \int \mathrm{d}t \int_{\Omega} \mathrm{d}^3x\;
+  \mathcal{L}\big(\vecX,\partial_t \vecX,\partial_i \vecX\big),
+  \qquad
+  \mathcal{L} := \frac{\rho_m}{2}\,|\partial_t \vecX|^2 - W(g;\bar g),
+  \label{eq:action}
+\end{equation}
+where $\rho_m$ is a mass density and $W$ is an isotropic stored-energy density.
+A minimal requirement is that $W$ is frame-indifferent and stable around the background,
+so that a linear wave regime exists.
+
+\paragraph{Example constitutive families.}
+The analysis is compatible with standard isotropic hyperelastic families.
+For instance, $W$ may be expressed via invariants of the right Cauchy--Green tensor
+(relative to $\bar g$), and reduces to linear elasticity for small strains \citep{Ogden1984,Holzapfel2000}.
+We keep the constitutive choice modular; the diagnostic pipeline later depends mainly
+on the existence of polarized, narrowband propagating modes.
+
+\subsection{Equations of motion}
+
+Define the first Piola--Kirchhoff-like stress
+\begin{equation}
+  P_{Ai} := \frac{\partial W}{\partial(\partial_i X^A)} ,\qquad A=1,\dots,4,
+  \label{eq:piola}
+\end{equation}
+so that the Euler--Lagrange equations take the form
+\begin{equation}
+  \rho_m\,\partial_t^2 X^A = \partial_i P_{Ai}.
+  \label{eq:eom}
+\end{equation}
+Because $W$ is constructed from $g_{ij}$ (and $\bar g_{ij}$), the continuum model is rotationally
+invariant in the brane coordinates by construction.
+
+\subsection{Linearization and polarized modes}
+
+Linearize around a flat background $\vecX_\star(x)=(x,0)$ and small displacements
+$\vecu(x,t)=\vecX(x,t)-\vecX_\star(x)$. Under standard regularity assumptions on $W$,
+one obtains a linear wave system with (in general) multiple branches, including transverse and
+longitudinal polarizations. These are the substrate carriers for the later geometric-phase diagnostics.

@@ -354,20 +354,20 @@ def main():
             "computed_wave_speed_m_per_s": computed_c,
             "wave_speed_relative_error": relative_error,
         },
-        dictionary={
-            "h": "Lattice spacing (physical grid spacing).",
-            "L0": "Spring rest length (pre-stretch).",
-            "rho_2": "Surface mass density for 2D brane.",
-            "T_2": "Effective 2D tension.",
-        },
-        paper_mapping={
-            "h_phys_m": "h_* (ground-state geometric spacing, Sec. Coupling/pre-stretch).",
-            "rest_length_phys_m": "ell_0 (spring rest length), alpha = ell_0 / h_*.",
-            "pre_stretch_alpha": "alpha (pre-stretch parameter, Eq. coupling alpha).",
-            "rho_2_kg_per_m2": "rho_m (mass density in continuum equations).",
-            "T_2_N_per_m": "T (effective tension in linearized wave equation).",
-            "k_spring_N_per_m": "k (spring constant in discrete model).",
-        },
+        symbol_map=[
+            ("wavelength_phys_m", r"\(\lambda_C\)", "Compton wavelength used as characteristic scale."),
+            ("h_phys_m", r"\(h_\star\)", "Ground-state geometric spacing (paper v2: coupling/pre-stretch)."),
+            ("rest_length_phys_m", r"\(\ell_0\)", "Spring rest length."),
+            ("pre_stretch_alpha", r"\(\alpha=\ell_0/h_\star\)", "Pre-stretch parameter; alpha<1 yields uniform pre-tension."),
+            ("rho_2_kg_per_m2", r"\(\rho_m\)", "Surface mass density in the continuum wave equation."),
+            ("T_2_N_per_m", r"\(T\)", "Effective tension in the linearized wave equation."),
+            ("k_spring_N_per_m", r"\(k\)", "Discrete spring constant in the lattice model."),
+            ("cfl_factor", r"\(\mathrm{CFL}\)", "CFL-like factor used to set the time step."),
+            ("dt_phys_s", r"\(\Delta t\)", "Physical time step used by the integrator."),
+        ],
+        notes=[
+            "Berry diagnostics use a hardcoded Compton carrier omega0 and the complex amplitude a = sqrt(omega0) u + i v / sqrt(omega0).",
+        ],
         figures=[
             FigureSpec(
                 path=run_manager.get_plot_path("displacement_2d_arrows.mp4"),
