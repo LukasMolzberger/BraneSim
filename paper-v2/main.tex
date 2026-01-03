@@ -100,11 +100,13 @@ and numerical stability of localized ``electron-like'' excitations in the same s
         $W(g;g^0)$ built from the induced metric $g_{ij}=\partial_i\X\cdot\partial_j\X$ relative to an isotropic
         reference metric $g^0_{ij}=\ell_0^2\delta_{ij}$. A single dimension-free parameter
         $\alpha=\ell_0/h_\star$ controls uniform pre-stress via boundary-enforced geometric scale $h_\star$.
-  \item \textbf{Connections are kinematical.} For narrowband solutions, projecting the real brane fields onto a
-        locally transported $n$-dimensional mode subspace produces a covariant derivative
+  \item \textbf{Connections are kinematical (and require an ordered narrowband sector).} For narrowband solutions,
+        projecting the real brane fields onto a locally transported $n$-dimensional mode subspace produces a covariant derivative
         $\covD_\mu=\partial_\mu+\ii a_\mu\mathbf{1}_n+\ii\bbA_\mu$, where $a_\mu$ is the U(1) Berry connection and
-        $\bbA_\mu$ is a Wilczek--Zee connection when $n>1$. These connections encode \emph{basis transport} of the
-        retained subspace and are not assumed as additional fundamental fields.
+        $\bbA_\mu$ is a Wilczek--Zee connection when $n>1$. These connections encode \emph{basis transport} of the retained subspace
+        and are not assumed as additional fundamental fields. Crucially, the reduction is \emph{not} the ``phase of arbitrary vibrations'':
+        it presupposes a coherent, narrowband carrier (a macroscopic complex envelope) whose phase is stiff on the envelope scale.
+        A broadband ``vibration soup'' generically destroys adiabaticity and produces noisy frame transport rather than a clean gauge field.
   \item \textbf{Localized modes are posed as a self-adjoint eigenproblem plus nonlinearity.} Linearization about a
         stationary, spherically symmetric background yields a self-adjoint operator under the mass-weighted
         inner product. Standard spectral results then provide orthonormality/completeness and justify spherical
@@ -682,6 +684,48 @@ where
   \item \(n=1\) corresponds to a U(1) (rank-1) bundle; \(n>1\) yields a non-Abelian bundle.
 \end{itemize}
 
+
+\subsection{Ordered narrowband sector as a brane ``order parameter'' (phase rigidity)}
+\label{subsec:order_parameter}
+
+Equation~\eqref{eq:ansatz} is more than a convenient signal-processing device: it defines a macroscopic \emph{complex}
+envelope field. Write (rank-1 for clarity)
+\[
+\Psi(\x,t)=A(\x,t)\,\e^{\ii\phi(\x,t)}.
+\]
+The phase field $\phi$ is meaningful only when the carrier is \emph{coherent}: $A$ must remain non-negligible and the
+phase must be correlated over distances long compared to the carrier wavelength. This is the precise sense in which the
+brane picture can support an ``order parameter with a phase'' (by analogy to superfluids), without assuming any change
+to microscopic statistics: we are describing a \emph{coherent narrowband sector} of a classical substrate, not claiming
+that fermionic exclusion is ``turned off''.
+
+\paragraph{Phase rigidity from brane elasticity.}
+The origin of phase stiffness is the ordinary gradient energy of the brane.
+After averaging over the fast carrier oscillation, the projected envelope energy contains terms of the form
+\[
+E_{\rm env}\;\sim\;\int \frac{K_{\rm eff}}{2}\,|\nabla\Psi|^2\,\dd^3x \;+\;\cdots
+\qquad\Rightarrow\qquad
+|\nabla\Psi|^2 = |\nabla A|^2 + A^2|\nabla\phi|^2.
+\]
+Thus spatial phase twists cost energy whenever $A$ is nonzero. This ``rigidity'' is what distinguishes an ordered
+narrowband sector from a broadband vibration bath.
+
+\paragraph{Why a ``vibration soup'' does not define a gauge field.}
+A broadband superposition with essentially random phases has no stable envelope $\Psi$ and no long-lived $\phi(\x,t)$.
+In that regime, mode conversion and dephasing make the measured frame transport noisy; the Berry connection becomes a
+short-correlation diagnostic rather than a clean emergent gauge potential.
+Practically, the U(1) reduction requires (i) a narrowband carrier, (ii) a large phase-coherence length, and
+(iii) an adiabatically varying mode frame (Sec.~\ref{sec:connections}).
+
+\paragraph{Role of $\alpha$ and branch structure.}
+When $\alpha$ produces strong longitudinal--transverse separation and little mixing, a Berry description based on
+\emph{longitudinal/transverse hybridization} is suppressed because the eigenmodes are already close to pure branches.
+Conversely, at intermediate $\alpha$ (or near avoided crossings) the instantaneous eigenmodes are hybrid and the
+associated polarization frame can vary with propagation direction and background deformation, enabling nontrivial
+Berry holonomy. Even in the decoupled limit, a U(1) (or non-Abelian) connection may still arise from transport within
+a near-degenerate \emph{transverse polarization} subspace; the present framework treats both cases uniformly by
+defining $\mathbf{E}$ as the appropriate eigenframe of the linearized operator.
+
 \subsection{Complex quadrature from real simulation variables}
 In a real-valued simulator, construct the complex amplitude from displacement and velocity
 (\texttt{branesim.berry.analysis}):
@@ -712,6 +756,13 @@ inter-band transitions must be negligible on the envelope scale. If the initial 
 bands, the resulting amplitude modulation (``beating'') is a \emph{dynamical interference} effect, not geometric phase.
 In practice, the adiabatic/single-band condition is enforced by a spectral separation
 $|\omega_b-\omega_{b'}|\gg \|\partial_t\|$ together with slow spatial variation of the eigenframe.
+
+\paragraph{Dephasing from broadband backgrounds.}
+If the brane hosts a broadband background of random vibrations, the envelope-phase $\phi$ and the eigenframe $\mathbf{E}$
+typically decorrelate on short scales, effectively reintroducing inter-band transitions and making $a_\mu$ noisy.
+In this regime a measured ``Berry signal'' should be interpreted as a diagnostic of mode conversion rather than as an
+effective gauge potential. This motivates the explicit coherence assumption in Sec.~\ref{sec:maxwell_term}.
+
 
 \subsection{Propagation speed and (possible) dispersion of the emergent gauge sector}
 The causal propagation of features in the measured connection $a_\mu$ is inherited from the physical channel that changes the
@@ -795,6 +846,15 @@ $\mathbf{E}(x)\to \mathbf{E}(x)U(x)$, and the emergent potential is the correspo
 Observable quantities depend only on the gauge-invariant curvature $F_{\mu\nu}$, not on $\chi(x)$ itself.
 
 
+
+
+\paragraph{Envelope phase vs.\ gauge choice.}
+The overall envelope phase $\phi$ in $\Psi=A\e^{\ii\phi}$ is a physical descriptor of the ordered narrowband sector
+(Sec.~\ref{subsec:order_parameter}) and inherits an elastic ``phase stiffness'' from gradient energy.
+The gauge redundancy $\chi(x)$, by contrast, expresses the freedom to rotate the local mode-frame
+$\mathbf{E}(x)\to \mathbf{E}(x)U(x)$ used to represent that sector. The Berry connection $a_\mu$ records how this
+frame twists in spacetime; only its curvature is frame independent.
+
 \subsection{Minimal coupling with Berry-induced potential}
 Identify the physical EM potential with the Berry connection up to units:
 \[
@@ -862,7 +922,12 @@ We work in a regime where the following hold.
         and slow envelope variations such that \(\|\partial_\mu \Psi\|\ll \omega_0\|\Psi\|\) and
         \(\|\partial_\mu \mathbf{E}\|\ll \omega_0\|\mathbf{E}\|\), where \(\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_n]\)
         is an orthonormal local mode-frame spanning the relevant \(n\)-dimensional internal subspace.
-    \item \textbf{Single-band adiabaticity.} The retained mode-frame $\mathbf{E}(x)$ spans an \emph{isolated} carrier band (rank 1) or a \emph{well-separated} rank-$n$ subspace.
+    
+  \item \textbf{Coherence (ordered narrowband sector).} Random broadband vibrations are subdominant on the carrier scale:
+        the complex envelope has a long phase-coherence length and time (relative to the carrier wavelength/period), and the
+        mode-frame transport extracted from $\mathbf{E}(x)$ is smooth after coarse-graining. In practice this corresponds to
+        maintaining a narrow spectral bandwidth around $\omega_0$ and suppressing non-adiabatic band hopping/dephasing.
+  \item \textbf{Single-band adiabaticity.} The retained mode-frame $\mathbf{E}(x)$ spans an \emph{isolated} carrier band (rank 1) or a \emph{well-separated} rank-$n$ subspace.
         Inter-band transitions (mode conversion) are negligible on the envelope scale; otherwise beating and non-adiabatic mixing invalidate an Abelian U(1) reduction and require an explicit multi-band (Wilczek--Zee) treatment.
   \item \textbf{Near-linearity at the carrier scale.} Around the chosen background configuration \(\X^\star\),
         the carrier-scale dynamics is well-approximated by the quadratic expansion of the brane action.
