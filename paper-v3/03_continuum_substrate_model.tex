@@ -140,3 +140,33 @@ For later use, we emphasize two generic features:
 and (ii) for $\alpha<1$ the pre-stress couples transverse excursions (in the embedding) back into in-brane stresses
 through the induced metric \eqref{eq:induced-metric}.
 These branches provide the substrate carriers for the geometric-phase and soliton constructions developed below.
+
+\subsection{Transverse--lateral coupling and an emergent ``gravity'' channel}
+\label{subsec:gravity-channel}
+
+A distinctive feature of an embedded elastic medium is that transverse gradients change intrinsic distances.
+To make this explicit, consider the simple near-identity embedding in which the first three components follow the
+material coordinates and the fourth component is a transverse displacement,
+\begin{equation}
+  \vecX(x,t)\approx (x^1,x^2,x^3,u(x,t)).
+  \label{eq:graph-embedding}
+\end{equation}
+Then the induced metric becomes
+\begin{equation}
+  g_{ij}=h_\star^2\,\delta_{ij}+\partial_i u\,\partial_j u,
+  \label{eq:metric-graph}
+\end{equation}
+where $h_\star$ denotes the held ground-state scale introduced in \Cref{eq:alpha-def} (equivalently, one may rescale coordinates so that $h_\star=1$),
+a large-amplitude transverse profile necessarily produces an \emph{in-brane} strain contribution of order
+$|\nabla u|^2$ even if the lateral components remain close to their ground state.
+With homogeneous pre-stress ($\alpha<1$), this geometrically induced strain backreacts on the in-brane stress field
+through the constitutive law, effectively coupling transverse excitation energy into slow modulations of the
+in-brane configuration.
+
+This provides a concrete mechanism for a long-range channel often described informally as ``gravity'' in the present
+program: localized transverse gradients can act as sources of slowly varying background strain/dilation, and linear
+wave packets propagating on top of that background experience branch-dependent effective coefficients
+(cf.\ \Cref{sec:emergent-relativity}).
+In a weak-field, slowly varying regime one may therefore seek a Newtonian-limit reduction in which a scalar potential
+built from coarse-grained strain (or elastic energy density) obeys a Poisson-type equation.
+Deriving such a reduction quantitatively is an open problem of the present theory fragment.

@@ -1,9 +1,8 @@
 \section{Scope, contributions, and non-claims}
 \label{sec:scope}
 
-This paper presents an \emph{alternative deterministic substrate theory} (still incomplete in several sectors),
-with the primary goal of giving a consistent continuum formulation of its main building blocks and how they
-fit together.
+This paper develops an \emph{alternative deterministic substrate theory} whose goal is to present a consistent
+continuum formulation of its main building blocks and to make its open problems explicit.
 The focus is the continuous model; discrete simulations are not treated as fundamental and appear only as an
 implementation appendix.
 
@@ -16,29 +15,46 @@ dynamics of an embedding $\vecX:\Omega\times\R\to\R^4$ (\Cref{sec:continuum-mode
 
 \item \textbf{Ordered narrowband carrier sector.}
 We assume the substrate admits an ordered, narrowband carrier sector (taken to be primarily longitudinal)
-that provides phase rigidity and enables a controlled multiscale envelope description (\Cref{sec:geophase,sec:effective-field}).
+that provides phase rigidity and enables a controlled multiscale envelope description
+(\Cref{sec:geophase,sec:effective-field}).
 
 \item \textbf{Berry/Wilczek--Zee connections as gauge structure.}
 Adiabatic transport of a polarization subspace induces a Berry connection (rank-1) or a Wilczek--Zee
-connection (non-Abelian). These connections are interpreted as the natural origin of gauge degrees of freedom
-in a coarse-grained description, and provide the bridge to a $U(1)$-like gauge picture and its non-Abelian extension
+connection (non-Abelian).
+These connections are interpreted as the natural origin of gauge degrees of freedom in a coarse-grained
+description, and provide the bridge to a $U(1)$-like gauge picture and its non-Abelian extension
 (\Cref{sec:geophase,sec:effective-field}).
 
 \item \textbf{Solitonic particles and a Dirac-envelope split.}
 Particle-like states are localized solitons whose spatial structure is organized by spherical symmetry and
 spherical-harmonic mode families (\Cref{sec:localized}).
 Conceptually, we separate (i) particle-internal structure (topology/geometry and its internal labels, including
-matter/antimatter distinction and spin state) from (ii) the underlying local phase field of the carrier sector.
+matter/antimatter distinction and spin state) from (ii) the underlying local phase structure of the carrier sector.
 The standard Dirac equation mixes both; here it is treated as an effective envelope description that couples the
 particle sector to the local phase/gauge structure.
 The spin-$\tfrac12$ $4\pi$ aspect is attributed to geometric phase/holonomy of an internal polarization subspace.
 \end{enumerate}
 
+\subsection{Two working hypotheses to be discriminated}
+To keep the proposal testable, we distinguish two nonexclusive working hypotheses that can be separated by
+numerical experiments:
+\begin{description}
+\item[Hypothesis~A (transverse-channel confinement).]
+Localization is dominated by nonlinear transverse--lateral coupling of the embedded brane
+(\Cref{subsec:gravity-channel,sec:localized}); gauge variables extracted from Berry/Wilczek--Zee holonomy are
+primarily \emph{readouts} of the ordered carrier sector and need not correlate strongly with confinement strength.
+
+\item[Hypothesis~B (holonomy-tied confinement).]
+Localization relies on a near-degenerate internal polarization subspace whose transport induces a robust Berry/
+Wilczek--Zee connection; in this case confinement and the extracted holonomy/curvature diagnostics should correlate
+systematically, and a non-Abelian ($n>1$) description may be required.
+\end{description}
+
 \subsection{Interpretive stance on quantum phenomena}
-We negate the probabilistic nature of quantum theory as fundamental.
+We do not treat the probabilistic postulates of quantum theory as fundamental.
 Apparent point-like interactions and discrete outcomes are attributed to deterministic wave dynamics in a
 narrowband medium, together with Fourier-localization constraints and threshold-like nonlinear exchange events.
-This stance motivates why localized solitons can exhibit particle-like scattering while remaining wave states.
+This stance motivates how localized solitons can exhibit particle-like scattering while remaining wave states.
 
 \subsection{Non-claims (what is \emph{not} asserted here)}
 \begin{enumerate}
@@ -46,8 +62,8 @@ This stance motivates why localized solitons can exhibit particle-like scatterin
 \item We do not claim that the geometric connections are \emph{identical} to electromagnetism; rather, we present a
 consistent identification of gauge degrees of freedom with Berry/Wilczek--Zee holonomy in a narrowband sector and
 develop its continuum consequences.
-\item We do not claim a unique constitutive law; we specify a concrete isotropic hyperelastic choice (St.\ Venant--Kirchhoff)
-as a baseline while keeping the constitutive layer modular.
+\item We do not claim a unique constitutive law; we specify a concrete isotropic hyperelastic choice
+(St.\ Venant--Kirchhoff) as a baseline while keeping the constitutive layer modular.
 \item We do not claim the discrete lattice approximation is fundamental; it is only a numerical realization of the
 continuum theory and kept out of the main narrative.
 \end{enumerate}

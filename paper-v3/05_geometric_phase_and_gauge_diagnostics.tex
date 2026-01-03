@@ -17,21 +17,22 @@ where $a(x,t)\ge 0$ varies slowly, $\bm{\epsilon}(x,t)\in\C^{N}$ is a normalized
 The internal dimension $N$ counts the relevant components (e.g.\ embedding-direction components and/or a
 coarse-grained mode basis).
 
-A central point is that polarization transport is not unique: the same physical state can be represented in
-many local phase conventions. Geometric phase formalizes this redundancy as a connection on a bundle of
-polarization states.
+A central point is that polarization transport is not unique: the same physical state can be represented in many
+local phase conventions.
+Geometric phase formalizes this redundancy as a connection on a bundle of polarization states.
 
 \subsection{Rank-1 Berry connection (U(1))}
 
-For a single isolated polarization mode, represent the local state by a normalized vector $\lvert u(x)\rangle\in\C^{N}$
-that depends smoothly on spacetime position $x^\mu$ (here $x^\mu=(c\,t,x^1,x^2,x^3)$ built from the intrinsic
-coordinates and a chosen characteristic speed $c$ of the carrier branch).
+For a single isolated polarization mode, represent the local state by a normalized vector
+$\lvert u(x)\rangle\in\C^{N}$ that depends smoothly on spacetime position $x^\mu$
+(here $x^\mu=(c\,t,x^1,x^2,x^3)$ built from the intrinsic coordinates and a chosen characteristic speed $c$ of the
+carrier branch).
 Define the Berry connection
 \begin{equation}
   a_\mu(x) := \ii\,\langle u(x)\,|\,\partial_\mu u(x)\rangle.
   \label{eq:berry-connection}
 \end{equation}
-Under a local phase choice $\lvert u(x)\rangle\mapsto \e^{-\ii\chi(x)}\lvert u(x)\rangle$ one finds
+Under a local phase choice $\lvert u(x)\rangle\mapsto e^{-\ii\chi(x)}\lvert u(x)\rangle$ one finds
 \begin{equation}
   a_\mu \mapsto a_\mu + \partial_\mu \chi,
   \label{eq:berry-gauge}
@@ -44,9 +45,34 @@ The Berry curvature is the field strength
 \end{equation}
 and the holonomy (geometric phase) around a closed loop $\Gamma$ is
 \begin{equation}
-  \gamma_\Gamma = \oint_\Gamma a_\mu\,\dd x^\mu = \int_{\Sigma:\,\partial\Sigma=\Gamma} f_{\mu\nu}\,\dd\Sigma^{\mu\nu}.
+  \gamma_\Gamma
+  = \oint_\Gamma a_\mu\,\dd x^\mu
+  = \int_{\Sigma:\,\partial\Sigma=\Gamma} f_{\mu\nu}\,\dd\Sigma^{\mu\nu}.
   \label{eq:berry-holonomy}
 \end{equation}
+
+\subsection{What the geometric phase is ``of'': eigenmode bundles and adiabaticity}
+\label{subsec:berry-of}
+
+The connection above is not attached to an arbitrary decomposition of a real field into amplitude and phase.
+In the present setting one should choose $\lvert u(x)\rangle$ as a (locally defined) eigenvector of the
+linearized carrier operator about the slowly varying background configuration at $x$.
+As $x$ varies, these eigenvectors form an eigenbundle, and the Berry/Wilczek--Zee connection is the natural
+connection on that bundle.
+
+A clean rank-1 ($U(1)$) reduction requires that the dynamics remains in a single isolated band.
+If $\Delta\omega_{\mathrm{gap}}(x)$ is the local separation to the nearest competing band and
+$\Omega_{\mathrm{mix}}(x)$ is the rate of non-adiabatic mode conversion induced by background gradients,
+then the adiabatic condition
+\begin{equation}
+  \Omega_{\mathrm{mix}}(x)\ll \Delta\omega_{\mathrm{gap}}(x)
+  \label{eq:adiabatic-condition}
+\end{equation}
+should hold on the envelope scale.
+When this fails, a measured ``Berry signal'' typically reflects mode mixing or beating, and the correct reduction
+is to retain the relevant multi-dimensional subspace (the Wilczek--Zee description).
+In the brane model, the pre-stress parameter $\alpha$ and the wavelength regime control branch separation and
+therefore how well an Abelian gauge description can apply.
 
 \subsection{Wilczek--Zee connection (non-Abelian)}
 
