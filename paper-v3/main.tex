@@ -1,0 +1,48 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage[numbers,sort&compress]{natbib}
+
+% --- Notation helpers (keep minimal to avoid package conflicts) ---
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\vecX}{\mathbf{X}}
+\newcommand{\vecY}{\mathbf{Y}}
+\newcommand{\vecu}{\mathbf{u}}
+\newcommand{\vecv}{\mathbf{v}}
+\newcommand{\veck}{\mathbf{k}}
+\newcommand{\n}{\mathbf{n}}
+
+\title{A Tensioned 3D-Brane Substrate with Geometric-Phase Diagnostics\\
+for Emergent Gauge Fields and Localized Particle-Like Modes}
+\author{Lukas Molzberger}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\input{00_abstract}
+
+\input{01_introduction}
+\input{02_scope_and_claims}
+\input{03_continuum_substrate_model}
+\input{04_emergent_relativity}
+\input{05_geometric_phase_and_gauge_diagnostics}
+\input{05b_effective_field_theory}
+\input{06_localized_modes_and_eigenproblems}
+\input{07_validation_roadmap}
+\input{08_discussion}
+\input{09_conclusion}
+
+\appendix
+\input{A_discrete_reference_implementation}
+\input{B_symbol_dictionary}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
