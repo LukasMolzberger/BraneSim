@@ -436,7 +436,7 @@ def main():
         m=1,
         n=1,
         radius=radius_sim,
-        amplitude=0.5,
+        amplitude=1.0,
         center=center,
         wave_speed=c_sim,
         polarization="spatial_x4",  # include X^4 in the rotating polarization plane

@@ -503,10 +503,13 @@ wave whose core necessarily carries substantial \(X^4\) gradients/polarization, 
 (Sec.~\ref{sec:connections}) and characterize the long-range interaction.
 
 \paragraph{Hypothesis B (connection-mediated self-trapping; gauge structure as the effective binder).}
-Localization is dominated by \(\alpha\)-controlled mixing between internal polarization branches of the same
-substrate excitation. In the reduced envelope description this mixing appears as a gauge connection acting
-through covariant derivatives (rank \(n=1\) U(1) Berry, or \(n>1\) Wilczek--Zee), and strong spatial variation of the
-local mode frame induces an effective geometric potential/curvature energy that can arrest dispersion.
+Localization is dominated by the geometry of the carrier-band eigenbundle: the effective ``gauge field'' is the
+Berry/Wilczek--Zee connection induced by adiabatic transport of a near-degenerate polarization subspace
+(ideally the two transverse/helicity modes tangent to the physical 3D brane).
+The parameter \(\alpha\) controls the degree of band coupling and the splitting of that subspace; when the subspace
+is isolated and transport is adiabatic, projection yields a covariant derivative with a rank \(n=1\) U(1) Berry connection
+(or \(n>1\) Wilczek--Zee connection). By contrast, strong non-adiabatic mode conversion typically produces beating
+and should be treated as explicit inter-band dynamics rather than as curvature of a single Abelian connection.
 Microscopically the dynamics is still entirely that of \eqref{eq:continuous_eom}; the ``gauge field'' is not an
 independent degree of freedom but a reparametrization of mode-frame transport (Sec.~\ref{sec:connections}).
 
@@ -694,12 +697,36 @@ Normalize to a ray:
 \]
 Undefined regions are masked by amplitude thresholds.
 
+\subsection{What the Berry phase is ``of'': eigenmode bundles, not arbitrary decompositions}
+The mode-frame $\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_n]$ must be tied to the \emph{instantaneous eigenmodes}
+of the \emph{linearized} brane operator around a chosen background $\X^\star(x)$ and in the chosen carrier band near $\omega_0$.
+Concretely, let $\mathcal{L}_{\X^\star}$ denote the quadratic (small-amplitude) operator governing carrier-scale dynamics.
+For each wavevector (or local ray direction) and band index $b$, the physical polarization vectors are eigenvectors
+$\mathbf{e}_b$ of $\mathcal{L}_{\X^\star}$; the Berry/Wilczek--Zee connection is the connection on the resulting eigenbundle.
+This matters whenever ``longitudinal'' and ``transverse'' components \emph{mix}: in that case $L/T$ are \emph{not} eigenmodes,
+and the correct $\mathbf{E}$ is a \emph{hybrid} eigenframe (bands $b=\pm$), not a kinematic $L/T$ projection.
+
+\subsection{Adiabatic single-band regime vs.\ beating (mode conversion)}
+A \emph{clean} rank-1 (U(1)) Berry description requires that the dynamics remains in a \emph{single isolated band}:
+inter-band transitions must be negligible on the envelope scale. If the initial condition excites a superposition of two nearby
+bands, the resulting amplitude modulation (``beating'') is a \emph{dynamical interference} effect, not geometric phase.
+In practice, the adiabatic/single-band condition is enforced by a spectral separation
+$|\omega_b-\omega_{b'}|\gg \|\partial_t\|$ together with slow spatial variation of the eigenframe.
+
+\subsection{Propagation speed and (possible) dispersion of the emergent gauge sector}
+The causal propagation of features in the measured connection $a_\mu$ is inherited from the physical channel that changes the
+eigenframe (transport of a narrowband packet and/or propagation of background deformations). In the single-band regime this
+is governed by the \emph{group velocity} $v_g(\omega)=\dd\omega/\dd k$ of the chosen band in the operating band around $\omega_0$.
+Thus, frequency dependence enters only through \emph{dispersion}: on the discrete lattice and near avoided crossings induced by
+band coupling, $v_g$ can vary with $\omega$; in the long-wavelength continuum regime $v_g$ is approximately constant.
+
+
 % ============================================================
 \section{Connections from Mode-Frame Transport (Berry / Wilczek--Zee)}
 \label{sec:connections}
 
 \subsection{Rank-1 (U(1)) Berry connection}
-For \(n=1\), let \(\ket{u(x)}\) be the normalized local mode, with \(x^\mu=(ct,\x)\).
+For \(n=1\), let \(\ket{u(x)}\) be the normalized local mode, with \(x^\mu=(c_{\rm EM}t,\x)\).
 Define
 \[
 a_\mu(x) = \ii \braket{u(x)}{\partial_\mu u(x)}.
@@ -709,6 +736,14 @@ and the curvature is
 \[
 f_{\mu\nu} = \partial_\mu a_\nu - \partial_\nu a_\mu.
 \]
+
+
+\paragraph{Geometric vs.\ dynamical phase (important distinction).}
+The connection above is geometric: it is defined by the transport of an \emph{eigenmode} (or eigen-subspace).
+A superposition of nearby bands can produce beating patterns through $\Delta\omega=\omega_+-\omega_-$, but such beating is not a
+Berry curvature signal and generally indicates non-adiabatic mode conversion. The Berry/U(1) reduction is therefore tied to
+(i) an isolated band (or a symmetry-protected helicity sector) and (ii) slow variation of the associated eigenframe.
+
 
 \subsection{Non-Abelian (Wilczek--Zee) connection for internal electron subspace}
 For \(n>1\), choose an orthonormal basis \(\ket{u_a(x)}\), \(a=1..r\), and define
@@ -752,6 +787,13 @@ Let \(\psi(x)\) be a Dirac spinor envelope field. Under a local U(1) phase chang
 \qquad
 A_\mu \to A_\mu - \partial_\mu \chi.
 \]
+
+\subsection{Meaning of the U(1) phase in this framework}
+In standard QED the function $\chi(x)$ expresses a redundancy of description (a choice of local phase convention).
+In the present brane framework the same redundancy is realized as a choice of local mode-frame
+$\mathbf{E}(x)\to \mathbf{E}(x)U(x)$, and the emergent potential is the corresponding Berry connection.
+Observable quantities depend only on the gauge-invariant curvature $F_{\mu\nu}$, not on $\chi(x)$ itself.
+
 
 \subsection{Minimal coupling with Berry-induced potential}
 Identify the physical EM potential with the Berry connection up to units:
@@ -820,13 +862,21 @@ We work in a regime where the following hold.
         and slow envelope variations such that \(\|\partial_\mu \Psi\|\ll \omega_0\|\Psi\|\) and
         \(\|\partial_\mu \mathbf{E}\|\ll \omega_0\|\mathbf{E}\|\), where \(\mathbf{E}(x)=[\mathbf{e}_1,\dots,\mathbf{e}_n]\)
         is an orthonormal local mode-frame spanning the relevant \(n\)-dimensional internal subspace.
+    \item \textbf{Single-band adiabaticity.} The retained mode-frame $\mathbf{E}(x)$ spans an \emph{isolated} carrier band (rank 1) or a \emph{well-separated} rank-$n$ subspace.
+        Inter-band transitions (mode conversion) are negligible on the envelope scale; otherwise beating and non-adiabatic mixing invalidate an Abelian U(1) reduction and require an explicit multi-band (Wilczek--Zee) treatment.
   \item \textbf{Near-linearity at the carrier scale.} Around the chosen background configuration \(\X^\star\),
         the carrier-scale dynamics is well-approximated by the quadratic expansion of the brane action.
         Nonlinearities remain essential for confinement (electron sector) but appear as slow, envelope-scale effects
         in the present reduction.
-  \item \textbf{Locality and isotropy at coarse scales.} After averaging over a few carrier periods and a few lattice spacings,
-        the resulting EFT is local and (approximately) Lorentz-invariant with characteristic speed \(c\), as already enforced
-        by the \(T=\rho c^2\) calibration and the isotropic discrete stencil.
+  \item \textbf{Locality, isotropy, and the meaning of \(c\) in the EFT.}
+        After averaging over a few carrier periods and a few lattice spacings, the resulting EFT is local and
+        (approximately) Lorentz-invariant in the \emph{long-wavelength} regime of the selected EM subbundle.
+        The characteristic causal speed entering \(x^\mu=(c_{\rm EM}t,\x)\) is the group velocity
+        \(c_{\rm EM}\approx v_g(\omega_0)\) of that band in the operating narrowband.
+        In the reference implementation we calibrate parameters such that \(c_{\rm EM}\) matches the physical \(c\)
+        for low \(k\). Outside this regime (near lattice scales or near strong band coupling) dispersion produces
+        higher-derivative corrections and small Lorentz-violating effects.
+  
   \item \textbf{Gauge redundancy = frame choice.} The frame \(\mathbf{E}\) is only defined up to a local rotation
         \(\mathbf{E}(x)\to \mathbf{E}(x)\,U(x)\) with \(U(x)\in U(1)\) (or \(U(n)\) in the Wilczek--Zee case),
         and physical predictions may not depend on this choice.
@@ -1071,6 +1121,37 @@ azimuthal winding number \(m\) and a well-defined rotating phase in a real-value
 A long-lived confined ``electron'' would correspond to a self-consistent nonlinear eigenmode of the
 coupled 4D rest-length elasticity system. The initializer alone does not enforce that equilibrium; it
 provides the candidate initial condition from which such equilibria can be sought and tested.
+
+
+
+\subsection{Dispersion, band identification, and adiabaticity checks}
+A Berry/U(1) interpretation is only meaningful in an operating regime where a single carrier band can be followed adiabatically.
+We therefore recommend the following diagnostics in the reference implementation:
+\begin{enumerate}
+  \item \textbf{Dispersion scan.} Excite near-plane waves at several wavelengths \(\lambda\) (or wave numbers \(k\)) in the
+        candidate EM subbundle and measure \(\omega(k)\) by temporal FFT at probes. Compute the group velocity
+        \(v_g(k)=\dd\omega/\dd k\). A nearly constant \(v_g\) indicates an effectively non-dispersive operating band.
+  \item \textbf{Mode purity / branch leakage.} For each excited \(k\), project the displacement (or complex amplitude) onto the
+        instantaneous eigenframe \(\mathbf{E}\) of the linearized operator. Track power leakage into orthogonal bands.
+        Pronounced periodic exchange (beating) indicates a multi-band superposition and invalidates a rank-1 reduction.
+  \item \textbf{High-frequency suppression mechanism.} If leakage decreases at higher \(\omega\), distinguish the causes:
+        (i) phase-mismatch \(\Delta k(\omega)=|k_+-k_-|\) averaging out conversion, (ii) transverse band edges / cutoff on the lattice,
+        or (iii) a genuinely small coupling \(g(k)\) in that band.
+\end{enumerate}
+
+\subsection{Berry/Wilczek--Zee extraction and ``U(1)-ness''}
+Given a measured mode-frame \(\mathbf{E}(x)\), compute the discrete connection and curvature (as already implemented in
+\texttt{branesim.berry.analysis}) and report gauge-invariant diagnostics:
+\begin{enumerate}
+  \item \textbf{Curvature energy proxy.} Compare \(\int f_{\mu\nu}f^{\mu\nu}\) (rank 1) or \(\int \mathrm{tr}(\bbF_{\mu\nu}\bbF^{\mu\nu})\)
+        (rank \(n\)) against the measured coarse-grained brane energy excess to calibrate \(\mu_0^{\rm eff}\)
+        (Sec.~\ref{sec:maxwell_calibration}).
+  \item \textbf{Abelian reduction check.} In a purported U(1) regime, verify that off-diagonal components are negligible
+        (for \(n>1\)) and that commutators \([\bbF_{\mu\nu},\bbF_{\rho\sigma}]\) are small compared to \(\bbF\) in norm.
+        Large commutators indicate intrinsically non-Abelian transport.
+  \item \textbf{Trivial-connection sanity check.} In spatially uniform regions with a constant eigenframe,
+        \(a_\mu\) should be (approximately) a pure gauge and the curvature should vanish up to numerical noise.
+\end{enumerate}
 
 
 \section{Symbol Dictionary}
