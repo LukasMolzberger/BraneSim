@@ -51,6 +51,7 @@ from branesim.electron.electron_initialization import (
     initialize_electron_mode_3d,
 )
 from branesim.utils import TestRunManager
+from branesim.report import FigureSpec, LatexReportGenerator, ReportData
 from branesim.visualization.brane_state_viz import visualize_brane_state
 from branesim.visualization.brane_3d_viz import (
     subsample_3d_field,
@@ -415,6 +416,8 @@ def main():
     )
     solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
 
+    expected_c, computed_c, relative_error = solver.verify_wave_speed()
+
     # ====================================================================
     # Initialize electron mode (rotating standing wave) IN SIMULATION UNITS
     # ====================================================================
@@ -454,6 +457,82 @@ def main():
     print("  Electron mode parameters:")
     for k, v in (debug or {}).items():
         print(f"    {k}: {v}")
+
+    report = ReportData(
+        title="3D Electron Simulation Report",
+        experiment_name="electron_3d_experiment",
+        run_name=run_manager.run_name,
+        summary=(
+            "3D electron-like rotating standing wave initialized with a "
+            "spherical-harmonic pattern and polarized into a spatial-X4 plane."
+        ),
+        metadata={
+            "device": str(device),
+            "dtype": str(dtype),
+            "dimensionality": "3D",
+        },
+        parameters={
+            "points_per_wavelength": points_per_wavelength,
+            "cfl_factor": cfl_factor,
+            "wavelength_phys_m": wavelength_phys,
+            "h_phys_m": h_phys,
+            "h_sim": h_sim,
+            "m_point_kg": m_point,
+            "rho_3_kg_per_m3": rho_D,
+            "T_3_Pa": T_D,
+            "k_spring_N_per_m": k_spring,
+            "rest_length_phys_m": rest_length_phys,
+            "rest_length_sim": rest_length_sim,
+            "dt_phys_s": dt_phys,
+            "dt_sim": dt_sim,
+            "nx": nx,
+            "ny": ny,
+            "nz": nz,
+            "radius_sim": radius_sim,
+            "electron_l": electron_spec.l,
+            "electron_m": electron_spec.m,
+            "electron_n": electron_spec.n,
+            "electron_amplitude": electron_spec.amplitude,
+            "electron_polarization": electron_spec.polarization,
+            "electron_smooth_edge": electron_spec.smooth_edge,
+        },
+        choices=[
+            "Fixed boundary conditions on all six walls.",
+            "Linear spring model with Velocity Verlet integration.",
+            "Electron mode seeded with l=1, m=1, n=1 in a spatial-X4 polarization plane.",
+        ],
+        assumptions=[
+            "Wave speed set by T = rho * c^2.",
+            "Continuum mapping uses h_sim = 1.0.",
+            "Initial confinement uses an optional static X4 Gaussian well.",
+        ],
+        derived={
+            "expected_wave_speed_m_per_s": expected_c,
+            "computed_wave_speed_m_per_s": computed_c,
+            "wave_speed_relative_error": relative_error,
+        },
+        dictionary={
+            "h": "Lattice spacing (physical grid spacing).",
+            "L0": "Spring rest length (pre-stretch).",
+            "rho_3": "Volume mass density for 3D brane.",
+            "T_3": "Effective 3D elastic modulus.",
+        },
+        figures=[
+            FigureSpec(
+                path=run_manager.get_plot_path("electron_3d_example_propagation_xy.png"),
+                caption="Electron XY slice propagation.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("electron_3d_example_orthogonal_slices.png"),
+                caption="Electron orthogonal slice snapshots.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("electron_3d_example.mp4"),
+                caption="Electron propagation animation.",
+            ),
+        ],
+    )
+    LatexReportGenerator().generate(report, run_manager.get_report_path("report.tex"))
 
 
     # --------------------------------------------------------------------

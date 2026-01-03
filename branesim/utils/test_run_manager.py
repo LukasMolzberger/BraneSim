@@ -51,6 +51,7 @@ class TestRunManager:
         self.plots_dir = self.run_dir / "plots"
         self.data_dir = self.run_dir / "data"
         self.logs_dir = self.run_dir / "logs"
+        self.report_dir = self.run_dir / "report"
 
         # Create directories
         self._create_directories()
@@ -61,6 +62,7 @@ class TestRunManager:
         self.plots_dir.mkdir(exist_ok=True)
         self.data_dir.mkdir(exist_ok=True)
         self.logs_dir.mkdir(exist_ok=True)
+        self.report_dir.mkdir(exist_ok=True)
 
     def get_plot_path(self, filename: str) -> str:
         """
@@ -98,6 +100,18 @@ class TestRunManager:
         """
         return str(self.logs_dir / filename)
 
+    def get_report_path(self, filename: str) -> str:
+        """
+        Get full path for a report file.
+
+        Args:
+            filename: Name of the report file (e.g., "report.tex")
+
+        Returns:
+            Full path to save the report
+        """
+        return str(self.report_dir / filename)
+
     def save_config(self, config_dict: dict, filename: str = "config.txt"):
         """
         Save configuration/parameters to a text file.
@@ -122,6 +136,7 @@ class TestRunManager:
         summary += f"  - Plots: {self.plots_dir}\n"
         summary += f"  - Data: {self.data_dir}\n"
         summary += f"  - Logs: {self.logs_dir}\n"
+        summary += f"  - Report: {self.report_dir}\n"
         return summary
 
     def __str__(self) -> str:

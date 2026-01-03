@@ -34,6 +34,7 @@ from branesim.initialization.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
 )
 from branesim.utils import TestRunManager
+from branesim.report import FigureSpec, LatexReportGenerator, ReportData
 from branesim.visualization.brane_state_viz import visualize_brane_state
 from branesim.visualization.brane_3d_viz import (
     subsample_3d_field,
@@ -396,6 +397,76 @@ def main():
         spacing=h_sim,
     )
     solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
+
+    expected_c, computed_c, relative_error = solver.verify_wave_speed()
+
+    report = ReportData(
+        title="3D Photon Simulation Report",
+        experiment_name="photon_3d_experiment",
+        run_name=run_manager.run_name,
+        summary=(
+            "3D photon wave packet initialized in a waveguide geometry with "
+            "Gaussian envelope and time-reversed velocity initialization."
+        ),
+        metadata={
+            "device": str(device),
+            "dtype": str(dtype),
+            "dimensionality": "3D",
+        },
+        parameters={
+            "points_per_wavelength": points_per_wavelength,
+            "cfl_factor": cfl_factor,
+            "wavelength_phys_m": wavelength_phys,
+            "h_phys_m": h_phys,
+            "h_sim": h_sim,
+            "m_point_kg": m_point,
+            "rho_3_kg_per_m3": rho_D,
+            "T_3_Pa": T_D,
+            "k_spring_N_per_m": k_spring,
+            "rest_length_phys_m": rest_length_phys,
+            "rest_length_sim": rest_length_sim,
+            "dt_phys_s": dt_phys,
+            "dt_sim": dt_sim,
+            "nx": nx,
+            "ny": ny,
+            "nz": nz,
+        },
+        choices=[
+            "Fixed boundary conditions on all six walls.",
+            "Linear spring model with Velocity Verlet integration.",
+            "Gaussian envelope in x/y/z with hard truncation at 4 sigma.",
+        ],
+        assumptions=[
+            "Wave speed set by T = rho * c^2.",
+            "Continuum mapping uses h_sim = 1.0.",
+        ],
+        derived={
+            "expected_wave_speed_m_per_s": expected_c,
+            "computed_wave_speed_m_per_s": computed_c,
+            "wave_speed_relative_error": relative_error,
+        },
+        dictionary={
+            "h": "Lattice spacing (physical grid spacing).",
+            "L0": "Spring rest length (pre-stretch).",
+            "rho_3": "Volume mass density for 3D brane.",
+            "T_3": "Effective 3D elastic modulus.",
+        },
+        figures=[
+            FigureSpec(
+                path=run_manager.get_plot_path("wave_propagation_xy.png"),
+                caption="Wave propagation XY slice.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("wave_orthogonal_slices.png"),
+                caption="Orthogonal slice snapshots.",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("wave_propagation.mp4"),
+                caption="Wave propagation animation.",
+            ),
+        ],
+    )
+    LatexReportGenerator().generate(report, run_manager.get_report_path("report.tex"))
 
     # Initialize wave packet IN SIMULATION UNITS
     print(f"\nInitializing photon wave packet...")

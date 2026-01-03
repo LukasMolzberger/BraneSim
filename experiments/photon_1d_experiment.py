@@ -22,6 +22,7 @@ from branesim.physics.forces import SpringForceComputer
 from branesim.config.physical_constants import PhysicalConstants
 from branesim.physics.dimensional_mapping import DimensionalMapper
 from branesim.utils import TestRunManager
+from branesim.report import FigureSpec, LatexReportGenerator, ReportData
 
 # Visualization
 from branesim.visualization import plot_all_brane_1d_standard
@@ -177,6 +178,76 @@ def main():
         spacing=h_sim,
     )
     solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
+
+    expected_c, computed_c, relative_error = solver.verify_wave_speed()
+
+    report = ReportData(
+        title="1D Photon Simulation Report",
+        experiment_name=experiment_name,
+        run_name=run_manager.run_name,
+        summary=(
+            "1D photon wave packet initialized with a Gaussian envelope and "
+            "propagated under a linear spring-mass brane model."
+        ),
+        metadata={
+            "device": str(device),
+            "dtype": str(dtype),
+            "dimensionality": "1D",
+        },
+        parameters={
+            "num_steps": num_steps,
+            "num_snapshots": num_snapshots,
+            "cfl_factor": cfl_factor,
+            "points_per_wavelength": points_per_wavelength,
+            "num_wavelengths": num_wavelengths,
+            "wavelength_phys_m": wavelength_phys,
+            "h_phys_m": h_phys,
+            "h_sim": h_sim,
+            "m_point_kg": m_point,
+            "rho_1_kg_per_m": rho_D,
+            "T_1_newton": T_D,
+            "k_spring_N_per_m": k_spring,
+            "rest_length_phys_m": rest_length_phys,
+            "rest_length_sim": rest_length_sim,
+            "dt_phys_s": dt_phys,
+            "dt_sim": dt_sim,
+            "domain_length_phys_m": domain_length_phys,
+            "domain_length_sim": domain_length_sim,
+            "amplitude_factor_h": amplitude_factor_h,
+            "center_fraction": center_fraction,
+        },
+        choices=[
+            "Fixed boundary conditions at both ends.",
+            "Velocity Verlet integrator with linear springs.",
+            "Right-moving, time-reversed initialization for velocities.",
+        ],
+        assumptions=[
+            "Continuum-to-lattice mapping uses h_sim = 1.0 as unit length.",
+            "Wave speed is enforced by T = rho * c^2.",
+        ],
+        derived={
+            "expected_wave_speed_m_per_s": expected_c,
+            "computed_wave_speed_m_per_s": computed_c,
+            "wave_speed_relative_error": relative_error,
+        },
+        dictionary={
+            "h": "Lattice spacing (physical grid spacing).",
+            "L0": "Spring rest length (pre-stretch).",
+            "rho_1": "Linear mass density for 1D brane.",
+            "T_1": "Effective 1D tension.",
+        },
+        figures=[
+            FigureSpec(
+                path=run_manager.get_plot_path("displacement_1d_components.mp4"),
+                caption="Displacement component evolution (1D).",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("displacement_1d_mag_angle.mp4"),
+                caption="Displacement magnitude/angle evolution (1D).",
+            ),
+        ],
+    )
+    LatexReportGenerator().generate(report, run_manager.get_report_path("report.tex"))
 
     # ========================================================================
     # Initialize Wave Packet

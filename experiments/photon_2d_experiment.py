@@ -27,6 +27,7 @@ from branesim.initialization.initial_conditions import (
     initialize_right_moving_velocities_time_reversed,
 )
 from branesim.utils import TestRunManager
+from branesim.report import FigureSpec, LatexReportGenerator, ReportData
 from branesim.visualization.displacement_field_viz import (
     displacement_frames_from_positions_frames,
     create_displacement_arrows_video_2d_in_3d,
@@ -304,6 +305,72 @@ def main():
         spacing=h_sim,
     )
     solver = VelocityVerletSolver(dt_sim, mass_model, physics, grid)
+
+    expected_c, computed_c, relative_error = solver.verify_wave_speed()
+
+    report = ReportData(
+        title="2D Photon Simulation Report",
+        experiment_name="photon_2d_experiment",
+        run_name=run_manager.run_name,
+        summary=(
+            "2D photon wave packet in tunnel geometry with Gaussian envelope "
+            "and right-moving velocity initialization."
+        ),
+        metadata={
+            "device": str(device),
+            "dtype": str(dtype),
+            "dimensionality": "2D",
+        },
+        parameters={
+            "points_per_wavelength": points_per_wavelength,
+            "num_wavelengths": num_wavelengths,
+            "cfl_factor": cfl_factor,
+            "wavelength_phys_m": wavelength_phys,
+            "h_phys_m": h_phys,
+            "h_sim": h_sim,
+            "m_point_kg": m_point,
+            "rho_2_kg_per_m2": rho_D,
+            "T_2_N_per_m": T_D,
+            "k_spring_N_per_m": k_spring,
+            "rest_length_phys_m": rest_length_phys,
+            "rest_length_sim": rest_length_sim,
+            "dt_phys_s": dt_phys,
+            "dt_sim": dt_sim,
+            "nx": nx,
+            "ny": ny,
+        },
+        choices=[
+            "Fixed boundary conditions on all edges.",
+            "Linear spring model with Velocity Verlet integration.",
+            "Gaussian envelope in x/y with hard truncation at 4 sigma.",
+        ],
+        assumptions=[
+            "Wave speed set by T = rho * c^2.",
+            "Continuum mapping uses h_sim = 1.0.",
+        ],
+        derived={
+            "expected_wave_speed_m_per_s": expected_c,
+            "computed_wave_speed_m_per_s": computed_c,
+            "wave_speed_relative_error": relative_error,
+        },
+        dictionary={
+            "h": "Lattice spacing (physical grid spacing).",
+            "L0": "Spring rest length (pre-stretch).",
+            "rho_2": "Surface mass density for 2D brane.",
+            "T_2": "Effective 2D tension.",
+        },
+        figures=[
+            FigureSpec(
+                path=run_manager.get_plot_path("displacement_2d_arrows.mp4"),
+                caption="Displacement vector field (2D).",
+            ),
+            FigureSpec(
+                path=run_manager.get_plot_path("displacement_2d_diralpha.mp4"),
+                caption="Directional/angle displacement visualization (2D).",
+            ),
+        ],
+    )
+    LatexReportGenerator().generate(report, run_manager.get_report_path("report.tex"))
 
     # Initialize wave packet IN SIMULATION UNITS
     print(f"\nInitializing photon wave packet...")
