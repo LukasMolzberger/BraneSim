@@ -1,67 +1,71 @@
 \section{From mode-frame transport to gauge-covariant envelope dynamics}
 \label{sec:effective-field}
 
-\subsection{Narrowband multiscale ansatz}
+\subsection{Multiscale ansatz and retained polarization subspace}
 
-Assume an excitation narrowband around a carrier frequency $\omega_0$.
-Write the substrate displacement as a slowly varying complex envelope times a local mode frame:
+Assume an excitation narrowband around a carrier angular frequency $\omega_0$.
+Write the substrate displacement as a slowly varying complex envelope multiplied by a local mode frame:
 \begin{equation}
   \vecu(x,t)\;\approx\;
   \mathrm{Re}\!\left[
-    e^{-i\omega_0 t}\sum_{a=1}^{n}\Psi^a(x,t)\,\mathbf{e}_a(x,t)
+    \e^{-\ii\omega_0 t}\sum_{a=1}^{n}\Psi^a(x,t)\,\mathbf{e}_a(x,t)
   \right],
   \label{eq:multiscale-ansatz}
 \end{equation}
-where $\Psi(x,t)\in\mathbb{C}^n$ varies slowly compared to $\omega_0^{-1}$ and
+where $\Psi(x,t)\in\C^n$ varies slowly compared to $\omega_0^{-1}$ and
 $\{\mathbf{e}_a(x,t)\}_{a=1..n}$ is an orthonormal frame spanning the retained polarization subspace.
-For $n=1$ this is a complex line bundle (Abelian case); for $n>1$ it is a rank-$n$ bundle (non-Abelian case).
+The frame is not unique: $\mathbf{e}_a\mapsto \sum_b \mathbf{e}_b\,U_{ba}(x)$ with $U(x)\in U(n)$ represents the same
+physical subspace.
 
-\subsection{Connection induced by the moving frame}
-
-Define the matrix-valued connection
+Projecting the full substrate dynamics onto the retained subspace produces, generically, a gauge-covariant derivative
+acting on $\Psi$:
 \begin{equation}
-  (\mathcal{A}_\mu)_{ab} := -i\,\mathbf{e}_a^\dagger\,\partial_\mu \mathbf{e}_b ,
-  \qquad \mu\in\{t,1,2,3\},
-  \label{eq:frame-connection}
+  \mathcal{D}_\mu \Psi
+  =
+  \left(\partial_\mu + \ii\,\mathcal{A}_\mu\right)\Psi,
+  \label{eq:covD}
 \end{equation}
-which reduces to the Abelian Berry connection for $n=1$.
-A change of local frame $\mathbf{e}_a\mapsto U_{ab}(x,t)\mathbf{e}_b$ induces the gauge transformation
+where $\mathcal{A}_\mu$ is the Berry (rank-1) or Wilczek--Zee (non-Abelian) connection defined in \Cref{sec:geophase}.
+The gauge transformation $\mathbf{E}\mapsto \mathbf{E}U$ induces $\Psi\mapsto U^\dagger\Psi$ and the standard
+connection transformation law, leaving $\mathcal{D}_\mu\Psi$ covariant.
+
+\subsection{Effective action for the slow sector}
+
+Under the multiscale separation (single-band or near-degenerate subspace) and smoothness of the polarization bundle,
+the coarse-grained slow dynamics admits a gauge-invariant effective action built from $\Psi$ and the curvature
+$\mathcal{F}_{\mu\nu}$:
 \begin{equation}
-  \mathcal{A}_\mu \mapsto U^\dagger \mathcal{A}_\mu U - i\,U^\dagger(\partial_\mu U),
+  S_{\text{eff}}[\Psi,\mathcal{A}]
+  \;=\;\int \dd^4x\;
+  \Big(
+    \Psi^\dagger \mathcal{K}(\mathcal{D}) \Psi
+    \;-\;\kappa\,\mathrm{tr}(\mathcal{F}_{\mu\nu}\mathcal{F}^{\mu\nu})
+    \;+\;\cdots
+  \Big),
+  \label{eq:Seff}
 \end{equation}
-with curvature $\mathcal{F}_{\mu\nu}=\partial_\mu\mathcal{A}_\nu-\partial_\nu\mathcal{A}_\mu-i[\mathcal{A}_\mu,\mathcal{A}_\nu]$
-\citep{WilczekZee1984,Cisowski2022}.
+where $\mathcal{K}(\mathcal{D})$ is an operator determined by the linearized carrier band (e.g.\ a Klein--Gordon-type or
+Dirac-type envelope operator), $\kappa$ is an emergent stiffness for curvature fluctuations, and ``$\cdots$'' denotes
+higher-order and symmetry-allowed terms.
+In the Abelian case ($n=1$) the curvature term reduces to $F_{\mu\nu}F^{\mu\nu}$ with $F_{\mu\nu}=f_{\mu\nu}$.
 
-\subsection{Gauge-covariant envelope derivatives}
+Geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
+What is specific here is the identification of the physically relevant gauge structure with the
+connection induced by a distinguished narrowband sector of the substrate.
 
-Because derivatives act on both $\Psi$ and the basis $\mathbf{e}_a$, the slow dynamics of the envelope naturally
-involves the covariant derivative
-\begin{equation}
-  D_\mu \Psi := \partial_\mu \Psi + i\,\mathcal{A}_\mu \Psi.
-  \label{eq:covariant-derivative}
-\end{equation}
-This is a purely kinematic statement: it follows from the multiscale decomposition \eqref{eq:multiscale-ansatz}
-and does not assume any particular ``electromagnetic'' interpretation.
+\subsection{Dirac-envelope interpretation and the ``split''}
 
-\subsection{Hypothesis: coarse-grained field dynamics}
-
-To obtain a genuine field theory for the connection, one must show that $\mathcal{A}_\mu$ acquires autonomous
-dynamics under coarse-graining. A common pattern in effective theories is that integrating out fast substrate degrees
-of freedom generates gauge-invariant kinetic terms built from curvature.
-Motivated by this structure, we propose the following \emph{testable hypothesis}:
-
-\begin{quote}
-In regimes where the multiscale separation holds and where the polarization bundle is smooth,
-the coarse-grained action for the slow sector contains a leading gauge-invariant term
-proportional to $\mathrm{tr}(\mathcal{F}_{\mu\nu}\mathcal{F}^{\mu\nu})$.
-In the Abelian case this reduces to $F_{\mu\nu}F^{\mu\nu}$.
-\end{quote}
-
-If validated, this would produce Maxwell-like equations as Euler--Lagrange equations for the effective field.
-The hypothesis is deliberately stated operationally: it can be tested by measuring whether curvature disturbances
-propagate as approximately sourceless waves outside localized modes (\Cref{sec:validation}).
-
-\paragraph{Why keep this as a hypothesis.}
-While geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,Bliokh2015SpinOrbit,Cisowski2022},
-the emergence of a \emph{propagating} gauge field requires additional dynamical conditions.
-The paper therefore treats the Maxwell-term emergence as a falsifiable target rather than a derived theorem.
+In standard quantum field theory, the Dirac field $\psi$ simultaneously encodes (i) the internal particle labels
+(spin, particle/antiparticle) and (ii) the local phase/gauge coupling through the covariant derivative
+$D_\mu=\partial_\mu+\ii(q/\hbar)A_\mu$.
+In the present theory, the proposal is to reinterpret this mixture as follows:
+\begin{itemize}
+\item the \emph{particle sector} corresponds to localized solitonic modes with additional internal structure
+(topology/geometry and its associated labels);
+\item the \emph{phase/gauge sector} corresponds to the Berry/Wilczek--Zee connection induced by transport of the
+ordered narrowband polarization subspace.
+\end{itemize}
+An effective Dirac-type envelope equation is then understood as a compact coupling of these two sectors.
+In particular, a ``charge''-like coupling parameter is not introduced as a fundamental constant of a new field;
+it appears as an effective conversion factor between the normalization conventions of the envelope field and the
+geometric connection extracted from the substrate.

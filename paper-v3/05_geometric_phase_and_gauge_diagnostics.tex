@@ -1,72 +1,80 @@
-\section{Geometric phase and gauge diagnostics}
+\section{Geometric phase, Berry/Wilczek--Zee connections, and gauge structure}
 \label{sec:geophase}
 
-\subsection{Narrowband multi-component waves and polarization transport}
+\subsection{Ordered narrowband waves and polarization transport}
 
-Assume the substrate supports a narrowband wave packet whose dominant oscillation can be expressed
-locally as
+We assume the substrate admits an ordered, narrowband carrier sector that supports multi-component polarized
+waves with a long phase-coherence length.
+Locally, a narrowband excitation can be written as
 \begin{equation}
-  \vecu(x,t) \approx \mathrm{Re}\Big\{ a(x,t)\,\bm{\epsilon}(x,t)\,e^{i\theta(x,t)} \Big\},
+  \vecu(x,t)\;\approx\;\mathrm{Re}\Big\{ a(x,t)\,\bm{\epsilon}(x,t)\,e^{\ii\theta(x,t)} \Big\},
   \qquad
-  \theta(x,t)=\veck\cdot x-\omega t,
+  \theta(x,t)=\phi(x,t)-\omega_0 t,
   \label{eq:quasi-monochromatic}
 \end{equation}
-where $\bm{\epsilon}(x,t)\in\mathbb{C}^N$ is a \emph{normalized} polarization state ($\bm{\epsilon}^\dagger\bm{\epsilon}=1$),
-$a(x,t)\ge 0$ is a slowly varying amplitude, and $N$ counts the relevant internal components
-(e.g., transverse directions in the embedding plus any effective internal basis used for coarse-graining).
+where $a(x,t)\ge 0$ varies slowly, $\bm{\epsilon}(x,t)\in\C^{N}$ is a normalized polarization state
+($\bm{\epsilon}^\dagger\bm{\epsilon}=1$), and $\omega_0$ is the carrier angular frequency.
+The internal dimension $N$ counts the relevant components (e.g.\ embedding-direction components and/or a
+coarse-grained mode basis).
 
-The phase $\theta$ contains the fast oscillation; the \emph{geometric} information is encoded in how
-$\bm{\epsilon}$ varies under transport in $(x,t)$.
+A central point is that polarization transport is not unique: the same physical state can be represented in
+many local phase conventions. Geometric phase formalizes this redundancy as a connection on a bundle of
+polarization states.
 
-\subsection{Berry / Pancharatnam--Berry connection}
+\subsection{Rank-1 Berry connection (U(1))}
 
-Define the Berry connection one-form
+For a single isolated polarization mode, represent the local state by a normalized vector $\lvert u(x)\rangle\in\C^{N}$
+that depends smoothly on spacetime position $x^\mu$ (here $x^\mu=(c\,t,x^1,x^2,x^3)$ built from the intrinsic
+coordinates and a chosen characteristic speed $c$ of the carrier branch).
+Define the Berry connection
 \begin{equation}
-  A_\mu := -i\,\bm{\epsilon}^\dagger \partial_\mu \bm{\epsilon},
-  \qquad \mu\in\{t,1,2,3\},
+  a_\mu(x) := \ii\,\langle u(x)\,|\,\partial_\mu u(x)\rangle.
   \label{eq:berry-connection}
 \end{equation}
-and its curvature
+Under a local phase choice $\lvert u(x)\rangle\mapsto \e^{-\ii\chi(x)}\lvert u(x)\rangle$ one finds
 \begin{equation}
-  F_{\mu\nu} := \partial_\mu A_\nu - \partial_\nu A_\mu.
+  a_\mu \mapsto a_\mu + \partial_\mu \chi,
+  \label{eq:berry-gauge}
+\end{equation}
+so only gauge-invariant quantities carry physical meaning.
+The Berry curvature is the field strength
+\begin{equation}
+  f_{\mu\nu} := \partial_\mu a_\nu - \partial_\nu a_\mu,
   \label{eq:berry-curvature}
 \end{equation}
-Under a local phase change $\bm{\epsilon}\mapsto e^{i\chi(x,t)}\bm{\epsilon}$,
-the connection transforms as $A_\mu\mapsto A_\mu+\partial_\mu \chi$ while $F_{\mu\nu}$ is invariant.
-This is the standard $U(1)$ gauge freedom \citep{Berry1984,Pancharatnam1956,Cisowski2022}.
-
-\paragraph{Gauge-invariant holonomy.}
-For a closed loop $\gamma$ in configuration space,
+and the holonomy (geometric phase) around a closed loop $\Gamma$ is
 \begin{equation}
-  \Phi_\gamma := \oint_\gamma A_\mu\,\mathrm{d}x^\mu
+  \gamma_\Gamma = \oint_\Gamma a_\mu\,\dd x^\mu = \int_{\Sigma:\,\partial\Sigma=\Gamma} f_{\mu\nu}\,\dd\Sigma^{\mu\nu}.
+  \label{eq:berry-holonomy}
 \end{equation}
-is gauge-invariant modulo $2\pi$ and equals the Berry phase accumulated along $\gamma$.
-A key diagnostic is whether such loop phases behave \emph{field-like} (i.e., depend locally
-on enclosed curvature and satisfy consistent evolution laws).
 
-\subsection{Non-Abelian (Wilczek--Zee) connection for degenerate subspaces}
+\subsection{Wilczek--Zee connection (non-Abelian)}
 
-If the substrate supports a $k$-dimensional (near-)degenerate subspace of modes
-$\{\bm{\epsilon}_a\}_{a=1}^k$ spanning a local vector bundle, define the matrix-valued connection
+If the relevant polarization sector is an $n$-dimensional near-degenerate subspace, choose an orthonormal
+frame $\mathbf{E}(x)\in\C^{N\times n}$ with columns $\lvert u_a(x)\rangle$ spanning the subspace, so that
+$\mathbf{E}^\dagger\mathbf{E}=I_n$.
+Define the Wilczek--Zee connection
 \begin{equation}
-  (\mathcal{A}_\mu)_{ab} := -i\,\bm{\epsilon}_a^\dagger\,\partial_\mu \bm{\epsilon}_b,
+  \mathcal{A}_\mu(x) := \ii\,\mathbf{E}(x)^\dagger\,\partial_\mu \mathbf{E}(x)\in\mathfrak{u}(n).
   \label{eq:wz-connection}
 \end{equation}
-and curvature $\mathcal{F}_{\mu\nu}=\partial_\mu\mathcal{A}_\nu-\partial_\nu\mathcal{A}_\mu-i[\mathcal{A}_\mu,\mathcal{A}_\nu]$.
-A change of local basis $\bm{\epsilon}_a\mapsto U_{ab}(x,t)\bm{\epsilon}_b$ with $U\in U(k)$ produces the
-usual non-Abelian gauge transformation \citep{WilczekZee1984}.
-This provides a principled way to encode multi-component ``internal'' structure without introducing
-additional fundamental fields.
+A change of local frame $\mathbf{E}\mapsto \mathbf{E}\,U(x)$ with $U(x)\in U(n)$ yields the non-Abelian gauge law
+\begin{equation}
+  \mathcal{A}_\mu \mapsto U^\dagger \mathcal{A}_\mu U + \ii\,U^\dagger \partial_\mu U,
+  \label{eq:wz-gauge}
+\end{equation}
+and the curvature (field strength) is
+\begin{equation}
+  \mathcal{F}_{\mu\nu}
+  := \partial_\mu \mathcal{A}_\nu-\partial_\nu \mathcal{A}_\mu
+     -\ii\,[\mathcal{A}_\mu,\mathcal{A}_\nu].
+  \label{eq:wz-curvature}
+\end{equation}
 
-\subsection{Interpretation in the substrate program}
+\subsection{Spinorial holonomy and the $4\pi$ aspect}
 
-The model does \emph{not} assume that $A_\mu$ is electromagnetism. Instead:
-\begin{itemize}
-\item $A_\mu$ is a well-defined geometric object extracted from the substrate wave state.
-\item $F_{\mu\nu}$ is a gauge-invariant diagnostic that can be tested for locality and propagation laws.
-\item If, in regimes outside localized excitations, $F_{\mu\nu}$ obeys effective sourceless dynamics
-and couples to localized modes through phase transport, then an emergent gauge interpretation becomes plausible.
-\end{itemize}
-
-The advantage of this viewpoint is methodological: geometric-phase quantities can be computed from
-either continuum solutions or discrete simulations, providing a bridge from substrate to effective fields.
+For $n=2$ (a two-level polarization subspace), holonomy lives naturally in a double cover of $SO(3)$.
+A closed loop in physical space that induces a $2\pi$ rotation of an internal polarization frame can therefore
+produce a sign change of the transported state, while a $4\pi$ loop returns it to itself.
+In the present theory this spinorial $4\pi$ aspect is attributed to Berry/Wilczek--Zee holonomy of an internal
+polarization bundle, and is treated as part of the particle-sector structure developed in \Cref{sec:localized}.

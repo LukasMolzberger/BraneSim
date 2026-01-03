@@ -1,38 +1,53 @@
 \section{Scope, contributions, and non-claims}
 \label{sec:scope}
 
-This work is best read as a \emph{proposal of a substrate model plus a diagnostic program}.
-It is not yet a closed derivation of all Standard Model parameters.
+This paper presents an \emph{alternative deterministic substrate theory} (still incomplete in several sectors),
+with the primary goal of giving a consistent continuum formulation of its main building blocks and how they
+fit together.
+The focus is the continuous model; discrete simulations are not treated as fundamental and appear only as an
+implementation appendix.
 
-\subsection{Contributions}
+\subsection{Core building blocks}
+The theory fragment developed here is organized around four coupled elements:
 \begin{enumerate}
-\item \textbf{Continuum substrate formulation.}
-A rotationally invariant continuum model is stated as a hyperelastic action on a 3D reference domain,
-with an embedding into $\R^4$ (\Cref{sec:continuum-model}).
+\item \textbf{Continuum 3D brane in 4D embedding.}
+A rotationally invariant hyperelastic action on an intrinsic $3$-manifold $\Omega\subset\R^3$ determines the
+dynamics of an embedding $\vecX:\Omega\times\R\to\R^4$ (\Cref{sec:continuum-model}).
 
-\item \textbf{Geometric-phase diagnostics for gauge structure.}
-A clear emergence map is given from a narrowband, polarized substrate wave to a
-Berry/Pancharatnam-Berry connection and curvature, including the non-Abelian (Wilczek--Zee)
-case for near-degenerate mode subspaces (\Cref{sec:geophase}).
+\item \textbf{Ordered narrowband carrier sector.}
+We assume the substrate admits an ordered, narrowband carrier sector (taken to be primarily longitudinal)
+that provides phase rigidity and enables a controlled multiscale envelope description (\Cref{sec:geophase,sec:effective-field}).
 
-\item \textbf{Localized modes as operator problems.}
-A framework is provided to pose ``particle-like'' localized modes as self-adjoint eigenproblems
-around spherically symmetric background configurations, avoiding ad-hoc periodicity or boundary
-assumptions (\Cref{sec:localized}).
+\item \textbf{Berry/Wilczek--Zee connections as gauge structure.}
+Adiabatic transport of a polarization subspace induces a Berry connection (rank-1) or a Wilczek--Zee
+connection (non-Abelian). These connections are interpreted as the natural origin of gauge degrees of freedom
+in a coarse-grained description, and provide the bridge to a $U(1)$-like gauge picture and its non-Abelian extension
+(\Cref{sec:geophase,sec:effective-field}).
 
-\item \textbf{Validation roadmap.}
-A set of concrete, simulation-independent checks is listed (symmetry tests, dispersion,
-holonomy extraction, gauge-invariant loop integrals), with discrete implementation moved to an
-appendix (\Cref{sec:validation}, \Cref{app:discrete}).
+\item \textbf{Solitonic particles and a Dirac-envelope split.}
+Particle-like states are localized solitons whose spatial structure is organized by spherical symmetry and
+spherical-harmonic mode families (\Cref{sec:localized}).
+Conceptually, we separate (i) particle-internal structure (topology/geometry and its internal labels, including
+matter/antimatter distinction and spin state) from (ii) the underlying local phase field of the carrier sector.
+The standard Dirac equation mixes both; here it is treated as an effective envelope description that couples the
+particle sector to the local phase/gauge structure.
+The spin-$\tfrac12$ $4\pi$ aspect is attributed to geometric phase/holonomy of an internal polarization subspace.
 \end{enumerate}
+
+\subsection{Interpretive stance on quantum phenomena}
+We negate the probabilistic nature of quantum theory as fundamental.
+Apparent point-like interactions and discrete outcomes are attributed to deterministic wave dynamics in a
+narrowband medium, together with Fourier-localization constraints and threshold-like nonlinear exchange events.
+This stance motivates why localized solitons can exhibit particle-like scattering while remaining wave states.
 
 \subsection{Non-claims (what is \emph{not} asserted here)}
 \begin{enumerate}
-\item We do not claim a complete derivation of the Standard Model, nor a replacement for QED/QFT.
-\item We do not claim that the Berry connection \emph{is} electromagnetism; rather, we propose it as a
-candidate effective gauge variable whose field-like behavior must be empirically or numerically tested.
-\item We do not claim a final, unique hyperelastic constitutive law; the paper isolates minimal
-requirements (isotropy, stability, existence of a linear-wave regime) and keeps the constitutive choice modular.
-\item We do not claim that the discrete lattice approximation is fundamental; it is treated as a numerical
-realization of the continuum model and kept out of the main narrative.
+\item We do not claim a complete derivation of the Standard Model, nor a finished replacement for QED/QFT.
+\item We do not claim that the geometric connections are \emph{identical} to electromagnetism; rather, we present a
+consistent identification of gauge degrees of freedom with Berry/Wilczek--Zee holonomy in a narrowband sector and
+develop its continuum consequences.
+\item We do not claim a unique constitutive law; we specify a concrete isotropic hyperelastic choice (St.\ Venant--Kirchhoff)
+as a baseline while keeping the constitutive layer modular.
+\item We do not claim the discrete lattice approximation is fundamental; it is only a numerical realization of the
+continuum theory and kept out of the main narrative.
 \end{enumerate}

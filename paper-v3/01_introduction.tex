@@ -1,49 +1,55 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Modern physics describes empirically successful regularities using several effective
-frameworks (relativity, quantum theory, gauge fields), but their mutual conceptual
-compatibility remains debated, and ``quantization'' is typically imposed as a postulate.
+Modern physics describes empirically successful regularities using several effective frameworks
+(relativity, quantum theory, gauge fields), but their mutual conceptual compatibility remains debated
+and ``quantization'' is typically imposed as a postulate.
 This paper explores an alternative \emph{substrate-first} strategy: assume an ontically real,
 deterministic wave medium, and treat familiar field theories as coarse-grained descriptions
 of constrained wave dynamics.
 
 \paragraph{Substrate hypothesis.}
-We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, described by
-an embedding map
+We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, described by an embedding map
 \begin{equation}
-  \vecX:\Omega\times\R \to \R^4, \qquad x\mapsto \vecX(x,t), \qquad \Omega\subset\R^3.
+  \vecX:\Omega\times\R \to \R^4, \qquad (x,t)\mapsto \vecX(x,t), \qquad \Omega\subset\R^3,
   \label{eq:embedding-map}
 \end{equation}
-Time $t$ is an external evolution parameter (not a geometric coordinate).
-The brane is assumed isotropic in its reference coordinates $x$.
+with an external time parameter $t$.
+The dynamics is specified by an isotropic hyperelastic action on $\Omega$, constructed from the induced
+metric of the embedding. This choice builds rotational invariance within the brane directly into the
+continuum model \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
 
-\paragraph{Motivation for geometric phase as a gauge diagnostic.}
-Multi-component waves generically exhibit geometric phases under adiabatic or cyclic transport.
-In optics this is known as the Pancharatnam--Berry phase \citep{Pancharatnam1956,Berry1984,Cisowski2022},
-and non-Abelian generalizations arise for degenerate subspaces \citep{WilczekZee1984}.
-The central technical idea in this paper is to treat the geometric phase of a \emph{narrowband, polarized}
-substrate wave as a \emph{diagnostic} for candidate gauge structures, rather than postulating
-a $U(1)$ field a priori.
+\paragraph{Narrowband order and geometric phase.}
+A central additional postulate is the existence of an ordered, narrowband carrier sector that provides
+a coherent phase reference over macroscopic scales (assumed to live primarily in a longitudinal
+polarization branch).
+Geometric phase and holonomy are universal in wave systems and in adiabatic transport of polarized states
+\citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
+Here they are promoted to a structural bridge: adiabatic transport of a polarization subspace induces a
+Berry (rank-1) or Wilczek--Zee (non-Abelian) connection, which is interpreted as the natural origin of
+gauge degrees of freedom in an effective description.
 
-\paragraph{Relation to analogue/emergent gravity programs.}
-Lorentzian kinematics and effective metrics can emerge in wave systems via linearization and
-hydrodynamic limits \citep{Barcelo2011AnalogueGravity}. We use this perspective to motivate
-an \emph{effective} light cone, while keeping the microscopic dynamics strictly Newtonian in $t$.
+\paragraph{Particles as solitons; probability not fundamental.}
+We do not take the probabilistic interpretation of quantum theory as fundamental.
+Instead, apparent point-like interactions and discrete outcomes are attributed to deterministic wave dynamics
+combined with Fourier-localization constraints and threshold-like nonlinear exchange events.
+Particle-like states are localized solitons whose spatial structure is organized by spherical symmetry and
+spherical-harmonic mode families.
+The spin-$\tfrac12$ $4\pi$ aspect is attributed to geometric phase/holonomy of an internal polarization
+subspace (a ``spinorial'' parallel transport effect) rather than to literal multi-winding of a photon path.
 
-\paragraph{Related work.}
-The present approach intersects three bodies of work:
-(i) geometric phase and gauge structures in wave systems \citep{Berry1984,Pancharatnam1956,WilczekZee1984,Cisowski2022,Bliokh2015SpinOrbit},
-(ii) continuum mechanics and isotropic hyperelasticity as rotationally invariant substrates \citep{Ogden1984,Holzapfel2000,DoCarmo1992},
-and (iii) emergent/analogue gravity ideas \citep{Barcelo2011AnalogueGravity,Sakharov1967VacuumGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
-Brane-world models in high-energy theory use ``branes'' in a different (field-theoretic) sense \citep{RandallSundrum1999};
-here the term is used literally as an elastic medium.
+\paragraph{Relation to existing ideas.}
+The emergence of an effective light cone and Lorentz-like kinematics from a preferred-time medium has
+close analogues in analogue-gravity systems \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
+The present use of the term ``brane'' is literal (an elastic medium), and should not be confused with
+field-theoretic brane-world scenarios in high-energy theory \citep{RandallSundrum1999}.
 
 \paragraph{Paper organization.}
 \Cref{sec:scope} states scope, contributions, and non-claims.
-\Cref{sec:continuum-model} formulates the continuum substrate model and stresses its rotational invariance.
+\Cref{sec:continuum-model} formulates the rotationally invariant continuum substrate model.
 \Cref{sec:emergent-relativity} discusses the linear-wave regime and an emergent effective light cone.
-\Cref{sec:geophase} develops geometric-phase diagnostics and their gauge freedom.
-\Cref{sec:localized} outlines localized modes and how to pose them as self-adjoint eigenproblems.
-\Cref{sec:validation} summarizes validation targets and falsifiable checks.
-Implementation details are in \Cref{app:discrete}.
+\Cref{sec:geophase,sec:effective-field} develop the geometric connection picture (Berry/Wilczek--Zee) and its
+gauge-covariant envelope formulation.
+\Cref{sec:localized} treats localized modes and shows how to pose them as self-adjoint eigenproblems around
+symmetric backgrounds.
+Discrete implementation details are collected in \Cref{app:discrete}.
