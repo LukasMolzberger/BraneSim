@@ -1204,6 +1204,41 @@ We therefore recommend the following diagnostics in the reference implementation
         or (iii) a genuinely small coupling \(g(k)\) in that band.
 \end{enumerate}
 
+\paragraph{Ordered narrowband coherence (``condensate-like'' sector).}
+The U(1) reduction presumes that the simulated brane contains a \emph{coherent narrowband carrier}
+whose complex envelope \(\Psi=Ae^{i\phi}\) is smooth on scales large compared to the carrier wavelength.
+In practice, verify this directly from probe time-series:
+\begin{enumerate}
+  \item \textbf{Carrier frequency and bandwidth.} At a set of probes \(\{\x_p\}\), form a complex signal \(z_p(t)\).
+        Use either (i) the two-quadrature representation already present in the initializer, or (ii) an analytic signal
+        \(z=u+i\,\mathcal{H}[u]\) (Hilbert transform). Let \(\omega_0\) be the dominant spectral peak of \(z\) and
+        \(\Delta\omega\) its half-power width. Require a narrowband regime, e.g.\ \(\Delta\omega/\omega_0\ll 1\),
+        and track \(\Delta\omega(t)\) to detect dephasing.
+  \item \textbf{Instantaneous phase diffusion.} Define \(\phi_p(t)=\arg z_p(t)\) and \(\omega_{\rm inst}(t)=\dot{\phi}_p(t)\).
+        Remove the mean drift \(\omega_0 t\) and estimate phase diffusion via
+        \(D_\phi(\tau)=\langle(\phi_p(t+\tau)-\phi_p(t)-\omega_0\tau)^2\rangle_t/(2\tau)\).
+        A stable ordered sector has small \(D_\phi\) over many carrier periods.
+  \item \textbf{Spatial phase correlation length.} Define a phase-correlation function
+        \(C_\phi(\mathbf{r})=\langle e^{i(\phi(\x+\mathbf{r})-\phi(\x))}\rangle_{\x}\) (and time-average over a steady window).
+        Extract a coherence length \(L_\phi\) from \(|C_\phi(r)|\sim e^{-r/L_\phi}\) or the first \(e^{-1}\) crossing.
+        A ``vibration soup'' corresponds to short \(L_\phi\) (few wavelengths) and rapidly varying \(\phi\).
+  \item \textbf{Adiabaticity against band crossings.} Let \(\Delta\omega_{\rm gap}\) be the frequency gap between the tracked band
+        and the nearest orthogonal band at the same \(k\). Estimate the mode-frame rotation rate (from projections or local eigenframes)
+        \(\Omega_{\rm mix}\sim \|\chi^\dagger \dot{\chi}\|\) (or its spatial analogue \(\|\chi^\dagger \nabla\chi\|\,v_g\)).
+        The rank-1 Berry reduction requires \(\Omega_{\rm mix}\ll \Delta\omega_{\rm gap}\).
+\end{enumerate}
+
+\paragraph{Where to compute (reference code path).}
+Instrument the solver to record probe time-series \(u(\x_p,t)\) (and, if available, the quadrature pair) at a fixed cadence.
+In the Python test harness, store these arrays (e.g.\ \texttt{.npz}) and a summary table (CSV) in the run folder using the
+\texttt{TestRunManager.get\_data\_path(...)} helpers (cf.\ \texttt{tests/test\_run\_manager.py}).
+A post-analysis script (recommended: \texttt{tests/diagnostics\_coherence.py}) should then:
+(i) FFT each probe to extract \(\omega_0,\Delta\omega\),
+(ii) compute \(D_\phi(\tau)\) from unwrapped phase,
+(iii) compute \(C_\phi(r)\) on a probe lattice (or radial lines),
+and (iv) combine these with the branch-leakage projections above into a single
+\texttt{coherence\_metrics.csv} plus plots saved via \texttt{TestRunManager.get\_plot\_path(...)}.
+
 \subsection{Berry/Wilczek--Zee extraction and ``U(1)-ness''}
 Given a measured mode-frame \(\mathbf{E}(x)\), compute the discrete connection and curvature (as already implemented in
 \texttt{branesim.berry.analysis}) and report gauge-invariant diagnostics:
