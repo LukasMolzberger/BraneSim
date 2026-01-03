@@ -47,19 +47,20 @@ def _render_table(rows: Iterable[tuple[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def _render_symbol_table(rows: Iterable[tuple[str, str, str]]) -> str:
+def _render_symbol_table(rows: Iterable[tuple[str, str, Scalar, str]]) -> str:
     lines = [
-        r"\begin{longtable}{p{0.28\linewidth}p{0.2\linewidth}p{0.47\linewidth}}",
+        r"\begin{longtable}{p{0.25\linewidth}p{0.18\linewidth}p{0.2\linewidth}p{0.32\linewidth}}",
         r"\toprule",
-        r"\textbf{Implementation} & \textbf{Paper Symbol} & \textbf{Description} \\",
+        r"\textbf{Implementation} & \textbf{Paper Symbol} & \textbf{Value} & \textbf{Description} \\",
         r"\midrule",
         r"\endhead",
     ]
-    for key, symbol, desc in rows:
+    for key, symbol, value, desc in rows:
         key_text = _latex_escape(key)
         symbol_text = symbol if symbol else "--"
+        value_text = _latex_escape(_format_value(value))
         desc_text = _latex_escape(desc)
-        lines.append(f"{key_text} & {symbol_text} & {desc_text} \\\\")
+        lines.append(f"{key_text} & {symbol_text} & {value_text} & {desc_text} \\\\")
     lines.extend([r"\bottomrule", r"\end{longtable}"])
     return "\n".join(lines)
 
@@ -96,7 +97,7 @@ class LatexReportGenerator:
             rows = [(k, _format_value(v)) for k, v in report.metadata.items()]
             doc.extend([r"\section*{Metadata}", _render_table(rows)])
 
-        if report.parameters:
+        if report.parameters and not report.symbol_map:
             rows = [(k, _format_value(v)) for k, v in report.parameters.items()]
             doc.extend([r"\section*{Parameters}", _render_table(rows)])
 
@@ -119,12 +120,6 @@ class LatexReportGenerator:
             doc.extend([r"\section*{Derived Measurements}", _render_table(rows)])
 
         symbol_rows = list(report.symbol_map)
-        if not symbol_rows:
-            symbol_rows = []
-            for key, desc in report.dictionary.items():
-                symbol_rows.append((key, "", desc))
-            for key, desc in report.paper_mapping.items():
-                symbol_rows.append((key, "", desc))
         if symbol_rows:
             doc.extend([r"\section*{Symbol Mapping}", _render_symbol_table(symbol_rows)])
 

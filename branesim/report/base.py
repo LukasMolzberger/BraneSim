@@ -31,7 +31,7 @@ class ReportData:
     derived: Dict[str, Scalar] = field(default_factory=dict)
     dictionary: Dict[str, str] = field(default_factory=dict)
     paper_mapping: Dict[str, str] = field(default_factory=dict)
-    symbol_map: List[tuple[str, str, str]] = field(default_factory=list)
+    symbol_map: List[tuple[str, str, Scalar, str]] = field(default_factory=list)
     figures: List[FigureSpec] = field(default_factory=list)
     notes: List[str] = field(default_factory=list)
     metadata: Dict[str, Scalar] = field(default_factory=dict)
