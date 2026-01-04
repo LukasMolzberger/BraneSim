@@ -76,6 +76,7 @@ class LatexReportGenerator:
             r"\usepackage[margin=1in]{geometry}",
             r"\usepackage{longtable}",
             r"\usepackage{booktabs}",
+            r"\usepackage{graphicx}",
             r"\usepackage{hyperref}",
             r"\begin{document}",
             r"\section*{Experiment Report}",
@@ -125,11 +126,17 @@ class LatexReportGenerator:
 
         if report.figures:
             doc.append(r"\section*{Figures}")
-            doc.append(r"\begin{itemize}")
             for fig in report.figures:
-                item = f"{fig.caption} (file: {fig.path})"
-                doc.append(rf"\item {_latex_escape(item)}")
-            doc.append(r"\end{itemize}")
+                path_text = rf"\detokenize{{{fig.path}}}"
+                doc.extend(
+                    [
+                        r"\begin{figure}[h]",
+                        r"\centering",
+                        rf"\includegraphics[width=\linewidth]{{{path_text}}}",
+                        rf"\caption{{{_latex_escape(fig.caption)}}}",
+                        r"\end{figure}",
+                    ]
+                )
 
         if report.notes:
             doc.append(r"\section*{Notes}")
