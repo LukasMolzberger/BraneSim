@@ -1,12 +1,27 @@
 \section{Introduction}
 \label{sec:introduction}
 
-Modern physics describes empirically successful regularities using several effective frameworks
-(relativity, quantum theory, gauge fields), but their mutual conceptual compatibility remains debated
-and ``quantization'' is typically imposed as a postulate.
-This paper explores an alternative \emph{substrate-first} strategy: assume an ontically real,
-deterministic wave medium, and treat familiar field theories as coarse-grained descriptions
-of constrained wave dynamics.
+The Standard Model and general relativity are extraordinarily successful at organizing experimental facts.
+At the same time, their combined fundamental ``catalog''---multiple fields, symmetry sectors, symmetry breaking
+structure, and many parameters fixed by measurement---invites a complementary line of inquiry:
+whether a smaller set of ground ingredients could underlie this effective complexity.
+This paper explores such a \emph{minimal-ingredient reconstruction} approach.
+
+\paragraph{Substrate-first strategy.}
+We adopt a deterministic \emph{substrate-first} strategy: posit an ontically real wave medium and treat familiar
+field theories as coarse-grained descriptions of constrained wave dynamics.
+The goal is \emph{not} to dispute the established phenomenology of quantum field theory, but to ask what could make
+gauge structure, relativistic kinematics, and particle-like quantization appear naturally as emergent regularities.
+
+\paragraph{Ground ingredients (minimal commitments).}
+The theory fragment developed here aims to keep its primitive commitments small:
+(i) a single continuous substrate with local action dynamics,
+(ii) geometric nonlinearity arising from the embedding (rather than adding separate interaction fields by hand), and
+(iii) a controlled separation between a linear wave sector and a nonlinear self-guidance sector.
+Symmetry properties such as large-scale isotropy are treated as \emph{constraints on admissible constitutive choices}
+(e.g., writing the energy in terms of invariants of the induced metric), not as additional ``ingredients''.
+Everything else is treated as emergent bookkeeping: in particular, gauge potentials are interpreted as connection
+data of an ordered wave sector, not as independent fundamental substances.
 
 \paragraph{Substrate hypothesis.}
 We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, described by an embedding map
@@ -15,9 +30,10 @@ We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, des
   \label{eq:embedding-map}
 \end{equation}
 with an external time parameter $t$.
-The dynamics is specified by an isotropic hyperelastic action on $\Omega$, constructed from the induced
-metric of the embedding. This choice builds rotational invariance within the brane directly into the
-continuum model \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
+The dynamics is specified by a local hyperelastic action on $\Omega$, constructed from invariants of the
+induced metric of the embedding. This is the minimal coordinate-free way to write an elastic energy without
+baking in a preferred direction or a discrete microstructure; throughout we use isotropic constitutive forms as a
+baseline and treat large-scale isotropy as an empirical constraint on admissible choices \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
 
 \paragraph{Gravity from transverse excitation (contraction).}
 A central motivating idea---already present at the level of the induced metric---is that excitation in the
@@ -30,7 +46,7 @@ localized modes. We therefore treat Newtonian gravity as an emergent, long-range
 mediated by transverse excitation, not as a separately postulated fundamental field.
 
 \paragraph{Narrowband order and geometric phase.}
-A central additional postulate is the existence of an ordered, narrowband carrier sector that provides
+A further postulate is the existence of an ordered, narrowband carrier sector that provides
 a coherent phase reference over macroscopic scales (assumed to live primarily in a longitudinal
 polarization branch).
 Geometric phase and holonomy are universal in wave systems and in adiabatic transport of polarized states
@@ -56,7 +72,7 @@ field-theoretic brane-world scenarios in high-energy theory \citep{RandallSundru
 
 \paragraph{Paper organization.}
 \Cref{sec:scope} states scope, contributions, and non-claims.
-\Cref{sec:continuum-model} formulates the rotationally invariant continuum substrate model.
+\Cref{sec:continuum-model} formulates the continuum substrate model (written in a coordinate-free form with an isotropic constitutive baseline).
 \Cref{sec:emergent-relativity} discusses the linear-wave regime and an emergent effective light cone.
 \Cref{sec:geophase,sec:effective-field} develop the geometric connection picture (Berry/Wilczek--Zee) and its
 gauge-covariant envelope formulation.

@@ -176,7 +176,7 @@ class VelocityVerletSolver:
 
     def verify_wave_speed(self) -> tuple[float, float, float]:
         """
-        Verify that the configured parameters reproduce the physical speed of light.
+        Verify that the transverse wave speed matches the physical speed of light.
 
         CRITICAL: c = 3×10⁸ m/s is a PHYSICAL CONSTANT, not something we compute.
         This method checks if the discrete model parameters reproduce this value.
@@ -185,7 +185,7 @@ class VelocityVerletSolver:
             Tuple of (expected_c, computed_c, relative_error)
             where:
                 expected_c = 3×10⁸ m/s (physical constant)
-                computed_c = linearized lattice wave speed from current parameters
+                computed_c = linearized lattice transverse wave speed from current parameters
                 relative_error = |computed_c - expected_c| / expected_c
         """
         from branesim.config.physical_constants import PhysicalConstants
@@ -193,7 +193,7 @@ class VelocityVerletSolver:
         constants = PhysicalConstants()
         expected_c = constants.c
 
-        # Compute effective wave speed from SpringForceComputer parameters
+        # Compute transverse wave speed from spring constant and pre-tension
         k = self.physics.spring_constant
         L_0 = self.physics.rest_length
         h = self.grid.spacing
@@ -201,10 +201,12 @@ class VelocityVerletSolver:
         # Get density in proper units for the intrinsic dimension
         rho = self.mass_model.density
 
-        # Linearized lattice wave speed (continuum correspondence)
-        # c^2 ~ k * h^(2-D) / rho, where D is the intrinsic dimension.
+        # Linearized lattice transverse wave speed (continuum correspondence)
+        # c_perp^2 ~ k_eff * h^(2-D) / rho, where k_eff = k * (1 - L_0/h).
         D = self.grid.dimension.value
-        computed_c = (k * (h ** (2 - D)) / rho) ** 0.5
+        pre_tension_factor = 1.0 - (L_0 / h)
+        k_eff = k * pre_tension_factor
+        computed_c = (k_eff * (h ** (2 - D)) / rho) ** 0.5
 
         relative_error = abs(computed_c - expected_c) / expected_c
 

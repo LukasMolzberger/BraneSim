@@ -185,17 +185,21 @@ def main():
     # Universal point mass (same for all dimensions - ensures consistent physics)
     m_point = 2.861821e-27  # kg (fixed for all 1D/2D/3D simulations)
 
-    # 2D brane parameters constrained to give wave speed = c
+    # 2D brane parameters with transverse waves calibrated to c
     # Derive mass density from point mass: ρ_D = m_point / h^D
     rho_D = m_point / (h_phys ** D)  # kg/m² (surface mass density)
-    T_D = rho_D * constants.c**2  # N/m (tension - computed from c² = T_D/rho_D)
+    pre_tension_factor = 1.0 - constants.pre_stretch_alpha
+    T_transverse = rho_D * constants.c**2  # N/m (tension for transverse speed c)
+    T_D = T_transverse / pre_tension_factor  # N/m (longitudinal modulus)
 
     # Rest length from physically calibrated constant
     # L0 = pre_stretch_alpha × a, where pre_stretch_alpha is from continuum calibration
     rest_length_phys = constants.pre_stretch_alpha * h_phys
 
-    # Wave speed (exactly equals c by construction)
-    c_wave = constants.c
+    # Wave speeds
+    c_transverse = (T_transverse / rho_D) ** 0.5
+    c_longitudinal = (T_D / rho_D) ** 0.5
+    c_wave = c_transverse
 
     # Axial spring constant (for 2D: k = T_D * h^(D-2) = T_D * h^0 = T_D)
     k_spring = T_D * (h_phys ** (D - 2))
@@ -211,11 +215,12 @@ def main():
     h_sim = mapper.to_sim_length(h_phys)  # = 1.0 always
     m_sim = mapper.to_sim_mass(m_point)
     k_sim = mapper.to_sim_spring_constant(k_spring)
-    c_sim = mapper.to_sim_velocity(c_wave)  # = 1.0 always (c_wave = c)
+    c_sim = mapper.to_sim_velocity(c_wave)  # = 1.0 always (c_transverse = c)
+    c_longitudinal_sim = mapper.to_sim_velocity(c_longitudinal)
     rest_length_sim = mapper.to_sim_length(rest_length_phys)
 
     # Time step calculation (CFL condition based on wave speed)
-    dt_phys = cfl_factor * h_phys / c_wave
+    dt_phys = cfl_factor * h_phys / c_longitudinal
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size - square geometry
@@ -225,17 +230,19 @@ def main():
     domain_length_sim = nx * h_sim  # = nx * 1.0 = nx
 
     # Verify wave speed
-    expected_wave_speed = math.sqrt(T_D / rho_D)
+    expected_wave_speed = c_transverse
 
     print(f"\nPhysical Parameters:")
     print(f"  2D surface mass density ρ_2 = {rho_D:.6e} kg/m²")
-    print(f"  2D tension T_2 = {T_D:.6e} N/m")
+    print(f"  2D transverse tension T_2 = {T_transverse:.6e} N/m")
+    print(f"  2D longitudinal modulus T_2,L = {T_D:.6e} N/m")
     print(f"  Spring constant k = {k_spring:.6e} N/m")
     print(f"  Point mass m = {m_point:.6e} kg")
     print(f"  Time step dt = {dt_phys:.6e} s")
-    print(f"  Expected wave speed = {expected_wave_speed:.6e} m/s")
+    print(f"  Transverse wave speed = {c_transverse:.6e} m/s")
+    print(f"  Longitudinal wave speed = {c_longitudinal:.6e} m/s")
     print(f"  Speed of light c = {constants.c:.6e} m/s")
-    print(f"  Wave speed error = {abs(expected_wave_speed - constants.c)/constants.c:.6e}")
+    print(f"  Transverse wave speed error = {abs(expected_wave_speed - constants.c)/constants.c:.6e}")
 
     print(f"\nScaling Factors:")
     print(mapper)
@@ -247,7 +254,8 @@ def main():
     print(f"  k_spring_sim = {k_sim:.6e}")
     print(f"  dt_sim = {dt_sim:.6e}  (time step)")
     print(f"  Wave propagation:")
-    print(f"    c_wave_sim = √(k_sim/m_sim) = {(k_sim/m_sim)**0.5:.6e}  (= 1.0 always)")
+    print(f"    c_transverse_sim = {c_sim:.6e}  (= 1.0 always)")
+    print(f"    c_longitudinal_sim = √(k_sim/m_sim) = {c_longitudinal_sim:.6e}")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain: {nx} × {ny} points")
@@ -330,7 +338,8 @@ def main():
             "h_sim": h_sim,
             "m_point_kg": m_point,
             "rho_2_kg_per_m2": rho_D,
-            "T_2_N_per_m": T_D,
+            "T_2_transverse_N_per_m": T_transverse,
+            "T_2_longitudinal_N_per_m": T_D,
             "k_spring_N_per_m": k_spring,
             "rest_length_phys_m": rest_length_phys,
             "rest_length_sim": rest_length_sim,
@@ -346,7 +355,8 @@ def main():
             "Gaussian envelope in x/y with hard truncation at 4 sigma.",
         ],
         assumptions=[
-            "Wave speed set by T = rho * c^2.",
+            "Transverse wave speed set by T_transverse = rho * c^2.",
+            "Time step uses the longitudinal speed set by pre-stretch.",
             "Continuum mapping uses h_sim = 1.0.",
         ],
         derived={
@@ -365,8 +375,10 @@ def main():
              "Pre-stretch parameter; alpha<1 yields uniform pre-tension."),
             ("rho_2_kg_per_m2", r"\(\rho_m\)", rho_D,
              "Surface mass density in the continuum wave equation."),
-            ("T_2_N_per_m", r"\(T\)", T_D,
-             "Effective tension in the linearized wave equation."),
+            ("T_2_transverse_N_per_m", r"\(T_\perp\)", T_transverse,
+             "Background tension setting transverse wave speed."),
+            ("T_2_longitudinal_N_per_m", r"\(T_\parallel\)", T_D,
+             "Effective longitudinal modulus for in-brane waves."),
             ("k_spring_N_per_m", r"\(k\)", k_spring,
              "Discrete spring constant in the lattice model."),
             ("cfl_factor", r"\(\mathrm{CFL}\)", cfl_factor,
@@ -422,7 +434,7 @@ def main():
         grid=grid,
         physics=physics,
         m_point=m_sim,
-        wave_speed=c_sim,  # Actual wave speed in sim units (= √(k_sim/m_sim) = 1.0)
+        wave_speed=c_sim,  # Transverse wave speed in sim units (= 1.0)
         field_component=3,
         shift_cells=1,
     )

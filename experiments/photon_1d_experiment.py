@@ -99,9 +99,13 @@ def main():
 
     # 1D brane parameters
     rho_D = m_point / (h_phys ** D)
-    T_D = rho_D * constants.c**2
+    pre_tension_factor = 1.0 - constants.pre_stretch_alpha
+    T_transverse = rho_D * constants.c**2
+    T_D = T_transverse / pre_tension_factor
     rest_length_phys = constants.pre_stretch_alpha * h_phys
-    c_wave = constants.c
+    c_transverse = (T_transverse / rho_D) ** 0.5
+    c_longitudinal = (T_D / rho_D) ** 0.5
+    c_wave = c_transverse
     k_spring = T_D * (h_phys ** (D - 2))
 
     # Create dimensional mapper
@@ -119,7 +123,7 @@ def main():
     rest_length_sim = mapper.to_sim_length(rest_length_phys)
 
     # Time step
-    dt_phys = cfl_factor * h_phys / c_wave
+    dt_phys = cfl_factor * h_phys / c_longitudinal
     dt_sim = mapper.to_sim_time(dt_phys)
 
     # Domain size
@@ -129,9 +133,12 @@ def main():
 
     print(f"\nPhysical Parameters:")
     print(f"  1D linear mass density ρ_1 = {rho_D:.6e} kg/m")
-    print(f"  1D tension T_1 = {T_D:.6e} N")
+    print(f"  1D transverse tension T_1 = {T_transverse:.6e} N")
+    print(f"  1D longitudinal modulus T_1,L = {T_D:.6e} N")
     print(f"  Point mass m = {m_point:.6e} kg")
     print(f"  Time step dt = {dt_phys:.6e} s")
+    print(f"  Transverse wave speed = {c_transverse:.6e} m/s")
+    print(f"  Longitudinal wave speed = {c_longitudinal:.6e} m/s")
 
     print(f"\nSimulation Configuration:")
     print(f"  Domain: {nx} points × {h_phys:.3e} m = {domain_length_phys:.6e} m")
@@ -205,7 +212,8 @@ def main():
             "h_sim": h_sim,
             "m_point_kg": m_point,
             "rho_1_kg_per_m": rho_D,
-            "T_1_newton": T_D,
+            "T_1_transverse_newton": T_transverse,
+            "T_1_longitudinal_newton": T_D,
             "k_spring_N_per_m": k_spring,
             "rest_length_phys_m": rest_length_phys,
             "rest_length_sim": rest_length_sim,
@@ -225,7 +233,8 @@ def main():
         ],
         assumptions=[
             "Continuum-to-lattice mapping uses h_sim = 1.0 as unit length.",
-            "Wave speed is enforced by T = rho * c^2.",
+            "Transverse wave speed is enforced by T_transverse = rho * c^2.",
+            "Time step uses the longitudinal speed set by pre-stretch.",
         ],
         derived={
             "expected_wave_speed_m_per_s": expected_c,
@@ -243,12 +252,14 @@ def main():
              "Pre-stretch parameter; alpha<1 yields uniform pre-tension."),
             ("rho_1_kg_per_m", r"\(\rho_m\)", rho_D,
              "Linear mass density in the continuum wave equation."),
-            ("T_1_newton", r"\(T\)", T_D,
-             "Effective tension in the linearized wave equation."),
+            ("T_1_transverse_newton", r"\(T_\perp\)", T_transverse,
+             "Background tension setting transverse wave speed."),
+            ("T_1_longitudinal_newton", r"\(T_\parallel\)", T_D,
+             "Effective longitudinal modulus for in-brane waves."),
             ("k_spring_N_per_m", r"\(k\)", k_spring,
              "Discrete spring constant in the lattice model."),
-            ("c_wave_sim", r"\(c_{\mathrm{wave}}\)", c_wave_sim,
-             "Wave speed used for calibration (approx. c in physical units)."),
+            ("c_wave_sim", r"\(c_{\perp}\)", c_wave_sim,
+             "Transverse wave speed used for calibration (c in physical units)."),
             ("cfl_factor", r"\(\mathrm{CFL}\)", cfl_factor,
              "CFL-like factor used to set the time step."),
             ("dt_phys_s", r"\(\Delta t\)", dt_phys,
