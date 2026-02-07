@@ -1,7 +1,7 @@
-\section{Continuum substrate model}
+\section{Substrate model: lattice microphysics and continuum (IR) effective description}
 \label{sec:continuum-model}
 
-\subsection{Ontology and kinematics (time as parameter)}
+\subsection{Continuum long-wavelength limit: ontology and kinematics}
 
 Let $\Omega\subset\R^3$ be the intrinsic (material) brane domain.
 We use either a periodic cell $\Omega=\T^3$ or a bounded cube with clamped boundary points.
@@ -15,15 +15,17 @@ The fundamental field is the embedding map
 \end{equation}
 whose components $X^A(x,t)$ ($A=1,\dots,4$) give the brane configuration in the ambient space.
 
-\subsection{Cubic lattice substrate and the continuum limit}
+\subsection{Discrete lattice substrate (microphysical postulate)}
 \label{subsec:lattice-substrate}
 
 The continuum model is treated as the long-wavelength effective theory of a \emph{cubic lattice} substrate.
 Let lattice sites be labeled by $n\in\mathbb{Z}^3$ with spacing $a$ and (reference) material positions
 $x_n=a\,n$.
 Each site carries an embedded configuration $\vecX_n(t)\in\R^4$.
-Interactions are encoded by springs/couplings between neighboring sites (optionally including diagonals to improve
-effective isotropy at long wavelength).
+Interactions are encoded by springs/couplings across neighbor shells with tunable strengths:
+nearest neighbors (axis-aligned) with stiffness $k_1$, face diagonals with $k_2$, and body diagonals with $k_3$.
+The rest lengths follow the geometry ($a$, $\sqrt{2}\,a$, $\sqrt{3}\,a$) with a uniform prestretch parameter $\alpha$.
+The ratios $(k_2/k_1,k_3/k_1)$ can be tuned to suppress leading anisotropic terms in the small-$|k|$ expansion.
 
 \paragraph{Dispersion, anisotropy, and birefringence.}
 At wavelengths comparable to $a$, the lattice generically exhibits direction-dependent dispersion and branch
@@ -170,21 +172,34 @@ These branches provide the substrate carriers for the geometric-phase and solito
 \label{subsec:gravity-channel}
 
 A distinctive feature of an embedded elastic medium is that transverse gradients change intrinsic distances.
-To make this explicit, consider the simple near-identity embedding in which the first three components follow the
-material coordinates and the fourth component is a transverse displacement,
+To make this explicit without removing in-brane dynamics, we use a near-identity decomposition around the
+homogeneous background embedding $\vecX_\star(x)=(h_\star x,0)$:
 \begin{equation}
-  \vecX(x,t)\approx (x^1,x^2,x^3,u(x,t)).
-  \label{eq:graph-embedding}
+  \vecX(x,t)=\big(h_\star x^1+\xi^1(x,t),\,h_\star x^2+\xi^2(x,t),\,h_\star x^3+\xi^3(x,t),\,u(x,t)\big),
+  \qquad \vec\xi(x,t)\in\R^3.
+  \label{eq:near-identity-embedding}
 \end{equation}
-Then the induced metric becomes
+The induced metric is then
+\begin{align}
+  g_{ij}
+  &= \partial_i\vecX\cdot\partial_j\vecX \nonumber\\
+  &= (h_\star\delta_i^{\,a}+\partial_i\xi^a)(h_\star\delta_j^{\,a}+\partial_j\xi^a)+\partial_i u\,\partial_j u \nonumber\\
+  &= h_\star^2\delta_{ij}+h_\star(\partial_i\xi_j+\partial_j\xi_i)+\partial_i\vec\xi\cdot\partial_j\vec\xi+\partial_i u\,\partial_j u.
+  \label{eq:metric-near-identity}
+\end{align}
+Setting $\vec\xi\equiv 0$ recovers the familiar graph picture used only for intuition; the ``gravity'' channel,
+however, relies on the allowed in-brane relaxation $\vec\xi\neq 0$ sourced by the quadratic term
+$\partial_i u\,\partial_j u$.
+
+In the small-slope regime, the in-brane strain has the schematic form
 \begin{equation}
-  g_{ij}=h_\star^2\,\delta_{ij}+\partial_i u\,\partial_j u,
-  \label{eq:metric-graph}
+  \varepsilon_{ij}\approx \tfrac12(\partial_i\xi_j+\partial_j\xi_i)+\tfrac12\,\partial_i u\,\partial_j u,
+  \label{eq:strain-near-identity}
 \end{equation}
-where $h_\star$ denotes the held ground-state scale introduced in \Cref{eq:alpha-def}
-(equivalently, one may rescale coordinates so that $h_\star=1$).
-A large-amplitude transverse profile necessarily produces an \emph{in-brane} strain contribution of order
-$|\nabla u|^2$ even if the lateral components remain close to their ground state.
+so the quasi-static balance $\partial_i\sigma_{ij}\approx 0$ with
+$\sigma_{ij}=\lambda\,\mathrm{tr}(\varepsilon)\delta_{ij}+2\mu\,\varepsilon_{ij}$ makes it explicit that
+the term $\partial_i u\,\partial_j u$ acts as a forcing/eigenstrain-like source for the slow in-brane field
+$\vec\xi$.
 
 \paragraph{Pythagorean lengthening and lateral contraction (informal picture).}
 For a small material displacement $\dd x$, the ambient line element of the graph embedding satisfies
@@ -197,6 +212,9 @@ configuration.
 In a discrete spring-lattice realization this is the familiar Pythagorean effect
 $|\Delta \vecX|=\sqrt{|\Delta x|^2+(\Delta u)^2}$: transverse variation increases spring length even when lateral
 coordinates are unchanged.
+In the actual dynamics the in-brane displacement $\vec\xi$ is not constrained; under pre-tension ($\alpha<1$) the
+additional metric contribution $\partial_i u\,\partial_j u$ acts as an effective source in the in-brane equilibrium
+equations, producing a compensating contraction/dilation pattern rather than a purely local increase of tensile stress.
 If the medium is pre-tensioned ($\alpha<1$), the additional length is paid for by increased tensile stress,
 which produces net lateral forces that pull material points \emph{toward} the region of transverse excitation.
 For a localized bump or rotating transverse pattern, the surrounding brane therefore develops an inward bias

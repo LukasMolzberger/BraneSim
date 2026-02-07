@@ -1,16 +1,17 @@
-\section{Discrete lattice substrate (implementation notes)}
+\section{Discrete lattice substrate (reference implementation)}
 \label{app:discrete}
 
 This appendix records a discrete cubic-lattice realization used in two roles:
 (i) as the proposed \emph{microphysical substrate picture} and
-(ii) as an implementation vehicle to test the continuum long-wavelength limit, dispersion, holonomy diagnostics,
-and localized-mode stability.
+(ii) as a vehicle to measure dispersion, anisotropy, holonomy diagnostics, and localized-mode stability, and to
+recover the continuum limit in the infrared.
 
 \subsection{Purpose and philosophy}
 
 The discrete model is used to:
 \begin{itemize}
-\item test isotropy numerically (including diagonal couplings as an approximation to rotational invariance),
+\item test isotropy numerically (including diagonal couplings as an isotropy-improving microphysical choice that
+remains only cubic-symmetric exactly),
 \item extract dispersion relations for small-amplitude waves,
 \item compute geometric-phase diagnostics from simulated polarized wave packets,
 \item search for and stress-test localized modes.
@@ -19,7 +20,7 @@ The discrete model is used to:
 \subsection{Lattice kinematics (summary)}
 
 A cubic lattice of nodes approximates $\Omega\subset\R^3$. Each node carries a 4D position $\vecX_{ijk}(t)\in\R^4$.
-Springs connect near neighbors; including diagonals improves isotropy.
+Springs connect near neighbors across prescribed shells; including diagonals improves isotropy.
 A uniform prestretch parameter $\alpha$ sets the spring rest lengths relative to the lattice spacing,
 representing homogeneous pre-tension.
 
