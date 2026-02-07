@@ -11,6 +11,8 @@ ontically real, tensioned three-dimensional elastic medium (a ``brane'') embedde
 The continuum model is formulated for an embedding field $\vecX:\Omega\times\mathbb{R}\to\mathbb{R}^4$ with external
 time as evolution parameter, using an isotropic hyperelastic action built from the induced metric and an
 isotropic reference metric; a single mismatch parameter $\alpha$ encodes homogeneous pre-stress.
+The continuum description is treated as the \emph{long-wavelength effective} limit of a cubic lattice of
+nodes/cells embedded in $\R^4$.
 Linearization yields multiple polarized branches with characteristic wave cones; when a single branch dominates and
 dispersion is negligible, Lorentz-type kinematics emerges as an effective symmetry for observers built from the same
 substrate.
@@ -21,11 +23,18 @@ We additionally postulate an ordered, narrowband carrier sector that provides ma
 Adiabatic transport of its polarization subspace induces a Berry (rank-1) or Wilczek--Zee (non-Abelian) connection;
 we interpret these connections as the natural gauge degrees of freedom of a coarse-grained envelope description,
 leading to gauge-covariant derivatives and curvature terms in an effective slow-sector action.
+On a cubic lattice, a natural internal sector is a three-component axis-aligned narrowband triplet
+$\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$.
+In the decoupled limit $g\to 0$, each axis supports an independent $U(1)$ geometric phase.
+For $g>0$, the eigenmodes become mixtures of axes and the correct description is a non-Abelian
+$U(3)$ Wilczek--Zee connection whose traceless part suggests an $SU(3)$-like ``color'' structure.
+The lattice spacing also introduces a Brillouin-zone setting in which Berry curvature can be computed on a
+discretized momentum lattice, in direct analogy with lattice-QCD Berry-curvature constructions.
 Particle-like states are modeled as localized solitons: because the dynamics derives from an action, linearization
 about symmetric backgrounds yields self-adjoint eigenproblems, with angular structure organized by spherical-harmonic
 families and physical amplitudes fixed by nonlinear self-guidance and energy normalization.
-A discrete spring-lattice realization is recorded as a reference implementation for testing isotropy, dispersion,
-holonomy diagnostics, and localized-mode stability.
+A discrete lattice realization is recorded both as (i) the proposed microphysical substrate picture and (ii) an
+implementation basis for testing dispersion, holonomy diagnostics, and localized-mode stability.
 
 The aim is not to challenge the empirical success of established theories, but to present a concrete, testable
 substrate model in which ``matter'' and ``forces'' are different regimes of one underlying dynamics.

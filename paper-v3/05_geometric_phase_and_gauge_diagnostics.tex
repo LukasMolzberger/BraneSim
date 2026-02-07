@@ -97,6 +97,56 @@ and the curvature (field strength) is
   \label{eq:wz-curvature}
 \end{equation}
 
+\subsection{Axis-aligned triplet phases and coupling-induced mixing ($U(1)^3\rightarrow U(3)$)}
+\label{subsec:axis-triplet}
+
+On a cubic lattice substrate it is natural to posit a three-component narrowband carrier triplet
+$\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ aligned with the lattice axes.
+Introduce a dimensionless coupling factor $g\ge 0$ controlling inter-axis mixing.
+
+\paragraph{Decoupled limit ($g=0$).}
+If the three axis channels are dynamically decoupled, each component supports an independent local phase choice
+and an independent rank-1 Berry connection $a_\mu^{(x)},a_\mu^{(y)},a_\mu^{(z)}$.
+In this limit, it is meaningful (and gauge-invariant) to speak of ``the Berry phase of an axis.''
+
+\paragraph{Mixed regime ($g>0$).}
+For any nonzero mixing, the physical eigenmodes are \emph{linear combinations} of axis labels.
+Axis-specific phases become basis-dependent and are not gauge-invariant.
+The correct adiabatic transport is instead a Wilczek--Zee connection on the transported near-degenerate subspace.
+For an approximately threefold-degenerate carrier subspace, one obtains a $U(3)$ connection
+$\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}.
+It can be decomposed into a trace $U(1)$ part and a traceless $SU(3)$ part,
+\begin{equation}
+  \mathcal{A}_\mu
+  = \frac{1}{3}\,\mathrm{tr}(\mathcal{A}_\mu)\,I_3
+  + \sum_{a=1}^{8} A^a_\mu\,T^a,
+\end{equation}
+where $T^a$ are $SU(3)$ generators.
+This provides a concrete way to express how ``axis-aligned Berry phases'' transition into a non-Abelian color-like
+connection once coupling is switched on.
+
+\subsection{Berry curvature on a discretized Brillouin zone (link-variable method)}
+\label{subsec:bz-berry}
+
+For a lattice substrate, Berry curvature can be computed directly on the discretized Brillouin zone using
+link variables and plaquettes, closely analogous to lattice-QCD Berry-curvature constructions
+\citep{Fukui2005ChernDiscretizedBZ,PuYamamoto2018BerryLatticeQCD,Yamamoto2016BerryPhaseLatticeQCD}.
+Let $\lvert u(\mathbf{k})\rangle$ be a normalized eigenvector (or $\mathbf{E}(\mathbf{k})$ a frame of a degenerate
+subspace) on a momentum lattice with spacing $\tilde a$.
+In the Abelian case one defines links
+\begin{equation}
+  U_j(\mathbf{k})=\frac{\langle u(\mathbf{k})\,|\,u(\mathbf{k}+\tilde{\jmath})\rangle}
+  {|\langle u(\mathbf{k})\,|\,u(\mathbf{k}+\tilde{\jmath})\rangle|},
+\end{equation}
+and a plaquette
+\begin{equation}
+  U_{ij}(\mathbf{k}) = U_i(\mathbf{k})U_j(\mathbf{k}+\tilde{\imath})
+  U_i^\dagger(\mathbf{k}+\tilde{\jmath})U_j^\dagger(\mathbf{k}),
+\end{equation}
+whose argument approximates the integrated Berry curvature over the plaquette.
+In the non-Abelian case one uses overlap matrices between frames and projects to $U(n)$ links, then forms the same
+plaquette structure to obtain a discretized non-Abelian curvature.
+This is a natural diagnostic bridge between the lattice-substrate hypothesis and QCD-motivated non-Abelian geometry.
 \subsection{Spinorial holonomy and the $4\pi$ aspect}
 
 For $n=2$ (a two-level polarization subspace), holonomy lives naturally in a double cover of $SO(3)$.

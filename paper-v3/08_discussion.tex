@@ -3,7 +3,7 @@
 
 \subsection{What is fixed by the continuum theory fragment}
 
-At the continuum level, the theory specifies:
+At the continuum level (treated here as the long-wavelength effective limit of a cubic lattice substrate), the theory specifies:
 (i) the substrate dynamics via an isotropic hyperelastic action \eqref{eq:action},
 (ii) the existence of an ordered narrowband sector that supports a controlled multiscale envelope description,
 and (iii) the geometric connection structure (Berry/Wilczek--Zee) induced by polarization transport.
@@ -22,6 +22,62 @@ Concretely, this means:
 relativistic kinematics is tied to the dominant wave cone of a linear sector,
 gauge structure is tied to holonomy of an ordered sector,
 and particle-like behavior is tied to localized nonlinear modes.
+
+\subsection{Lattice substrate: ontology, anisotropy, and continuum recovery}
+\label{subsec:discussion-lattice}
+
+The cubic lattice is treated not merely as a numerical convenience but as a candidate \emph{microphysical}
+substrate.
+In this reading, the isotropic continuum action serves as a compact \emph{effective} description valid at wavelengths
+$\lambda\gg a$ (with $a$ the lattice spacing), while the lattice determines the high-$k$ dispersion and the available
+polarization/mixing structure.
+
+Because cubic symmetry is weaker than full rotational symmetry, the lattice generically produces
+direction-dependent wave speeds, dispersion, and branch splitting (``birefringence'') at momenta approaching the
+Brillouin-zone boundary.
+Two complementary requirements follow:
+(i) \emph{observational viability} demands that anisotropies at accessible scales be suppressed, and
+(ii) the theory should explain \emph{why} effective isotropy emerges robustly for composite measuring devices that are
+themselves excitations of the substrate.
+Operationally, the paper commits to the controllable regime where the continuum limit is well-defined and
+anisotropies are parametrically small; the lattice picture then becomes a concrete hypothesis about the UV completion.
+
+\subsection{Axis-aligned triplet phases and the coupling-driven transition to non-Abelian holonomy}
+\label{subsec:discussion-axis-triplet}
+
+The ``axis-aligned Berry phase'' idea is best understood as a \emph{basis-dependent} description of a transported
+near-degenerate carrier sector.
+On a cubic lattice, it is natural to organize a narrowband carrier triplet
+$\Psi=(\psi_x,\psi_y,\psi_z)^\top$ aligned with the lattice axes.
+If inter-axis coupling is negligible ($g\to 0$), each component admits an independent rank-1 Berry connection and one
+may speak meaningfully of three separate $U(1)$ geometric phases.
+
+For any nonzero coupling ($g>0$), however, the physical eigenmodes are mixtures of axis labels.
+In that regime, ``the Berry phase of the $x$ axis'' is not gauge-invariant; the invariant content is the
+Wilczek--Zee holonomy of the transported subspace and its curvature.
+This provides a sharp criterion for when axis-wise phase bookkeeping is legitimate (effectively decoupled channels)
+and when the description must be upgraded to a non-Abelian $U(3)$ connection with an $SU(3)$ traceless component.
+
+\subsection{Contact with lattice gauge theory and lattice-QCD Berry curvature diagnostics}
+\label{subsec:discussion-lqcd}
+
+Standard lattice QCD uses a lattice primarily as a \emph{regulator} for a continuum gauge theory; in contrast, this
+framework treats the lattice as \emph{ontic} and interprets gauge structure as emergent connection data of an
+ordered carrier sector.
+Despite this difference in interpretation, the \emph{diagnostic machinery} transfers almost verbatim:
+Berry connections and curvatures can be computed on a discretized Brillouin zone using link variables and plaquettes,
+in close analogy to lattice-QCD Berry-curvature constructions \citep{PuYamamoto2018BerryLatticeQCD,Yamamoto2016BerryPhaseLatticeQCD,Fukui2005ChernDiscretizedBZ}.
+
+This analogy clarifies a central structural point about the ``color'' direction.
+Non-Abelian Berry curvature requires (approximate) degeneracy of the transported subspace; interactions or mixing that
+lift degeneracy can reduce the effective geometry to an Abelian sector.
+In this model, the coupling factor $g$ plays an analogous role: it controls both the mixing of the triplet and
+the gap structure that determines whether a non-Abelian adiabatic transport picture is justified.
+A practical program suggested by this link is:
+(i) compute $U(1)$ and $U(3)$ Berry curvatures on the momentum lattice for the relevant branches,
+(ii) compare holonomies under loops in $\mathbf{k}$-space to ``charge'' labels of long-range interactions, and
+(iii) test whether the traceless part exhibits genuinely non-Abelian features (e.g.\ noncommuting holonomies) in the
+parameter regime where localized modes and an ordered narrowband sector coexist.
 
 \subsection{Gravity as contraction from transverse excitation}
 
@@ -56,8 +112,8 @@ the phase reference that enables Berry/Wilczek--Zee holonomy.
 
 By construction, the underlying dynamics is deterministic.
 The probabilistic character of quantum measurements is attributed to the interaction of localized solitons with
-wave packets that are constrained by Fourier localization (band-limited narrowband carriers cannot be localized
-arbitrarily sharply), together with threshold-like nonlinear exchange events in which small differences in phase and
+wave packets that are constrained by Fourier localization and, in the lattice picture, by the finite Brillouin zone
+(band-limited narrowband carriers cannot be localized arbitrarily sharply), together with threshold-like nonlinear exchange events in which small differences in phase and
 amplitude can decide whether energy is transferred.
 In this view, apparent point-like interactions reflect the structure of wave packets and nonlinear exchange,
 not the existence of fundamental point particles.
@@ -69,10 +125,14 @@ Several gaps remain before the theory fragment could be regarded as a closed rep
 \item identifying constitutive laws and parameter regimes that simultaneously support (a) a stable ordered narrowband
 sector and (b) robust localized solitons,
 \item deriving the precise effective dynamics of curvature fluctuations of the Berry/Wilczek--Zee connection
+\item quantifying the lattice-induced anisotropy/birefringence and establishing bounds (or suppression mechanisms)
+that ensure effective Lorentz/isotropy constraints in accessible regimes,
+\item formulating the dynamics and physical meaning of the inter-axis coupling factor $g$ (including when and how it
+produces a protected near-degeneracy required for a non-Abelian Wilczek--Zee description),
 (including whether a Maxwell/Yang--Mills-type term dominates in the relevant regimes),
 \item clarifying the quantitative mapping between far-field holonomy labels and electromagnetic phenomenology,
 \item understanding how multi-particle states and apparent entanglement-like correlations arise in a deterministic
 wave medium.
 \end{itemize}
-The present goal is to place the theory on a consistent continuum footing so that these problems can be attacked
-without ambiguity about the underlying substrate model.
+The present goal is to place the theory on a consistent lattice-to-continuum footing so that these problems can be
+attacked without ambiguity about the underlying substrate model.

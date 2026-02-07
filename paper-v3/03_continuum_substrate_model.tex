@@ -15,6 +15,31 @@ The fundamental field is the embedding map
 \end{equation}
 whose components $X^A(x,t)$ ($A=1,\dots,4$) give the brane configuration in the ambient space.
 
+\subsection{Cubic lattice substrate and the continuum limit}
+\label{subsec:lattice-substrate}
+
+The continuum model is treated as the long-wavelength effective theory of a \emph{cubic lattice} substrate.
+Let lattice sites be labeled by $n\in\mathbb{Z}^3$ with spacing $a$ and (reference) material positions
+$x_n=a\,n$.
+Each site carries an embedded configuration $\vecX_n(t)\in\R^4$.
+Interactions are encoded by springs/couplings between neighboring sites (optionally including diagonals to improve
+effective isotropy at long wavelength).
+
+\paragraph{Dispersion, anisotropy, and birefringence.}
+At wavelengths comparable to $a$, the lattice generically exhibits direction-dependent dispersion and branch
+splitting (birefringence), because the cubic symmetry is not fully rotational.
+In contrast, for $\lambda\gg a$ (small $|k|$ inside the Brillouin zone), the dispersion can be expanded and the
+leading-order dynamics is well-approximated by an isotropic continuum elasticity model with effective Lam\'e-type
+parameters.
+This motivates using an isotropic hyperelastic action as a baseline in the main text while keeping the lattice
+as the microphysical hypothesis.
+
+\paragraph{Brillouin zone and geometric-phase diagnostics.}
+The lattice spacing $a$ defines a Brillouin zone $k_i\in[-\pi/a,\pi/a]$.
+Because Berry curvature is naturally defined over parameter spaces such as $\mathbf{k}$-space eigenbundles,
+the lattice formulation provides a direct route to Berry-curvature diagnostics on a discretized momentum lattice
+(see \Cref{sec:geophase}).
+
 \subsection{Induced metric and isotropic reference metric}
 
 The embedding induces a (time-dependent) Riemannian metric on the brane:

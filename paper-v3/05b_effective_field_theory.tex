@@ -54,6 +54,23 @@ so that $F^{\mathrm{eff}}_{\mu\nu}=\partial_\mu A^{\mathrm{eff}}_\nu-\partial_\n
 The conversion factor $\eta$ fixes units and would have to be determined by matching to experiment; it is not introduced
 as a fundamental coupling in the microscopic substrate equations.
 
+\subsection{Triplet envelope sector and $U(3)\simeq U(1)\times SU(3)$ decomposition}
+\label{subsec:triplet-u3}
+
+If the retained narrowband sector is a three-dimensional near-degenerate subspace (as suggested by an axis-aligned
+triplet on a cubic lattice), then $n=3$ and the emergent connection is $\mathcal{A}_\mu\in\mathfrak{u}(3)$.
+Decomposing into trace and traceless parts,
+\begin{equation}
+  \mathcal{A}_\mu
+  = \underbrace{\frac{1}{3}\mathrm{tr}(\mathcal{A}_\mu)\,I_3}_{U(1)\ \text{part}}
+  + \underbrace{\sum_{a=1}^{8}A^a_\mu\,T^a}_{SU(3)\ \text{part}},
+\end{equation}
+suggests a direct route to a ``QCD-like'' internal gauge structure in the slow-sector EFT:
+the $U(1)$ part behaves electromagnetism-like, while the traceless part carries non-Abelian self-couplings through
+the curvature commutator term in $\mathcal{F}_{\mu\nu}$.
+Crucially, for nonzero inter-axis mixing, statements about ``a Berry phase per axis'' are not gauge-invariant; the
+invariant content is the holonomy/curvature of the transported subspace (Wilczek--Zee).
+
 
 Geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
 What is specific here is the identification of the physically relevant gauge structure with the
@@ -64,7 +81,7 @@ connection induced by a distinguished narrowband sector of the substrate.
 In standard quantum field theory, the Dirac field $\psi$ simultaneously encodes (i) the internal particle labels
 (spin, particle/antiparticle) and (ii) the local phase/gauge coupling through the covariant derivative
 $D_\mu=\partial_\mu+\ii(q/\hbar)A_\mu$.
-In the present theory, the proposal is to reinterpret this mixture as follows:
+In the present theory, this mixture is reinterpreted as follows:
 \begin{itemize}
 \item the \emph{particle sector} corresponds to localized solitonic modes with additional internal structure
 (topology/geometry and its associated labels);
