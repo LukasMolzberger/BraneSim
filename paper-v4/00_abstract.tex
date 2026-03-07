@@ -1,15 +1,38 @@
 \begin{abstract}
-We develop a deterministic \emph{substrate theory fragment} in which observable physics is modeled as excitation dynamics of a three-dimensional brane-like medium embedded in $\R^4$, with external time as the evolution parameter.
-The continuum description is written as a coordinate-free hyperelastic theory for an embedding field $\vecX: \Omega \times \R \to \R^4$, while a cubic lattice is treated as the candidate microphysical realization whose long-wavelength limit is the continuum model.
-This separation is central: the continuum theory expresses the constitutive and geometric content cleanly, whereas the lattice supplies the actual branch structure, dispersion, and mixing mechanisms to be tested numerically.
+The Standard Model and general relativity are extraordinarily successful effective descriptions of observed physics,
+yet they leave open a complementary explanatory question: whether a smaller set of underlying ingredients could give
+rise to relativistic kinematics, gauge structure, and particle-like localization as emergent regularities.
+This paper develops that question in a deterministic \emph{substrate-first} setting.
 
-Three mechanisms are isolated and formulated explicitly.
-First, linearization about a homogeneous background yields polarized wave branches and an effective wave cone, making Lorentz-type kinematics interpretable as an emergent long-wavelength symmetry rather than a microscopic postulate.
-Second, because transverse deformation changes intrinsic distances through the induced metric, homogeneous prestretch produces a transverse-to-lateral backreaction; in a weak and slowly varying regime this motivates a candidate contraction channel for gravity-like behavior.
-Third, an ordered narrowband carrier sector supports adiabatic transport of polarization states and thereby induces Berry or Wilczek--Zee connections, which provide the natural geometric variables of a coarse-grained gauge description.
+We study a three-dimensional brane lattice embedded in $\mathbb{R}^4$, with external time as evolution parameter.
+Its continuum description is formulated as the long-wavelength effective theory of an embedding field
+$\vecX:\Omega\times\mathbb{R}\to\mathbb{R}^4$ governed by an isotropic hyperelastic action built from the induced metric.
+A homogeneous mismatch parameter $\alpha$ encodes the prestretch between the held lattice spacing and the stress-free
+link length.
+A central modeling point is that the essential nonlinearity is \emph{geometric}, not imposed by an auxiliary field or by
+hand-written thresholds: even when the microscopic link energy is Hooke-linear in the scalar extension,
+the 4D Euclidean link length and the induced metric make the map from substrate positions to forces nonlinear.
+This same geometric mechanism couples transverse amplitude to in-brane contraction.
 
-We also formulate localized particle-like states as nonlinear bound modes of the same substrate.
-Here the emphasis is deliberately modest: the paper does not claim a derivation of the full Standard Model, QCD, or general relativity.
-Its contribution is instead to connect the lattice postulate, continuum equations, geometric-phase diagnostics, and localized-mode program into one coherent mathematical framework with a clear computational agenda.
-Within that agenda, the most informative near-term target is not an electron-like mode but a proton- or neutron-like \emph{baryon-scale triplet state}, because the cubic lattice naturally provides a three-channel axis-aligned sector whose mixing can be analyzed directly.
+In the weak, narrowband regime, linearization yields polarized branches with characteristic wave cones.
+When one branch dominates and dispersion is negligible, observers built from that same branch inherit an effective
+Lorentz-type kinematics.
+A slowly varying transverse excitation also modifies intrinsic distances and, under prestretch, produces an inward
+lateral response; in a weak-field regime we interpret this as a gravity-like contraction channel.
+Assuming an ordered carrier sector, adiabatic transport of its polarization subspace induces Berry (rank-1) or
+Wilczek--Zee (non-Abelian) connections, which we interpret as the natural gauge variables of a coarse-grained
+envelope theory.
+On a cubic lattice, an axis-aligned triplet $\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ provides a natural candidate
+internal sector: in the decoupled limit it supports three approximately Abelian phases, while finite inter-axis mixing
+promotes the description to a non-Abelian $U(3)$ transport problem with an $SU(3)$-like traceless part.
+
+Localized particle-like states are posed as confined wave modes rather than point objects.
+Linearization about symmetric backgrounds yields self-adjoint eigenproblems with spherical-harmonic angular structure,
+while nonlinear self-guidance is attributed to the same induced-metric geometry that couples amplitude to lateral strain.
+This paper therefore has two aims: first, to consolidate the core theory into a coherent lattice-to-continuum statement;
+second, to define the decisive numerical program.
+Because the cubic substrate naturally singles out a three-channel internal sector, the next simulation priority is argued
+to be a baryon-like triplet mode (proton/neutron sector) rather than another electron-only ansatz.
+The intended contribution is not a finished replacement for established theories, but a sharpened substrate model whose
+mathematical bridges are explicit enough to be attacked directly in simulation.
 \end{abstract}

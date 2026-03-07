@@ -1,55 +1,85 @@
 \section{Scope, contributions, and non-claims}
 \label{sec:scope}
 
-This paper develops a \emph{deterministic substrate theory fragment}.
-Its purpose is not to present a finished replacement for established physics, but to put the central mathematical ingredients of the proposal into a cleaner and more testable form.
-The main contribution is the assembly of one coherent chain---from lattice postulate to continuum equations, from geometric diagnostics to the localized-mode program---so that the computational burden and the remaining conceptual gaps become explicit rather than implicit.
+This paper develops a deterministic substrate theory fragment with a narrow purpose:
+to state the core lattice-to-continuum theory coherently, to identify which bridges are already fixed by the model,
+and to isolate the decisive computations that must now be carried out.
+A cubic lattice is treated as the candidate microphysical substrate, while the continuum formulation is retained as the
+long-wavelength effective description and as the cleanest way to write isotropic constitutive baselines.
 
 \subsection{Positioning relative to established physics}
-The Standard Model and general relativity are treated here as \emph{empirically validated effective frameworks}.
-Nothing in this manuscript is intended to diminish their established experimental domain of validity.
-The present work asks a different question:
-whether some of their structural features can be reinterpreted as emergent regularities of a deeper deterministic medium.
+The Standard Model and general relativity are treated here as empirically validated effective frameworks.
+Nothing in this paper is intended to weaken confidence in their experimental domain of applicability.
+The present work instead targets a different explanatory layer: it asks whether familiar structures such as
+effective Lorentz symmetry, gauge connections, and quantized particle spectra could arise as emergent regularities
+from a smaller set of ground ingredients.
 
-\subsection{Core contributions}
-The theory fragment advanced here is organized around five specific claims.
+\subsection{Core theory delivered here}
+The theory fragment developed here is organized around six coupled elements:
 \begin{enumerate}
-\item \textbf{A continuum substrate model with explicit ontology.}
-The fundamental variable is an embedding field $\vecX: \Omega\times\R \to \R^4$ for an intrinsic three-dimensional brane, with external time as evolution parameter.
-The continuum dynamics is written as a local hyperelastic action built from the induced metric and an isotropic reference metric.
+\item \textbf{A single substrate with two descriptions.}
+A cubic lattice of nodes/cells embedded in $\R^4$ is taken as the microphysical substrate.
+For wavelengths large compared to the lattice spacing, its dynamics admits a continuum approximation by an
+isotropic hyperelastic action on an intrinsic $3$-domain $\Omega\subset\R^3$ (\Cref{sec:continuum-model}).
 
-\item \textbf{A lattice realization of the same substrate.}
-A cubic lattice embedded in $\R^4$ is treated as the candidate microphysical realization.
-The continuum model is its long-wavelength effective description.
-This makes anisotropy, Brillouin-zone structure, and axis-aligned carrier mixing part of the physical hypothesis rather than mere numerical artifacts.
+\item \textbf{Geometric nonlinearity as the primary coupling mechanism.}
+The central amplitude--lateral coupling does not come from an auxiliary field.
+It comes from the 4D Euclidean link length on the lattice and, equivalently, from the induced metric in the continuum.
+This geometric mechanism is the intended source of transverse contraction, self-guidance, and localization.
 
-\item \textbf{A geometric contraction channel.}
-Because transverse deformation changes intrinsic distances, prestretch induces a transverse-to-lateral backreaction.
-In a weak and slowly varying regime this yields a candidate mechanism for a gravity-like contraction field sourced by stored substrate energy.
+\item \textbf{A prestretched substrate with an emergent gravity-like channel.}
+A homogeneous mismatch parameter $\alpha$ encodes the prestretch between held spacing and stress-free length.
+Because transverse gradients modify intrinsic distances, localized transverse excitation produces an inward lateral pull
+(contraction) and a slowly varying strain field.
+In a weak, slowly varying regime this is interpreted as the qualitative origin of a long-range gravity-like channel
+(\Cref{subsec:gravity-channel}).
 
-\item \textbf{Geometric-phase gauge diagnostics.}
-An ordered narrowband carrier sector supports Berry or Wilczek--Zee transport.
-The corresponding connection and curvature are interpreted as the natural geometric variables of an emergent gauge description.
-On the cubic lattice, the axis-aligned triplet $\Psi=(\psi_x,\psi_y,\psi_z)^\top$ provides the minimal non-Abelian testbed.
+\item \textbf{An ordered narrowband carrier sector.}
+We assume the substrate admits an ordered, narrowband carrier sector that provides phase rigidity and enables a
+controlled multiscale envelope description (\Cref{sec:geophase,sec:effective-field}).
 
-\item \textbf{Localized modes as the central validation problem.}
-Particle-like behavior is assigned to nonlinear localized modes of the substrate.
-The manuscript formulates the corresponding linearized eigenproblems, clarifies the role of nonlinear self-guidance, and identifies proton- and neutron-like baryon-scale triplet states as the most informative first simulation targets.
+\item \textbf{Berry/Wilczek--Zee transport as emergent gauge structure.}
+Adiabatic transport of a retained polarization subspace induces a Berry connection (rank-1) or a Wilczek--Zee
+connection (non-Abelian).
+These are interpreted as the natural gauge variables of the slow-sector description, rather than as independent
+microscopic fields (\Cref{sec:geophase,sec:effective-field}).
+
+\item \textbf{Localized particle modes and the baryon priority.}
+Particle-like states are modeled as localized standing-wave/solitonic modes whose spatial structure is organized by
+symmetry and whose amplitude scale is fixed by nonlinear self-guidance and energy normalization (\Cref{sec:localized}).
+Because the cubic substrate naturally singles out an axis-aligned triplet sector, the first decisive non-electron target
+is argued to be a baryon-like confined triplet mode, with proton/neutron structure treated as the primary numerical
+priority.
 \end{enumerate}
 
-\subsection{Immediate computational objective}
-The paper is written to support a concrete next step:
-a numerical search for stable three-channel localized modes on the cubic lattice whose size, energy, branch content, and holonomy diagnostics can be compared against baryon-scale targets.
-This is narrower and more credible than claiming a direct derivation of QCD.
-It is also more aligned with the actual structure of the current substrate hypothesis, because the axis-aligned triplet is intrinsically a three-channel object.
-
 \subsection{Non-claims}
-To keep the scope honest, the present version does \emph{not} claim:
+To keep the scope honest, several items are explicitly \emph{not} claimed in this manuscript:
 \begin{itemize}
-\item a derivation of the full Standard Model gauge group, generations, or measured coupling constants,
-\item a quantitative reduction of the contraction channel to Einstein gravity or a derived value of $G$,
-\item a derivation of full QCD from first principles,
-\item a complete scattering theory or multi-particle theory,
-\item an already completed proton, neutron, or electron simulation.
+\item a derivation of the full Standard Model gauge group, generations, or precise coupling constants,
+\item a completed quantitative reduction of the contraction channel to a Newtonian limit with a derived value of $G$,
+\item a completed derivation of Maxwell or Yang--Mills dynamics in all regimes,
+\item a finished proton or neutron solution,
+\item a closed multi-particle theory including scattering cross sections, bound-state spectra, and entanglement
+phenomenology.
 \end{itemize}
-Instead, the claim is that the mathematical core of the proposal can be stated more cleanly than before and that the next decisive step is computational rather than rhetorical.
+
+\subsection{Immediate numerical program}
+The paper now commits to a concrete simulation agenda rather than to a broad list of generic falsification slogans.
+Three numerical tasks are decisive:
+\begin{enumerate}
+\item \textbf{Dispersion and isotropy control.}
+Measure direction-dependent wave speeds, birefringence, and branch splitting as functions of wavelength relative to the
+lattice spacing and neighbor stencil.
+The aim is to determine whether a universal long-wavelength observer sector exists.
+
+\item \textbf{Contraction-channel extraction.}
+Create localized transverse excitation, measure the induced slow in-brane contraction field, and test whether it focuses
+or accelerates long-wavelength probe packets in the expected weak-field manner.
+
+\item \textbf{Localized triplet-mode search.}
+Construct and evolve confined three-component seeds tied to the axis-aligned cubic channels, and test whether the
+substrate supports stable baryon-like standing-wave modes with confined internal triplet structure, controlled far-field
+holonomy, and reproducible size/energy diagnostics.
+\end{enumerate}
+The contribution of the present paper is therefore a sharpened substrate model plus a concrete route for deciding whether
+its main emergence claims survive direct computation.

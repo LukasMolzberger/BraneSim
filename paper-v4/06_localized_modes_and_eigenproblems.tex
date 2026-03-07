@@ -1,67 +1,98 @@
 \section{Localized modes and self-adjoint eigenproblems}
 \label{sec:localized}
 
-The central physical question for the substrate proposal is whether the same microscopic dynamics can support robust localized states.
-If such states do not exist, the framework reduces to an unusual wave medium.
-If they do exist, then particle-like behavior can be discussed without introducing fundamental point objects.
-This section formulates the localized-mode problem in the most economical way.
+A core goal of the substrate theory is to explain particle-like behavior (localization, discrete spectra,
+internal ``spin/charge''-like structure) as properties of confined wave states rather than point particles.
+In this framework, particles are extended standing-wave configurations of the substrate.
 
 \subsection{Linearization about symmetric backgrounds and self-adjointness}
 
 Let $\vecX_0(x)$ be a time-independent background embedding representing a localized deformation region.
-Write
-\begin{equation}
-  \vecX(x,t)=\vecX_0(x)+\bm{\eta}(x,t)
-\end{equation}
-with $\bm{\eta}$ small.
-Because the equations of motion derive from the action \eqref{eq:action}, the linearized operator is obtained from the second variation of that action and is therefore self-adjoint with respect to the kinetic-energy inner product
+We are especially interested in backgrounds that are \emph{spherically symmetric} in the intrinsic brane coordinates,
+so that invariants depend only on $r=|x|$.
+
+Linearize the equations of motion \eqref{eq:eom} about $\vecX_0$ by writing
+$\vecX(x,t)=\vecX_0(x)+\bm{\eta}(x,t)$ with small perturbation $\bm{\eta}$.
+Because the dynamics derives from an action \eqref{eq:action}, the linearized operator arises from the second
+variation of the action and is therefore self-adjoint with respect to the inner product induced by the kinetic energy,
+schematically
 \begin{equation}
   \langle \bm{\eta},\bm{\zeta}\rangle
   :=\int_{\Omega} \rho_m\,\bm{\eta}(x)\cdot \bm{\zeta}(x)\,\dd^3x,
   \label{eq:inner-product}
 \end{equation}
-subject to the chosen boundary conditions.
-Thus orthogonality and real mode frequencies are not additional assumptions; they are consequences of variational structure.
+together with the boundary/regularity conditions appropriate to the chosen domain.
+Orthogonality and completeness of eigenmodes are therefore not added by hand; they are standard properties of a
+self-adjoint eigenproblem.
 
-\subsection{Angular structure, spherical families, and cubic corrections}
+\subsection{Angular structure and spherical harmonics}
 
-For a spherically symmetric background, the linearized operator commutes with the $SO(3)$ action on the intrinsic coordinates, so the angular dependence may be expanded in spherical harmonics $Y_{\ell m}(\theta,\varphi)$.
-This gives the natural starting point for classifying localized modes.
-The actual microscopic lattice is cubic rather than rotationally invariant, so exact degeneracies will generally be split at sufficiently short wavelengths.
-Nevertheless, the spherical classification remains the correct long-wavelength organizing principle for localized states whose core size is large compared to the lattice spacing.
+For a spherically symmetric background, the linearized operator commutes with the action of $SO(3)$ on the intrinsic
+coordinates.
+Consequently, eigenmodes can be chosen to transform in irreducible $SO(3)$ representations.
+Operationally, this implies a separation into a radial problem and an angular problem whose eigenfunctions are
+spherical harmonics $Y_{\ell m}(\theta,\varphi)$.
+This statement is purely a symmetry consequence: it requires rotational invariance of the background and of the
+linearized operator, not a change in the underlying substrate ontology.
 
-\subsection{Energy normalization and physical targets}
+Appropriate superpositions, together with nontrivial embedding-space polarization structure, can yield torus-like,
+loop-like, or shell-like energy density profiles.
+These should be understood as standing-wave organizations of the substrate rather than as literal point particles
+moving on thin trajectories.
 
-The linearized eigenproblem fixes spatial structure and oscillation frequencies but does not fix overall amplitude.
-Physical amplitude must be selected by the nonlinear theory together with an energy target.
-Accordingly, the relevant normalization condition is
+\subsection{Amplitude scaling and energy normalization}
+
+The linear eigenproblem fixes mode shapes and frequencies but not the overall amplitude:
+if $\bm{\eta}$ is an eigenmode, so is $c\,\bm{\eta}$ for any scalar $c$.
+Physical amplitudes are selected only when nonlinearities are included and the total energy is fixed.
+For an electron-like excitation one may impose a rest-energy normalization
 \begin{equation}
-  \overline{E}[\vecX] = M_{\mathrm{target}} c^2,
+  \overline{E}[\vecX] \;=\; m_e c^2,
   \label{eq:rest-energy-normalization}
 \end{equation}
-where $M_{\mathrm{target}}$ is the physical mass assigned to the localized mode under study.
-For the present program, proton- and neutron-scale targets are the most natural first cases because they match the intrinsic three-channel structure of the cubic carrier sector more directly than an electron-like state does.
+where $\overline{E}$ denotes the conserved substrate energy associated with \eqref{eq:action}.
+For baryon-like modes the same logic applies with the appropriate target rest energy of the chosen species.
+The important structural point is unchanged: amplitude is not determined by the linear eigenproblem alone.
 
-\subsection{Confinement as nonlinear self-guidance}
+\subsection{Confinement as geometric self-guidance}
 
-A localized mode requires a confinement mechanism.
-In a purely linear system, packets generically disperse or radiate away.
-A useful conceptual benchmark is the toroidal-electron literature, which correctly emphasizes that ordinary weak gravitational curvature is far too small to confine a Compton-scale wave mode \citep{Williamson1997,vanderMark2000LightHeavy}.
-The present framework adopts that confinement requirement but assigns the trapping mechanism to the substrate's own constitutive and geometric nonlinearity.
-Large-amplitude deformation changes the local stress response and therefore the local propagation operator for nearby fluctuations.
-A sufficiently structured excitation can then ``write'' an effective medium for itself and remain self-guided.
+A confining mechanism is required: in a purely linear wave system, localized packets generally disperse or radiate.
+A useful conceptual benchmark is the toroidal electron proposal attributed to Williamson \& van der Mark, which argues
+that ordinary gravitational curvature is far too weak to confine a Compton-scale photon-like mode and that confinement
+must arise from a self-consistent, excitation-specific mechanism.
+We adopt the \emph{confinement requirement} while not committing to a literal double-loop trajectory
+(see e.g.\ the review discussion in \citep{HuygensOptics2025}).
 
-\subsection{Three-channel localized modes as baryon-like targets}
+In the present substrate theory, the first candidate confinement mechanism is the brane's \emph{geometric}
+self-guidance.
+Large-amplitude deformations modify the local Euclidean link lengths on the lattice and the induced metric in the
+continuum; this changes the local stress response and therefore the propagation characteristics of fluctuations around
+the deformed state.
+The crucial point is that this mechanism is already present even when the microscopic link law is Hooke-linear in the
+scalar extension.
+Constitutive refinements may strengthen or weaken localization, but the underlying nonlinear feedback comes from the
+same geometry that couples transverse amplitude to lateral strain.
 
-On the cubic lattice the most informative localized states are those that significantly occupy the axis-aligned triplet sector.
-Such states need not be identified immediately with literal quarks.
-The narrower and more testable statement is that a stable three-channel bound configuration would be the natural substrate analogue of a baryonic object.
-A proton-like and a neutron-like state would then correspond to two nearby stable solutions with similar geometric scale and total energy but different far-field holonomy or charge-like diagnostics.
-This is the point at which the localized-mode program meets the geometric-phase program:
-one must solve for the nonlinear core and the long-range connection data at the same time.
+\subsection{Why the baryon sector is the next numerical target}
+
+The cubic substrate naturally singles out three axis-associated channels.
+That makes the proton/neutron sector a particularly informative next target: a confined three-component standing-wave
+mode tests the very structure that the lattice introduces most directly.
+In contrast, an isolated electron-like ansatz can exist without decisively probing the triplet mixing sector.
+
+The working hypothesis is therefore that a baryon-like seed should be built from three mutually locked narrowband
+components tied primarily to the axis-aligned carrier channels, with confinement arising from geometric self-guidance
+and with the far-field Abelian trace sector distinguishing charged and neutral configurations.
+This is not yet a derivation of QCD or of nucleon phenomenology.
+It is a concrete question for simulation: does the substrate support stable, localized, color-confined triplet modes at
+all?
+If the answer is no, an important bridge in the theory fails early and clearly.
+If the answer is yes, the cubic triplet sector becomes the natural arena for sharpening the particle interpretation.
 
 \subsection{Connection to Berry/Wilczek--Zee holonomy and spin}
 
-Localized modes can carry internal polarization structure, and the Berry/Wilczek--Zee connections of \Cref{sec:geophase} can be evaluated either on loops surrounding a localized core or along adiabatic deformations of a localized family.
-In this way, long-range ``charge''-like labels are interpreted as holonomy data of the surrounding carrier sector, while the spin-$\tfrac12$ $4\pi$ aspect is interpreted as spinorial transport of an internal two-level subspace.
-The crucial open task is to demonstrate this numerically for actual localized solutions of the substrate equations.
+Localized modes can carry internal polarization structure (multi-component standing waves).
+The Berry/Wilczek--Zee connections of \Cref{sec:geophase} can then be evaluated on loops surrounding the localized
+region or on adiabatic deformations of a localized mode family.
+In this way, long-range ``charge''-like labels are interpreted as far-field holonomy/phase structure, while the
+spin-$\tfrac12$ $4\pi$ aspect is attributed to spinorial holonomy of a two-level polarization subspace.

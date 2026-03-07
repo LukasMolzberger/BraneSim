@@ -19,23 +19,45 @@ whose components $X^A(x,t)$ ($A=1,\dots,4$) give the brane configuration in the 
 \label{subsec:lattice-substrate}
 
 The continuum model is treated as the long-wavelength effective theory of a \emph{cubic lattice} substrate.
-Let lattice sites be labeled by $n\in\mathbb{Z}^3$ with spacing $a$ and (reference) material positions
-$x_n=a\,n$.
+Let lattice sites be labeled by $n\in\mathbb{Z}^3$ with spacing $a$ and reference positions $x_n=a\,n$.
 Each site carries an embedded configuration $\vecX_n(t)\in\R^4$.
-Interactions are encoded by springs/couplings across neighbor shells with tunable strengths:
-nearest neighbors (axis-aligned) with stiffness $k_1$, face diagonals with $k_2$, and body diagonals with $k_3$.
-The rest lengths follow the geometry ($a$, $\sqrt{2}\,a$, $\sqrt{3}\,a$) with a uniform prestretch parameter $\alpha$.
-The ratios $(k_2/k_1,k_3/k_1)$ can be tuned to suppress leading anisotropic terms in the small-$|k|$ expansion.
-In the present cubic-lattice picture, $\alpha$ is not merely a background strain label: it is the primary control parameter for amplitude-to-lateral coupling and therefore for the effective mixing of the nominally axis-aligned carrier branches, while the additional neighbor shells mainly tune isotropy and high-$k$ dispersion around that basic mechanism.
+For a neighbor stencil $\mathcal N\subset\mathbb{Z}^3$, the discrete potential energy may be written schematically as
+\begin{equation}
+  U_{\mathrm{lat}}[\{\vecX_n\}]
+  =
+  \frac12\sum_n\sum_{\delta\in\mathcal N}
+  k_{\delta}
+  \Big(\,\lvert \vecX_{n+\delta}-\vecX_n\rvert-\alpha a\lvert\delta\rvert\,\Big)^2,
+  \label{eq:lattice-energy}
+\end{equation}
+with stiffnesses $k_{\delta}$ grouped, for example, into axis-aligned, face-diagonal, and body-diagonal shells.
+The uniform prestretch parameter $\alpha$ fixes the ratio between the held lattice spacing and the stress-free link
+length.
+
+\paragraph{Geometric nonlinearity already present at the microscopic level.}
+\Cref{eq:lattice-energy} makes an important modeling point explicit.
+Even if the link energy is Hooke-linear in the scalar extension,
+its dependence on the node coordinates is nonlinear because the extension is the full Euclidean distance in $\R^4$.
+This Pythagorean nonlinearity is the microscopic origin of the amplitude--lateral coupling that later appears in the
+continuum as the induced-metric term $\partial_i u\,\partial_j u$.
+No additional nonlinear interaction field is required for this effect.
 
 \paragraph{Dispersion, anisotropy, and birefringence.}
 At wavelengths comparable to $a$, the lattice generically exhibits direction-dependent dispersion and branch
-splitting (birefringence), because the cubic symmetry is not fully rotational.
-In contrast, for $\lambda\gg a$ (small $|k|$ inside the Brillouin zone), the dispersion can be expanded and the
-leading-order dynamics is well-approximated by an isotropic continuum elasticity model with effective Lam\'e-type
-parameters.
-This motivates using an isotropic hyperelastic action as a baseline in the main text while keeping the lattice
-as the microphysical hypothesis.
+splitting because cubic symmetry is weaker than full rotational symmetry.
+For $\lambda\gg a$ (small $|k|$ inside the Brillouin zone), the dispersion can be expanded and the leading-order
+dynamics can be organized by an isotropic continuum elasticity model with effective Lam\'e-type parameters.
+This motivates using an isotropic hyperelastic action as the continuum baseline while keeping the lattice as the
+microphysical hypothesis.
+
+\paragraph{Operational isotropy in the coarse-grained observer sector.}
+Microscopic cubicity does not by itself guarantee an observable preferred direction for long-wavelength observers built
+from the same substrate.
+A preferred direction becomes operationally relevant only if different orientations or branches renormalize rods,
+clocks, and signal cones \emph{differently}.
+The physical requirement is therefore stronger than a coordinate redefinition: the dominant narrowband observer sector
+must inherit a universal effective metric, with residual anisotropy pushed into higher-order corrections.
+Establishing that universality is one of the main numerical tasks of the theory.
 
 \paragraph{Brillouin zone and geometric-phase diagnostics.}
 The lattice spacing $a$ defines a Brillouin zone $k_i\in[-\pi/a,\pi/a]$.
@@ -69,7 +91,7 @@ Define the mixed relative metric
 Any isotropic hyperelastic energy density can be written as $W=W(\widehat g)$, equivalently as a function of the
 principal stretches or invariants of $\widehat g$.
 
-\paragraph{Continuum analogue of pre-tension (the $\alpha$ knob).}
+\paragraph{Continuum analogue of pre-tension.}
 The reference metric $g^0$ encodes the stress-free geometric scale.
 If boundary conditions enforce a held ground-state scale $h_\star$ (uniform), then
 \begin{equation}
@@ -81,7 +103,6 @@ For $\alpha<1$ the brane is uniformly pre-stressed (continuum ``pre-tension''). 
 transverse gradients backreact on in-brane stresses through the geometric nonlinearity of $g_{ij}(\vecX)$.
 In the lattice substrate picture (\Cref{subsec:lattice-substrate}), the same $\alpha$ multiplies the geometric
 neighbor distances to set spring rest lengths; \Cref{eq:alpha-def} is the continuum encoding of that uniform prestretch.
-In that sense, $\alpha$ is the main physical knob that turns transverse amplitude into lateral restoring forces and therefore governs the onset of branch mixing in the axis-aligned triplet sector.
 
 \subsection{Constitutive law: St.\ Venant--Kirchhoff (Green--Lagrange strain)}
 
@@ -107,6 +128,12 @@ with Lam\'e parameters $\mu>0$ and $\lambda$ (units: Pa). In terms of Poisson ra
 \end{equation}
 This choice is not claimed unique; it is used because it is isotropic, analytic, and captures the
 geometric nonlinearity through $g_{ij}(\vecX)$.
+It also reduces to standard linear elasticity in the small-strain limit, making the longitudinal/transverse
+wave speeds and the linearized branch structure transparent.
+We emphasize that StVK is employed here as a \emph{baseline constitutive law} for analytic tractability, not as a
+claim of material realism at arbitrarily large strains; more robust hyperelastic energies (e.g.\ neo-Hookean,
+Mooney--Rivlin, Ogden-type) can be substituted within the same induced-metric framework without changing the
+geometric mechanism of transverse--lateral backreaction.
 
 \subsection{Lagrangian, action, and equations of motion}
 

@@ -1,49 +1,102 @@
 \section{Introduction}
 \label{sec:introduction}
 
-The Standard Model and general relativity are extraordinarily successful effective descriptions of observed physics.
-At the same time, their combined foundational inventory---multiple quantum fields, symmetry sectors, and parameters fixed by experiment---continues to motivate a complementary question:
-could some of that effective complexity arise from a smaller microscopic set of ingredients?
-The present paper takes up that question in a deliberately limited form.
+The Standard Model and general relativity are extraordinarily successful at organizing experimental facts.
+At the same time, their combined fundamental inventory---multiple fields, symmetry sectors, symmetry breaking
+structure, and many parameters fixed by measurement---invites a complementary line of inquiry:
+whether a smaller set of ground ingredients could underlie this effective complexity.
+This paper explores such a \emph{minimal-ingredient reconstruction} program.
 
 \paragraph{Substrate-first strategy.}
-We adopt a deterministic \emph{substrate-first} viewpoint.
-The primitive ontology is a single dynamical medium, and familiar field-theoretic objects are interpreted as coarse-grained descriptions of special excitation sectors of that medium.
-The aim is not to replace established theories by assertion.
-The aim is to formulate a mathematically coherent theory fragment in which relativistic kinematics, geometric gauge variables, and particle-like localization can all be discussed within one substrate model.
+We adopt a deterministic \emph{substrate-first} strategy: posit an ontically real wave medium and treat familiar
+field theories as coarse-grained descriptions of constrained wave dynamics.
+The goal is \emph{not} to dispute established phenomenology, but to ask what could make gauge structure,
+relativistic kinematics, and particle-like quantization appear naturally as emergent regularities.
 
-\paragraph{Minimal commitments.}
-The framework is built from four basic commitments:
-(i) a three-dimensional brane-like medium with local action dynamics,
-(ii) a 4D embedding so that transverse excitation can modify intrinsic geometry,
-(iii) a cubic lattice as the candidate microscopic realization, and
-(iv) an ordered narrowband sector whose transported polarization states can carry geometric phase.
-Everything beyond that---effective gauge potentials, charge-like labels, Lorentz symmetry, and particle-like spectra---is treated as emergent bookkeeping rather than as additional fundamental substances.
+\paragraph{Ground ingredients (minimal commitments).}
+The theory fragment developed here keeps its primitive commitments deliberately small:
+(i) a single substrate with local action dynamics, microscopically represented as a cubic lattice embedded in $\R^4$ and
+macroscopically by its continuum long-wavelength description,
+(ii) pure geometric coupling between transverse amplitude and lateral strain,
+and (iii) a controlled separation between a linear wave sector and a nonlinear self-guidance sector.
+Gauge potentials, relativistic coordinates, and particle labels are then interpreted as emergent bookkeeping attached to
+stable excitation sectors rather than as independent fundamental substances.
 
-\paragraph{Continuum/lattice split.}
-A recurring source of confusion in speculative substrate models is the mixing of continuum and microscopic claims.
-Here the distinction is made explicit.
-The continuum theory is used to state the geometric and constitutive content in a coordinate-free way.
-The cubic lattice is the concrete ultraviolet hypothesis that determines branch splitting, anisotropy, Brillouin-zone structure, and the axis-aligned mixing mechanisms that the continuum description cannot by itself resolve.
-This paper therefore treats the continuum equations as the long-wavelength effective theory of a lattice substrate, not as a replacement for it.
+\paragraph{Geometric source of nonlinearity.}
+One modeling distinction is crucial throughout this paper.
+The microscopic link law may be linear in the scalar extension, but the extension itself is the full Euclidean distance
+between neighboring nodes in $\R^4$.
+Equivalently, in the continuum description the induced metric already contains the quadratic term
+$\partial_i u\,\partial_j u$ when the fourth embedding component is excited.
+The primary nonlinearity of the theory therefore comes from geometry---the Pythagorean dependence of link lengths and the
+induced metric---not from an added interaction field, an imposed threshold, or a hand-crafted saturation rule.
+This point matters because the same geometric mechanism is intended to underwrite contraction, self-guidance, and
+localized particle structure.
 
-\paragraph{Why the localization problem matters.}
-The decisive issue for any such framework is not whether one can write down a plausible continuum action.
-It is whether the same substrate can support robust localized modes with the right scales, internal labels, and long-range diagnostics.
-In earlier exploratory work, electron-like localization seemed the natural first target.
-At the present stage, however, the more informative target is a proton- or neutron-like state:
-the cubic substrate naturally offers a three-channel axis-aligned sector, so baryon-scale triplet states provide the clearest setting in which branch mixing, confinement, and non-Abelian holonomy can be tested together.
+\paragraph{Substrate hypothesis.}
+We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, described by an embedding map
+\begin{equation}
+  \vecX:\Omega\times\R \to \R^4, \qquad (x,t)\mapsto \vecX(x,t), \qquad \Omega\subset\R^3,
+  \label{eq:embedding-map}
+\end{equation}
+with an external time parameter $t$.
+The dynamics is specified by a local hyperelastic action on $\Omega$, constructed from invariants of the
+induced metric of the embedding.
+This is the minimal coordinate-free way to write an elastic energy without hard-coding preferred directions into the
+continuum description; microscopically, a cubic lattice substrate is allowed, and large-scale isotropy is treated as an
+empirical constraint on admissible lattice couplings and parameter regimes \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
+
+\paragraph{Gravity from transverse excitation (contraction).}
+A central motivating idea is that excitation in the embedding dimension generically feeds back into
+\emph{lateral} stresses.
+If a region of the brane develops transverse structure $X^4=u(x,t)$, then the induced metric gains the quadratic
+contribution $\partial_i u\,\partial_j u$.
+Because the in-brane displacement is itself dynamical, a prestretched medium relaxes by generating an inward-biased
+lateral response rather than only a local stress increase.
+Coarse-grained over scales large compared to the carrier wavelength, such slowly varying contraction fields can bias the
+propagation of other wave packets and the equilibrium of localized modes.
+We therefore treat Newtonian gravity as an emergent, long-range \emph{contraction channel} mediated by transverse
+excitation, not as a separately postulated fundamental field.
+
+\paragraph{Ordered narrowband sector and geometric phase.}
+A further working postulate is the existence of an ordered, narrowband carrier sector that provides
+a coherent phase reference over macroscopic scales.
+On a lattice substrate, band structure provides a natural setting for narrowband sectors; here we focus on the
+geometric consequences.
+Adiabatic transport of a polarization subspace induces a Berry (rank-1) or Wilczek--Zee (non-Abelian) connection,
+which is interpreted as the natural origin of gauge variables in an effective description
+\citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
+
+\paragraph{Microscopic cubicity and macroscopic isotropy.}
+The cubic lattice hypothesis is not rotationally symmetric on the microscopic level, and the theory does not try to hide
+that fact.
+The relevant question is whether long-wavelength observers built from the same substrate inherit a \emph{universal}
+effective metric in which signal speed, rod length, and clock rate are renormalized together.
+If such universality holds, coarse-grained isotropy can emerge even though the ultraviolet substrate is axis-aligned.
+If it fails, residual direction dependence and birefringence remain as decisive diagnostics.
+This is therefore not a purely semantic coordinate choice; it is a concrete physical requirement on the observer sector.
+
+\paragraph{Particles as solitons; probability not fundamental.}
+We do not take the probabilistic interpretation of quantum theory as fundamental.
+Instead, apparent point-like interactions and discrete outcomes are attributed to deterministic wave dynamics
+combined with Fourier-localization constraints and nonlinear exchange events.
+Particles are not fundamental point objects in this framework; they are localized standing-wave patterns of the
+substrate, potentially with internal polarization and topological structure.
+The spin-$\tfrac12$ $4\pi$ aspect is attributed to geometric phase/holonomy of an internal polarization
+subspace rather than to literal multi-winding of a photon path.
 
 \paragraph{Relation to existing ideas.}
-The emergence of an effective light cone from a preferred-time medium has close analogues in analogue-gravity systems \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
-The use of Berry and Wilczek--Zee connections follows standard geometric-phase theory in wave systems \citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
-The present use of the term ``brane'' is literal---an elastic medium embedded in $\R^4$---and should not be confused with high-energy brane-world scenarios \citep{RandallSundrum1999}.
+The emergence of an effective light cone and Lorentz-like kinematics from a preferred-time medium has
+close analogues in analogue-gravity systems \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
+The present use of the term ``brane'' is literal (an elastic medium), and should not be confused with
+field-theoretic brane-world scenarios in high-energy theory \citep{RandallSundrum1999}.
 
 \paragraph{Paper organization.}
-\Cref{sec:scope} states the precise scope, core claims, and non-claims.
-\Cref{sec:continuum-model} formulates the continuum substrate model and its lattice interpretation.
-\Cref{sec:emergent-relativity} develops the linear-wave regime and its effective Lorentz interpretation.
-\Cref{sec:geophase,sec:effective-field} isolate the geometric-phase sector and the corresponding envelope description.
-\Cref{sec:localized} formulates localized particle-like states as nonlinear bound modes.
-\Cref{sec:computational-program} turns these ingredients into a concrete numerical program, with baryon-scale triplet states as the immediate target.
-\Cref{sec:discussion} and \Cref{sec:conclusion} summarize what is actually established and what remains open.
+\Cref{sec:scope} states the precise scope and the numerical priorities.
+\Cref{sec:continuum-model} formulates the lattice and continuum substrate model, making the geometric source of the
+nonlinearity explicit.
+\Cref{sec:emergent-relativity} discusses the linear-wave regime and an emergent effective light cone.
+\Cref{sec:geophase,sec:effective-field} develop the ordered carrier sector and its Berry/Wilczek--Zee gauge structure.
+\Cref{sec:localized} formulates localized particle modes as self-adjoint eigenproblems with nonlinear self-guidance.
+\Cref{sec:discussion} then identifies the most decisive next step: a baryon-like triplet simulation on the cubic
+substrate, where the axis-aligned internal structure is expected to matter most directly.
