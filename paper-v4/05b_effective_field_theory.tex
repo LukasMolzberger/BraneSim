@@ -1,0 +1,76 @@
+\section{From mode-frame transport to gauge-covariant envelope dynamics}
+\label{sec:effective-field}
+
+This section states the most conservative effective-field-theory consequence of the geometric-phase construction:
+if a narrowband polarization subspace is transported adiabatically, then the slow envelope fields living in that subspace must be differentiated with the corresponding Berry or Wilczek--Zee connection.
+The point is structural.
+We do \emph{not} claim that the full Standard Model Lagrangian has been derived.
+We claim only that gauge-covariant slow-sector dynamics is the natural form of any adiabatic envelope description built from the transported substrate modes.
+
+\subsection{Multiscale ansatz and retained polarization subspace}
+Let the microscopic substrate support a carrier frequency $\omega_0$ together with an $n$-dimensional narrowband polarization subspace.
+Write the physical field schematically as
+\begin{equation}
+  \vecu(x,t)
+  = \mathrm{Re}\!\left[
+    \e^{-\ii\omega_0 t}\sum_{a=1}^{n}\Psi^a(x,t)\,\mathbf{e}_a(x,t)
+  \right],
+  \label{eq:multiscale-ansatz}
+\end{equation}
+where $\Psi(x,t)\in\C^n$ varies slowly compared to $\omega_0^{-1}$ and
+$\{\mathbf{e}_a(x,t)\}_{a=1..n}$ is an orthonormal frame spanning the retained subspace.
+A change of local frame,
+$\mathbf{e}_a\mapsto \sum_b \mathbf{e}_b U_{ba}(x)$ with $U(x)\in U(n)$,
+leaves the physical subspace unchanged and therefore acts as a gauge redundancy of the slow description.
+
+Projecting the full dynamics onto the retained subspace produces the covariant derivative
+\begin{equation}
+  \mathcal{D}_\mu \Psi
+  =
+  \left(\partial_\mu + \ii\,\mathcal{A}_\mu\right)\Psi,
+  \label{eq:covD}
+\end{equation}
+where $\mathcal{A}_\mu$ is the Berry connection for $n=1$ or the Wilczek--Zee connection for $n>1$.
+Thus the geometric connection is not added by hand; it is the bookkeeping device forced on the slow sector by adiabatic transport of the microscopic mode frame.
+
+\subsection{Derivative expansion for the slow sector}
+Once the covariant derivative is fixed, the slow envelope theory must be assembled from gauge-invariant combinations of $\Psi$, $\mathcal{D}_\mu\Psi$, and the curvature $\mathcal{F}_{\mu\nu}$.
+A generic local derivative expansion therefore has the form
+\begin{equation}
+  S_{\text{slow}}[\Psi,\mathcal{A}]
+  = \int \dd^4x\;\Big(
+      \Psi^\dagger \mathcal{K}(\mathcal{D})\Psi
+      - V_{\text{eff}}(\Psi)
+      - \kappa_2\,\mathrm{tr}(\mathcal{F}_{\mu\nu}\mathcal{F}^{\mu\nu})
+      + \cdots
+    \Big),
+  \label{eq:Seff}
+\end{equation}
+where $\mathcal{K}(\mathcal{D})$ is the kinetic operator inherited from the carrier band and the ellipsis denotes higher-order symmetry-allowed terms.
+The expression \eqref{eq:Seff} should be read as an \emph{organizational principle}, not as a completed microscopic derivation.
+The actual coefficients must be extracted from the lattice spectrum and mode overlaps.
+
+\subsection{Triplet envelope sector and the role of $U(3)$}
+\label{subsec:triplet-u3}
+
+If the retained narrowband sector is three-dimensional, as suggested by the axis-aligned lattice triplet,
+then $\Psi\in\C^3$ and $\mathcal{A}_\mu\in\mathfrak{u}(3)$.
+The decomposition
+\begin{equation}
+  \mathcal{A}_\mu
+  = \frac{1}{3}\mathrm{tr}(\mathcal{A}_\mu)\,I_3
+  + \sum_{a=1}^{8} A^a_\mu T^a
+\end{equation}
+separates the trace part from the traceless part.
+This is mathematically suggestive because it makes an Abelian/non-Abelian split available.
+What it does \emph{not} yet do is prove that the substrate reproduces QCD.
+The physically meaningful statement is narrower:
+for a genuinely mixed three-dimensional transported subspace, the correct geometric description is non-Abelian, and any effective long-wavelength envelope theory must respect that fact.
+
+\subsection{Dirac-type envelope equations as effective comparison points}
+In ordinary relativistic field theory, the Dirac equation packages together propagation, spinor structure, and gauge coupling in one compact object.
+In the present framework, those ingredients are distributed across two layers:
+localized substrate modes carry the particle-like structure, while the transported narrowband sector supplies the connection that enters the slow covariant derivative.
+A Dirac-type equation is therefore best viewed here as an \emph{effective comparison point} for the slow envelope description, not as the fundamental microscopic law.
+This reinterpretation is useful because it clarifies what still has to be shown computationally:
+one must extract the relevant coefficients and dispersion data from the substrate itself rather than insert them phenomenologically.
