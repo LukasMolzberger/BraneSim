@@ -63,3 +63,6 @@ It is intended to prevent core assumptions from being lost during paper edits, c
 13. **Dimensionality-agnostic core implementation**
     - Core solver, forces, initialization interfaces, and diagnostics should work for 1D, 2D, and 3D where possible.
     - Dimension-specific code is acceptable in geometry setup, visualization, and experiment orchestration only.
+
+14. **English only policy**
+    - Never ever use any other language than English in this project!
