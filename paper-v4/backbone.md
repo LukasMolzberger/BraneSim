@@ -52,10 +52,14 @@ It is intended to prevent core assumptions from being lost during paper edits, c
     - Necessary conceptual bridges should stay if they are required to make the theory work.
     - Redundancy should be reduced, but not at the cost of breaking the explanatory chain.
 
-11. **Simulation priority: decisive tests over elegant prose**
+11. **The paper must present only the final theory, not the path of discussion**
+    - Discussions between user and assistant, exploratory back-and-forth, and abandoned intermediate ideas are not part of the manuscript.
+    - The paper should present one internally consistent formulation of the theory, not a reconstruction of how that formulation was reached.
+
+12. **Simulation priority: decisive tests over elegant prose**
     - The next decisive numerical target is a baryon-like triplet mode (proton/neutron sector), not another purely electron-centered attempt.
     - Reason: the cubic substrate naturally singles out a three-channel internal structure.
 
-12. **Dimensionality-agnostic core implementation**
+13. **Dimensionality-agnostic core implementation**
     - Core solver, forces, initialization interfaces, and diagnostics should work for 1D, 2D, and 3D where possible.
     - Dimension-specific code is acceptable in geometry setup, visualization, and experiment orchestration only.
