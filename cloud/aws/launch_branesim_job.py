@@ -46,13 +46,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--remote-command",
         default=(
-            "python experiments/baryon_init_component.py --output \"$BRANESIM_RESULTS_DIR/initial_state.npz\" "
-            "&& python experiments/baryon_simulation_component.py --input \"$BRANESIM_RESULTS_DIR/initial_state.npz\" "
-            "--output \"$BRANESIM_RESULTS_DIR/trajectory.zip\" "
-            "&& python experiments/baryon_visualization_component.py --input \"$BRANESIM_RESULTS_DIR/trajectory.zip\" "
-            "--mode volume --output \"$BRANESIM_RESULTS_DIR/volume.mp4\" "
-            "&& python experiments/baryon_diagnostics_component.py --input \"$BRANESIM_RESULTS_DIR/trajectory.zip\" "
-            "--output-dir \"$BRANESIM_RESULTS_DIR/diagnostics\""
+            "python orchestration/run_pipeline.py "
+            "--config orchestration/configs/local_extensive.json "
+            "--output-dir \"$BRANESIM_RESULTS_DIR\""
         ),
         help="Shell command executed on the EC2 instance inside the project directory",
     )

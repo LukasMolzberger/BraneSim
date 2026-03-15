@@ -43,12 +43,13 @@ python cloud/aws/launch_branesim_job.py \
   --project-archive /tmp/branesim-project.tar.gz
 ```
 
-Use `--remote-command` to run a custom workflow, for example a high-resolution simulation only or a rendering-only pass.
-You can also run the single-config orchestrator:
+Default remote command now runs:
 
 ```bash
---remote-command "python experiments/baryon_pipeline_run.py --config experiments/configs/baryon_pipeline.example.json --output-dir \$BRANESIM_RESULTS_DIR"
+python orchestration/run_pipeline.py --config orchestration/configs/local_extensive.json --output-dir "$BRANESIM_RESULTS_DIR"
 ```
+
+Use `--remote-command` to run a custom workflow if needed.
 
 ## 3) Retrieve results
 
