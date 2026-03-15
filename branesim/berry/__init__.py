@@ -29,7 +29,12 @@ Public API
 """
 
 from .analysis import BerryTimeSeries, compton_omega0, compute_berry_time_series
-from .viz import create_berry_videos
+
+
+def create_berry_videos(*args, **kwargs):
+    from .viz import create_berry_videos as _impl
+
+    return _impl(*args, **kwargs)
 
 __all__ = [
     "BerryTimeSeries",
