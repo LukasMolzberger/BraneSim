@@ -3,7 +3,9 @@
 **This file is the single source of truth for project principles.**
 Read it before making **any** physics, mapping, measurement, or experiment changes.
 
----
+--- 
+
+Bla
 
 ## Quick Reference Card (Non-Negotiables)
 
