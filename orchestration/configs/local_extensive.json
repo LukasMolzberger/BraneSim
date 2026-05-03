@@ -1,0 +1,61 @@
+{
+  "initialization": {
+    "nx": 32,
+    "ny": 32,
+    "nz": 32,
+    "spacing": 1.0,
+    "periodic_axes": [false, false, false],
+    "spring_constant": 1.0,
+    "rest_length": 0.2,
+    "mass_density": 1.0,
+    "dt": 0.01,
+    "num_steps": 500,
+    "checkpoint_interval": 5,
+    "l": 1,
+    "m": 1,
+    "n": 1,
+    "radius": 8.0,
+    "amplitude": 0.2,
+    "wave_speed": 1.0,
+    "smooth_edge": 2.0,
+    "axis_amplitudes": [1.0, 1.0, 1.0],
+    "axis_phase_offsets": [0.0, 2.0943951023931953, 4.1887902047863905],
+    "mixing_strength": 0.15,
+    "x4_trace_weight": 0.35,
+    "device": "auto",
+    "dtype": "float64"
+  },
+  "simulation": {
+    "device": "auto"
+  },
+  "visualizations": [
+    {
+      "mode": "volume",
+      "output_name": "volume_magnitude.mp4",
+      "field_mode": "magnitude_all",
+      "frame_stride": 1,
+      "subsample": 2,
+      "density_threshold": 0.003,
+      "alpha_scale": 1.0,
+      "gamma": 0.8,
+      "fps": 20,
+      "dpi": 120
+    },
+    {
+      "mode": "slice",
+      "output_name": "slice_xy_magnitude.mp4",
+      "field_mode": "magnitude_all",
+      "plane": "xy",
+      "frame_stride": 1,
+      "fps": 20,
+      "dpi": 120
+    }
+  ],
+  "diagnostics": {
+    "frame_stride": 1,
+    "berry_point_stride": 4,
+    "omega_ref": 1.0,
+    "leakage_radius_factor": 2.0,
+    "render_berry_videos": false
+  }
+}
