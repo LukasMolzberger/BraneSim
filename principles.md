@@ -53,6 +53,52 @@ Read it before making **any** physics, mapping, measurement, or experiment chang
 
 The solver evolves the substrate state `{R_p(t), V_p(t)}` only.
 
+### 1.1a Structural facts about the lattice (must be respected)
+
+These are mathematical consequences of the central-force pair-spring energy
+`U_link = ½ k_δ (|R_{p+δ} − R_p| − α a |δ|)²`. They are not policy — they are
+identities the project relies on:
+
+- **Cauchy relations vs cubic isotropy (do not confuse).** Any cubic Bravais
+  lattice with purely central pair-wise interactions, expanded around its
+  stress-free reference, satisfies the Cauchy relation `C_{1122} = C_{1212}`
+  (in Voigt notation: `C_{12} = C_{44}`). This reduces the number of
+  independent cubic elastic constants from 3 to 2 and is automatic.
+  However, **cubic isotropy** — the condition `C_{1111} − C_{1122} = 2 C_{1212}`
+  — is a *separate* requirement and is NOT implied by the Cauchy relation.
+  Cubic isotropy depends on the specific shell weights and is NOT automatic
+  with the `1/|δ|²` weights used in `components/simulation/grid.py`.
+  See `paper-v4/derivations/lattice_to_continuum.md` for the closed-form
+  computation. With the current weights and prestress `α`, the residual
+  cubic-anisotropy index is `η_cub = −7α / [2(39 − 22α)]`, which evaluates to
+  roughly `−21%` at `α = 1` and `−2%` at `α = 0.2` (the current default).
+  This anisotropy is leading-order in `ka`, not an `O((ka)⁴)` correction.
+- **Implications of leading-order anisotropy.** Until shell weights are
+  retuned (or the project commits to a finite static anisotropy at this
+  level), claims about "operational rotational invariance" or "emergent
+  Lorentz" must be quantitative and acknowledge this baseline. Subtask 2
+  in `paper-v4/validation_roadmap.md` is the empirical check; the dispersion
+  experiment must measure direction-dependent `c_L` and `c_T` and compare
+  against the predicted `η_cub`.
+- **Prestress α controls inter-axis coupling.** The cross-term in the link
+  energy proportional to `(1−α)·(Δξ)²/(2a)` is the only linear coupling
+  between the three lateral channels `ξ¹, ξ², ξ³` from the diagonal-shell
+  springs. At `α = 1` the channels decouple at the linear level (gauge group
+  reduces to `U(1)³`); at `α < 1` the coupling activates and the gauge group
+  is the full `U(3) = U(1) × SU(3)` of the complex narrowband triplet.
+  Therefore `α` is the dial that runs the U(1)³ → U(3) crossover.
+- **Geometric quartic = Skyrme-class stabilization.** The induced-metric
+  contribution `∂_i u ∂_j u` enters the StVK energy as `(μ/4ℓ₀⁴)(|∇u|²)²`,
+  which under Derrick scaling `u(x) → u(λx)` scales as `λ^{+1}` in 3D and
+  resists collapse. Combined with the `λ^{−1}` quadratic-gradient term, this
+  is the standard Skyrme balance and *defeats Derrick's no-go at the
+  continuum level*. Lattice spacing `a` provides an independent UV cutoff.
+- **Two soliton regimes.** Width `~ a` (lattice-stabilized) → strong
+  Peierls–Nabarro pinning, soliton mass tied to the UV scale, no continuum
+  limit. Width `≫ a` (Skyrme-stabilized) → exponentially suppressed PN,
+  Lorentz-respecting motion, derivable physical scale. **The program targets
+  width ≫ a**; experiments must report the width-to-spacing ratio explicitly.
+
 ### 1.2 Dynamics (implementation truth)
 The simulation is defined by a mechanical energy (or discrete Lagrangian) of the substrate.
 
@@ -164,7 +210,38 @@ Operationally:
 **Critical requirement:** the "band isolation" step is not optional. If we mix modes,
 the phase is not gauge-meaningful and Berry diagnostics become unreliable.
 
-### 4.3 Berry phase outputs expected from experiments
+### 4.3 Narrowband is local, not global
+
+The complex-envelope description (`ξⁱ ≈ Re[Ψⁱ e^{−iω₀ t}]`) is required to promote
+the real lateral triplet `(ξ¹, ξ², ξ³)` to the complex `Ψ ∈ ℂ³` on which `U(3)`
+acts. This **does not** require a globally coherent narrowband sector. The
+description is per-wavepacket: each band-isolated excitation carries its own
+local complex envelope and its own Wilczek–Zee bundle. A global carrier
+postulate is not part of this project's commitments.
+
+### 4.4 SU(3) emergence chain (record what is doing the work)
+
+The path from microphysics to color-like internal structure is:
+
+1. Cubic central-force lattice → Cauchy isotropy → leading-order isotropic IR
+   with three real lateral channels forming an `SO(3)` vector.
+2. Prestress `α < 1` activates linear off-diagonal coupling between channels via
+   the diagonal-shell springs (face- and body-diagonal links).
+3. Per-wavepacket narrowband ansatz promotes real `(ξ¹, ξ², ξ³)` to complex
+   `Ψ ∈ ℂ³`, on which `U(3) = U(1) × SU(3)` acts.
+4. The `U(1)` trace sector is the EM-like channel; the `SU(3)` traceless
+   sector is the candidate color channel.
+
+What this chain does NOT provide:
+- **Color confinement** (asymptotic freedom, area-law Wilson loops, hadron
+  spectrum). That is a separate dynamical question; the SU(3) here is
+  kinematic gauge structure, not QCD's full nonperturbative content.
+- **Discrete cubic group → continuous SU(3) representation theory.** SU(3)
+  emerges from the *near-degenerate continuum triplet*, not from `O_h`.
+- **Half-integer spin.** This requires spinorial holonomy of a 2-level
+  polarization subspace inside the triplet; it does not come for free.
+
+### 4.5 Berry phase outputs expected from experiments
 - Local Berry phase along a 1D path (per position / per segment)
 - Holonomy on closed loops (2π vs 4π behaviors where relevant)
 - Robustness under gauge choices (re-phasing of `u`)

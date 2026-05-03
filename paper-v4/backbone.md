@@ -66,3 +66,46 @@ It is intended to prevent core assumptions from being lost during paper edits, c
 
 14. **English only policy**
     - Never ever use any other language than English in this project!
+
+15. **Cauchy relation ≠ cubic isotropy (the difference matters)**
+    - Central-force pair springs in a stress-free Bravais lattice automatically
+      give the Cauchy relation `C_{1122} = C_{1212}` (`C_{12} = C_{44}` in
+      Voigt notation). This reduces the cubic elastic tensor from 3 to 2
+      independent constants.
+    - This does **not** imply cubic isotropy. Isotropy requires the additional
+      condition `C_{1111} − C_{1122} = 2 C_{1212}`, which depends on the shell
+      weights. The `1/|δ|²` choice currently in `components/simulation/grid.py`
+      does NOT satisfy this condition: it produces a leading-order static
+      cubic anisotropy of roughly `−21%` at `α = 1` and `−2%` at `α = 0.2`.
+    - See `paper-v4/derivations/lattice_to_continuum.md` for the closed form.
+      The anisotropy is leading-order, not `O((ka)⁴)`. Shell-weight retuning
+      to recover isotropy is an open project decision.
+
+16. **Prestress `α` runs the U(1)³ → U(3) crossover**
+    - At `α = 1` the three lateral channels decouple at the linear level
+      → gauge group of the narrowband triplet is `U(1)³`.
+    - At `α < 1` the diagonal-shell springs activate linear off-axis
+      coupling → gauge group is the full `U(3) = U(1) × SU(3)`.
+    - This is the operational meaning of `α` for the gauge sector and is
+      directly testable by sweeping `α` and measuring the SU(3)-content of
+      the Wilczek–Zee curvature.
+
+17. **Geometric quartic provides Skyrme-class soliton stabilization**
+    - The induced-metric correction `∂_i u ∂_j u` in StVK gives a `(|∇u|²)²`
+      term that scales as `λ^{+1}` under Derrick scaling, balancing the
+      `λ^{−1}` quadratic-gradient term. This defeats Derrick collapse at the
+      continuum level without any added field.
+    - **Target soliton width ≫ a** (Skyrme-stabilized regime), not `~ a`
+      (lattice-stabilized regime). The latter has Peierls–Nabarro pinning
+      that breaks emergent Lorentz invariance.
+    - Absolute stability against unwinding to vacuum may still require
+      topology (winding number, Hopf charge); existence + perturbative
+      stability is not the same as topological stability.
+
+18. **Narrowband is local per wavepacket, not a global postulate**
+    - The complex-envelope description is required to promote the real
+      lateral triplet to `Ψ ∈ ℂ³`. It is applied per band-isolated
+      excitation, never as a globally coherent universe-wide carrier.
+    - Therefore "narrowband ordered sector" as previously stated in v3 is
+      replaced by "per-wavepacket band isolation". This removes the
+      dependence on an unmotivated global oscillation.

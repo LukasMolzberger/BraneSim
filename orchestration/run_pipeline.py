@@ -80,6 +80,9 @@ def main() -> None:
     if not sim_cfg:
         raise ValueError("Missing required 'simulation' section")
 
+    init_module = init_cfg.pop("module", "components.initialization.run")
+    diag_module = diag_cfg.pop("module", "components.diagnostics.run") if diag_cfg else None
+
     initial_state = out_dir / init_cfg.pop("output_name", "initial_state.npz")
     trajectory = out_dir / sim_cfg.pop("output_name", "trajectory.zip")
 
@@ -89,7 +92,7 @@ def main() -> None:
     cmd_init = [
         sys.executable,
         "-m",
-        "components.initialization.run",
+        init_module,
         "--output",
         str(initial_state),
     ] + _to_args(init_cfg)
@@ -133,17 +136,18 @@ def main() -> None:
         viz_outputs.append(str(output))
 
     # 4) diagnostics
-    cmd_diag = [
-        sys.executable,
-        "-m",
-        "components.diagnostics.run",
-        "--input",
-        str(trajectory),
-        "--output-dir",
-        str(diag_dir),
-    ] + _to_args(diag_cfg)
-    commands.append(cmd_diag)
-    _run(cmd_diag)
+    if diag_module is not None:
+        cmd_diag = [
+            sys.executable,
+            "-m",
+            diag_module,
+            "--input",
+            str(trajectory),
+            "--output-dir",
+            str(diag_dir),
+        ] + _to_args(diag_cfg)
+        commands.append(cmd_diag)
+        _run(cmd_diag)
 
     summary = {
         "config": str(Path(args.config).resolve()),
