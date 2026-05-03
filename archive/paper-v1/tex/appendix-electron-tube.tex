@@ -1,0 +1,309 @@
+\section{Tubular coordinates around the toroidal electron}
+\label{app:tubular-electron}
+
+The Williamson--van der Mark picture of the electron --- a
+Compton-frequency internal mode confined to a narrow strip of
+electromagnetic energy that is bent and twisted into a toroidal hull
+--- can be made mathematically explicit by introducing tubular
+coordinates around a closed centerline $\mathbf{C}(z)$. The physical
+structure is this \emph{twisted strip}, a Möbius-type strip in the sense that the internal polarization frame is single-valued only after two circuits, which winds twice around the
+torus core before closing and therefore requires a $4\pi$ rotation
+(two full circuits) to return to its starting configuration. For
+concrete calculations we thicken this strip slightly into a tubular
+neighbourhood and parametrize it with coordinates $(z,x,y)$, where
+$z$ is arclength along the centerline and $(x,y)$ span the
+cross-section. It is important to emphasize that ``tube'' or ``tubular
+coordinates'' refer solely to this \emph{mathematical coordinate
+patch}, introduced to handle curvature and torsion in a systematic
+way. The physical support of the internal mode---the region where
+$|\xi|$ is appreciable---is the narrow twisted strip itself, not a
+separate material tube or tunnel with walls.
+
+Let $\mathbf{C}(z)\in\mathbb R^3$ denote the spatial centerline of the
+toroidal electron in the brane's three lateral directions
+$X^1,X^2,X^3$, parametrized by arclength $z\in[0,L)$ in the electron
+rest frame, so that $|\partial_z\mathbf C(z)|=1$ and $\mathbf C(z+L)
+=\mathbf C(z)$. This closed curve is arranged so that it winds twice
+around the torus core in a $(2,1)$ torus-knot pattern: completing one
+circuit of length $L$ corresponds to two revolutions around the core,
+which is the geometric origin of the $4\pi$ periodicity of the internal
+field configuration discussed in the main text. Along this closed curve
+we introduce the Frenet--Serret frame
+$(\mathbf t(z),\mathbf n(z),\mathbf b(z))$ with curvature $\kappa(z)$
+and torsion $\tau(z)$,
+%
+\begin{equation}
+  \mathbf t'=\kappa\,\mathbf n,\qquad
+  \mathbf n'=-\kappa\,\mathbf t+\tau\,\mathbf b,\qquad
+  \mathbf b'=-\tau\,\mathbf n,
+  \label{eq:frenet-serret}
+\end{equation}
+%
+where $'=\partial_z$. A small tubular neighbourhood of the centerline
+is then parametrized by coordinates $(z,x,y)$ via
+%
+\begin{equation}
+  \mathbf r(z,x,y)
+  \;=\;
+  \mathbf C(z) + x\,\mathbf n(z) + y\,\mathbf b(z),
+  \label{eq:tubular-embedding}
+\end{equation}
+%
+with $(x,y)$ spanning the cross-section of the ``tunnel'' around the
+electron. The microscopic embedding field is still
+$\mathbf X=(X^1,X^2,X^3,X^4)$, but in these adapted coordinates the
+three lateral components $(X^1,X^2,X^3)$ are replaced by
+$\mathbf r(z,x,y)$, while the transverse embedding direction (represented by $X^4$ in this gauge) remains a
+separate normal coordinate. We denote the microscopic transverse-displacement mode in
+this tubular neighbourhood by
+%
+\begin{equation}
+  \xi(t,z,x,y) \;:=\; X^4\bigl(t,\mathbf r(z,x,y)\bigr),
+  \label{eq:xi-from-X4}
+\end{equation}
+%
+so that $(t,z,x,y)$ serve as local coordinates on the world-tube of
+the electron---that is, the spacetime region of the brane where the
+amplitude $|\xi|$ is appreciable---with the double-loop structure
+encoded in the internal mode pattern of $\xi$ across the cross-section
+$(x,y)$.
+
+The induced metric $g_{ab}$ on the brane in the coordinates
+$(z,x,y)$ is obtained by pulling back the flat ambient metric
+in the lateral directions:
+%
+\begin{equation}
+  g_{ab}(z,x,y)
+  \;=\;
+  \partial_a\mathbf r\cdot\partial_b\mathbf r,
+  \qquad a,b\in\{z,x,y\}.
+  \label{eq:tubular-metric-def}
+\end{equation}
+%
+Using the Frenet--Serret relations~\eqref{eq:frenet-serret} one finds
+to first order in the transverse distance $\rho=\sqrt{x^2+y^2}$ from
+the centerline,
+%
+\begin{equation}
+  g_{ab}
+  \;\approx\;
+  \begin{pmatrix}
+    1 - 2\kappa x & -\,\tau y & \;\;\tau x \\[0.4ex]
+    -\,\tau y & 1 & 0 \\[0.4ex]
+    \;\;\tau x & 0 & 1
+  \end{pmatrix},
+  \qquad
+  g^{ab}
+  \;\approx\;
+  \begin{pmatrix}
+    1 + 2\kappa x & \;\;\tau y & -\,\tau x \\[0.4ex]
+    \;\;\tau y & 1 & 0 \\[0.4ex]
+    -\,\tau x & 0 & 1
+  \end{pmatrix},
+  \label{eq:tubular-metric}
+\end{equation}
+%
+where $g^{ab}$ is the inverse metric, and we have neglected terms of
+order $\kappa^2\rho^2$ and $\tau^2\rho^2$. In these adapted
+coordinates the toroidal soliton appears, locally, as a straight tunnel
+aligned with the $z$-axis; the global curvature and double-loop
+structure are encoded entirely in the $z$-dependence of the frame
+$(\mathbf n,\mathbf b)$ and the metric coefficients $g_{ab}(z,x,y)$.
+The electromagnetic energy circulating along the double loop is then
+represented by a structured internal mode $\xi(t,z,x,y)$ localized
+within this world-tube (the brane region where $|\xi|$ is large),
+confined to a finite range of $(x,y)$ around the centerline.
+
+\paragraph{Effective amplitude dynamics in tubular coordinates.}
+
+Restricting attention to the dominant microscopic amplitude mode
+$\xi(t,z,x,y)$ inside the electron's world-tube, we can write a
+minimal effective Lagrangian density in the adapted coordinates
+$(t,z,x,y)$ of the form
+%
+\begin{equation}
+  \mathcal{L}_\xi
+  \;=\;
+  \frac{\rho_m}{2}\,(\partial_t \xi)^2
+  \;-\;
+  \frac{T_\mathrm{eff}}{2}\,g^{ab}\,\partial_a\xi\,\partial_b\xi
+  \;-\;
+  V_\mathrm{nl}(\xi,\partial\xi,\dots),
+  \label{eq:xi-tubular-lagrangian}
+\end{equation}
+%
+where $\rho_m$ is the effective mass density introduced in
+Section~\ref{sec:emergent-relativity}, $T_\mathrm{eff}$ is an effective
+tension along the tube that depends on the microscopic spring constant
+and rest length, and $V_\mathrm{nl}$ collects residual nonlinear
+corrections beyond the geometric contributions contained in the metric
+$g^{ab}$. Inserting the approximate inverse metric
+\eqref{eq:tubular-metric} yields, to first order in curvature and
+torsion,
+%
+\begin{align}
+  g^{ab}\,\partial_a\xi\,\partial_b\xi
+  \;\approx\;
+  &\bigl(1 + 2\kappa x\bigr)\,(\partial_z\xi)^2
+  + (\partial_x\xi)^2
+  + (\partial_y\xi)^2
+  \nonumber\\[0.5ex]
+  &\quad
+  + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
+  - 2\tau x\,(\partial_z\xi)(\partial_y\xi),
+  \label{eq:xi-gradient-tubular}
+\end{align}
+%
+so that the gradient energy density of the amplitude mode takes the
+schematic form
+%
+\begin{equation}
+  \mathcal{E}_{\mathrm{grad}}
+  \;\approx\;
+  \frac{T_\mathrm{eff}}{2}\Bigl[
+    \bigl(1+2\kappa x\bigr)(\partial_z\xi)^2
+    + (\partial_x\xi)^2
+    + (\partial_y\xi)^2
+    + 2\tau y\,(\partial_z\xi)(\partial_x\xi)
+    - 2\tau x\,(\partial_z\xi)(\partial_y\xi)
+  \Bigr].
+  \label{eq:xi-gradient-energy}
+\end{equation}
+%
+Two features are worth emphasizing. First, the curvature term
+$\propto\kappa x(\partial_z\xi)^2$ implies that for sufficiently
+large longitudinal gradients of $\xi$ it becomes energetically
+favourable for the mode to shift its support away from the
+centerline in the transverse directions $(x,y)$, i.e.\ to develop a
+lateral ``bulge''. Second, the torsion terms
+$\propto\tau\,(\partial_z\xi)(\partial_x\xi)$ and
+$\propto\tau\,(\partial_z\xi)(\partial_y\xi)$ show that a purely
+longitudinal oscillation is not an eigenmode once the tube is twisted:
+steep variations along $z$ inevitably source transverse gradients
+$\partial_x\xi$ and $\partial_y\xi$. Together, these geometric
+couplings provide a concrete mechanism by which the strongly excited,
+Compton-frequency internal mode of the toroidal electron drives lateral
+deformations of the brane that confine the energy to a finite tubular
+region, while the microscopic spring rest length controls the relative
+cost of longitudinal stretching versus transverse bulging through the
+effective tension $T_\mathrm{eff}$ and thus sets the critical amplitude
+threshold for self-confinement.
+
+\paragraph{Gauge sector from Berry/Wilczek--Zee holonomy.}
+
+In this work, we do \emph{not} close the electromagnetic
+sector by introducing a phenomenological Poisson equation for a scalar
+potential derived from a coarse-grained transverse-displacement field.
+Instead, the $U(1)$ gauge structure is reconstructed from the Berry
+connection of band-isolated substrate modes, as detailed in
+Section~\ref{conceptual-model}. The internal circulating mode of the
+toroidal electron acts as a source of Berry curvature and
+holonomy defects; the effective electromagnetic potential $A_\mu^{\text{eff}}$
+is identified with this connection. The transverse embedding
+deformation (represented by $X^4$ in this gauge) still encodes energy density and contributes to the
+induced metric $g_{ij}[\mathbf{X}]$ (gravitational sector), but the
+electromagnetic sector is traced to the geometric phase structure of
+the polarization bundle, not directly to the Laplacian of a displacement component.
+
+
+\section{Radial-slice confinement constraints and effective index profile}
+\label{app:confinement-slice}
+
+This appendix formalizes a simple ``radial slice'' view of confinement for the toroidal electron.
+The goal is not to solve the full nonlinear field equations in closed form, but to identify the
+\emph{static background} features that must be present for a photon-like narrowband mode to circulate
+around a ring of radius $R$ without rapid leakage.
+
+\paragraph{Geometry vs.\ propagation.}
+The embedding $\mathbf X(x,t)\in\mathbb R^4$ (and thus the induced metric $g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$)
+is a geometric object. By contrast, an ``effective refractive index'' profile $n_{\rm eff}(x)$ is a
+property of \emph{waves on that background}: it is defined by the dispersion relation obtained from
+linearizing the substrate dynamics around a (possibly slowly varying) background configuration
+$\mathbf X_0(x)$.
+A finite maximal propagation speed of the medium is a kinematic constraint, but by itself does not
+produce bending; bending requires spatial gradients of the effective propagation characteristics.
+
+\paragraph{Local frame and radial line.}
+Fix a point on the torus centerline and introduce a local orthonormal frame
+$\{\hat e_s,\hat e_r,\hat e_\phi,\hat e_4\}$, where $\hat e_s$ is tangent along the torus,
+$\hat e_r$ points radially outward in the brane (perpendicular to the centerline),
+$\hat e_\phi$ completes an orthonormal basis in the brane cross-section, and $\hat e_4$ denotes the
+local embedding-normal direction (the $X^4$ direction in a convenient gauge).
+Consider the 1D line parameterized by $r\ge 0$ along $\hat e_r$ starting at the centerline.
+
+\paragraph{Static background ansatz.}
+Along this line we write a minimal static deformation in terms of three scalar profiles:
+an embedding-normal bulge $w(r)$ (primarily in $X^4$) and two in-brane displacements
+$u_r(r)$ (along $\hat e_r$) and $u_\phi(r)$ (along $\hat e_\phi$),
+\begin{equation}
+\mathbf X_0(r) \;\approx\; \mathbf X_\star(r)
++ u_r(r)\,\hat e_r + u_\phi(r)\,\hat e_\phi + w(r)\,\hat e_4,
+\label{eq:radial-slice-embedding}
+\end{equation}
+where $\mathbf X_\star$ denotes the reference embedding (e.g.\ the pre-tensioned ground state).
+
+The induced metric component along the radial direction is then
+\begin{equation}
+g_{rr}(r)=|\partial_r\mathbf X_0|^2
+\approx (1+u_r'(r))^2 + (u_\phi'(r))^2 + (w'(r))^2 .
+\label{eq:radial-slice-grr}
+\end{equation}
+Along the torus direction $s$ one obtains an additional geometric factor from curvature
+$\kappa=1/R$; to leading order, offsets across the tube modify the local arclength by
+\begin{equation}
+g_{ss}(r)\;\propto\;\bigl(1-\kappa r\bigr)^2,
+\label{eq:radial-slice-gss-curvature}
+\end{equation}
+up to strain-dependent corrections from the full embedding.
+
+\paragraph{Stress and effective wave speed.}
+Given a stretch energy density $W(g;g^0)$, define the stress-like tensor
+\begin{equation}
+P^{ij}(r)=2\,\frac{\partial W}{\partial g_{ij}}(r).
+\label{eq:radial-slice-stress}
+\end{equation}
+For tension-dominated branches propagating primarily along the torus direction, a useful proxy for
+the local effective wave speed is
+\begin{equation}
+c_{\rm eff}^2(r)\;\propto\;\frac{P^{ss}(r)}{\rho_m},
+\label{eq:radial-slice-ceff-proxy}
+\end{equation}
+where $\rho_m$ is the mass density. More generally, $c_{\rm eff}(r)$ is determined by the eigenvalues
+of the linearized operator around $\mathbf X_0$; Eq.~\eqref{eq:radial-slice-ceff-proxy} captures the
+basic dependence on the background stress. We define an effective refractive index
+\begin{equation}
+n_{\rm eff}(r)=\frac{c_{\rm ref}}{c_{\rm eff}(r)},
+\label{eq:radial-slice-neff}
+\end{equation}
+for a chosen reference speed $c_{\rm ref}$.
+
+\paragraph{Order-of-magnitude bending requirement.}
+Treat the circulating mode as guided in a tube of transverse radius $a$ that is bent into a ring of
+radius $R$. A robust waveguide estimate is that bending without rapid leakage requires an index
+contrast across the guided region of order
+\begin{equation}
+\frac{\Delta n}{n}\;\sim\;\frac{a}{R},
+\label{eq:radial-slice-bend-criterion}
+\end{equation}
+equivalently $\Delta c/c\sim a/R$. This condition expresses that curvature must be supported by a
+transverse gradient of the effective propagation characteristics (self-induced waveguiding).
+
+\paragraph{Inner/outer coherence for a double ridge.}
+If the electron core supports two intertwined ridges (``double winding'') separated by a transverse
+offset $\pm w_0$ from the tube center, the inner and outer paths have different lengths
+$2\pi(R\mp w_0)$. For a coherent closed mode at a common temporal frequency $\omega$, closure requires
+different local phase advance per arclength,
+\begin{equation}
+k_{\rm in}(R-w_0)\;\approx\;k_{\rm out}(R+w_0),
+\qquad
+\frac{\Delta k}{k}\;\sim\;\frac{2w_0}{R}.
+\label{eq:radial-slice-inner-outer-k}
+\end{equation}
+Thus it is typically \emph{not} the temporal frequency that varies across the cross-section, but the
+local wavenumber (or phase velocity) at fixed $\omega$.
+The same background stress profile that guides the mode must therefore also provide a cross-sectional
+dispersion gradient compatible with Eq.~\eqref{eq:radial-slice-inner-outer-k}.
+
+Equations~\eqref{eq:radial-slice-bend-criterion}--\eqref{eq:radial-slice-inner-outer-k} provide
+direct, testable constraints on the deformation profiles $w(r)$, $u_r(r)$, $u_\phi(r)$ through their
+effect on $P^{ss}(r)$ and hence on $n_{\rm eff}(r)$.

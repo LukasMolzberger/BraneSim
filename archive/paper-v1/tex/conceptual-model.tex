@@ -1,0 +1,696 @@
+\section{Conceptual Model}\label{conceptual-model}
+
+\textbf{Ontological postulate:} We postulate that the physical universe is a continuous, tensioned three-dimensional brane embedded in a higher-dimensional space. This brane is ontically real; all observable phenomena—particles, forces, spacetime structure—arise from its internal oscillations and patterns of strain. We may choose a convenient embedding frame where one component visualizes transverse displacement, but the substrate dynamics depends only on the full embedding $\mathbf{X}\in\mathbb{R}^4$ and does not privilege any component. Time is not a geometric coordinate but an external evolution parameter.
+
+Key features of this ontology:
+\begin{itemize}
+\item The brane is spatially isotropic in its ground state; Lorentz invariance emerges as an effective symmetry from isotropic wave propagation, not as a fundamental property.
+\item Transverse deformations couple to lateral contraction, producing curvature-like effects that mimic gravity. In the weak-field limit, these deformations induce an effective metric tensor $g_{\mu\nu}$ whose Newtonian gravitational potential is sourced by the coarse-grained elastic energy density via a Poisson-like equation.
+\item Particles correspond to self-confined solitonic excitations whose topology and internal phase determine charge, spin, and mass.
+\item Quantization and collapse-like phenomena arise as nonlinear threshold effects, not stochastic postulates.
+\end{itemize}
+
+This section introduces (i) the microscopic substrate model and (ii) a minimal set of derived
+constructions that map substrate wave states to geometric phase and candidate gauge variables.
+These constructions are part of the proposed emergence map (substrate $\rightarrow$ effective field
+description) and can later also serve as numerical readouts for validation.
+Crucially, the microscopic equations of motion are always those of the brane embedding
+$\mathbf X(x,t)$; all derived objects (complex envelopes, Berry connections/holonomies, etc.) are
+deterministic functionals of $(\mathbf X,\partial_t\mathbf X)$ and never modify the substrate
+dynamics (see also Section~\ref{experimental-setting}).
+
+\paragraph{Scope of derived readout fields.}
+Throughout the paper we introduce derived quantities (complex envelopes, geometric phases)
+as part of the bridge from the substrate fields $(\mathbf X,\partial_t\mathbf X)$ to effective
+descriptions. They are computed from substrate snapshots but do not feed back into the
+equations of motion.
+
+The Michelson–Morley null result is naturally explained by Lorentz contraction of matter itself, rendering motion through the medium undetectable. In this view, the observed constancy of light speed reflects a dynamical property of the medium rather than a postulate about spacetime geometry.
+
+\subsection{Continuous Formulation: Pre-tensioned $d$-Brane Embedded in $\mathbb{R}^4$}\label{continuous-formulation}
+
+\subsubsection{Periodic pre-tensioned hyperelastic substrate (minimal model)}
+\label{sec:periodic-pretension-minimal}
+
+\paragraph{Periodic cell.}
+Throughout this work the brane is modeled on a periodic material domain
+\[
+  \Omega=\mathbb T^3 \equiv \prod_{i=1}^3 [0,L_i]\quad\text{with endpoints identified.}
+\]
+All admissible perturbations and variations are periodic in $x$; integration by
+parts therefore produces no boundary terms.
+
+\paragraph{Induced metric and reference metric.}
+The fundamental degree of freedom is the embedding $\mathbf X(x,t)\in\mathbb R^4$.
+The induced metric is
+\begin{equation}
+  g_{ij}(\mathbf X)=\partial_i\mathbf X\cdot\partial_j\mathbf X,
+  \qquad i,j=1,2,3,
+  \label{eq:induced-metric}
+\end{equation}
+and the reference (stress-free) metric is taken as
+\begin{equation}
+  g^0_{ij}=\ell_0^2\,\delta_{ij}.
+  \label{eq:reference-metric}
+\end{equation}
+Define the relative mixed metric
+\begin{equation}
+  \widehat g := (g^0)^{-1}g,
+  \label{eq:relative-metric}
+\end{equation}
+with eigenvalues $\lambda_a>0$ and principal stretches $\sigma_a=\sqrt{\lambda_a}$.
+
+\paragraph{Eigen-stretch energy density.}
+We use an isotropic stretch-only hyperelastic energy minimized at $g=g^0$:
+\begin{equation}
+  W(g;g^0)=\frac{K}{2}\sum_{a=1}^3(\sigma_a-1)^2,
+  \qquad \sigma_a=\sqrt{\lambda_a(\widehat g)}.
+  \label{eq:eigen-stretch-energy}
+\end{equation}
+All nonlinearity considered in this substrate model arises from the geometric
+dependence of $g_{ij}$ on the embedding $\mathbf X$ and from the nonlinear
+dependence of $W$ on the stretches $\sigma_a$. No additional saturation law is assumed.
+
+\paragraph{Lagrangian and action.}
+The (minimal) Lagrangian density is
+\begin{equation}
+  \mathcal L
+  =\frac{\rho_m}{2}\,|\partial_t\mathbf X|^2
+  -W(g(\mathbf X);g^0),
+  \label{eq:brane-lagrangian}
+\end{equation}
+with action
+\begin{equation}
+  S[\mathbf X]=\int dt\int_{\Omega} d^3x\;\mathcal L\big(\mathbf X,\partial_t\mathbf X,\partial_i\mathbf X\big).
+  \label{eq:brane-action}
+\end{equation}
+(Discrete curvature/bending penalties are treated as optional numerical regularizers
+in the experimental setting and are not part of the minimal analytical model here.)
+
+\paragraph{First variation: stress and equations of motion.}
+Define
+\begin{equation}
+  S^{ij}:=\frac{\partial W}{\partial g_{ij}},
+  \qquad
+  P_{Ai}:=\frac{\partial W}{\partial(\partial_i X^A)} = 2\,S^{ij}\,\partial_j X^A,
+  \qquad A=1,\dots,4.
+  \label{eq:piola-stress}
+\end{equation}
+Hamilton's principle $\delta S=0$ yields the (second-order) substrate PDE
+\begin{equation}
+  \rho_m\,\partial_{tt}X^A = \partial_i P_{Ai},
+  \qquad A=1,\dots,4,
+  \label{eq:equations-of-motion}
+\end{equation}
+where periodicity implies no boundary/traction terms.
+
+\paragraph{Velocity, momentum, and conserved energy (Hamiltonian density).}
+Define the $4$D velocity field
+\begin{equation}
+  v^A(x,t) := \partial_t X^A(x,t),
+  \qquad
+  \mathbf v(x,t) := \partial_t \mathbf X(x,t)\in\mathbb R^4.
+  \label{eq:velocity-field}
+\end{equation}
+If the displacement is defined relative to a time-independent reference embedding
+$\mathbf X_\star(x)$ as $\mathbf u(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)$, then
+$\partial_t\mathbf u(x,t)=\mathbf v(x,t)$.
+
+The canonical momentum density conjugate to $X^A$ is
+\begin{equation}
+  p_A := \frac{\partial \mathcal L}{\partial(\partial_t X^A)}
+  = \rho_m\,v^A,
+  \qquad A=1,\dots,4,
+  \label{eq:canonical-momentum}
+\end{equation}
+or in vector form $\mathbf p=\rho_m\,\mathbf v$.
+The corresponding (conserved) energy density is
+\begin{equation}
+  \mathcal H(\mathbf X,\mathbf v)
+  = \frac{\rho_m}{2}\,|\mathbf v|^2 + W(g(\mathbf X);g^0)
+  = \frac{1}{2\rho_m}\,|\mathbf p|^2 + W(g(\mathbf X);g^0).
+  \label{eq:brane-hamiltonian-density}
+\end{equation}
+Equivalently, the energy functional is $H=\int_\Omega d^3x\,\mathcal H$.
+Thus $(\mathbf u,\mathbf p)$ (equivalently $(\mathbf u,\mathbf v)$)
+is the local canonical phase-space pair produced by the substrate solver and will
+serve as raw input for the complex mode-envelope / Berry-phase construction in
+Sec.~\ref{sec:brane-to-berry-to-em}.
+(An explicit canonical Poisson-bracket formulation is standard for conservative
+field theories and is omitted here for brevity.)
+
+\paragraph{Conservation laws (periodic cell).}
+The energy $H$ is conserved in time for the conservative dynamics: $\frac{dH}{dt}=0$.
+Translation invariance in the embedding space implies conservation of the total momentum
+\begin{equation}
+  \mathbf p_{\text{tot}} = \int_{\Omega} d^3x\, \mathbf p(x,t),
+  \label{eq:total-momentum}
+\end{equation}
+since $W$ depends only on spatial derivatives $\partial_i\mathbf X$.
+The periodic domain ensures no boundary flux contributions.
+
+\paragraph{Pre-tension on a periodic cell (affine base + periodic displacement).}
+A uniform pre-tensioned base state is represented by an affine embedding
+\begin{equation}
+  \mathbf X_\star(x)=A x+\mathbf b,
+  \qquad A\in\mathbb R^{4\times 3},\ \mathrm{rank}(A)=3,
+  \label{eq:affine-base-embedding}
+\end{equation}
+with constant base metric $g_{\star,ij}=(A^\mathsf T A)_{ij}$.
+Pre-tension means $g_\star\neq g^0$ (equivalently, $\sigma_{\star,a}\neq 1$ for at least one $a$),
+and it is maintained because the periodic cell (i.e.\ the affine part $A$) is held fixed.
+We evolve only periodic displacements about this base,
+\begin{equation}
+  \mathbf X(x,t)=\mathbf X_\star(x)+\mathbf u(x,t),
+  \qquad \mathbf u(\cdot,t)\ \text{periodic on }\Omega.
+  \label{eq:decomposition-affine-plus-periodic}
+\end{equation}
+Let $A_i:=\partial_i\mathbf X_\star\in\mathbb R^4$ denote the constant base tangents.
+
+\subsubsection{4D displacement and momentum as magnitude + $S^3$ direction (and $S^3\simeq SU(2)$)}
+\label{sec:s3-su2-decomposition}
+
+Many constructions in this work benefit from separating a 4D vector
+field into (i) a nonnegative scalar magnitude and (ii) a unit direction on the
+3-sphere. This applies both to the 4D displacement field about a chosen base
+embedding and to the 4D canonical momentum density in the Hamiltonian
+formulation.
+
+\paragraph{Displacement field.}
+Given the periodic displacement (Eq.~\eqref{eq:decomposition-affine-plus-periodic})
+\[
+\mathbf u(x,t)=\mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
+\]
+define its pointwise magnitude and direction by
+\begin{equation}
+  a_u(x,t) := |\mathbf u(x,t)| \ge 0,
+  \qquad
+  \mathbf n_u(x,t) :=
+  \begin{cases}
+    \mathbf u(x,t)/|\mathbf u(x,t)|, & \mathbf u(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \mathbf u(x,t)=\mathbf 0,
+  \end{cases}
+  \label{eq:xi-amplitude-direction}
+\end{equation}
+so that wherever $\mathbf u\neq 0$,
+\begin{equation}
+  \mathbf u(x,t) = a_u(x,t)\,\mathbf n_u(x,t),
+  \qquad
+  \mathbf n_u(x,t)\in S^3\subset\mathbb R^4.
+  \label{eq:xi-factorization}
+\end{equation}
+The scalar $a_u$ provides an ``amplitude'' (e.g.\ arrow length or opacity in
+visualizations), while $\mathbf n_u$ encodes the instantaneous 4D direction as
+a point on the unit 3-sphere.
+
+\paragraph{Momentum field.}
+In the minimal Hamiltonian setup, the canonical momentum density is
+(Eq.~\eqref{eq:canonical-momentum})
+\[
+\mathbf p(x,t)=\rho_m\,\partial_t \mathbf X(x,t)\in\mathbb R^4.
+\]
+Define analogously
+\begin{equation}
+  a_p(x,t) := |\mathbf p(x,t)| \ge 0,
+  \qquad
+  \mathbf n_p(x,t) :=
+  \begin{cases}
+    \mathbf p(x,t)/|\mathbf p(x,t)|, & \mathbf p(x,t)\neq \mathbf 0,\\
+    \text{undefined}, & \mathbf p(x,t)=\mathbf 0,
+  \end{cases}
+  \label{eq:pi-amplitude-direction}
+\end{equation}
+so that $\mathbf p=a_p\,\mathbf n_p$ wherever $\mathbf p\neq 0$.
+For constant $\rho_m$, $\mathbf n_p$ is the direction of the 4D velocity
+$\partial_t\mathbf X$, and the magnitude $a_p$ controls the kinetic energy
+density via $\mathcal T=\frac{1}{2\rho_m}|\mathbf p|^2$
+(cf.\ Eq.~\eqref{eq:brane-hamiltonian-density}).
+
+\paragraph{From $S^3$ directions to unit quaternions.}
+Write a unit 4-vector as $\mathbf n=(n_0,n_1,n_2,n_3)\in S^3$.
+Identifying $\mathbb R^4$ with the quaternion algebra $\mathbb H$,
+we associate $\mathbf n$ with the \emph{unit quaternion}
+\begin{equation}
+  q(\mathbf n) := n_0 + n_1\,\mathbf i + n_2\,\mathbf j + n_3\,\mathbf k,
+  \qquad |q|=1.
+  \label{eq:unit-quaternion}
+\end{equation}
+Thus the direction fields $\mathbf n_u$ and $\mathbf n_p$ can be viewed as
+quaternion-valued fields $q_u(x,t)$ and $q_p(x,t)$ taking values in the group
+of unit quaternions.
+
+\paragraph{$S^3\simeq SU(2)$ (explicit matrix map).}
+Unit quaternions form a Lie group isomorphic to $SU(2)$.
+An explicit isomorphism is given by mapping $q=a+b\,\mathbf i+c\,\mathbf j+d\,\mathbf k$
+to the complex $2\times 2$ matrix
+\begin{equation}
+  U(q)=
+  \begin{pmatrix}
+    a+i d & c+i b\\
+    -c+i b & a-i d
+  \end{pmatrix},
+  \qquad
+  U(q)^\dagger U(q)=\mathbb I,\ \det U(q)=1.
+  \label{eq:quaternion-to-su2}
+\end{equation}
+Consequently, a unit direction $\mathbf n\in S^3$ may be interpreted
+interchangeably as a unit quaternion $q(\mathbf n)$ or an $SU(2)$ element $U(q)$.
+
+\paragraph{Rotations / isometries of the round $3$-sphere.}
+In this paper $S^3$ denotes the \emph{round} unit $3$-sphere
+$S^3=\{x\in\mathbb R^4:\|x\|=1\}$ with the metric induced from $\mathbb R^4$.
+Every orthogonal transformation $A\in O(4)$ preserves the norm and therefore acts
+as an isometry of $S^3$ by restriction, $x\mapsto Ax$.
+Consequently the full isometry group is
+\begin{equation}
+  \mathrm{Isom}(S^3)\cong O(4),
+  \label{eq:isom-s3-o4}
+\end{equation}
+and the orientation-preserving isometries (``proper rotations'') form
+\begin{equation}
+  \mathrm{Isom}^+(S^3)\cong SO(4).
+  \label{eq:isomplus-s3-so4}
+\end{equation}
+In the quaternion / $SU(2)$ identification $S^3\simeq SU(2)$, the
+orientation-preserving action can be written as independent left and right
+multiplication,
+\begin{equation}
+  q \ \mapsto\ a\,q\,b^{-1},
+  \qquad a,b\in SU(2),
+  \label{eq:left-right-action}
+\end{equation}
+which yields the standard Lie-group identification
+\begin{equation}
+  SO(4)\ \cong\ \bigl(SU(2)_L\times SU(2)_R\bigr)\big/\{\pm(1,1)\}.
+  \label{eq:so4-su2xsu2}
+\end{equation}
+If one fixes a point $q_0\in S^3$, the subgroup of $\mathrm{Isom}^+(S^3)$ that
+leaves $q_0$ invariant (the stabilizer) is isomorphic to $SO(3)$, mirroring the
+usual ``rotations about a point'' intuition.
+
+\paragraph{Relation to $SO(3)$ and the double cover (spinorial $4\pi$ periodicity).}
+Although $\mathbf n$ is used here primarily as a compact encoding of a 4D
+direction, the same $SU(2)$ element also parametrizes 3D rotations.
+Represent a 3-vector $\mathbf r=(r_x,r_y,r_z)\in\mathbb R^3$ as a \emph{pure}
+imaginary quaternion $\underline r=r_x\,\mathbf i+r_y\,\mathbf j+r_z\,\mathbf k$.
+Then the action
+\begin{equation}
+  \underline r \ \mapsto\ \underline r' := q\,\underline r\,q^{-1}
+  \label{eq:su2-rotation-action}
+\end{equation}
+is a proper rotation in $\mathbb R^3$. The map $q\mapsto R\in SO(3)$ is a
+\emph{double cover}: $q$ and $-q$ induce the same rotation. Equivalently, with
+the axis--angle parametrization
+\begin{equation}
+  q = \cos(\tfrac{\theta}{2}) + \sin(\tfrac{\theta}{2})\,
+  (\hat u_x\,\mathbf i+\hat u_y\,\mathbf j+\hat u_z\,\mathbf k),
+  \label{eq:axis-angle-quaternion}
+\end{equation}
+a $2\pi$ rotation in $SO(3)$ corresponds to a sign flip $q\mapsto -q$, while a
+full return $q\mapsto q$ requires $4\pi$. This is the standard geometric origin
+of spinorial $4\pi$ periodicity and motivates using $SU(2)\simeq S^3$ valued
+direction fields when diagnosing holonomy-like effects.
+
+\paragraph{Practical note (zeros).}
+At points where $\mathbf u$ or $\mathbf p$ vanish, the direction
+$\mathbf n$ is undefined. In computations and visualizations we therefore mask
+those points (or carry forward the last valid direction) and use the scalar
+magnitude $a$ to suppress spurious direction artifacts.
+
+\paragraph{Assumptions (minimal analytic substrate model).}
+The continuous substrate model used in this paper rests on the following explicit assumptions:
+
+\begin{enumerate}
+  \item \textbf{Material domain is periodic:}
+  the brane is modeled on a 3-torus $\Omega=\mathbb T^3$ (a periodic cell).
+  Consequently, there are no physical boundary layers or boundary forces in the analytic model;
+  all fields and admissible variations are periodic in $x$.
+
+  \item \textbf{Embedding space is Euclidean $\mathbb R^4$:}
+  the brane configuration is an embedding field $\mathbf X(x,t)\in\mathbb R^4$
+  with the standard inner product. No embedding component (including $X^4$) is treated as special.
+
+  \item \textbf{Stretch-only hyperelasticity (no bending):}
+  the internal energy depends only on first derivatives $\partial_i\mathbf X$
+  through the induced metric $g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$.
+  No curvature/second-derivative penalties (bending) are included in the minimal analytic model.
+
+  \item \textbf{Eigen-stretch constitutive law:}
+  the strain energy density is the isotropic eigen-stretch form
+  $W(g;g^0)$ defined in Eq.~\eqref{eq:eigen-stretch-energy}.
+  In particular, the only material nonlinearity in the substrate model enters through
+  $g_{ij}(\mathbf X)$ and the nonlinear dependence of $W$ on the principal stretches $\sigma_a$.
+
+  \item \textbf{Reference metric (rest geometry) is prescribed:}
+  the stress-free state is defined by a given reference metric $g^0_{ij}$
+  (taken constant in this work, typically $g^0_{ij}=\ell_0^2\delta_{ij}$).
+
+  \item \textbf{Pre-tension is imposed by a fixed periodic cell:}
+  pre-tension is represented by an affine base embedding $\mathbf X_\star(x)=Ax+\mathbf b$
+  with $g_\star\neq g^0$ and is maintained by holding the macroscopic cell deformation (the affine part $A$) fixed.
+  Only periodic displacements $\mathbf u$ about this base are evolved,
+  cf.\ Eq.~\eqref{eq:decomposition-affine-plus-periodic}.
+
+  \item \textbf{Inertia-only dynamics (no dissipation):}
+  the action uses the kinetic term $\frac{\rho_m}{2}|\partial_t\mathbf X|^2$
+  with constant mass density $\rho_m$ in material coordinates, and no damping or forcing terms
+  are included unless explicitly stated in the experimental section.
+
+  \item \textbf{Regular embedding (no rank loss / self-intersection modeling):}
+  the induced metric is assumed positive definite in the regime of interest
+  (no local collapse of $\partial_i\mathbf X$). Self-contact and self-avoidance are not modeled.
+
+  \item \textbf{Smoothness / classical field theory:}
+  fields are assumed sufficiently smooth for the required derivatives and
+  spectral objects (eigenvalues/projectors of $\widehat g$) to be well-defined.
+\end{enumerate}
+
+\subsubsection{Second variation and linearized operator about a pre-tensioned base}
+\label{sec:second-variation-linearization}
+
+\paragraph{Metric variations induced by $\mathbf u$.}
+The induced metric expands as $g=g_\star+\delta g + \delta^2 g + \cdots$ with
+\begin{align}
+  \delta g_{ij}
+  &=
+  A_i\cdot\partial_j\mathbf u
+  +
+  A_j\cdot\partial_i\mathbf u,
+  \label{eq:delta-metric}
+  \\
+  \delta^2 g_{ij}
+  &=
+  \partial_i\mathbf u\cdot\partial_j\mathbf u.
+  \label{eq:delta2-metric}
+\end{align}
+
+\paragraph{Base stress and tangent moduli.}
+Evaluate at the base metric $g_\star$:
+\begin{equation}
+  S_\star^{ij}:=\left.\frac{\partial W}{\partial g_{ij}}\right|_{g=g_\star},
+  \qquad
+  H_\star^{ij\,kl}:=\left.\frac{\partial^2 W}{\partial g_{ij}\,\partial g_{kl}}\right|_{g=g_\star}.
+  \label{eq:base-stress-and-moduli}
+\end{equation}
+
+\paragraph{Quadratic action.}
+Because $\mathbf X_\star$ is an equilibrium on the periodic domain, the linear term vanishes and
+the action expanded to second order is
+\begin{equation}
+  S^{(2)}[\mathbf u]
+  =
+  \int dt\int_{\Omega} d^3x\;
+  \left[
+    \frac{\rho_m}{2}|\partial_t\mathbf u|^2
+    -
+    \left(
+      S_\star^{ij}\,\partial_i\mathbf u\cdot\partial_j\mathbf u
+      +
+      \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
+    \right)
+  \right].
+  \label{eq:quadratic-action}
+\end{equation}
+The first term in parentheses is the \emph{geometric stiffness} contribution from pre-stress;
+it vanishes if the base is stress-free ($S_\star^{ij}=0$).
+
+\paragraph{Quadratic Hamiltonian about a pre-tensioned base.}
+For $\mathbf X=\mathbf X_\star+\mathbf u$ define the perturbation momentum
+$\mathbf p := \rho_m\,\partial_t\mathbf u$.
+The Hamiltonian expanded to second order is
+\begin{equation}
+  H^{(2)}[\mathbf u,\mathbf p]
+  =
+  \int_{\Omega} d^3x\;
+  \left[
+    \frac{1}{2\rho_m}|\mathbf p|^2
+    +
+    \left(
+      S_\star^{ij}\,\partial_i\mathbf u\cdot\partial_j\mathbf u
+      +
+      \frac12\,H_\star^{ij\,kl}\,(\delta g_{ij})(\delta g_{kl})
+    \right)
+  \right],
+  \label{eq:quadratic-hamiltonian}
+\end{equation}
+with $\delta g_{ij}$ given by Eq.~\eqref{eq:delta-metric}.
+This $H^{(2)}$ is the Legendre transform of the quadratic action
+Eq.~\eqref{eq:quadratic-action} and makes the geometric-stiffness contribution of the base pre-stress explicit.
+
+\paragraph{Linearized equations of motion.}
+The Euler--Lagrange equations from $S^{(2)}$ yield the linear operator
+\begin{equation}
+  \rho_m\,\partial_{tt}u^A
+  =
+  \partial_i\Big(
+    2\,S_\star^{ij}\,\partial_ju^A
+    +
+    2\,H_\star^{ij\,kl}\,(\delta g_{kl})\,A_j^A
+  \Big),
+  \qquad A=1,\dots,4,
+  \label{eq:linearized-pde-general}
+\end{equation}
+where $\delta g_{kl}$ is given by Eq.~\eqref{eq:delta-metric}. For an affine base state
+($A_i$, $S_\star$, $H_\star$ constant), this can be written explicitly as a constant-coefficient system:
+\begin{equation}
+  \rho_m\,\partial_{tt}u^A
+  =
+  2\,S_\star^{ij}\,\partial_i\partial_ju^A
+  +
+  2\,H_\star^{ij\,kl}\,A_j^A\,
+  \Big(
+    A_k^B\,\partial_i\partial_lu^B + A_l^B\,\partial_i\partial_ku^B
+  \Big).
+  \label{eq:linearized-pde-constant-coeff}
+\end{equation}
+This expression makes the coupling between embedding components ($A,B$) induced by the pre-tensioned geometry fully explicit
+without treating any embedding direction (including $X^4$) as a special case.
+
+\paragraph{Isotropic pre-tension (useful special case).}
+If $g_\star=s^2 g^0$ with $s\neq 1$, then $S_\star^{ij}$ is proportional to $(g^0)^{ij}$
+and the geometric stiffness term reduces to an isotropic wave operator.
+This case provides a clean reference point for measuring the emergent wave speed $c$ in periodic dispersion tests.
+
+\paragraph{Spectral formulas (eigen-stretch model).}
+Let $\widehat g_\star=(g^0)^{-1}g_\star$ have eigenvalues $\lambda_{\star,a}$ and
+$g^0$-orthogonal projectors $\mathcal P_a$ onto the corresponding eigenspaces, with $\sigma_{\star,a}=\sqrt{\lambda_{\star,a}}$.
+Then the base stress can be written compactly as
+\begin{equation}
+  S_\star^{ij}
+  =
+  \sum_{a=1}^3
+  \frac{K}{4}\,\frac{\sigma_{\star,a}-1}{\sigma_{\star,a}}\,
+  \big(\mathcal P_a\big)^{ij}_{(g^0)}.
+  \label{eq:base-stress-spectral}
+\end{equation}
+The second variation is most cleanly expressed in projector form. Let
+$f(\lambda)=\frac{K}{2}(\sqrt{\lambda}-1)^2$, so that
+$f'(\lambda)=\frac{K}{2}\frac{\sqrt{\lambda}-1}{\sqrt{\lambda}}$ and
+$f''(\lambda)=\frac{K}{4}\lambda^{-3/2}$.
+For a symmetric perturbation $\delta\widehat g=(g^0)^{-1}\delta g$ one has
+\begin{align}
+  D^2W_\star[\delta\widehat g,\delta\widehat g]
+  &=
+  \sum_a f''(\lambda_{\star,a})\big(\mathrm{tr}(\mathcal P_a\,\delta \widehat g)\big)^2
+  \nonumber\\
+  &\quad+
+  2\sum_{a<b}
+  \frac{f'(\lambda_{\star,a})-f'(\lambda_{\star,b})}{\lambda_{\star,a}-\lambda_{\star,b}}\,
+  \mathrm{tr}\big(\mathcal P_a\,\delta \widehat g\,\Pi_b\,\delta \widehat g\big),
+  \label{eq:second-variation-spectral}
+\end{align}
+with the usual continuous-limit interpretation when eigenvalues are degenerate (projectors onto the degenerate eigenspace).
+The tensor $H_\star^{ij\,kl}$ in Eq.~\eqref{eq:base-stress-and-moduli} is defined implicitly by
+$\tfrac12\,H_\star^{ij\,kl}\delta g_{ij}\delta g_{kl}=\tfrac12\,D^2W_\star[(g^0)^{-1}\delta g,(g^0)^{-1}\delta g]$.
+
+\paragraph{Assumptions specific to linearization.}
+When deriving Eqs.~\eqref{eq:quadratic-action}--\eqref{eq:linearized-pde-constant-coeff},
+we additionally assume:
+
+\begin{enumerate}
+  \item \textbf{Small perturbations about the base:}
+  $\mathbf X=\mathbf X_\star+\mathbf u$ with $\|\partial\mathbf u\|$ small enough that
+  truncation at second order in $\mathbf u$ is valid.
+
+  \item \textbf{Uniform base state:}
+  the base embedding is affine so that $A_i$, $S_\star^{ij}$, and $H_\star^{ij\,kl}$ are spatially constant,
+  yielding a constant-coefficient linear operator on the periodic cell.
+\end{enumerate}
+
+\subsubsection{Linear wave regime and isotropy (stress-free reference)}\label{linear-wave-regime-and-isotropy}
+
+Linearize about a flat embedding $\mathbf X_\star(x)=(x^1,x^2,x^3,0)$ with small displacement $\mathbf u(x,t)$ so $\mathbf X=\mathbf X_\star+\mathbf u$, and retain leading order. For a stress-free base state with $g^\star_{ij}=g^0_{ij}$ (equivalently, setting $\ell_0=1$ as a dimensionless normalization so $g^\star_{ij}=\delta_{ij}$) and homogeneous parameters, one obtains a linear wave equation of the form
+\begin{equation}
+\partial_{tt}\mathbf u = c^2\Delta\mathbf u,
+\label{eq:linear-wave-equation}
+\end{equation}
+where the effective wave speed is determined by the continuum stiffness and density:
+\begin{equation}
+c^2 = \frac{K}{\rho_m}.
+\end{equation}
+Throughout this work we identify this emergent wave speed with the physical speed of light $c$.
+For a pre-tensioned base with $g_\star\neq g^0$, the linear operator includes additional geometric stiffness terms from the base stress $S_\star^{ij}$, as derived in Eqs.~\eqref{eq:linearized-pde-general}--\eqref{eq:linearized-pde-constant-coeff}.
+
+All \textbf{four components} of $\mathbf u$ obey the same \textbf{isotropic} wave equation in the material coordinates. The wave speed is the same for all directions and for all embedding coordinates. Geometric nonlinearities (large stretches) introduce deviations from this ideal isotropic behavior.
+
+The relativistic interpretation of this linear wave regime, and its relation to
+effective Lorentz symmetry, is developed in more detail in
+Section~\ref{emergent-relativity-and-lorentz-invariance}.
+
+\textbf{Regime of validity (boxed):}
+The linear wave equation~\eqref{eq:linear-wave-equation} with isotropic
+dispersion is valid in the small-strain regime, where geometric nonlinearities
+can be neglected. In this regime the
+wave speed $c=\sqrt{K/\rho_m}$ is approximately constant and independent of
+direction. This linear, isotropic propagation behaviour underlies the emergent
+Lorentz symmetry discussed in
+Section~\ref{emergent-relativity-and-lorentz-invariance}.
+
+\subsubsection{Geometric nonlinearity and localization threshold}\label{subsec:geom-threshold}
+
+Define the local energy density
+\begin{equation}
+\mathcal{E}=\frac{\rho_m}{2}|\partial_t\mathbf{X}|^2
++W(g;g^0).
+\label{eq:energy-density}
+\end{equation}
+
+\paragraph{Threshold for soliton nucleation: dimensionless nonlinearity.}
+Geometric nonlinearity is controlled by the dimensionless parameter measuring the relative stretch:
+\begin{equation}
+\eta(x,t) \;\sim\; |\nabla \mathbf{X}|^2 \;\sim\; (A k)^2,
+\label{eq:eta-nonlinearity}
+\end{equation}
+for a mode of amplitude $A$ and characteristic wavenumber $k$. Localization into a self-confined soliton occurs when $\eta$ reaches order unity over a region of linear size $\sim\lambda_C$, where $\lambda_C = \hbar/(m_e c)$ is the reduced Compton wavelength. For such a configuration with $k \sim 1/\lambda_C$, the nonlinearity condition $\eta \gtrsim 1$ implies $A \sim \lambda_C$.
+
+Given the calibration $\rho_m \lambda_C^3 \approx m_e$ (see Section~\ref{amplitude-scale-calibration}), the elastic energy in a Compton-scale cell with $\eta \sim 1$ satisfies
+\begin{equation}
+E_{\text{cell}} \;\sim\; \rho_m\,A^2\,\omega_C^2\,\lambda_C^3
+\;\sim\; \rho_m c^2 \lambda_C^3
+\;\sim\; m_e c^2,
+\label{eq:threshold-criterion}
+\end{equation}
+where $\omega_C = c/\lambda_C$ is the Compton angular frequency. Thus, the \emph{energy-in-a-Compton-volume} threshold is not a separate postulate but the energetic restatement of the geometric nonlinearity condition $\eta \gtrsim 1$ given the mass-density calibration. Above threshold, the geometric nonlinearity inherent in the full strain tensor can naturally lock in localized high-stretch 4D configurations, turning a propagating photon-like mode into a self-confined, particle-like soliton.
+
+Earlier drafts included a toy intrinsic-curvature estimate for a localized bulge; it is omitted here to keep the focus on the localization threshold and the Berry/holonomy construction.
+
+\subsubsection{"Gravity" as effective metric}\label{gravity-as-effective-metric}
+
+Internal signal propagation uses the instantaneous induced metric $g_{ij}=\partial_i\mathbf X\cdot\partial_j\mathbf X$. Local embedding deformations modify $g$, creating \textbf{geodesic focusing} for in-brane rays. We therefore identify \textbf{effective gravity} with curvature of $g$ induced by the embedding deformation. In practice we extract $g$ from simulation snapshots and ray-trace null-like paths in $(t,x)$ with interval
+\begin{equation}
+ds^2 = -c^2 dt^2 + g_{ij}(x,t)\,dx^i\, dx^j \quad\text{(with $x^i$ intrinsic/material coordinates)}.
+\label{eq:effective-metric-interval}
+\end{equation}
+
+\paragraph{Confinement as nonlinear self-guidance (and relation to ordinary gravity).}
+Williamson \& van der Mark \cite{WilliamsonVanDerMark1997} argue that ordinary gravitational curvature
+(as in geometrodynamics) is far too weak to account for Compton-scale confinement, and that the
+effective curvature required to confine a photon-like mode ``need only apply to the self-confined
+photon'' and need not significantly affect other nearby objects.
+In our brane model the confining mechanism is likewise \emph{not} the spacetime curvature of general
+relativity and not universal Newtonian attraction. Instead, confinement is attributed to the brane's
+\emph{constitutive nonlinearity}: large-amplitude deformations modify the local stress response
+$P^{ij}=2\,\partial W/\partial g_{ij}$ and therefore the linearized propagation characteristics of
+small fluctuations around the deformed state.
+
+This observation is important conceptually. The \emph{shape} of a localized defect in $\mathbb R^4$
+(e.g.\ a toroidal bulge in $X^4$) is a purely geometric statement about the embedding
+$\mathbf X(x,t)$. By contrast, an ``effective refractive index'' $n_{\rm eff}(x)$ is \emph{not} a
+geometric invariant of the embedding alone: it is defined by the dispersion relation obtained from
+linearizing the substrate dynamics around a (possibly slowly varying) background configuration
+(App.~\ref{app:confinement-slice}). A finite maximal propagation speed of the medium, $c_{\rm brane}$,
+acts only as a consistency constraint; it does not by itself produce bending. Bending and guidance
+require transverse gradients of the effective wave speed (self-induced waveguiding). For a circulating
+mode of transverse radius $a$ on a ring of radius $R$, a useful order-of-magnitude requirement is
+$\Delta n/n \sim a/R$ (App.~\ref{app:confinement-slice}).
+
+For numerical experiments we work on finite brane patches
+$\Omega$ with physically motivated boundary conditions
+(periodic, free, or clamped; see Sec.~\ref{experimental-setting}).
+
+\subsection{From substrate waves to geometric phase and gauge structure}
+\label{sec:brane-to-berry-to-em}
+
+Our long-term programme is to test whether a purely mechanical brane substrate can
+support phase and degeneracy structures that admit an effective gauge description.
+In this revision we proceed step by step: we define only the \emph{minimal} objects
+needed to talk about geometric (Berry) phase of prepared narrowband wave packets.
+More elaborate reconstructions (curvature maps, defect/source localization, non-Abelian
+transport) are deferred.
+
+\subsubsection{Phase-space fields: displacement, velocity, momentum}
+Let $\mathbf X(x,t)\in\mathbb R^4$ be the brane embedding and choose a time-independent
+reference embedding $\mathbf X_\star(x)$ (e.g.\ the pre-tensioned ground state).
+We define the displacement and velocity fields
+\begin{equation}
+  \mathbf u(x,t) := \mathbf X(x,t)-\mathbf X_\star(x)\in\mathbb R^4,
+  \qquad
+  \mathbf v(x,t) := \partial_t\mathbf X(x,t)=\partial_t\mathbf u(x,t)\in\mathbb R^4,
+  \label{eq:xi-and-velocity}
+\end{equation}
+and (for constant mass density $\rho_m$) the canonical momentum density
+\begin{equation}
+  \mathbf p(x,t) := \rho_m\,\mathbf v(x,t)\in\mathbb R^4.
+  \label{eq:pi-from-velocity}
+\end{equation}
+These two real fields $(\mathbf u,\mathbf v)$ (equivalently $(\mathbf u,\mathbf p)$)
+constitute the raw phase-space information from which we will construct a complex mode
+representation.
+
+\subsubsection{Prepared narrowband complex envelope and isolated-band condition}
+A Berry connection is naturally defined on \emph{normalized complex mode directions}.
+Accordingly we introduce a complex envelope field
+\begin{equation}
+  \varphi(x,t)\in\mathbb C^4,
+  \qquad
+  \tilde \varphi(x,t):=\frac{\varphi(x,t)}{\|\varphi(x,t)\|}\in S^7\subset\mathbb C^4,
+  \label{eq:complex-envelope-normalized}
+\end{equation}
+to represent the local oscillatory state of a narrowband carrier wave packet.
+In our workflow the narrowband carrier is defined by \emph{initialization} (preparation-first),
+so that the subsequent analysis does not rely on post-hoc band-pass filters or tuned
+frequencies. Practically, $\varphi$ is obtained from the real phase-space pair $(\mathbf u,\mathbf v)$
+by constructing a consistent quadrature (analytic-signal) representation of the prepared carrier.
+
+The usual single-band ($U(1)$) geometric phase is meaningful only when the packet occupies an
+\emph{effectively isolated} mode branch on its spectral support. We use this in the practical sense:
+there exists a minimum spectral gap $\Delta_{\min}>0$ separating the intended branch from all others
+for the wavenumbers that carry the packet.
+The reference embedding $\mathbf X_\star$ distinguishes intrinsic tangent directions from the
+normal (out-of-brane) direction in $\mathbb R^4$, which can help split polarizations, but it does
+not by itself guarantee a gap; in simulations the gap must be verified for the chosen parameters
+and packet support.
+
+\subsubsection{Berry connection and Berry phase (U(1) case)}
+For a normalized complex envelope $\tilde \varphi(x,t)$ we define the spacetime Berry connection
+(one-form) by
+\begin{equation}
+  a_\mu(x,t) := \mathrm{Im}\,\langle \tilde \varphi(x,t)\mid \partial_\mu \tilde \varphi(x,t)\rangle,
+  \qquad \mu\in\{t,1,2,3\},
+  \label{eq:spacetime-berry-connection}
+\end{equation}
+where $\langle\cdot,\cdot\rangle$ is the standard Hermitian inner product on $\mathbb C^4$.
+Under a local phase redefinition (gauge) $\tilde \varphi\mapsto e^{i\chi}\tilde \varphi$, the connection transforms as
+$a_\mu\mapsto a_\mu+\partial_\mu\chi$ \cite{Berry1984}.
+
+The geometric phase accumulated along a closed spacetime loop $\gamma$ is
+\begin{equation}
+  \Theta[\gamma] := \oint_\gamma a_\mu\,dR^\mu \;\;\; \mathrm{mod}\;2\pi.
+  \label{eq:berry-phase-loop}
+\end{equation}
+For numerics it is often preferable to use the gauge-invariant overlap (link) formulation:
+for a discrete step $R\to R'$ define
+\begin{equation}
+  U(R\to R') :=
+  \frac{\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle}
+       {\big|\langle \tilde \varphi(R)\mid \tilde \varphi(R')\rangle\big|}\in U(1),
+  \label{eq:u1-link-variable}
+\end{equation}
+and evaluate the loop phase as $\Theta[\gamma]=\arg\prod_{(R\to R')\in\gamma} U(R\to R')$.
+
+\paragraph{Deferred steps.}
+The identification of the Berry connection with an effective electromagnetic four-potential and the
+reconstruction of Maxwell-like field equations require additional assumptions and additional numerical reconstruction procedures
+(e.g.\ robust curvature estimation, defect/source localization, and possibly non-Abelian transport in
+degenerate subspaces \cite{WilczekZee1984}). These steps are left for future work; here we restrict to
+the minimal $U(1)$ geometric phase readout on prepared narrowband packets.

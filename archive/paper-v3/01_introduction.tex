@@ -1,0 +1,85 @@
+\section{Introduction}
+\label{sec:introduction}
+
+The Standard Model and general relativity are extraordinarily successful at organizing experimental facts.
+At the same time, their combined fundamental ``catalog''---multiple fields, symmetry sectors, symmetry breaking
+structure, and many parameters fixed by measurement---invites a complementary line of inquiry:
+whether a smaller set of ground ingredients could underlie this effective complexity.
+This paper explores such a \emph{minimal-ingredient reconstruction} approach.
+
+\paragraph{Substrate-first strategy.}
+We adopt a deterministic \emph{substrate-first} strategy: posit an ontically real wave medium and treat familiar
+field theories as coarse-grained descriptions of constrained wave dynamics.
+The goal is \emph{not} to dispute the established phenomenology of quantum field theory, but to ask what could make
+gauge structure, relativistic kinematics, and particle-like quantization appear naturally as emergent regularities.
+
+\paragraph{Ground ingredients (minimal commitments).}
+The theory fragment developed here aims to keep its primitive commitments small:
+(i) a single substrate with local action dynamics (posited microscopically as a cubic lattice embedded in $\R^4$, with a continuum long-wavelength effective description),
+(ii) geometric nonlinearity arising from the embedding (rather than adding separate interaction fields by hand), and
+(iii) a controlled separation between a linear wave sector and a nonlinear self-guidance sector.
+Symmetry properties such as large-scale isotropy are treated as \emph{constraints on admissible constitutive choices}
+(e.g., writing the energy in terms of invariants of the induced metric), not as additional ``ingredients''.
+Everything else is treated as emergent bookkeeping: in particular, gauge potentials are interpreted as connection
+data of an ordered wave sector, not as independent fundamental substances.
+
+\paragraph{Substrate hypothesis.}
+We assume a three-dimensional elastic medium (``brane'') embedded in $\R^4$, described by an embedding map
+\begin{equation}
+  \vecX:\Omega\times\R \to \R^4, \qquad (x,t)\mapsto \vecX(x,t), \qquad \Omega\subset\R^3,
+  \label{eq:embedding-map}
+\end{equation}
+with an external time parameter $t$.
+The dynamics is specified by a local hyperelastic action on $\Omega$, constructed from invariants of the
+induced metric of the embedding. This is the minimal coordinate-free way to write an elastic energy without
+committing the effective continuum description to a preferred direction; microscopically, a cubic lattice
+substrate is allowed, and large-scale isotropy is treated as an empirical constraint on admissible lattice
+couplings and parameter regimes \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
+
+\paragraph{Gravity from transverse excitation (contraction).}
+A central motivating idea---already present at the level of the induced metric---is that excitation in the
+embedding dimension generically feeds back into \emph{lateral} stresses. Intuitively, if a region of the brane
+develops transverse structure $X^4=u(x,t)$, then the induced metric gains a quadratic contribution
+$\partial_i u\,\partial_j u$; because the in-brane displacement is dynamical, a pre-tensioned medium relaxes by
+generating an inward-biased lateral response rather than only a local stress increase. Coarse-grained over scales large compared to the carrier wavelength, such
+slowly varying contraction fields can bias the propagation of other wave packets and the equilibrium of
+localized modes. We therefore treat Newtonian gravity as an emergent, long-range \emph{contraction channel}
+mediated by transverse excitation, not as a separately postulated fundamental field.
+
+\paragraph{Narrowband order and geometric phase.}
+A further postulate is the existence of an ordered, narrowband carrier sector that provides
+a coherent phase reference over macroscopic scales (assumed to live primarily in a longitudinal
+polarization branch).
+On a lattice substrate, band structure provides a natural setting for narrowband sectors; here we treat the
+existence of an ordered carrier sector as a working postulate and focus on its diagnostic consequences.
+Geometric phase and holonomy are universal in wave systems and in adiabatic transport of polarized states
+\citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
+Here they are promoted to a structural bridge: adiabatic transport of a polarization subspace induces a
+Berry (rank-1) or Wilczek--Zee (non-Abelian) connection, which is interpreted as the natural origin of
+gauge degrees of freedom in an effective description.
+
+\paragraph{Particles as solitons; probability not fundamental.}
+We do not take the probabilistic interpretation of quantum theory as fundamental.
+Instead, apparent point-like interactions and discrete outcomes are attributed to deterministic wave dynamics
+combined with Fourier-localization constraints and threshold-like nonlinear exchange events.
+Particle-like states are localized solitons whose spatial structure is organized by spherical symmetry and
+spherical-harmonic mode families.
+The spin-$\tfrac12$ $4\pi$ aspect is attributed to geometric phase/holonomy of an internal polarization
+subspace (a ``spinorial'' parallel transport effect) rather than to literal multi-winding of a photon path.
+
+\paragraph{Relation to existing ideas.}
+The emergence of an effective light cone and Lorentz-like kinematics from a preferred-time medium has
+close analogues in analogue-gravity systems \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
+The present use of the term ``brane'' is literal (an elastic medium), and should not be confused with
+field-theoretic brane-world scenarios in high-energy theory \citep{RandallSundrum1999}.
+
+\paragraph{Paper organization.}
+\Cref{sec:scope} states scope, contributions, and non-claims.
+\Cref{sec:continuum-model} formulates the continuum substrate model (written in a coordinate-free form with an isotropic constitutive baseline).
+\Cref{sec:emergent-relativity} discusses the linear-wave regime and an emergent effective light cone.
+\Cref{sec:geophase,sec:effective-field} develop the geometric connection picture (Berry/Wilczek--Zee) and its
+gauge-covariant envelope formulation.
+\Cref{sec:localized} treats localized modes and shows how to pose them as self-adjoint eigenproblems around
+symmetric backgrounds.
+The microphysical lattice postulate and its parameterization are stated in \Cref{subsec:lattice-substrate};
+geometric-phase diagnostics are developed in \Cref{sec:geophase}.

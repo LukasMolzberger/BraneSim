@@ -1,0 +1,77 @@
+\section{Localized modes and self-adjoint eigenproblems}
+\label{sec:localized}
+
+A core goal of the substrate theory is to explain particle-like behavior (localization, discrete spectra,
+internal ``spin/charge''-like structure) as properties of confined wave states rather than point particles.
+
+\subsection{Linearization about symmetric backgrounds and self-adjointness}
+
+Let $\vecX_0(x)$ be a time-independent background embedding representing a localized deformation region.
+We are especially interested in backgrounds that are \emph{spherically symmetric} in the intrinsic brane coordinates,
+so that invariants depend only on $r=|x|$.
+
+Linearize the equations of motion \eqref{eq:eom} about $\vecX_0$ by writing
+$\vecX(x,t)=\vecX_0(x)+\bm{\eta}(x,t)$ with small perturbation $\bm{\eta}$.
+Because the dynamics derives from an action \eqref{eq:action}, the linearized operator arises from the second
+variation of the action and is therefore self-adjoint with respect to the inner product induced by the kinetic energy,
+schematically
+\begin{equation}
+  \langle \bm{\eta},\bm{\zeta}\rangle
+  :=\int_{\Omega} \rho_m\,\bm{\eta}(x)\cdot \bm{\zeta}(x)\,\dd^3x,
+  \label{eq:inner-product}
+\end{equation}
+together with the boundary/regularity conditions appropriate to the chosen domain (periodic cell, decay at infinity,
+or a large but finite domain with physical boundary conditions).
+In this setting, orthogonality and completeness of eigenmodes are not ``imposed'' as ad-hoc constraints: they follow as
+standard properties of a self-adjoint eigenproblem.
+
+\subsection{Angular structure and spherical harmonics}
+
+For a spherically symmetric background, the linearized operator commutes with the action of $SO(3)$ on the intrinsic
+coordinates. Consequently, eigenmodes can be chosen to transform in irreducible $SO(3)$ representations.
+Operationally, this implies a separation into a radial problem and an angular problem whose eigenfunctions are
+spherical harmonics $Y_{\ell m}(\theta,\varphi)$.
+This statement is a symmetry consequence and does not depend on switching the substrate constitutive law:
+it only requires rotational invariance of the background and of the linearized operator.
+
+In particular, spherical-harmonic mode families provide the natural spatial ``skeleton'' for localized excitations.
+Appropriate superpositions (and/or coupling to embedding-direction components) can yield torus-like or ring-like
+energy density profiles reminiscent of toroidal electron models, but here without assuming literal multi-winding
+of a photon trajectory.
+
+\subsection{Amplitude scaling and energy normalization}
+
+The linear eigenproblem fixes mode shapes and frequencies but not the overall amplitude:
+if $\bm{\eta}$ is an eigenmode, so is $c\,\bm{\eta}$ for any scalar $c$.
+Physical amplitudes are selected only when nonlinearities are included and the total energy is fixed.
+For an electron-like excitation one may impose a rest-energy normalization
+\begin{equation}
+  \overline{E}[\vecX] \;=\; m_e c^2,
+  \label{eq:rest-energy-normalization}
+\end{equation}
+where $\overline{E}$ denotes the conserved substrate energy associated with \eqref{eq:action} and $c$ is the
+characteristic speed of the carrier branch used to define the effective spacetime coordinates in \Cref{sec:geophase}.
+This ties the nonlinear amplitude scale of a localized soliton to a physical energy target.
+
+\subsection{Confinement as nonlinear self-guidance}
+
+A confining mechanism is required: in a purely linear wave system, localized packets generally disperse or radiate.
+A useful conceptual benchmark is the toroidal electron proposal attributed to Williamson \& van der Mark, which argues
+that ordinary gravitational curvature is far too weak to confine a Compton-scale photon-like mode and that confinement
+must arise from a self-consistent, excitation-specific mechanism.
+We adopt the \emph{confinement requirement} while not committing to a literal double-loop trajectory
+(see e.g.\ the review discussion in \citep{HuygensOptics2025}).
+
+In the present substrate theory, confinement is attributed primarily to the brane's \emph{constitutive and geometric
+nonlinearity}: large-amplitude deformations modify the local stress response and therefore the local linearized
+propagation characteristics of small fluctuations around the deformed state.
+Equivalently, the soliton ``writes'' an effective medium for itself (through $g_{ij}(\vecX)$ and $W$), enabling
+self-guidance and trapping without introducing a fundamental point charge or external potential.
+
+\subsection{Connection to Berry/Wilczek--Zee holonomy and spin}
+
+Localized modes can carry internal polarization structure (multi-component standing waves).
+The Berry/Wilczek--Zee connections of \Cref{sec:geophase} can then be evaluated on loops surrounding the localized region
+or on adiabatic deformations of a localized mode family.
+In this way, long-range ``charge''-like labels are interpreted as far-field holonomy/phase structure, while the
+spin-$\tfrac12$ $4\pi$ aspect is attributed to spinorial holonomy of a two-level polarization subspace.

@@ -1,0 +1,216 @@
+\section{Geometric phase, Berry/Wilczek--Zee connections, and gauge structure}
+\label{sec:geophase}
+
+\subsection{Ordered narrowband waves and polarization transport}
+
+We assume the substrate admits an ordered, narrowband carrier sector that supports multi-component polarized
+waves with a long phase-coherence length.
+Locally, a narrowband excitation can be written as
+\begin{equation}
+  \vecu(x,t)\;\approx\;\mathrm{Re}\Big\{ a(x,t)\,\bm{\epsilon}(x,t)\,e^{\ii\theta(x,t)} \Big\},
+  \qquad
+  \theta(x,t)=\phi(x,t)-\omega_0 t,
+  \label{eq:quasi-monochromatic}
+\end{equation}
+where $a(x,t)\ge 0$ varies slowly, $\bm{\epsilon}(x,t)\in\C^{N}$ is a normalized polarization state
+($\bm{\epsilon}^\dagger\bm{\epsilon}=1$), and $\omega_0$ is the carrier angular frequency.
+The internal dimension $N$ counts the relevant components (e.g.\ embedding-direction components and/or a
+coarse-grained mode basis).
+
+A central point is that polarization transport is not unique: the same physical state can be represented in many
+local phase conventions.
+Geometric phase formalizes this redundancy as a connection on a bundle of polarization states.
+
+\subsection{Rank-1 Berry connection (U(1))}
+
+For a single isolated polarization mode, represent the local state by a normalized vector
+$\lvert u(x)\rangle\in\C^{N}$ that depends smoothly on spacetime position $x^\mu$
+(here $x^\mu=(c\,t,x^1,x^2,x^3)$ built from the intrinsic coordinates and a chosen characteristic speed $c$ of the
+carrier branch).
+Define the Berry connection
+\begin{equation}
+  a_\mu(x) := \ii\,\langle u(x)\,|\,\partial_\mu u(x)\rangle.
+  \label{eq:berry-connection}
+\end{equation}
+Under a local phase choice $\lvert u(x)\rangle\mapsto e^{-\ii\chi(x)}\lvert u(x)\rangle$ one finds
+\begin{equation}
+  a_\mu \mapsto a_\mu + \partial_\mu \chi,
+  \label{eq:berry-gauge}
+\end{equation}
+so only gauge-invariant quantities carry physical meaning.
+The Berry curvature is the field strength
+\begin{equation}
+  f_{\mu\nu} := \partial_\mu a_\nu - \partial_\nu a_\mu,
+  \label{eq:berry-curvature}
+\end{equation}
+and the holonomy (geometric phase) around a closed loop $\Gamma$ is
+\begin{equation}
+  \gamma_\Gamma
+  = \oint_\Gamma a_\mu\,\dd x^\mu
+  = \int_{\Sigma:\,\partial\Sigma=\Gamma} f_{\mu\nu}\,\dd\Sigma^{\mu\nu}.
+  \label{eq:berry-holonomy}
+\end{equation}
+
+\subsection{What the geometric phase is ``of'': eigenmode bundles and adiabaticity}
+\label{subsec:berry-of}
+
+The connection above is not attached to an arbitrary decomposition of a real field into amplitude and phase.
+In the present setting one should choose $\lvert u(x)\rangle$ as a (locally defined) eigenvector of the
+linearized carrier operator about the slowly varying background configuration at $x$.
+As $x$ varies, these eigenvectors form an eigenbundle, and the Berry/Wilczek--Zee connection is the natural
+connection on that bundle.
+
+A clean rank-1 ($U(1)$) reduction requires that the dynamics remains in a single isolated band.
+If $\Delta\omega_{\mathrm{gap}}(x)$ is the local separation to the nearest competing band and
+$\Omega_{\mathrm{mix}}(x)$ is the rate of non-adiabatic mode conversion induced by background gradients,
+then the adiabatic condition
+\begin{equation}
+  \Omega_{\mathrm{mix}}(x)\ll \Delta\omega_{\mathrm{gap}}(x)
+  \label{eq:adiabatic-condition}
+\end{equation}
+should hold on the envelope scale.
+When this fails, a measured ``Berry signal'' typically reflects mode mixing or beating, and the correct reduction
+is to retain the relevant multi-dimensional subspace (the Wilczek--Zee description).
+In the brane model, the pre-stress parameter $\alpha$ and the wavelength regime control branch separation and
+therefore how well an Abelian gauge description can apply.
+
+\subsection{Diagnostic protocol and artifact controls (numerical extraction)}
+\label{subsec:diagnostic-protocol}
+
+The Berry/Wilczek--Zee connection is meaningful only when it is tied to a specific eigenbundle (or transported
+subspace) and when the reported observables are gauge-invariant.
+For numerical experiments on the lattice substrate, the following protocol provides a concrete, reproducible
+procedure to extract holonomy/curvature and to rule out common artifacts.
+
+\begin{center}
+\fbox{\begin{minipage}{0.95\linewidth}
+\textbf{Protocol}
+\begin{enumerate}
+\item \textbf{Carrier isolation / demodulation.}
+Choose a carrier frequency $\omega_0$ and isolate a narrowband sector (e.g.\ by band-pass filtering in time or by
+short-time Fourier methods).
+Work with a complex envelope representation consistent with \Cref{eq:quasi-monochromatic}.
+
+\item \textbf{Define the instantaneous polarization object.}
+At each spacetime point (or each sample along a loop), define either
+(i) a normalized rank-1 state $\lvert u(x)\rangle$ for an isolated band, or
+(ii) an $n$-dimensional subspace projector $P(x)$ (or an orthonormal frame $\mathbf{E}(x)$) for a near-degenerate
+sector.
+The definition should be tied to the \emph{local linearized carrier problem} about the slowly varying background at $x$
+(cf.\ \Cref{subsec:berry-of}).
+
+\item \textbf{Measure the adiabaticity/gap indicators.}
+Estimate a local band gap $\Delta\omega_{\mathrm{gap}}(x)$ (separation to the nearest competing band) and a mode-leakage
+proxy along the transport path (e.g.\ growth of energy outside the chosen band/subspace).
+Use these to empirically validate the adiabatic criterion \Cref{eq:adiabatic-condition}.
+
+\item \textbf{Holonomy from overlaps (gauge-invariant).}
+For a discretized loop $\Gamma: x_0\!\to x_1\!\to\cdots\to x_m=x_0$:
+\begin{itemize}
+\item \emph{Abelian (rank-1):} define links
+$U_k=\frac{\langle u(x_k)\,|\,u(x_{k+1})\rangle}{|\langle u(x_k)\,|\,u(x_{k+1})\rangle|}\in U(1)$ and report the loop phase
+$\gamma_\Gamma=\arg\!\big(\prod_{k=0}^{m-1}U_k\big)$.
+\item \emph{Non-Abelian (rank-$n$):} define overlap matrices $M_k=\mathbf{E}(x_k)^\dagger\mathbf{E}(x_{k+1})$ and extract their
+unitary part (e.g.\ by polar decomposition) as $U_k\in U(n)$.
+Report the holonomy matrix $U_\Gamma=\prod_{k=0}^{m-1}U_k$ and gauge-invariant summaries such as
+$\mathrm{spec}(U_\Gamma)$ and $\mathrm{tr}(U_\Gamma)$.
+\end{itemize}
+
+\item \textbf{Curvature by small loops / plaquettes.}
+Approximate curvature by evaluating holonomy around small loops and dividing by enclosed area (real-space),
+or use the link-variable Brillouin-zone construction in \Cref{subsec:bz-berry} (momentum-space).
+\end{enumerate}
+
+\textbf{Artifact controls (required for credibility).}
+\begin{itemize}
+\item \textbf{Gauge randomization test:} apply arbitrary local phase choices (rank-1) or local $U(n)$ frame rotations (rank-$n$) and
+confirm that reported invariants (e.g.\ $\gamma_\Gamma$, $\mathrm{spec}(U_\Gamma)$) do not change.
+\item \textbf{Resolution/convergence:} verify stability of invariants under refinement of $\Delta t$, lattice spacing, and loop sampling density.
+\item \textbf{Adiabatic breakdown demonstration:} intentionally violate \Cref{eq:adiabatic-condition} and show that the extracted holonomy
+becomes non-robust (strong dependence on sampling/path or visible subspace leakage), distinguishing geometry from beating.
+\end{itemize}
+\end{minipage}}
+\end{center}
+
+\subsection{Wilczek--Zee connection (non-Abelian)}
+
+If the relevant polarization sector is an $n$-dimensional near-degenerate subspace, choose an orthonormal
+frame $\mathbf{E}(x)\in\C^{N\times n}$ with columns $\lvert u_a(x)\rangle$ spanning the subspace, so that
+$\mathbf{E}^\dagger\mathbf{E}=I_n$.
+Define the Wilczek--Zee connection
+\begin{equation}
+  \mathcal{A}_\mu(x) := \ii\,\mathbf{E}(x)^\dagger\,\partial_\mu \mathbf{E}(x)\in\mathfrak{u}(n).
+  \label{eq:wz-connection}
+\end{equation}
+A change of local frame $\mathbf{E}\mapsto \mathbf{E}\,U(x)$ with $U(x)\in U(n)$ yields the non-Abelian gauge law
+\begin{equation}
+  \mathcal{A}_\mu \mapsto U^\dagger \mathcal{A}_\mu U + \ii\,U^\dagger \partial_\mu U,
+  \label{eq:wz-gauge}
+\end{equation}
+and the curvature (field strength) is
+\begin{equation}
+  \mathcal{F}_{\mu\nu}
+  := \partial_\mu \mathcal{A}_\nu-\partial_\nu \mathcal{A}_\mu
+     -\ii\,[\mathcal{A}_\mu,\mathcal{A}_\nu].
+  \label{eq:wz-curvature}
+\end{equation}
+
+\subsection{\texorpdfstring{Axis-aligned triplet phases and coupling-induced mixing ($U(1)^3\rightarrow U(3)$)}{Axis-aligned triplet phases and coupling-induced mixing (U(1)^3 -> U(3))}}
+\label{subsec:axis-triplet}
+
+On a cubic lattice substrate it is natural to posit a three-component narrowband carrier triplet
+$\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ aligned with the lattice axes.
+Introduce a dimensionless mixing parameter $g_{\mathrm{mix}}\ge 0$ controlling inter-axis mixing.
+In the lattice substrate, $g_{\mathrm{mix}}$ is an effective measure determined by the prestretch $\alpha$ and by
+the microscopic coupling stencil (notably off-axis/diagonal couplings).
+
+\paragraph{Decoupled limit ($g_{\mathrm{mix}}=0$).}
+If the three axis channels are dynamically decoupled, each component supports an independent local phase choice
+and an independent rank-1 Berry connection $a_\mu^{(x)},a_\mu^{(y)},a_\mu^{(z)}$.
+In this limit, it is meaningful (and gauge-invariant) to speak of ``the Berry phase of an axis.''
+
+\paragraph{Mixed regime ($g_{\mathrm{mix}}>0$).}
+For any nonzero mixing, the physical eigenmodes are \emph{linear combinations} of axis labels.
+Axis-specific phases become basis-dependent and are not gauge-invariant.
+The correct adiabatic transport is instead a Wilczek--Zee connection on the transported near-degenerate subspace.
+For an approximately threefold-degenerate carrier subspace, one obtains a $U(3)$ connection
+$\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}.
+It can be decomposed into a trace $U(1)$ part and a traceless $SU(3)$ part,
+\begin{equation}
+  \mathcal{A}_\mu
+  = \frac{1}{3}\,\mathrm{tr}(\mathcal{A}_\mu)\,I_3
+  + \sum_{a=1}^{8} A^a_\mu\,T^a,
+\end{equation}
+where $T^a$ are $SU(3)$ generators.
+This provides a concrete way to express how ``axis-aligned Berry phases'' transition into a non-Abelian color-like
+connection once coupling is switched on.
+
+\subsection{Berry curvature on a discretized Brillouin zone (link-variable method)}
+\label{subsec:bz-berry}
+
+For a lattice substrate, Berry curvature can be computed directly on the discretized Brillouin zone using
+link variables and plaquettes, closely analogous to lattice-QCD Berry-curvature constructions
+\citep{Fukui2005ChernDiscretizedBZ,PuYamamoto2018BerryLatticeQCD,Yamamoto2016BerryPhaseLatticeQCD}.
+Let $\lvert u(\mathbf{k})\rangle$ be a normalized eigenvector (or $\mathbf{E}(\mathbf{k})$ a frame of a degenerate
+subspace) on a momentum lattice with spacing $\tilde a$.
+In the Abelian case one defines links
+\begin{equation}
+  U_j(\mathbf{k})=\frac{\langle u(\mathbf{k})\,|\,u(\mathbf{k}+\tilde{\jmath})\rangle}
+  {|\langle u(\mathbf{k})\,|\,u(\mathbf{k}+\tilde{\jmath})\rangle|},
+\end{equation}
+and a plaquette
+\begin{equation}
+  U_{ij}(\mathbf{k}) = U_i(\mathbf{k})U_j(\mathbf{k}+\tilde{\imath})
+  U_i^\dagger(\mathbf{k}+\tilde{\jmath})U_j^\dagger(\mathbf{k}),
+\end{equation}
+whose argument approximates the integrated Berry curvature over the plaquette.
+In the non-Abelian case one uses overlap matrices between frames and projects to $U(n)$ links, then forms the same
+plaquette structure to obtain a discretized non-Abelian curvature.
+This is a natural diagnostic bridge between the lattice-substrate hypothesis and QCD-motivated non-Abelian geometry.
+\subsection{\texorpdfstring{Spinorial holonomy and the $4\pi$ aspect}{Spinorial holonomy and the 4pi aspect}}
+
+For $n=2$ (a two-level polarization subspace), holonomy lives naturally in a double cover of $SO(3)$.
+A closed loop in physical space that induces a $2\pi$ rotation of an internal polarization frame can therefore
+produce a sign change of the transported state, while a $4\pi$ loop returns it to itself.
+In the present theory this spinorial $4\pi$ aspect is attributed to Berry/Wilczek--Zee holonomy of an internal
+polarization bundle, and is treated as part of the particle-sector structure developed in \Cref{sec:localized}.

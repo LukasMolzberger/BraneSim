@@ -1,0 +1,115 @@
+\section{Emergent relativity and effective Lorentz symmetry}
+\label{sec:emergent-relativity}
+\label{emergent-relativity-and-lorentz-invariance}
+
+A central feature of the brane model is that special-relativistic kinematics
+emerges as an effective description of wave propagation in the substrate, rather
+than being imposed as a fundamental symmetry. This section outlines how Lorentz
+invariance arises in the linear regime and discusses the expected regime of
+validity.
+
+\subsection{Wave-cone invariance and the effective light cone}
+
+In the linear wave regime (small amplitudes, weak nonlinearity), the brane
+substrate supports propagating modes whose dispersion relation is approximately
+
+\begin{equation}
+\omega^2(\mathbf{k}) \approx c^2 |\mathbf{k}|^2,
+\label{eq:linear-dispersion}
+\end{equation}
+
+where $c = \sqrt{T/\rho_m}$ is the wave speed determined by the brane's tension
+$T$ and mass density $\rho_m$. This dispersion relation is isotropic (depends
+only on $|\mathbf{k}|$, not on the direction of $\mathbf{k}$) provided the
+discrete lattice structure is sufficiently isotropic (e.g., FCC lattice with
+appropriate neighbor weights; see Section~\ref{lattice-and-neighborhoods}).
+
+For an observer embedded in the brane who can only access information through
+wave propagation, the set of events that can be causally connected to a given
+spacetime point $(t_0, \mathbf{x}_0)$ is bounded by the \emph{effective light
+cone}:
+
+\begin{equation}
+(t - t_0)^2 - \frac{|\mathbf{x} - \mathbf{x}_0|^2}{c^2} = 0.
+\label{eq:light-cone}
+\end{equation}
+
+Inside this cone (timelike separation), signals can propagate; outside
+(spacelike separation), no subluminal signal can connect the events. This
+structure is precisely the kinematic foundation of special relativity.
+
+\subsection{Emergent Minkowski metric}
+
+The dispersion relation~\eqref{eq:linear-dispersion} implies that the phase
+velocity of a wave packet with central wavevector $\mathbf{k}$ is $\mathbf{v}
+= c^2 \mathbf{k} / \omega$, and the group velocity is $\mathbf{v}_g = \partial
+\omega / \partial \mathbf{k} = c^2 \mathbf{k} / \omega$. For a wave packet
+centered at $\omega_0$, $\mathbf{k}_0$ satisfying the dispersion relation, the
+spacetime interval between events separated by $dt$ and $d\mathbf{x}$ is
+invariant under transformations that preserve the cone structure. This leads
+naturally to the effective Minkowski metric:
+
+\begin{equation}
+ds^2 = c^2 dt^2 - d\mathbf{x}^2 = c^2 dt^2 - (dx^1)^2 - (dx^2)^2 - (dx^3)^2.
+\label{eq:minkowski-metric}
+\end{equation}
+
+Transformations that preserve this metric form the Lorentz group $\mathrm{SO}(1,3)$.
+
+\subsection{Regime of validity and corrections}
+
+The emergent Lorentz invariance is a \emph{regime-based} property, valid in the
+limit where:
+
+\begin{enumerate}
+\item \textbf{Wavelengths are large compared to the lattice spacing:}
+  $|\mathbf{k}| h \ll 1$, where $h$ is the discrete lattice spacing. At shorter
+  wavelengths, lattice dispersion corrections become significant and the
+  dispersion relation deviates from the linear form~\eqref{eq:linear-dispersion}.
+
+\item \textbf{Amplitudes are small:} Geometric nonlinearity (lateral contraction
+  induced by normal displacements) is weak. When amplitudes approach the
+  Compton scale $\lambda_C$, the geometric nonlinearity parameter $\eta$
+  becomes of order unity, and the wave
+  dynamics can no longer be linearized.
+
+\item \textbf{The medium is isotropic:} The discrete lattice structure and the
+  energy functional produce an isotropic effective stiffness tensor. In
+  practice, this requires careful choice of lattice geometry and neighbor
+  weights (see Section~\ref{calibration-dispersion-isotropy}).
+\end{enumerate}
+
+Outside these regimes, corrections to Lorentz invariance are expected. In
+particular, at Compton scales (where soliton formation occurs), the effective
+description must account for strong geometric nonlinearity and the induced
+metric $g_{ij} = \partial_i \mathbf{X} \cdot \partial_j \mathbf{X}$ deviates
+from the flat Minkowski form. The framework does not claim exact Lorentz
+invariance at all scales; rather, it posits that the observed approximate
+Lorentz symmetry of macroscopic physics emerges from the isotropic wave
+propagation properties of the substrate in the appropriate regime.
+
+\subsection{Lorentz transformations as effective coordinate changes}
+
+For an internal observer who can only infer spacetime structure through wave
+kinematics, a \emph{boost} (change of reference frame with relative velocity
+$\mathbf{v}$) corresponds to a re-labeling of events that preserves the causal
+structure encoded in the light cone. The standard Lorentz transformation
+formulae
+
+\begin{align}
+t' &= \gamma \left( t - \frac{\mathbf{v} \cdot \mathbf{x}}{c^2} \right), \\
+\mathbf{x}' &= \mathbf{x} + (\gamma - 1) \frac{(\mathbf{v} \cdot \mathbf{x})
+\mathbf{v}}{v^2} - \gamma \mathbf{v} t,
+\end{align}
+
+with $\gamma = (1 - v^2/c^2)^{-1/2}$, arise as the unique linear transformations
+that preserve the interval $ds^2$ and map forward light cones to forward light
+cones.
+
+From the brane perspective, these transformations do not reflect a deep symmetry
+of the microscopic dynamics (the brane Lagrangian is written with an absolute
+time parameter $t$), but rather the kinematic constraints on wave propagation in
+an isotropic elastic medium. This is analogous to the emergence of Lorentz-like
+symmetry in analog gravity systems (e.g., sound waves in Bose--Einstein
+condensates~\cite{Barcelo2011AnalogueGravity}), where the "speed of light" is
+replaced by the speed of sound and the symmetry is approximate and regime-dependent.
