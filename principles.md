@@ -221,12 +221,17 @@ postulate is not part of this project's commitments.
 
 ### 4.4 SU(3) emergence chain (record what is doing the work)
 
-The path from microphysics to color-like internal structure is:
+The candidate path from microphysics to color-like internal structure is:
 
-1. Cubic central-force lattice → Cauchy isotropy → leading-order isotropic IR
-   with three real lateral channels forming an `SO(3)` vector.
-2. Prestress `α < 1` activates linear off-diagonal coupling between channels via
-   the diagonal-shell springs (face- and body-diagonal links).
+1. Cubic central-force lattice → three real lateral displacement channels.
+   The current `1/|δ|²` shell weights do **not** give an exactly isotropic
+   leading-order IR tensor; an `SO(3)`-like triplet is only justified after
+   shell retuning or after quantitatively showing that residual anisotropy is
+   below the tolerance of the regime being used.
+2. Prestress `α` changes the acoustic/static tensors and the degree of
+   branch mixing through the same substrate energy. Its proposed role in the
+   `U(1)³ → U(3)` crossover must be measured through band isolation and
+   Wilczek--Zee diagnostics, not assumed from the Cauchy relation alone.
 3. Per-wavepacket narrowband ansatz promotes real `(ξ¹, ξ², ξ³)` to complex
    `Ψ ∈ ℂ³`, on which `U(3) = U(1) × SU(3)` acts.
 4. The `U(1)` trace sector is the EM-like channel; the `SU(3)` traceless

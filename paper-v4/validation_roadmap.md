@@ -42,20 +42,24 @@ L7 localized solitons
 
 ## Sprint 1 — IR foundations (L0 → L2)
 
-The Cauchy-isotropy argument predicts isotropic long-wavelength dispersion *by
-construction*. This sprint converts that prediction into measurable numbers
-and confirms or falsifies the IR foundation.
+The lattice-to-continuum calculation now predicts finite leading-order cubic
+anisotropy for the current `1/|δ|²` shell weights. This sprint converts the
+closed-form acoustic tensor into measurable numbers, verifies the force code,
+and decides whether to retune shell weights or carry a quantified anisotropy
+forward.
 
 | # | Subtask | Owner | Falsifiable output |
 |---|---|---|---|
 | 1 | Lattice-to-continuum elastic-constants derivation: closed-form `μ(k_δ, a)`, `λ(k_δ, a)` from the central-force pair springs with `1/|δ|²` shell weights. **Done** (`paper-v4/derivations/lattice_to_continuum.md`). Finding: standard Cauchy relation `C_{1122} = C_{1212}` holds at `α=1`, but cubic isotropy `C_{1111}−C_{1122} = 2 C_{1212}` is **violated** with the `1/|δ|²` weights, with leading-order anisotropy index `η_cub = −7α/[2(39−22α)]`. Predicts `c_T ≈ 1.912`, `c_L ≈ 1.989`, `c_L/c_T ≈ 1.040` at `α=0.2` (the local_extensive default). | `physics-derivation` | ✅ closed-form expressions + numerical predictions |
-| 1b | Solve for shell weights that recover cubic isotropy: find the manifold of `(w_I, w_{II}, w_{III})` satisfying `2 w_I = w_{II} + (8/3) w_{III}` (the isotropy condition; derived in subtask 1's §3). Choose a representative point, document the trade-off (e.g. effective `c_L/c_T`, condition number), and propose retuning. | `physics-derivation` | closed-form weight family + recommended choice + impact estimate |
-| 2 | Long-wavelength dispersion + isotropy: measure `ω([100])` vs `ω([110])` vs `ω([111])` at `|k|·a ∈ {0.05, 0.1, 0.2, 0.3}`. | `dispersion-analyst` | < 1% deviation at `|k|·a ≤ 0.1`; report scaling of deviation with `(ka)`; cross-check against subtask 1's `(ka)²` vanishing prediction |
+| 1b | Shell weights that recover cubic isotropy. **Done** (`paper-v4/derivations/shell_weight_isotropy.md`). Finding: effective weights must satisfy `2 w_I = w_{II} + (16/9) w_{III}`. A conservative representative preserving `S = 26/3` is `(431/345, 334/345, 99/115)`, predicting `c_T ≈ 1.908`, `c_L ≈ 1.997` at `α=0.2`. | `physics-derivation` | ✅ closed-form weight family + recommended retuned point |
+| 2 | Long-wavelength dispersion + anisotropy: measure `ω([100])` vs `ω([110])` vs `ω([111])` at `|k|·a ∈ {0.05, 0.1, 0.2, 0.3}` and compare to the acoustic tensor in subtask 1. | `dispersion-analyst` | measured branch speeds match the closed-form direction-dependent predictions after `k→0` extrapolation; report residual finite-`ka` scaling |
 | 3 | Branch-speed match: measure `c_T`, `c_L` directly and compare to subtask 1's prediction. | `dispersion-analyst` | < 5% deviation, else subtask 1 wrong or numerical issue |
 | 4 | Band isolation: identify `(α, ω₀)` window with `Δω_gap / ω₀ > 0.1` and verify mode leakage decays exponentially. | `dispersion-analyst` + `berry-validator` | yes/no with measured leakage time-constant |
 
 Pass criterion for sprint: subtask 1 reproduces the empirical `c_T`, `c_L` to
-within 5%, and direction-dependent dispersion is below 1% at `|k|·a ≤ 0.1`.
+within 5%, and the measured direction-dependent branch speeds match the
+closed-form anisotropy prediction closely enough to decide whether shell
+retuning is required before later Lorentz/gauge claims.
 
 ---
 
@@ -137,9 +141,9 @@ holding to ≤ 1%. EP failure here is a fatal result for the gravity story.
 
 - Add a confinement force, a damping term, an amplitude clamp, or a hand-tuned
   saturation rule.
-- Tune shell weights to obtain isotropy after we already showed it is automatic
-  by the Cauchy relation. If isotropy fails empirically with central-force
-  springs, the failure is itself the result.
+- Claim isotropy from the Cauchy relation alone. If shell weights are retuned,
+  the retuning must be explicit and recorded as a model choice; if they are not,
+  the finite anisotropy must be carried forward quantitatively.
 - Postulate a global narrowband carrier sector to force Berry diagnostics to
   work. Per principles §4.3, narrowband is per-wavepacket.
 - Hide preferred-frame effects behind "operational isotropy" hand-waving when

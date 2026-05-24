@@ -14,11 +14,18 @@ class BraneGrid3D:
     spacing: float
     device: torch.device
     periodic_axes: tuple[bool, bool, bool] = (False, False, False)
+    shell_weights: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
     def __post_init__(self):
         nx, ny, nz = self.grid_shape
         if nx <= 1 or ny <= 1 or nz <= 1:
             raise ValueError("grid_shape must have all dimensions > 1")
+        if len(self.shell_weights) != 3:
+            raise ValueError("shell_weights must contain axial, face-diagonal, and body-diagonal weights")
+        shell_weights = tuple(float(v) for v in self.shell_weights)
+        if any(v <= 0.0 for v in shell_weights):
+            raise ValueError("shell_weights must be positive")
+        object.__setattr__(self, "shell_weights", shell_weights)
 
         offsets = []
         for di in (-1, 0, 1):
@@ -30,7 +37,13 @@ class BraneGrid3D:
 
         norms = torch.norm(self.neighbor_offsets.to(torch.float32), dim=1)
         object.__setattr__(self, "neighbor_offset_norms", norms)
-        object.__setattr__(self, "neighbor_weights", 1.0 / (norms ** 2))
+
+        norm_sq = torch.sum(self.neighbor_offsets.to(torch.int64) ** 2, dim=1)
+        shell_weight_tensor = torch.empty_like(norms)
+        shell_weight_tensor[norm_sq == 1] = shell_weights[0]
+        shell_weight_tensor[norm_sq == 2] = shell_weights[1]
+        shell_weight_tensor[norm_sq == 3] = shell_weights[2]
+        object.__setattr__(self, "neighbor_weights", shell_weight_tensor / (norms ** 2))
 
         neighbors = self._build_neighbors()
         object.__setattr__(self, "neighbors", neighbors)

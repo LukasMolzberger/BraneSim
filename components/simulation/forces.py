@@ -13,6 +13,41 @@ class SpringForceComputer:
         self.spring_constant = float(spring_constant)
         self.rest_length = float(rest_length)
 
+    def _bond_delta(
+        self,
+        state: BraneState3D,
+        grid: BraneGrid3D,
+        ids: torch.Tensor,
+        neighbor_idx: int,
+        p_pos: torch.Tensor,
+        q_pos: torch.Tensor,
+    ) -> torch.Tensor:
+        delta = q_pos - p_pos
+        if not any(grid.periodic_axes):
+            return delta
+
+        offset = grid.neighbor_offsets[neighbor_idx]
+        coords = state.grid_coords[ids]
+        image_shift = torch.zeros_like(delta)
+
+        for axis, is_periodic in enumerate(grid.periodic_axes):
+            if not is_periodic:
+                continue
+
+            step = int(offset[axis].item())
+            if step == -1:
+                mask = coords[:, axis] == 0
+                shift = -float(grid.grid_shape[axis]) * float(grid.spacing)
+            elif step == 1:
+                mask = coords[:, axis] == grid.grid_shape[axis] - 1
+                shift = float(grid.grid_shape[axis]) * float(grid.spacing)
+            else:
+                continue
+
+            image_shift[mask, axis] = shift
+
+        return delta + image_shift
+
     def compute_forces(self, state: BraneState3D, grid: BraneGrid3D) -> torch.Tensor:
         forces = torch.zeros_like(state.positions)
 
@@ -26,7 +61,7 @@ class SpringForceComputer:
             p_pos = state.positions[ids]
             q_pos = state.positions[neighbor_ids[ids]]
 
-            delta = q_pos - p_pos
+            delta = self._bond_delta(state, grid, ids, neighbor_idx, p_pos, q_pos)
             distance = torch.norm(delta, dim=1, keepdim=True)
 
             rest_length = self.rest_length * grid.neighbor_offset_norms[neighbor_idx].to(state.dtype)
@@ -54,7 +89,7 @@ class SpringForceComputer:
             p_pos = state.positions[ids]
             q_pos = state.positions[neighbor_ids[ids]]
 
-            delta = q_pos - p_pos
+            delta = self._bond_delta(state, grid, ids, neighbor_idx, p_pos, q_pos)
             distance = torch.norm(delta, dim=1)
             rest_length = self.rest_length * grid.neighbor_offset_norms[neighbor_idx].to(state.dtype)
             strain = distance - rest_length

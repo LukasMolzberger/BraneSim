@@ -20,6 +20,7 @@ class LatticeConfig:
     spacing: float
     periodic_axes: tuple[bool, bool, bool]
     fixed_boundaries: bool
+    shell_weights: tuple[float, float, float] = (1.0, 1.0, 1.0)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -27,6 +28,7 @@ class LatticeConfig:
             "spacing": float(self.spacing),
             "periodic_axes": list(self.periodic_axes),
             "fixed_boundaries": bool(self.fixed_boundaries),
+            "shell_weights": [float(v) for v in self.shell_weights],
         }
 
     @staticmethod
@@ -36,6 +38,7 @@ class LatticeConfig:
             spacing=float(data["spacing"]),
             periodic_axes=tuple(bool(v) for v in data.get("periodic_axes", (False, False, False))),
             fixed_boundaries=bool(data.get("fixed_boundaries", True)),
+            shell_weights=tuple(float(v) for v in data.get("shell_weights", (1.0, 1.0, 1.0))),
         )
 
 
