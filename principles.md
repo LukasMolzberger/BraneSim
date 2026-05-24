@@ -66,20 +66,32 @@ identities the project relies on:
   independent cubic elastic constants from 3 to 2 and is automatic.
   However, **cubic isotropy** — the condition `C_{1111} − C_{1122} = 2 C_{1212}`
   — is a *separate* requirement and is NOT implied by the Cauchy relation.
-  Cubic isotropy depends on the specific shell weights and is NOT automatic
-  with the `1/|δ|²` weights used in `components/simulation/grid.py`.
-  See `paper-v4/derivations/lattice_to_continuum.md` for the closed-form
-  computation. With the current weights and prestress `α`, the residual
-  cubic-anisotropy index is `η_cub = −7α / [2(39 − 22α)]`, which evaluates to
-  roughly `−21%` at `α = 1` and `−2%` at `α = 0.2` (the current default).
-  This anisotropy is leading-order in `ka`, not an `O((ka)⁴)` correction.
-- **Implications of leading-order anisotropy.** Until shell weights are
-  retuned (or the project commits to a finite static anisotropy at this
-  level), claims about "operational rotational invariance" or "emergent
-  Lorentz" must be quantitative and acknowledge this baseline. Subtask 2
-  in `paper-v4/validation_roadmap.md` is the empirical check; the dispersion
-  experiment must measure direction-dependent `c_L` and `c_T` and compare
-  against the predicted `η_cub`.
+  Cubic isotropy depends on the specific shell weights. With the bare
+  `1/|δ|²` weights, isotropy is NOT satisfied: the residual cubic-anisotropy
+  index is `η_cub = −7α / [2(39 − 22α)]`, which evaluates to roughly `−21%`
+  at `α = 1` and `−2%` at `α = 0.2`. This anisotropy is leading-order in `ka`,
+  not an `O((ka)⁴)` correction. See `paper-v4/derivations/lattice_to_continuum.md`
+  for the closed-form computation.
+- **Canonical configs use retuned isotropic shell weights.** The isotropy
+  condition `2 w_I = w_II + (16/9) w_III` admits a conservative
+  representative `(w_I, w_II, w_III) = (431/345, 334/345, 99/115)` that
+  preserves the second-moment stiffness `S = 26/3` and stays close to the
+  bare `(1, 1, 1)` weights (derivation:
+  `paper-v4/derivations/shell_weight_isotropy.md`). The default canonical
+  config `orchestration/configs/local_extensive.json` now carries these
+  retuned weights so that downstream Lorentz / Berry / soliton claims rest
+  on a leading-order isotropic acoustic tensor. The code default in
+  `components/simulation/grid.py` is left at `(1, 1, 1)` for backward
+  compatibility — configs that intentionally probe the anisotropic baseline
+  (e.g. `orchestration/configs/dispersion_*.json` without `_isotropic`)
+  rely on that default.
+- **Implications of leading-order anisotropy.** Any claim about "operational
+  rotational invariance" or "emergent Lorentz" must use the retuned weights
+  (or quantify the residual anisotropy of the bare weights and acknowledge
+  it). Subtask 2 in `paper-v4/validation_roadmap.md` is the empirical check;
+  the dispersion experiment must measure direction-dependent `c_L` and
+  `c_T` and compare against the predicted `η_cub` for the bare weights and
+  against direction-independent `c_L, c_T` for the retuned weights.
 - **Prestress α controls inter-axis coupling.** The cross-term in the link
   energy proportional to `(1−α)·(Δξ)²/(2a)` is the only linear coupling
   between the three lateral channels `ξ¹, ξ², ξ³` from the diagonal-shell

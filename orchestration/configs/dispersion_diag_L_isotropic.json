@@ -1,0 +1,27 @@
+{
+  "_comment": "Sprint 1, subtask 3 (Run B, isotropy probe): longitudinal plane-wave along [111] with the retuned isotropic shell weights (431/345, 334/345, 99/115). Predicts c_L ≈ 1.997 at α=0.2 (direction-independent on the isotropy manifold). Compare against dispersion_axis_L_isotropic.json — the speeds should match to within finite-k corrections. |k|·a = 2π√3/32 ≈ 0.340.",
+  "initialization": {
+    "module": "components.initialization.plane_wave",
+    "nx": 32,
+    "ny": 32,
+    "nz": 32,
+    "spacing": 1.0,
+    "periodic_axes": [true, true, true],
+    "free_boundaries": true,
+    "shell_weights": [1.2492753623188406, 0.9681159420289855, 0.8608695652173913],
+    "spring_constant": 1.0,
+    "rest_length": 0.2,
+    "mass_density": 1.0,
+    "dt": 0.05,
+    "num_steps": 1200,
+    "checkpoint_interval": 4,
+    "k_index": [1, 1, 1],
+    "polarization": [0.5773502691896257, 0.5773502691896257, 0.5773502691896257],
+    "amplitude": 0.001,
+    "device": "auto",
+    "dtype": "float64"
+  },
+  "simulation": {"device": "auto"},
+  "visualizations": [],
+  "diagnostics": {"module": "components.diagnostics.dispersion", "frame_stride": 1}
+}
