@@ -49,3 +49,14 @@ Thumbs.db
 .coverage
 htmlcov/
 test-runs/
+
+# LaTeX
+paper/build/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.synctex.gz
