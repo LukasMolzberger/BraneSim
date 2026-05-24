@@ -1,19 +1,22 @@
 \section{Geometric phase, Berry/Wilczek--Zee connections, and gauge structure}
 \label{sec:geophase}
 
-\subsection{Ordered narrowband waves and polarization transport}
+\subsection{Per-wavepacket band isolation and polarization transport}
 
-We assume the substrate admits an ordered, narrowband carrier sector that supports multi-component polarized
-waves with a long phase-coherence length.
-Locally, a narrowband excitation can be written as
+The complex-envelope description is applied per band-isolated excitation.
+Each wavepacket is treated as narrowband around its own local carrier angular frequency $\omega_0$,
+determined by the linearized carrier operator about the slowly varying background at the wavepacket's
+location; no globally coherent universe-wide carrier is assumed.
+A band-isolated wavepacket can be written locally as
 \begin{equation}
   \vecu(x,t)\;\approx\;\mathrm{Re}\Big\{ a(x,t)\,\bm{\epsilon}(x,t)\,e^{\ii\theta(x,t)} \Big\},
   \qquad
   \theta(x,t)=\phi(x,t)-\omega_0 t,
   \label{eq:quasi-monochromatic}
 \end{equation}
-where $a(x,t)\ge 0$ varies slowly, $\bm{\epsilon}(x,t)\in\C^{N}$ is a normalized polarization state
-($\bm{\epsilon}^\dagger\bm{\epsilon}=1$), and $\omega_0$ is the carrier angular frequency.
+where $a(x,t)\ge 0$ varies slowly on the envelope scale, $\bm{\epsilon}(x,t)\in\C^{N}$ is a normalized
+polarization state ($\bm{\epsilon}^\dagger\bm{\epsilon}=1$), and $\omega_0$ is the wavepacket's local carrier
+angular frequency.
 The internal dimension $N$ counts the relevant components (e.g.\ embedding-direction components and/or a
 coarse-grained mode basis).
 
@@ -158,7 +161,7 @@ and the curvature (field strength) is
 \subsection{\texorpdfstring{Axis-aligned triplet phases and coupling-induced mixing ($U(1)^3\rightarrow U(3)$)}{Axis-aligned triplet phases and coupling-induced mixing (U(1)^3 -> U(3))}}
 \label{subsec:axis-triplet}
 
-On a cubic lattice substrate it is natural to posit a three-component narrowband carrier triplet
+On a cubic lattice substrate it is natural to organize the per-wavepacket complex envelope as a three-component triplet
 $\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ aligned with the lattice axes.
 Introduce a dimensionless mixing parameter $g_{\mathrm{mix}}\ge 0$ controlling inter-axis mixing.
 In the lattice substrate, $g_{\mathrm{mix}}$ is an effective measure determined by the prestretch $\alpha$ and by
@@ -173,7 +176,7 @@ In this limit, it is meaningful (and gauge-invariant) to speak of ``the Berry ph
 For any nonzero mixing, the physical eigenmodes are \emph{linear combinations} of axis labels.
 Axis-specific phases become basis-dependent and are not gauge-invariant.
 The correct adiabatic transport is instead a Wilczek--Zee connection on the transported near-degenerate subspace.
-For an approximately threefold-degenerate carrier subspace, one obtains a $U(3)$ connection
+For an approximately threefold-degenerate retained subspace, one obtains a $U(3)$ connection
 $\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}.
 It can be decomposed into a trace $U(1)$ part and a traceless $SU(3)$ part,
 \begin{equation}
