@@ -103,8 +103,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--nz", type=int, default=64)
     p.add_argument("--spacing", type=float, default=1.0)
     p.add_argument("--periodic-axes", type=str, default="false,false,false")
-    p.add_argument("--shell-weights", type=_triple_floats, default=(1.0, 1.0, 1.0),
-                   help="Effective shell weights for axial, face-diagonal, and body-diagonal links.")
+    p.add_argument("--axial-weight", type=float, default=1.0,
+                   help="Per-link spring weight for the 6 axial neighbors (the only shell in the minimal model).")
     p.add_argument("--free-boundaries", action="store_true")
 
     p.add_argument("--spring-constant", type=float, required=True)
@@ -139,7 +139,7 @@ def main() -> None:
         spacing=float(args.spacing),
         periodic_axes=parse_bool_triple(args.periodic_axes),
         fixed_boundaries=not args.free_boundaries,
-        shell_weights=args.shell_weights,
+        axial_weight=float(args.axial_weight),
     )
     dynamics = DynamicsConfig(
         spring_constant=float(args.spring_constant),
@@ -239,7 +239,7 @@ def main() -> None:
     print("Initialization complete")
     print(f"  output: {args.output}")
     print(f"  grid: {lattice.grid_shape}")
-    print(f"  shell_weights: {tuple(round(v, 6) for v in lattice.shell_weights)}")
+    print(f"  axial_weight: {round(lattice.axial_weight, 6)}")
     print(f"  device: {device}")
 
 

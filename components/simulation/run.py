@@ -62,7 +62,7 @@ def main() -> None:
         spacing=lattice.spacing,
         device=device,
         periodic_axes=lattice.periodic_axes,
-        shell_weights=lattice.shell_weights,
+        axial_weight=lattice.axial_weight,
     )
     physics = SpringForceComputer(
         spring_constant=dynamics.spring_constant,

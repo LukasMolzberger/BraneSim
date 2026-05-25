@@ -1,6 +1,15 @@
 # Shell-weight retuning for leading-order cubic isotropy
 
-Sprint 1, subtask 1b of `paper-v4/validation_roadmap.md`.
+Sprint 1, subtask 1b of `paper/validation_roadmap.md`.
+
+> **OBSOLETE.** This derivation addresses how to tune the shell weights of a
+> 26-neighbor stencil to achieve leading-order cubic isotropy. The project
+> has since committed to the minimal 6-neighbor axial-only stencil (see
+> `paper/backbone.md` #15). On the axial-only stencil there is only one
+> shell and the retuning question does not apply: cubic anisotropy is
+> instead accepted as a structural feature of the lab frame and dealt with
+> via the dual-observer framework (backbone #8, #19). This file is kept
+> for reference but is no longer the canonical guidance for the project.
 
 ---
 

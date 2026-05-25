@@ -160,35 +160,50 @@ and the curvature (field strength) is
   \label{eq:wz-curvature}
 \end{equation}
 
-\subsection{\texorpdfstring{Axis-aligned triplet phases and coupling-induced mixing ($U(1)^3\rightarrow U(3)$)}{Axis-aligned triplet phases and coupling-induced mixing (U(1)^3 -> U(3))}}
+\subsection{\texorpdfstring{Axis-aligned triplet and prestress-driven $U(1)^3\rightarrow U(3)$ degeneracy}{Axis-aligned triplet and prestress-driven U(1)^3 -> U(3) degeneracy}}
 \label{subsec:axis-triplet}
 
-On a cubic lattice substrate it is natural to organize the per-wavepacket complex envelope as a three-component triplet
-$\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ aligned with the lattice axes.
-Introduce a dimensionless mixing parameter $g_{\mathrm{mix}}\ge 0$ controlling inter-axis mixing.
-In the lattice substrate, $g_{\mathrm{mix}}$ is an effective measure determined by the prestretch $\alpha$ and by
-the microscopic coupling stencil (notably off-axis/diagonal couplings).
+On the 6-neighbor axial-only cubic lattice (\Cref{subsec:lattice-substrate}) it is natural to organize the
+per-wavepacket complex envelope as a three-component triplet $\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$ aligned with the
+lattice axes.
+The role of the prestress parameter $\alpha$ (derivation convention: $\alpha = \mathrm{rest\_length}/\mathrm{spacing}$,
+so $\alpha = 1$ is no prestress and $\alpha = 0$ is maximum prestress) is to control the \emph{eigenvalue spread} of the
+3-channel Christoffel matrix $D(k)$ — not to introduce off-diagonal coupling between the axis components, which is
+absent on this lattice at every $\alpha$.
 
-\paragraph{Decoupled limit ($g_{\mathrm{mix}}=0$).}
-If the three axis channels are dynamically decoupled, each component supports an independent local phase choice
-and an independent rank-1 Berry connection $a_\mu^{(x)},a_\mu^{(y)},a_\mu^{(z)}$.
+\paragraph{Non-degenerate limit ($\alpha\to 1$, no prestress).}
+The lattice energy is purely Hookean longitudinal, and $D(k)$ has maximally split eigenvalues with the transverse modes
+at zero frequency. The three axis-aligned channels are dynamically decoupled: each component supports an independent
+local phase choice and an independent rank-1 Berry connection $a_\mu^{(x)},a_\mu^{(y)},a_\mu^{(z)}$.
 In this limit, it is meaningful (and gauge-invariant) to speak of ``the Berry phase of an axis.''
+The carrier-triplet gauge group is closest to $U(1)^3$.
 
-\paragraph{Mixed regime ($g_{\mathrm{mix}}>0$).}
-For any nonzero mixing, the physical eigenmodes are \emph{linear combinations} of axis labels.
-Axis-specific phases become basis-dependent and are not gauge-invariant.
-The correct adiabatic transport is instead a Wilczek--Zee connection on the transported near-degenerate subspace.
-For an approximately threefold-degenerate retained subspace, one obtains a $U(3)$ connection
-$\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}.
-It can be decomposed into a trace $U(1)$ part and a traceless $SU(3)$ part,
+\paragraph{Degenerate limit ($\alpha\to 0$, maximum prestress).}
+The $(1-\alpha)|\Delta u|^2$ geometric-stiffness term dominates and contributes equal stiffness to all components on
+every bond. $D(k)\propto I$ becomes proportional to the identity at every $k$, and the three lateral channels are fully
+degenerate. The transported subspace is genuinely 3-dimensional and the appropriate adiabatic-transport object is a
+Wilczek--Zee connection $\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}, decomposable into a trace
+$U(1)$ part and a traceless $SU(3)$ part,
 \begin{equation}
   \mathcal{A}_\mu
   = \frac{1}{3}\,\mathrm{tr}(\mathcal{A}_\mu)\,I_3
   + \sum_{a=1}^{8} A^a_\mu\,T^a,
 \end{equation}
 where $T^a$ are $SU(3)$ generators.
-This provides a concrete way to express how ``axis-aligned Berry phases'' transition into a non-Abelian color-like
-connection once coupling is switched on.
+At the project's default operating point $\alpha=0.2$ the lattice sits close to this degenerate limit.
+
+\paragraph{What the microscopic anisotropy actually provides.}
+The $U(3)$ gauge group on a 3-dimensional complex envelope is a generic representation-theoretic fact about $\C^3$ and
+does not require the lattice to be anisotropic.
+What the cubic anisotropy does provide is the \emph{physically meaningful decomposition}: a preferred 3-dim subspace
+(the lateral triplet, distinct from the embedding-amplitude direction $X^4$), a preferred axis-aligned basis within
+it (which makes the eight $SU(3)$ traceless generators carry operational meaning, e.g.\ as ``colour'' labels on
+solitons that occupy specific axis-aligned channels), and a natural identification of the $U(1)$ trace with the
+electromagnetism-like sector.
+Without the cubic anisotropy of the lab frame, no preferred basis would exist and the $SU(3)$ generators would be
+arbitrary linear combinations with no operational handle.
+This is the load-bearing role of microscopic anisotropy in the gauge-emergence story; see \texttt{paper/backbone.md} \#19
+for the corresponding sector mapping.
 
 \subsection{Berry curvature on a discretized Brillouin zone (link-variable method)}
 \label{subsec:bz-berry}
@@ -212,6 +227,22 @@ whose argument approximates the integrated Berry curvature over the plaquette.
 In the non-Abelian case one uses overlap matrices between frames and projects to $U(n)$ links, then forms the same
 plaquette structure to obtain a discretized non-Abelian curvature.
 This is a natural diagnostic bridge between the lattice-substrate hypothesis and QCD-motivated non-Abelian geometry.
+
+\paragraph{Caveat: the construction is identity-by-construction on the real $D(k)$ eigenframe.}
+The dynamical matrix $D(\mathbf{k})$ of the substrate is the Hessian of a real-valued spring energy, hence real and
+symmetric for every $\mathbf{k}$. Real symmetric matrices admit real eigenvectors, and a real eigenvector bundle over a
+simply-connected region of the Brillouin zone is topologically trivial: every plaquette holonomy reduces to the identity
+and every continuous Berry curvature vanishes identically.
+The link-variable construction above therefore yields zero curvature when applied to the eigenframe of the bare $D(k)$,
+independent of $\alpha$ and the lattice details. (We have verified this numerically across a full $\alpha$ sweep and over
+the entire $(k_x,k_y)$ plane; the holonomy is identity to machine precision at every plaquette and every $\alpha$.)
+The meaningful Berry/WZ object in this project is not the bundle of real $D(k)$ eigenvectors but the
+\emph{per-wavepacket complex envelope} $\Psi\in\C^3$ of \Cref{subsec:axis-triplet} together with its slow effective
+Hamiltonian, whose eigenstates can carry genuine complex phase structure inherited from the rotating-wave reduction
+$i\partial_t\Psi = H_{\mathrm{eff}}\Psi$.
+Section~\ref{subsec:bz-berry} should therefore be read as a \emph{template diagnostic} that applies once the complex
+envelope dynamics provides an intrinsically complex effective operator; applied to the lab-frame $D(k)$ alone it does
+not separate $U(1)^3$ from $U(3)$.
 \subsection{\texorpdfstring{Spinorial holonomy and the $4\pi$ aspect}{Spinorial holonomy and the 4pi aspect}}
 
 For $n=2$ (a two-level polarization subspace), holonomy lives naturally in a double cover of $SO(3)$.

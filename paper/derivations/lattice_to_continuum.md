@@ -1,7 +1,20 @@
 # Lattice → continuum: long-wavelength elastic constants of the BraneSim cubic lattice
 
-Sprint 1, subtask 1 of `paper-v4/validation_roadmap.md`.
+Sprint 1, subtask 1 of `paper/validation_roadmap.md`.
 Author: `physics-derivation` agent.
+
+> **Historical scope.** This derivation was carried out for the 26-neighbor
+> stencil (axial + face-diagonal + body-diagonal shells) with `1/|δ|²` shell
+> weights, which was the canonical lattice at the time. The project has since
+> committed to a **6-neighbor axial-only** stencil as the minimal model (see
+> `paper/backbone.md` #15). The algebra in §3.1 — including the key
+> decomposition `(s_δ²)⁽²⁾ = α(δ̂·Δu)² + (1−α)|Δu|²` — is unchanged on any
+> stencil, but the elastic constants, anisotropy index `η_cub`, and shell sums
+> in §3.3–§3.7 are specific to the 26-neighbor case. On 6-neighbor axial-only
+> only the axial shell contributes; the predicted wave speeds along [100] are
+> `c_L² = 1` and `c_T² = (1−α)` (in units `k_axial = a = ρ = 1`), and the
+> lattice carries a structural cubic anisotropy that the new framework
+> acknowledges as a feature, not a bug (backbone #8, #16, #19).
 
 ---
 

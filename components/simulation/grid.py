@@ -1,4 +1,10 @@
-"""Simulation-owned 3D lattice topology."""
+"""Simulation-owned 3D lattice topology.
+
+Minimal-model commitment: 6-neighbor axial-only stencil. Each node connects to
+its six nearest axial neighbors (±êₓ, ±ê_y, ±ê_z). Diagonal shells
+(face-diagonal, body-diagonal) are intentionally absent — see ``paper/backbone.md``
+points 8, 16, and 19 for the dual-observer framework that motivates this choice.
+"""
 
 from __future__ import annotations
 
@@ -14,36 +20,30 @@ class BraneGrid3D:
     spacing: float
     device: torch.device
     periodic_axes: tuple[bool, bool, bool] = (False, False, False)
-    shell_weights: tuple[float, float, float] = (1.0, 1.0, 1.0)
+    axial_weight: float = 1.0
 
     def __post_init__(self):
         nx, ny, nz = self.grid_shape
         if nx <= 1 or ny <= 1 or nz <= 1:
             raise ValueError("grid_shape must have all dimensions > 1")
-        if len(self.shell_weights) != 3:
-            raise ValueError("shell_weights must contain axial, face-diagonal, and body-diagonal weights")
-        shell_weights = tuple(float(v) for v in self.shell_weights)
-        if any(v <= 0.0 for v in shell_weights):
-            raise ValueError("shell_weights must be positive")
-        object.__setattr__(self, "shell_weights", shell_weights)
+        if float(self.axial_weight) <= 0.0:
+            raise ValueError("axial_weight must be positive")
+        object.__setattr__(self, "axial_weight", float(self.axial_weight))
 
-        offsets = []
-        for di in (-1, 0, 1):
-            for dj in (-1, 0, 1):
-                for dk in (-1, 0, 1):
-                    if not (di == 0 and dj == 0 and dk == 0):
-                        offsets.append((di, dj, dk))
+        # 6-neighbor axial stencil: ±êₓ, ±ê_y, ±ê_z only.
+        offsets = [
+            (-1, 0, 0), (1, 0, 0),
+            (0, -1, 0), (0, 1, 0),
+            (0, 0, -1), (0, 0, 1),
+        ]
         object.__setattr__(self, "neighbor_offsets", torch.tensor(offsets, device=self.device, dtype=torch.int64))
 
         norms = torch.norm(self.neighbor_offsets.to(torch.float32), dim=1)
         object.__setattr__(self, "neighbor_offset_norms", norms)
 
-        norm_sq = torch.sum(self.neighbor_offsets.to(torch.int64) ** 2, dim=1)
-        shell_weight_tensor = torch.empty_like(norms)
-        shell_weight_tensor[norm_sq == 1] = shell_weights[0]
-        shell_weight_tensor[norm_sq == 2] = shell_weights[1]
-        shell_weight_tensor[norm_sq == 3] = shell_weights[2]
-        object.__setattr__(self, "neighbor_weights", shell_weight_tensor / (norms ** 2))
+        # All six axial bonds have |δ|=1 so per-link spring factor is just the axial weight.
+        weights = torch.full_like(norms, fill_value=float(self.axial_weight))
+        object.__setattr__(self, "neighbor_weights", weights)
 
         neighbors = self._build_neighbors()
         object.__setattr__(self, "neighbors", neighbors)
@@ -58,8 +58,8 @@ class BraneGrid3D:
         nx, ny, nz = self.grid_shape
         periodic_x, periodic_y, periodic_z = self.periodic_axes
 
-        neighbors = -np.ones((self.num_points, 26), dtype=np.int64)
         offsets = self.neighbor_offsets.detach().cpu().numpy()
+        neighbors = -np.ones((self.num_points, offsets.shape[0]), dtype=np.int64)
 
         for i in range(nx):
             for j in range(ny):

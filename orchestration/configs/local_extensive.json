@@ -1,12 +1,12 @@
 {
-  "_comment": "Canonical default config. Shell weights are the retuned isotropic representative (431/345, 334/345, 99/115) from paper-v4/derivations/shell_weight_isotropy.md — these satisfy 2 w_I = w_II + (16/9) w_III and remove the leading-order cubic anisotropy of the unretuned (1, 1, 1) baseline. Use (1, 1, 1) explicitly only for anisotropic-baseline comparisons.",
+  "_comment": "Canonical default config. Minimal-model commitment: 6-neighbor axial-only lattice (no diagonal shells). The cubic anisotropy of the long-wavelength dispersion is acknowledged as the lab-frame structural feature that provides the basis for the SU(3) gauge sector; operational isotropy is conjectured to emerge for inside (soliton) observers via observer universality. See paper/backbone.md #8, #16, #19.",
   "initialization": {
     "nx": 32,
     "ny": 32,
     "nz": 32,
     "spacing": 1.0,
     "periodic_axes": [false, false, false],
-    "shell_weights": [1.2492753623188406, 0.9681159420289855, 0.8608695652173913],
+    "axial_weight": 1.0,
     "spring_constant": 1.0,
     "rest_length": 0.2,
     "mass_density": 1.0,
