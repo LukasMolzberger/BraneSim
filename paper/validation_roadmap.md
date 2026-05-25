@@ -102,7 +102,7 @@ at width ≫ a (Skyrme-stabilized) or only at width ~ a (lattice-stabilized)?
 |---|---|---|---|
 | 12 | Soliton existence: stable localized standing-wave mode survives ≳ 10³ carrier periods without radiation; sweep over seed width `R_seed ∈ {2a, 4a, 8a, 16a, 32a}` to identify regime A vs regime B | `soliton-hunter` | confinement score above threshold; explicit width-to-spacing ratio in report |
 | 13 | Soliton stability: linear stability eigenproblem about `X_0` has no growing mode | `soliton-hunter` | spectrum of `ℒ_0` |
-| 14 | Triplet baryon search: parameter sweep `(α, k_1, k_2, k_3, R, A, θ_mix)` ranking by confinement quality | `soliton-hunter` | top-10 candidate configs |
+| 14 | Triplet baryon search: parameter sweep over the partial-wave ansatz menu (hedgehog, Skyrme-twisted hedgehog, hedgehog + trace admixture, axis-triplet control) with width `R`, amplitude `A`, prestress `α`, and profile shape; see `baryon_simulation_roadmap.md` Phase 2 for the (J,L) content of each ansatz family and backbone #20 for the description protocol | `soliton-hunter` | top-10 candidate configs across the four ansatz families, with confinement score per (J,L) channel |
 | 15 | Spin-½ holonomy: `4π`-vs-`2π` behavior of a 2-level polarization subspace under spatial rotation | `berry-validator` + `soliton-hunter` | sign-flip at `2π`, return at `4π` |
 | 16 | Fermion-statistics gap: explicit acknowledgement in the paper that exchange statistics is **not** addressed by the current theory | `paper-writer` | label change in paper |
 

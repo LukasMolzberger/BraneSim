@@ -45,25 +45,82 @@ Then:
 - make `analysis.py` accept `omega0` from the experiment config instead of hardcoding the electron Compton value,
 - rename electron-specific helper names where they are really species-generic.
 
-### Phase 2 — Add a baryon initializer
+### Phase 2 — Add a partial-wave-organized baryon initializer
 
-Create a new module such as `baryon_initialization.py` with at least two seed families:
+Create a new module such as `baryon_initialization.py` providing seed families
+organized by their (J, L) vector-spherical-harmonic content
+(see backbone #20 and paper §6.3, `sec:soliton-labels`).
+Each seed family corresponds to a representation of the emergent SO(3) at
+soliton scale; on the cubic substrate these descend to O_h irreps with small
+splittings at sub-leading order in `a / R_seed`.
 
-1. **Axis-triplet standing-wave seed**
-   - three coupled components associated primarily with x, y, z carrier channels,
-   - common spherical or slightly cubic envelope,
-   - controllable relative phases and amplitudes,
-   - option for locked or weakly mixed triplet states.
+Every initializer must declare its (J, L) content explicitly in its
+docstring or metadata so that diagnostics can be projected onto the correct
+channel.
 
-2. **Confined triplet tube / shell seed**
-   - a more structured seed with internal circulation or standing-wave nodes,
-   - explicit control of parity-like and charge-trace-like combinations,
-   - intended for proton vs neutron comparisons.
+#### Candidate 1 — Hedgehog (J=0, L=1)
 
-Working proton/neutron hypothesis for the first experiments:
-- **proton**: confined triplet with nonzero far-field U(1) trace sector,
-- **neutron**: confined triplet with near-cancelled far-field U(1) trace sector,
-- both share a confined internal triplet/color structure.
+```
+ξⁱ(x) = f(r) · x̂ⁱ        with f(0) = A, f(∞) = 0
+```
+
+- Color index `i` locked to spatial angular direction `x̂ⁱ`.
+- Entire structure lives in the SU(3) traceless sector.
+- U(1) trace averages to zero angularly → trace-neutral far field.
+- No topological protection (winding 0) — expected to radiate unless
+  geometric quartic alone suffices.
+- Sweep parameters: amplitude `A`, profile width `w`, prestress `α`,
+  profile shape (Gaussian / sech / power-tail).
+
+#### Candidate 2 — Skyrme-twisted hedgehog (J=0, winding B=1)
+
+```
+ξⁱ(x)  = A · x̂ⁱ · sin F(r)
+δX⁴(x) = A · cos F(r)
+F(0) = π,  F(∞) = 0
+```
+
+- Topologically protected by π₃ winding number `B=1` on the
+  (lateral triplet + X⁴) → S³ map.
+- Uses the gravity channel `X⁴` (backbone #19) as the fourth direction the
+  field wraps; topological winding and gravity channel share a structure.
+- This is the most likely actually-stable baryon candidate per the
+  topological-stability requirement of backbone #17.
+- Sweep parameters: amplitude `A`, characteristic width `w` (defined by
+  the radius at which `F(r) = π/2`), prestress `α`, profile shape.
+
+#### Candidate 3 — Hedgehog with U(1) trace admixture (J=0, L=1 + L=0)
+
+```
+ξⁱ(x) = f₁(r) · x̂ⁱ  +  (1/√3) · (1,1,1)ⁱ · f₀(r)
+```
+
+- Adds a scalar trace component on top of the hedgehog.
+- `f₀` gives nonzero U(1) far field → proton-like.
+- Can be combined with the Skyrme twist of Candidate 2 to give a
+  topologically stable proton-class seed.
+- Sweep parameters: trace fraction `f₀(0) / f₁(0)`, amplitudes, widths,
+  prestress.
+
+#### Candidate 4 — Axis-triplet (negative control, J=1, L=0)
+
+```
+ξⁱ(x) = δⁱ_k · A_k · g(r)   for k ∈ {1,2,3} with independent weights A_k
+```
+
+- Three independent axis-polarized scalars.
+- **No color-spatial locking; not a baryon ansatz.**
+- Expected to radiate. Included only as a negative control to confirm
+  that the search distinguishes partial-wave-locked configurations from
+  unlocked ones. If candidate 4 confines but candidates 1-3 do not, the
+  framework is wrong.
+
+#### Working proton/neutron hypothesis
+
+- **proton**: Candidate 3 (or 2+3 combined) — hedgehog + nonzero U(1)
+  trace admixture, giving a nonzero far-field trace sector.
+- **neutron**: Candidate 1 or Candidate 2 — pure hedgehog or
+  Skyrme-twisted hedgehog with trace-cancelled far field.
 
 This is a working simulation hypothesis, not yet a derived claim.
 

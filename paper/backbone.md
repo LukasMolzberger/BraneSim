@@ -168,3 +168,46 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       Sprint 2 (gauge sector / SU(3)), Sprint 3 (observer universality /
       effective Lorentz), Sprint 4 (solitons / colour-charged matter),
       Sprint 5 (gravity channel).
+
+20. **Soliton-layer description protocol: vector spherical harmonics**
+    - The natural description language for the angular structure of a
+      localized 3D mode on the lateral triplet `ξⁱ ∈ ℝ³` is the
+      **vector spherical harmonic** basis `Yⁱ_{JLM}(θ,φ)` paired with a
+      radial profile:
+
+        `ξⁱ(r,θ,φ) = Σ_{J,L,M} f_{JLM}(r) · Yⁱ_{JLM}(θ,φ)`
+
+    - **This is a description-layer commitment, not a structural one.**
+      The substrate is cubic (`O_h`, per #15); it is **not** `SO(3)`-symmetric.
+      What spherical harmonics describe is the *emergent* approximate
+      `SO(3)` at long wavelength (confirmed by Sprint 1 dispersion
+      measurements), which is the regime where solitons live by the
+      width-≫-a requirement of #17. Particles emerge from the lower layers;
+      spherical harmonics organize how we *describe and classify* them —
+      they do not determine which states exist. A `(J, L, M)` channel
+      that does not support a stable stationary configuration of the
+      substrate dynamics is simply absent from the physical spectrum.
+    - **Cubic-anisotropy refinement at soliton scale.** `O_h` corrections
+      appear as small splittings of `SO(3)` multiplets. The `L=1` rep maps
+      intact to the `T_{1u}` irrep of `O_h` (still 3-dim — the hedgehog
+      survives without restriction). Higher-`L` modes split (e.g.
+      `L=2 → E_g ⊕ T_{2g}`) and should be parameterized in cubic
+      harmonics when lattice corrections matter.
+    - **Combined particle labels at the soliton layer:**
+      `(J, P; SU(3)-irrep; Q_U(1); B_winding)`.
+      - `J` = total angular momentum (from emergent `SO(3)` at scales ≫ a).
+      - `P` = parity (discrete part of the emergent rotation group).
+      - `SU(3)-irrep` and `Q_U(1)` from the U(3) decomposition of the
+        lateral triplet (per #16, #19).
+      - `B_winding` = topological winding number (per #17).
+    - **Canonical baryon ansatz: hedgehog `ξⁱ = f(r) x̂ⁱ`** (`J=0, L=1`).
+      The internal index `i` is locked to the spatial angular direction,
+      putting the entire nontrivial structure in the SU(3) traceless
+      sector; the U(1) trace averages to zero angularly (trace-neutral
+      far field). Topological stabilization (winding `B=1`) is achieved by
+      extending the hedgehog into a Skyrme-twisted configuration in which
+      the embedding-amplitude direction `X⁴` (per #19) also rotates
+      radially. Proton-vs-neutron distinction enters as a `J=0` trace
+      admixture on top of the hedgehog, not as an unrelated seed.
+    - Concrete ansatz menu used in the simulation search is recorded in
+      `paper/baryon_simulation_roadmap.md` Phase 2.
