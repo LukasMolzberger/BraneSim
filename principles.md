@@ -59,46 +59,38 @@ These are mathematical consequences of the central-force pair-spring energy
 `U_link = ½ k_δ (|R_{p+δ} − R_p| − α a |δ|)²`. They are not policy — they are
 identities the project relies on:
 
-- **Cauchy relations vs cubic isotropy (do not confuse).** Any cubic Bravais
-  lattice with purely central pair-wise interactions, expanded around its
-  stress-free reference, satisfies the Cauchy relation `C_{1122} = C_{1212}`
-  (in Voigt notation: `C_{12} = C_{44}`). This reduces the number of
-  independent cubic elastic constants from 3 to 2 and is automatic.
-  However, **cubic isotropy** — the condition `C_{1111} − C_{1122} = 2 C_{1212}`
-  — is a *separate* requirement and is NOT implied by the Cauchy relation.
-  Cubic isotropy depends on the specific shell weights. With the bare
-  `1/|δ|²` weights, isotropy is NOT satisfied: the residual cubic-anisotropy
-  index is `η_cub = −7α / [2(39 − 22α)]`, which evaluates to roughly `−21%`
-  at `α = 1` and `−2%` at `α = 0.2`. This anisotropy is leading-order in `ka`,
-  not an `O((ka)⁴)` correction. See `paper-v4/derivations/lattice_to_continuum.md`
-  for the closed-form computation.
-- **Canonical configs use retuned isotropic shell weights.** The isotropy
-  condition `2 w_I = w_II + (16/9) w_III` admits a conservative
-  representative `(w_I, w_II, w_III) = (431/345, 334/345, 99/115)` that
-  preserves the second-moment stiffness `S = 26/3` and stays close to the
-  bare `(1, 1, 1)` weights (derivation:
-  `paper-v4/derivations/shell_weight_isotropy.md`). The default canonical
-  config `orchestration/configs/local_extensive.json` now carries these
-  retuned weights so that downstream Lorentz / Berry / soliton claims rest
-  on a leading-order isotropic acoustic tensor. The code default in
-  `components/simulation/grid.py` is left at `(1, 1, 1)` for backward
-  compatibility — configs that intentionally probe the anisotropic baseline
-  (e.g. `orchestration/configs/dispersion_*.json` without `_isotropic`)
-  rely on that default.
-- **Implications of leading-order anisotropy.** Any claim about "operational
-  rotational invariance" or "emergent Lorentz" must use the retuned weights
-  (or quantify the residual anisotropy of the bare weights and acknowledge
-  it). Subtask 2 in `paper-v4/validation_roadmap.md` is the empirical check;
-  the dispersion experiment must measure direction-dependent `c_L` and
-  `c_T` and compare against the predicted `η_cub` for the bare weights and
-  against direction-independent `c_L, c_T` for the retuned weights.
-- **Prestress α controls inter-axis coupling.** The cross-term in the link
-  energy proportional to `(1−α)·(Δξ)²/(2a)` is the only linear coupling
-  between the three lateral channels `ξ¹, ξ², ξ³` from the diagonal-shell
-  springs. At `α = 1` the channels decouple at the linear level (gauge group
-  reduces to `U(1)³`); at `α < 1` the coupling activates and the gauge group
-  is the full `U(3) = U(1) × SU(3)` of the complex narrowband triplet.
-  Therefore `α` is the dial that runs the U(1)³ → U(3) crossover.
+- **Canonical stencil: 6-neighbor axial-only.** Each node connects to its six
+  nearest axial neighbours `±êᵢ`. Diagonal-shell bonds (face-diagonal,
+  body-diagonal) are intentionally absent. The dynamical matrix `D(k)` is
+  then **diagonal in the Cartesian basis** at every `k` and every `α`, with
+  k-independent eigenvectors `(ê_x, ê_y, ê_z)`. See
+  `paper/derivations/lattice_to_continuum.md` for the algebra and
+  `test-runs/sprint2_subtask9_d_of_k_diagonal/` for the structural certificate.
+- **α convention** (matches code and derivations): `α := rest_length / spacing`,
+  so `α = 1` ↔ no prestress (rest length = held distance) and `α = 0` ↔
+  maximum prestress (rest length zero). Default operating point: `α = 0.2`.
+- **Cubic anisotropy is a structural feature, not a defect.** On the
+  6-neighbor axial-only lattice the long-wavelength dispersion is direction-
+  dependent: along `[100]` the speeds are `c_L = 1, c_T = √(1−α)`; along
+  `[111]` all three lateral eigenvalues are exactly degenerate at every `α`.
+  This anisotropy is acknowledged at the lab-observer level and is the
+  structural source of the U(3) gauge sector under the dual-observer
+  framework (`paper/backbone.md` #8, #15, #16, #19).
+- **Prestress α runs the U(1)³ → U(3) crossover via eigenvalue degeneracy
+  (Mechanism ii).** What runs with `α` is the eigenvalue spread of `D(k)`,
+  *not* the eigenframe (which is k-independent). At `α = 1` the transverse
+  modes are at zero frequency and the three lateral channels are dynamically
+  decoupled → closest to `U(1)³`. At `α = 0` the lattice energy is purely
+  geometric `(1−α)|Δu|²` and `D(k) ∝ I`: the three lateral channels are
+  fully degenerate and the carrier-triplet gauge group is the full
+  `U(3) = U(1) × SU(3)`. The default `α = 0.2` sits close to the degenerate
+  end (≈ 10.6 % L–T gap along `[100]`, 0 % along `[111]`).
+- **Cubic anisotropy provides the *basis* for the gauge sector, not the
+  gauge group.** `U(3)` on a 3-dim complex envelope is generic; what the
+  cubic anisotropy provides is the preferred lateral subspace `(ξ¹, ξ², ξ³)`,
+  the preferred axis-aligned basis within it (giving operational meaning to
+  the eight SU(3) traceless generators as "colour" labels), and the natural
+  identification of the U(1) trace with the EM-like sector. See backbone #19.
 - **Geometric quartic = Skyrme-class stabilization.** The induced-metric
   contribution `∂_i u ∂_j u` enters the StVK energy as `(μ/4ℓ₀⁴)(|∇u|²)²`,
   which under Derrick scaling `u(x) → u(λx)` scales as `λ^{+1}` in 3D and

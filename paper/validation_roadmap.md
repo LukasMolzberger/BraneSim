@@ -50,16 +50,15 @@ forward.
 
 | # | Subtask | Owner | Falsifiable output |
 |---|---|---|---|
-| 1 | Lattice-to-continuum elastic-constants derivation: closed-form `μ(k_δ, a)`, `λ(k_δ, a)` from the central-force pair springs with `1/|δ|²` shell weights. **Done** (`paper-v4/derivations/lattice_to_continuum.md`). Finding: standard Cauchy relation `C_{1122} = C_{1212}` holds at `α=1`, but cubic isotropy `C_{1111}−C_{1122} = 2 C_{1212}` is **violated** with the `1/|δ|²` weights, with leading-order anisotropy index `η_cub = −7α/[2(39−22α)]`. Predicts `c_T ≈ 1.912`, `c_L ≈ 1.989`, `c_L/c_T ≈ 1.040` at `α=0.2` (the local_extensive default). | `physics-derivation` | ✅ closed-form expressions + numerical predictions |
-| 1b | Shell weights that recover cubic isotropy. **Done** (`paper-v4/derivations/shell_weight_isotropy.md`). Finding: effective weights must satisfy `2 w_I = w_{II} + (16/9) w_{III}`. A conservative representative preserving `S = 26/3` is `(431/345, 334/345, 99/115)`, predicting `c_T ≈ 1.908`, `c_L ≈ 1.997` at `α=0.2`. | `physics-derivation` | ✅ closed-form weight family + recommended retuned point |
-| 2 | Long-wavelength dispersion + anisotropy: measure `ω([100])` vs `ω([110])` vs `ω([111])` at `|k|·a ∈ {0.05, 0.1, 0.2, 0.3}` and compare to the acoustic tensor in subtask 1. | `dispersion-analyst` | measured branch speeds match the closed-form direction-dependent predictions after `k→0` extrapolation; report residual finite-`ka` scaling |
-| 3 | Branch-speed match: measure `c_T`, `c_L` directly and compare to subtask 1's prediction. | `dispersion-analyst` | < 5% deviation, else subtask 1 wrong or numerical issue |
-| 4 | Band isolation: identify `(α, ω₀)` window with `Δω_gap / ω₀ > 0.1` and verify mode leakage decays exponentially. | `dispersion-analyst` + `berry-validator` | yes/no with measured leakage time-constant |
+| 1 | Closed-form `D(k)` for the canonical 6-neighbor axial-only lattice; verify that `D(k)` is diagonal in Cartesian, eigenframe is k-independent, and branch speeds along `[100]` are `c_L² = 1`, `c_T² = (1−α)`. **Done** (`paper/derivations/lattice_to_continuum.md` + `test-runs/sprint2_subtask9_d_of_k_diagonal/`). | `physics-derivation` | ✅ closed-form + 5 numerical checks pass at `< 1e-14` tolerance |
+| 1b | *(retired)* Shell-weight retuning to recover cubic isotropy on the 26-neighbor stencil. The project has committed to the 6-neighbor axial-only lattice (backbone #15) and accepts lab-frame anisotropy as the structural source of the gauge sector under the dual-observer framework. | — | — |
+| 2 | Long-wavelength dispersion: measure `ω([100])`, `ω([111])` at `|k|·a ∈ {0.05, 0.1, 0.2, 0.3}` on the canonical 6-neighbor lattice and compare to closed form. | `dispersion-analyst` | branch speeds match `c_L = 1`, `c_T = √(1−α)` along `[100]` and the degenerate triplet speed along `[111]` after `k→0` extrapolation |
+| 3 | Lab-frame anisotropy quantification: measure the structural ratio `c_L([100]) / c([111])` at the operating point `α = 0.2` and confirm it matches `1/√((3−2α)/3) ≈ 1.075`. | `dispersion-analyst` | < 1% deviation from the analytic prediction |
+| 4 | Band isolation on the canonical lattice: structurally, the L–T gap along `[100]` is exact and equal to `1 − √(1−α)` (10.6 % at `α = 0.2`); the lateral triplet along `[111]` is exactly degenerate. No numerical sweep needed unless characterizing non-linear leakage at finite amplitude. | `dispersion-analyst` (only if non-linear leakage probe is needed) | analytic / yes-no |
 
-Pass criterion for sprint: subtask 1 reproduces the empirical `c_T`, `c_L` to
-within 5%, and the measured direction-dependent branch speeds match the
-closed-form anisotropy prediction closely enough to decide whether shell
-retuning is required before later Lorentz/gauge claims.
+Pass criterion for sprint: dispersion measurements reproduce the closed-form
+`c_L`, `c_T` formulas to within 1 % at the working point, after finite-`ka`
+extrapolation.
 
 ---
 

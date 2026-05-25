@@ -248,7 +248,7 @@ anisotropy). At $\alpha=0.2$: $\eta_{\rm cub}\approx-0.0207$.
 
 ### 3.7 Comparison with the principles claim
 
-`principles.md` §1.1a and `paper-v4/backbone.md` point 15 assert that the
+`principles.md` §1.1a and `paper/backbone.md` point 15 assert that the
 26-neighbor central-force lattice with $1/|\delta|^2$ shell weights satisfies
 the cubic isotropy condition automatically, with anisotropy first appearing at
 $O((ka)^4)$. **The derivation above does not support this claim.** What is
@@ -315,7 +315,7 @@ $\alpha\to0$ (where both speeds approach $\sqrt{26k_0/(54\,a\rho_m)}$).
   spacing). Leading neglected term is $O((ak)^4)$ in dispersion, $O(a^2\nabla^2u)$
   in the energy density.
 - **Linear elasticity:** $|\nabla u|\ll1$. The geometric quartic
-  $(\nabla u\cdot\nabla u)^2$ that gives Skyrme stabilization (paper-v4
+  $(\nabla u\cdot\nabla u)^2$ that gives Skyrme stabilization (paper/
   backbone point 17) is a separate sprint.
 - **Static anisotropy.** The result $\eta_{\rm cub}\ne0$ found in §3.6 is
   exact within the long-wavelength expansion; it is **not** suppressed by any
