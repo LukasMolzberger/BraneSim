@@ -1,27 +1,47 @@
 \section{Substrate model: lattice microphysics and continuum (IR) effective description}
 \label{sec:continuum-model}
 
-\subsection{Continuum long-wavelength limit: ontology and kinematics}
+\subsection{Ontology and kinematics}
+\label{subsec:ontology-kinematics}
 
-Let $\Omega\subset\R^3$ be the intrinsic (material) brane domain.
-We use either a periodic cell $\Omega=\T^3$ or a bounded cube with clamped boundary points.
-Time $t\in\R$ is an external evolution parameter, not an additional coordinate of the brane.
+The fundamental object of this theory is a \emph{4D brane lattice embedded in a 4D Euclidean ambient with codimension zero}: the lattice is the substrate, and there is no extra perpendicular direction in the ambient.
+The ambient $\R^4$ is fully symmetric --- no preferred direction --- and serves only as a stage on which Euclidean distances are measured.
+All asymmetries that we will encounter (the distinction between time and the three spatial directions, the split between gauge and gravity sectors) are properties of the brane and of the inside observer's frame, not of the ambient.
 
+Let $\Omega\subset\R^4$ be the intrinsic (material) brane domain (either a periodic cell $\Omega=\T^4$ or a bounded hypercube with clamped boundary).
 The fundamental field is the embedding map
 \begin{equation}
-  \vecX(x,t)\in\R^4,
-  \qquad x=(x^1,x^2,x^3)\in\Omega,\quad t\in\R,
+  \vecX(x)\in\R^4,
+  \qquad x=(x^1,x^2,x^3,x^4)\in\Omega,
   \label{eq:fundamental-field}
 \end{equation}
-whose components $X^A(x,t)$ ($A=1,\dots,4$) give the brane configuration in the ambient space.
+whose components $X^A(x)$ ($A=1,\dots,4$) give the brane configuration in the ambient.
+The four ambient directions are geometrically equivalent.
+The asymmetry that picks one of them as the \emph{timelike} direction is a property of the brane action $S[\vecX]$, not of the ambient: the action has Lorentzian sign structure --- the standard $T-V$ Lagrangian, recast on the lattice as link-energy terms with opposite sign for the timelike-direction contributions.
+Globally, cosmological boundary conditions (a Big Bang vertex emanating along one specific ambient direction) fix this choice unambiguously, so every inside observer agrees on which axis is time.
+
+\paragraph{Working spacelike-slice description.}
+For technical work that does not require explicit 4D treatment --- the linear-regime dispersion of \Cref{sec:emergent-relativity}, the gauge-sector diagnostics of \Cref{sec:geophase}, and the localized-mode analysis of \Cref{sec:localized} --- it is convenient to slice the brane perpendicular to the timelike direction.
+Each spacelike slice is parameterised by $x=(x^1,x^2,x^3)\in\Omega_3\subset\R^3$, with the timelike coordinate $t:=x^4$ acting as the slicing parameter.
+In this description the embedding takes the equivalent form
+\begin{equation}
+  \vecX(x,t)\in\R^4,
+  \qquad x=(x^1,x^2,x^3)\in\Omega_3,\quad t\in\R,
+  \label{eq:fundamental-field-sliced}
+\end{equation}
+identical in form to older 3D-in-4D formulations.
+The fourth ambient component, denoted $u$ in this slicing, is the inside observer's chosen timelike component of $\vecX$ --- what earlier formulations called the ``amplitude'' direction.
+With this identification, all the constitutive, kinematic, and gauge-sector developments below carry through verbatim, now understood as describing the inside observer's spacelike slice.
 
 \subsection{Discrete lattice substrate (microphysical postulate)}
 \label{subsec:lattice-substrate}
 
-The continuum model is treated as the long-wavelength effective theory of a \emph{cubic lattice} substrate.
-Let lattice sites be labeled by $n\in\mathbb{Z}^3$ with spacing $a$ and reference positions $x_n=a\,n$.
-Each site carries an embedded configuration $\vecX_n(t)\in\R^4$.
-For a neighbor stencil $\mathcal N\subset\mathbb{Z}^3$, the discrete potential energy may be written schematically as
+The continuum model is treated as the long-wavelength effective theory of a \emph{4D cubic lattice} substrate.
+Lattice sites are labeled by $n\in\mathbb{Z}^4$ with spacing $a$ and reference positions $x_n=a\,n$; each site carries an embedded configuration $\vecX_n\in\R^4$.
+The discrete brane action is a sum of link-energy contributions with the Lorentzian sign structure of \Cref{subsec:ontology-kinematics}: contributions involving the timelike direction enter with opposite sign from those involving the three spacelike directions.
+
+On a fixed spacelike slice (perpendicular to the timelike direction), sites are labeled by $n\in\mathbb{Z}^3$ with embedded configurations $\vecX_n(t)\in\R^4$ where $t$ is the slicing parameter.
+For a spacelike neighbour stencil $\mathcal N\subset\mathbb{Z}^3$, the slice-restricted potential energy reads
 \begin{equation}
   U_{\mathrm{lat}}[\{\vecX_n\}]
   =
@@ -33,6 +53,7 @@ For a neighbor stencil $\mathcal N\subset\mathbb{Z}^3$, the discrete potential e
 with stiffnesses $k_{\delta}$ grouped, for example, into axis-aligned, face-diagonal, and body-diagonal shells.
 The uniform prestretch parameter $\alpha$ fixes the ratio between the held lattice spacing and the stress-free link
 length.
+Link contributions along the timelike direction enter the full brane action with opposite sign and are absorbed into the kinetic term $\tfrac12\rho_m|\partial_t\vecX|^2$ of the slice Lagrangian (\Cref{eq:lagrangian-density} below); their explicit lattice form is a separate design question and is not required for any spacelike-slice analysis in this paper.
 
 \paragraph{Geometric nonlinearity already present at the microscopic level.}
 \Cref{eq:lattice-energy} makes an important modeling point explicit.
@@ -266,6 +287,13 @@ tension, which pulls laterally inward.
 With homogeneous pre-stress ($\alpha<1$), this geometrically induced strain backreacts on the in-brane stress field
 through the constitutive law, effectively coupling transverse excitation energy into slow modulations of the
 in-brane configuration.
+
+\paragraph{Unification across all four directions.}
+The Pythagorean argument above is direction-blind: in the underlying 4D ontology (\Cref{subsec:ontology-kinematics}) any displacement perpendicular to a link stretches that link, regardless of which ambient direction is perpendicular.
+The slice-projected description above treats $u=X^4$ specially because the inside observer has already chosen $X^4$ as the timelike direction.
+The same mechanism, applied symmetrically across the four directions, predicts that displacements in the three \emph{spacelike} directions (i.e.\ in-brane kinetic energy / spatial motion) also lengthen the link along the timelike direction --- which is gravitational \emph{time dilation} sourced by stress--energy.
+Length contraction (timelike-direction excitation stretches spacelike links) and time dilation (spacelike-direction excitation stretches the timelike link) are therefore two faces of one rule.
+The slice-restricted analysis of this subsection captures the first face; a full 4D treatment of the brane action would express both within one expression.
 
 This provides a concrete mechanism for a long-range channel often described informally as ``gravity'' in the present
 program: localized transverse gradients can act as sources of slowly varying background strain (contraction/dilation),

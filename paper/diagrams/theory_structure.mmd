@@ -5,12 +5,12 @@ config:
     nodePlacementStrategy: NETWORK_SIMPLEX
 ---
 %% BraneSim Theory Structure — Current State
-%% Top-down: lab-frame ontology → brane structure → solver → emergent bridge → inside observer → solitons → Bell stance
+%% Top-down: lab-frame ontology → brane structure → emergent bridge → inside observer → solitons → Bell stance
+%% Solvers (Verlet etc.) are diagnostic tools, not theory components, and are deliberately absent.
 
 flowchart TB
     classDef lab fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000
     classDef brane fill:#fff59d,stroke:#f57f17,stroke-width:2px,color:#000
-    classDef solver fill:#ffe0b2,stroke:#e65100,stroke-width:2px,color:#000
     classDef emergent fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px,color:#000
     classDef inside fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#000
     classDef soliton fill:#ffab91,stroke:#bf360c,stroke-width:2px,color:#000
@@ -31,23 +31,16 @@ flowchart TB
         B3 -.constrains.-> B2
     end
 
-    subgraph L3["L3 · SOLVER"]
-        direction LR
-        S1["<b>Foundational</b><br/>4D action stationarity δS = 0<br/>past + future BVP"]:::solver
-        S2["<b>Working pipeline</b><br/>Verlet Cauchy slices (3D × t)<br/>forward-evolution diagnostic"]:::solver
-        S2 -.special case of.-> S1
-    end
-
-    subgraph L4["L4 · EMERGENT BRIDGE"]
+    subgraph L3["L3 · EMERGENT BRIDGE"]
         direction TB
-        E1["<b>4D World-Volume</b><br/>stationary configuration"]:::emergent
+        E1["<b>4D World-Volume</b><br/>stationary configuration of S[R]"]:::emergent
         E2["<b>Contraction Mechanism</b><br/>disp ⊥ link → stretch<br/>unifies length-contraction + time-dilation"]:::emergent
         E3["<b>Per-wavepacket Narrowband</b><br/>real triplet → Ψ ∈ ℂ³"]:::emergent
         E1 --> E2
         E1 --> E3
     end
 
-    subgraph L5["L5 · INSIDE OBSERVER (effective physics)"]
+    subgraph L4["L4 · INSIDE OBSERVER (effective physics)"]
         direction TB
         I1["<b>Pick timelike direction</b><br/>globally agreed via cosmo BCs"]:::inside
         I2["<b>Effective Lorentzian metric g_μν</b><br/>modulated by contraction field ξ"]:::inside
@@ -65,7 +58,7 @@ flowchart TB
         I1 --> I6
     end
 
-    subgraph L6["L6 · SOLITONS (matter content)"]
+    subgraph L5["L5 · SOLITONS (matter content)"]
         direction TB
         P1["<b>Stable solitons</b><br/>VSH ansatz menu:<br/>hedgehog · Skyrme-twisted · trace-admixture · axis-control"]:::soliton
         P2["<b>Combined labels</b><br/>(J, P ; SU(3)-irrep ; Q_U(1) ; B_winding)"]:::soliton
@@ -74,7 +67,7 @@ flowchart TB
         P1 --> P3
     end
 
-    subgraph L7["L7 · BELL STANCE (entanglement)"]
+    subgraph L6["L6 · BELL STANCE (entanglement)"]
         direction TB
         T1["<b>V-branching worldtubes</b><br/>entanglement = continuity of one 4D object<br/>local + deterministic + retrocausal"]:::bell
         T2["Same family:<br/>TSVF · Transactional · Price–Wharton · Sutherland"]:::bell
@@ -90,10 +83,7 @@ flowchart TB
 
     %% Inter-layer edges
     A1 --> B1
-    B2 --> S1
-    B2 --> S2
-    S1 --> E1
-    S2 --> E1
+    B2 --> E1
     E2 --> I2
     E2 --> I6
     E3 --> I3
