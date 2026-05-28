@@ -6,9 +6,23 @@ It is intended to prevent core assumptions from being lost during paper edits, c
 ## Canonical project backbone
 
 1. **Single substrate, substrate-only evolution**
-   - Fundamental ontology: a 3D brane lattice embedded in 4D.
-   - Evolve only microscopic substrate degrees of freedom: node positions and velocities.
-   - Forces must come from the substrate energy only.
+   - Fundamental ontology: a **4D brane lattice embedded in 4D Euclidean
+     ambient** (codimension 0). The "amplitude" direction of older 3D-in-4D
+     formulations is absorbed into the time direction; the lattice IS the
+     substrate. The four directions of the ambient are geometrically
+     equivalent; their distinguished roles (time vs space, gauge vs gravity)
+     are properties of the brane action and of the inside observer's frame,
+     not of the ambient (see #21, #22).
+   - The full 4D world-volume is a stationary point of the brane action
+     `S[R]`; the foundational equations of motion come from the brane's
+     elastic energy only. No external fields, no back-reaction from emergent
+     diagnostics.
+   - The current Verlet pipeline produces **Cauchy slices** through this 4D
+     world-volume; it remains valid as a forward-evolution diagnostic of
+     specific initial-condition problems, but it is not the foundational
+     solver. A time-symmetric solver that finds full 4D stationary
+     configurations under past+future boundary data is a separate
+     development track (see project memory).
 
 2. **Particles are not point-like**
    - Electrons, protons, neutrons, and other particles are modeled as extended standing-wave / solitonic patterns.
@@ -158,7 +172,13 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       gradients source in-brane strain via the Pythagorean `∂_i u ∂_j u`
       coupling. Gravity is therefore structurally distinct from gauge — the
       gauge sector lives in the lateral triplet, the gravity sector lives in
-      the embedding-amplitude direction.
+      the embedding-amplitude direction. **Note (per #22):** in the 4D-in-4D
+      ontology of #1, `X⁴` is the inside observer's chosen timelike
+      direction within the 4D ambient, and the lateral triplet is the
+      perpendicular 3-dim spacelike subspace. The lateral/amplitude split is
+      observer-relative but globally consistent under cosmological boundary
+      conditions; the descriptions in this item remain valid as the inside
+      observer's view.
     - Inside (soliton) observers experience all three sectors as standard
       effective field theories: Lorentz-invariant EM with U(1) gauge,
       colour-charged matter with SU(3) gauge, and a long-range scalar/tensor
@@ -211,3 +231,83 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       admixture on top of the hedgehog, not as an unrelated seed.
     - Concrete ansatz menu used in the simulation search is recorded in
       `paper/baryon_simulation_roadmap.md` Phase 2.
+
+21. **Asymmetry lives in the brane, not the ambient**
+    - The 4D ambient (per #1) is fully symmetric Euclidean — just a stage
+      for measuring distances (Pythagoras). No preferred direction at the
+      ambient level.
+    - The asymmetry that picks out one of the four lattice directions as
+      **time** is a property of the brane's elastic action: the action has
+      Lorentzian sign structure (standard `T − V` Lagrangian, recast on the
+      lattice as link-energy terms with opposite sign for the timelike
+      direction relative to the three spacelike directions). This is what
+      makes one of the four lattice directions "time".
+    - All previously stated anisotropy claims (cubic anisotropy at lab level
+      per #8 and #15, the `U(1)³ → U(3)` crossover per #16) are
+      consequently claims about the brane's structure on its 3D spacelike
+      slice. The full 4D lattice has 4D-cubic symmetry at the geometric
+      level; the 3D-cubic structure those items rely on is what a Cauchy
+      slice perpendicular to the timelike direction exhibits.
+    - The Verlet implementation already encodes this asymmetry implicitly
+      via the kinetic term `½ m v²`: this is the discrete form of a
+      timelike-direction "link" with an opposite-sign contribution to the
+      action. The 4D-in-4D reading makes that structure explicit instead of
+      implicit.
+
+22. **The gauge / gravity split is observer-relative**
+    - The 4-component displacement field `δX^μ` at each node has no
+      privileged structural decomposition at the lab level. The split into
+      "3 lateral channels carrying U(3) gauge + 1 timelike channel
+      carrying gravity" (per #19) is performed by the **inside observer**
+      after they pick a timelike direction.
+    - Globally, the inside observers' choice is constrained to a single
+      direction by **cosmological boundary conditions**: the Big Bang
+      vertex emanates along one of the four lattice directions, and that
+      direction is what every inside observer ends up calling "time". The
+      split in #19 is therefore globally consistent in our universe even
+      though it is not structurally built into the substrate.
+    - Different inside observers (related by emergent Lorentz
+      transformations on their spacelike slice) may disagree locally on
+      what counts as the "amplitude" direction within `δX^μ`, but they
+      agree on the global timelike axis by virtue of riding the same
+      cosmological history.
+    - **Unified contraction.** The geometric-quartic mechanism (#17) now
+      acts symmetrically across all four lattice directions: a displacement
+      perpendicular to any link stretches that link, regardless of which
+      direction the perpendicular is. Consequence: gravitational length
+      contraction (timelike displacement stretching spacelike links) and
+      gravitational time dilation (spacelike displacement / kinetic energy
+      stretching the timelike link) are two faces of the same rule. The
+      two faces of gravity unify under one mechanism.
+
+23. **Bell's theorem and the retrocausal worldtube interpretation**
+    - BraneSim is manifestly local and deterministic — a classical lattice
+      with action-based dynamics. Bell rules out theories that are
+      simultaneously local, deterministic, and measurement-independent. The
+      cleanest loophole consistent with this project's substrate is
+      **retrocausality**: future measurement context propagates back along
+      the particle's worldtube.
+    - **Causality is a property of solitons, not of the substrate.** The
+      brane's action is time-symmetric (Lorentzian signature does not
+      single out a direction of time, only a *kind* of direction). The
+      arrow of time is selected by the **chirality of soliton solutions**:
+      matter solitons are forward-propagating worldtubes; antimatter
+      solitons are backward-propagating worldtubes (Feynman–Stueckelberg-
+      consistent).
+    - **Entanglement is V-branching of one worldtube.** Spacelike
+      correlations between entangled pairs are continuity of one extended
+      4D object whose worldtube branches at a V-vertex in the shared past
+      — not "spooky action at a distance".
+    - This places BraneSim in the same interpretive family as Aharonov's
+      two-state-vector formalism, Cramer's transactional interpretation,
+      Price & Wharton's retrocausal models, and Sutherland's
+      time-symmetric Bohmian model.
+    - **Open derivations** (flagged as future work; do not claim in the
+      paper as established):
+      - Reproduce Tsirelson's bound (`2√2`) from V-branching soliton
+        correlations on the substrate.
+      - Derive the no-signalling theorem as a theorem of substrate
+        dynamics rather than assuming it.
+      - Match the observed baryon-to-photon ratio from the
+        geometric-asymmetry picture (matter and antimatter expanding from
+        the Big Bang vertex in opposite time directions).

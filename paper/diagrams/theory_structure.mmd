@@ -1,0 +1,105 @@
+---
+config:
+  layout: elk
+  elk:
+    nodePlacementStrategy: NETWORK_SIMPLEX
+---
+%% BraneSim Theory Structure — Current State
+%% Top-down: lab-frame ontology → brane structure → solver → emergent bridge → inside observer → solitons → Bell stance
+
+flowchart TB
+    classDef lab fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000
+    classDef brane fill:#fff59d,stroke:#f57f17,stroke-width:2px,color:#000
+    classDef solver fill:#ffe0b2,stroke:#e65100,stroke-width:2px,color:#000
+    classDef emergent fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px,color:#000
+    classDef inside fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef soliton fill:#ffab91,stroke:#bf360c,stroke-width:2px,color:#000
+    classDef bell fill:#f8bbd0,stroke:#880e4f,stroke-width:2px,color:#000
+    classDef open fill:#cfd8dc,stroke:#37474f,stroke-width:1px,stroke-dasharray:4 4,color:#000
+
+    subgraph L1["L1 · LAB ONTOLOGY (symmetric)"]
+        direction TB
+        A1["<b>4D Euclidean Ambient</b><br/>fully symmetric · no preferred direction"]:::lab
+    end
+
+    subgraph L2["L2 · BRANE STRUCTURE (asymmetry sources)"]
+        direction TB
+        B1["<b>4D Brane Lattice</b><br/>codim 0 — lattice IS substrate"]:::brane
+        B2["<b>Brane Action S[R]</b><br/>Lorentzian signature T − V<br/>picks 1 of 4 directions as time"]:::brane
+        B3["<b>Cosmological BCs</b><br/>Big Bang vertex<br/>globally fixes the time axis"]:::brane
+        B1 --> B2
+        B3 -.constrains.-> B2
+    end
+
+    subgraph L3["L3 · SOLVER"]
+        direction LR
+        S1["<b>Foundational</b><br/>4D action stationarity δS = 0<br/>past + future BVP"]:::solver
+        S2["<b>Working pipeline</b><br/>Verlet Cauchy slices (3D × t)<br/>forward-evolution diagnostic"]:::solver
+        S2 -.special case of.-> S1
+    end
+
+    subgraph L4["L4 · EMERGENT BRIDGE"]
+        direction TB
+        E1["<b>4D World-Volume</b><br/>stationary configuration"]:::emergent
+        E2["<b>Contraction Mechanism</b><br/>disp ⊥ link → stretch<br/>unifies length-contraction + time-dilation"]:::emergent
+        E3["<b>Per-wavepacket Narrowband</b><br/>real triplet → Ψ ∈ ℂ³"]:::emergent
+        E1 --> E2
+        E1 --> E3
+    end
+
+    subgraph L5["L5 · INSIDE OBSERVER (effective physics)"]
+        direction TB
+        I1["<b>Pick timelike direction</b><br/>globally agreed via cosmo BCs"]:::inside
+        I2["<b>Effective Lorentzian metric g_μν</b><br/>modulated by contraction field ξ"]:::inside
+        subgraph GAUGE["Gauge sector · 3 spatial channels"]
+            direction TB
+            I3["<b>U(3) gauge</b>"]:::inside
+            I4["U(1) trace<br/>= EM"]:::inside
+            I5["SU(3) traceless<br/>= colour"]:::inside
+            I3 --> I4
+            I3 --> I5
+        end
+        I6["<b>Gravity sector</b><br/>1 timelike channel via contraction"]:::inside
+        I1 --> I2
+        I1 --> I3
+        I1 --> I6
+    end
+
+    subgraph L6["L6 · SOLITONS (matter content)"]
+        direction TB
+        P1["<b>Stable solitons</b><br/>VSH ansatz menu:<br/>hedgehog · Skyrme-twisted · trace-admixture · axis-control"]:::soliton
+        P2["<b>Combined labels</b><br/>(J, P ; SU(3)-irrep ; Q_U(1) ; B_winding)"]:::soliton
+        P3["<b>Soliton Chirality</b><br/>matter = forward worldtube<br/>antimatter = backward worldtube"]:::soliton
+        P1 --> P2
+        P1 --> P3
+    end
+
+    subgraph L7["L7 · BELL STANCE (entanglement)"]
+        direction TB
+        T1["<b>V-branching worldtubes</b><br/>entanglement = continuity of one 4D object<br/>local + deterministic + retrocausal"]:::bell
+        T2["Same family:<br/>TSVF · Transactional · Price–Wharton · Sutherland"]:::bell
+        T1 --> T2
+    end
+
+    subgraph OPEN["OPEN DERIVATIONS (future work)"]
+        direction LR
+        O1["Tsirelson 2√2"]:::open
+        O2["No-signalling"]:::open
+        O3["Baryon-to-photon ratio"]:::open
+    end
+
+    %% Inter-layer edges
+    A1 --> B1
+    B2 --> S1
+    B2 --> S2
+    S1 --> E1
+    S2 --> E1
+    E2 --> I2
+    E2 --> I6
+    E3 --> I3
+    I3 --> P1
+    I6 --> P1
+    P3 --> T1
+    T1 -.needs.-> O1
+    T1 -.needs.-> O2
+    P3 -.needs.-> O3

@@ -25,9 +25,27 @@ Read it before making **any** physics, mapping, measurement, or experiment chang
    If thresholds exist, they must **emerge** from smooth dynamics and the chosen energy.
 
 5. **Ontology & Interpretation**
-   - Fundamental entity: a **3D brane embedded in 4D** (the 4th coordinate is "amplitude").
-   - Time `t` is an **external evolution parameter** (not a geometric coordinate in the substrate).
-   - Relativity, EM, gravity, particles, quantization are **emergent descriptions**.
+   - Fundamental entity: a **4D brane lattice embedded in 4D Euclidean ambient**
+     (codimension 0). The lattice IS the substrate. The "amplitude" direction
+     of older 3D-in-4D formulations is absorbed into the time direction.
+   - **The ambient is symmetric; asymmetry lives in the brane.** One of the
+     four lattice directions is picked out as **time** by the brane action's
+     Lorentzian sign structure (`T − V` Lagrangian), not by anything intrinsic
+     to the ambient.
+   - **Causality is a property of solitons, not of the substrate.** The brane
+     action is time-symmetric. The arrow of time is selected at the soliton
+     level by chirality (matter = forward worldtube, antimatter = backward
+     worldtube).
+   - **The gauge / gravity split is observer-relative.** The 4-component
+     displacement field decomposes into 3 spatial (U(3) gauge: EM + colour)
+     + 1 timelike (gravity, via the contraction mechanism) only after the
+     inside observer picks a timelike direction. Cosmological boundary
+     conditions (Big Bang vertex) make this split globally consistent.
+   - Relativity, EM, gravity, particles, quantization are **emergent
+     descriptions** seen by the inside observer.
+   - The current Verlet pipeline produces Cauchy slices through the 4D
+     world-volume; it remains a valid forward-evolution diagnostic, not the
+     foundational solver.
 
 6. **Dimensionality-Agnostic Implementation**
    All core implementations (solver, forces, initialization, diagnostics) must work for 1D, 2D, and 3D
@@ -47,23 +65,64 @@ Read it before making **any** physics, mapping, measurement, or experiment chang
 ## 1. Core Model Commitments
 
 ### 1.1 Substrate definition (conceptual)
-- Material coordinates: `x = (x¹, x², x³) ∈ Ω ⊂ ℝ³`
-- Embedding map: `X(x,t) ∈ ℝ⁴`
-- Discretization: nodes `p` with positions `R_p(t) ∈ ℝ⁴`
 
-The solver evolves the substrate state `{R_p(t), V_p(t)}` only.
+**Full ontology (foundational):**
+- Material coordinates: `x = (x¹, x², x³, x⁴) ∈ Ω ⊂ ℝ⁴`. All four coordinates
+  are on equal geometric footing in the ambient. The fourth is the
+  **timelike** direction selected by the brane action's Lorentzian sign
+  structure (per backbone #21).
+- Embedding map: `X(x) ∈ ℝ⁴` — codimension 0. The brane IS the ambient;
+  there is no extra perpendicular direction. The amplitude direction of
+  older 3D-in-4D formulations is absorbed into the timelike direction.
+- Discretization: nodes `p` indexed by 4D lattice coordinate `(i,j,k,l)`,
+  positions `R_p ∈ ℝ⁴`.
+- The full 4D world-volume is a stationary point of the brane action
+  `S[R]`; the foundational solver finds it as a 4D boundary-value problem.
+
+**Working pipeline (Cauchy slices, what the code currently implements):**
+- The current implementation treats `x⁴` as the timelike direction
+  explicitly and discretizes it as a sequence of 3D slices indexed by an
+  integer time step.
+- At this slicing, the working state is `{R_p(t), V_p(t)}` with
+  `R_p(t) ∈ ℝ⁴` (the 4D ambient position of a node `p` at slice `t`) and
+  `V_p(t) ∈ ℝ⁴` (its velocity, which is the discrete time-direction
+  difference of `R_p`).
+- The Verlet integrator (Substrate-Only Evolution rule) produces a
+  forward-evolution diagnostic — a Cauchy slice through the 4D world-volume
+  rather than the full stationary configuration.
+- The reduction from "node has 4D position `R_p ∈ ℝ⁴`" to
+  "node has 3D in-brane position `(x¹, x², x³)` plus a 1D
+  amplitude `u`" used in older derivations remains a valid description
+  **from the inside observer's frame**, where the chosen timelike direction
+  is identified with the amplitude axis (per backbone #22).
+
+The solver evolves the substrate state `{R_p(t), V_p(t)}` only. The 4D
+foundational reading is what gives this evolution its physical meaning;
+the practical computation is unchanged.
 
 ### 1.1a Structural facts about the lattice (must be respected)
 
 These are mathematical consequences of the central-force pair-spring energy
 `U_link = ½ k_δ (|R_{p+δ} − R_p| − α a |δ|)²`. They are not policy — they are
-identities the project relies on:
+identities the project relies on.
 
-- **Canonical stencil: 6-neighbor axial-only.** Each node connects to its six
-  nearest axial neighbours `±êᵢ`. Diagonal-shell bonds (face-diagonal,
-  body-diagonal) are intentionally absent. The dynamical matrix `D(k)` is
-  then **diagonal in the Cartesian basis** at every `k` and every `α`, with
-  k-independent eigenvectors `(ê_x, ê_y, ê_z)`. See
+**Scope note.** The facts below describe the **spacelike-slice geometry** of
+the substrate — the 3D-cubic lattice seen at a fixed time slice by the
+inside observer. They remain the correct description of what the current
+Verlet pipeline simulates. The full 4D-in-4D ontology (backbone #1, #21,
+#22) adds a timelike fourth lattice direction; the connectivity and
+elastic structure along that fourth direction (e.g. whether links along
+time are explicit lattice bonds with rest-length spacing, or are encoded
+implicitly via the kinetic term `½ m v²` in the current Verlet pipeline)
+is a separate design question being deferred. None of the facts below
+change.
+
+- **Canonical stencil: 6-neighbor axial-only (spacelike slice).** Each node
+  connects to its six nearest axial neighbours `±êᵢ` in the three spacelike
+  directions. Diagonal-shell bonds (face-diagonal, body-diagonal) are
+  intentionally absent. The dynamical matrix `D(k)` is then **diagonal in
+  the Cartesian basis** at every `k` and every `α`, with k-independent
+  eigenvectors `(ê_x, ê_y, ê_z)`. See
   `paper/derivations/lattice_to_continuum.md` for the algebra and
   `test-runs/sprint2_subtask9_d_of_k_diagonal/` for the structural certificate.
 - **α convention** (matches code and derivations): `α := rest_length / spacing`,
@@ -104,7 +163,21 @@ identities the project relies on:
   width ≫ a**; experiments must report the width-to-spacing ratio explicitly.
 
 ### 1.2 Dynamics (implementation truth)
-The simulation is defined by a mechanical energy (or discrete Lagrangian) of the substrate.
+
+**Foundational view.** The substrate is defined by a brane action `S[R]`
+over the full 4D world-volume. The physical configuration is a stationary
+point: `δS/δR = 0`. The action has Lorentzian sign structure (backbone
+#21) — time-direction terms enter with opposite sign from spacelike terms,
+recovering standard `T − V` Lagrangian mechanics in the inside-observer's
+frame. Time-symmetric solvers that find the full 4D stationary
+configuration under past+future boundary data are a separate development
+track (see project memory).
+
+**Working pipeline (what the code currently implements).** The simulation
+is driven by a mechanical energy `U` on each 3D Cauchy slice plus the
+kinetic term `½ m v²` along the timelike direction. This is the discrete
+Lagrangian whose stationarity is the action-stationarity condition above,
+specialised to forward time-marching from an initial slice.
 
 **Typical structure (conceptual, not prescriptive):**
 - Stretching/edge energy: depends on deviations of neighbor distances from rest lengths
@@ -132,6 +205,76 @@ A practical dependency order used in debugging and testing:
 6. **Gravity-like diagnostics** (lateral contraction / induced metric interpretations)
 
 Don't "skip levels" by hard-coding behavior at a lower level.
+
+### 1.4 Lab vs inside observer (dual-observer framework)
+
+The substrate has two natural observers. They see different things, and
+several project commitments depend on keeping them distinct.
+
+**Lab observer (the one writing the simulation).**
+- Sees the 4D Euclidean ambient and the brane lattice within it.
+- Sees the brane action's Lorentzian sign structure as a property of the
+  action, not of the ambient.
+- Sees the lattice's 4D-cubic anisotropy (which, on a spacelike Cauchy
+  slice, reduces to the 3D-cubic anisotropy of §1.1a) as a real, measurable
+  feature.
+- Has access to the full 4D state and can read off any global property.
+
+**Inside observer (an excitation propagating in the brane).**
+- Built from substrate excitations; their rods, clocks, and signal cones
+  are renormalized coherently with the local wave speed.
+- Picks one of the four lattice directions as their **timelike direction**.
+  Globally, cosmological boundary conditions (Big Bang vertex) make every
+  inside observer pick the same direction; locally, different inside
+  observers are related by emergent Lorentz transformations on the
+  perpendicular spacelike 3-subspace.
+- Sees an **effective Lorentzian metric**, modulated by the contraction
+  field sourced by displacements in the timelike direction (the
+  gravity-channel mechanism).
+- Is conjectured to be blind to the lab-frame cubic anisotropy on their
+  spacelike slice (backbone #8). This is the load-bearing assumption for
+  emergent Lorentz kinematics; it must be tested, not assumed.
+- Sees the displacement 4-vector decompose into **3 spatial channels
+  (carrying U(3) gauge: U(1) EM + SU(3) colour) plus 1 timelike channel
+  (carrying gravity, via contraction)** — observer-relative but globally
+  consistent (backbone #22).
+
+**Information flow.** All "emergent" descriptions — Lorentzian metric,
+Maxwell-like fields, Berry/Wilczek–Zee connections, soliton dynamics —
+live at the inside-observer level. The lab observer measures them as
+diagnostics but does not feed them back into the solver (the
+No-Back-Reaction rule, §0 quick-reference card #2).
+
+### 1.5 Bell's theorem and the retrocausal worldtube interpretation
+
+BraneSim is manifestly local and deterministic. Bell's theorem rules out
+theories that are simultaneously local, deterministic, and
+measurement-independent. The project commits to the **retrocausal
+loophole**: the future measurement context propagates back along the
+particle's worldtube. Concretely:
+
+- The brane action is time-symmetric (its Lorentzian signature picks out a
+  *kind* of direction, not a *direction*). The arrow of time is selected
+  at the soliton level by the **chirality of soliton solutions**: matter
+  solitons are forward-propagating worldtubes; antimatter solitons are
+  backward-propagating worldtubes (Feynman–Stueckelberg-consistent).
+- **Entanglement is V-branching of one worldtube.** Spacelike correlations
+  between entangled pairs are continuity of one extended 4D object whose
+  worldtube branches at a V-vertex in the shared past.
+- This places the model in the same interpretive family as Aharonov's
+  TSVF, Cramer's transactional interpretation, Price & Wharton's
+  retrocausal models, and Sutherland's time-symmetric Bohmian model.
+
+**Open derivations** (not yet established; flagged as future work):
+- Reproduce Tsirelson's bound (`2√2`) from V-branching soliton
+  correlations on the substrate.
+- Derive the no-signalling theorem from substrate dynamics rather than
+  assuming it.
+- Match the observed baryon-to-photon ratio from the geometric-asymmetry
+  picture of the Big Bang vertex.
+
+These are constraints on what the project *can* eventually claim, not
+established results.
 
 ---
 
