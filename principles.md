@@ -169,9 +169,32 @@ over the full 4D world-volume. The physical configuration is a stationary
 point: `δS/δR = 0`. The action has Lorentzian sign structure (backbone
 #21) — time-direction terms enter with opposite sign from spacelike terms,
 recovering standard `T − V` Lagrangian mechanics in the inside-observer's
-frame. Time-symmetric solvers that find the full 4D stationary
-configuration under past+future boundary data are a separate development
-track (see project memory).
+frame.
+
+The explicit discrete form is the 4D-cubic link sum with `6 + 2` links per
+node — six spacelike central-force springs entering `−V`, and two temporal
+links (`±` in time) entering `+T` — derived in full in
+`paper/derivations/discrete_4d_brane_action.md`. Two facts from that
+derivation are load-bearing for how the solver must be understood:
+
+- **The Euler–Lagrange stencil IS Störmer–Verlet.** Stationarity at an
+  interior node, `δS/δR_p^l = 0`, is term-for-term the leapfrog update
+  `m (R^{l+1} − 2R^l + R^{l−1})/Δt² = F^l = −∂V^l/∂R^l`. Verlet is the
+  *discrete variational (symplectic) integrator* of this action, not an
+  approximation to it. The local stencil is therefore identical whether the
+  model is solved as a forward initial-value problem (the working pipeline)
+  or as a 4D block boundary-value problem (the foundational reading); only
+  the global solution philosophy and boundary conditions differ.
+- **The action is a saddle, not a minimum** (Lorentzian ⇒ unbounded
+  below). A foundational block solver must **root-find `∇S = 0`**
+  (Newton–Krylov), never gradient-descend `S`; relaxation/minimization
+  would silently solve the *Euclidean* heat-equation problem instead.
+  The two-time block BVP is also not unconditionally well-posed
+  (resonances → non-uniqueness). Both are tracked in `OPEN_PROBLEMS.md`
+  §A1/§A2, with soliton chirality (§1.5) as the conjectured selection
+  principle. Time-symmetric solvers that find the full 4D stationary
+  configuration under past+future boundary data are a separate development
+  track.
 
 **Working pipeline (what the code currently implements).** The simulation
 is driven by a mechanical energy `U` on each 3D Cauchy slice plus the
@@ -266,15 +289,11 @@ particle's worldtube. Concretely:
   retrocausal models, and Sutherland's time-symmetric Bohmian model.
 
 **Open derivations** (not yet established; flagged as future work):
-- Reproduce Tsirelson's bound (`2√2`) from V-branching soliton
-  correlations on the substrate.
-- Derive the no-signalling theorem from substrate dynamics rather than
-  assuming it.
-- Match the observed baryon-to-photon ratio from the geometric-asymmetry
-  picture of the Big Bang vertex.
-
-These are constraints on what the project *can* eventually claim, not
-established results.
+Tsirelson's bound (`2√2`), the no-signalling theorem, and the
+baryon-to-photon ratio. These are constraints on what the project *can*
+eventually claim, not established results. The live, detailed list lives in
+`OPEN_PROBLEMS.md` §B (the central tracker) — keep it there, not in the
+paper or the theory-structure diagram.
 
 ---
 

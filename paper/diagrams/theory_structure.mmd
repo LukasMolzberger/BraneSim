@@ -15,7 +15,6 @@ flowchart TB
     classDef inside fill:#a5d6a7,stroke:#1b5e20,stroke-width:2px,color:#000
     classDef soliton fill:#ffab91,stroke:#bf360c,stroke-width:2px,color:#000
     classDef bell fill:#f8bbd0,stroke:#880e4f,stroke-width:2px,color:#000
-    classDef open fill:#cfd8dc,stroke:#37474f,stroke-width:1px,stroke-dasharray:4 4,color:#000
 
     subgraph L1["L1 · LAB ONTOLOGY (symmetric)"]
         direction TB
@@ -74,13 +73,6 @@ flowchart TB
         T1 --> T2
     end
 
-    subgraph OPEN["OPEN DERIVATIONS (future work)"]
-        direction LR
-        O1["Tsirelson 2√2"]:::open
-        O2["No-signalling"]:::open
-        O3["Baryon-to-photon ratio"]:::open
-    end
-
     %% Inter-layer edges
     A1 --> B1
     B2 --> E1
@@ -90,6 +82,3 @@ flowchart TB
     I3 --> P1
     I6 --> P1
     P3 --> T1
-    T1 -.needs.-> O1
-    T1 -.needs.-> O2
-    P3 -.needs.-> O3

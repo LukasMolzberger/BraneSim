@@ -53,7 +53,7 @@ For a spacelike neighbour stencil $\mathcal N\subset\mathbb{Z}^3$, the slice-res
 with stiffnesses $k_{\delta}$ grouped, for example, into axis-aligned, face-diagonal, and body-diagonal shells.
 The uniform prestretch parameter $\alpha$ fixes the ratio between the held lattice spacing and the stress-free link
 length.
-Link contributions along the timelike direction enter the full brane action with opposite sign and are absorbed into the kinetic term $\tfrac12\rho_m|\partial_t\vecX|^2$ of the slice Lagrangian (\Cref{eq:lagrangian-density} below); their explicit lattice form is a separate design question and is not required for any spacelike-slice analysis in this paper.
+Link contributions along the timelike direction enter the full brane action with opposite sign and are absorbed into the kinetic term $\tfrac12\rho_m|\partial_t\vecX|^2$ of the slice Lagrangian (\Cref{eq:lagrangian-density} below); their explicit lattice form is developed in \Cref{subsec:discrete-4d-action}.
 
 \paragraph{Geometric nonlinearity already present at the microscopic level.}
 \Cref{eq:lattice-energy} makes an important modeling point explicit.
@@ -91,6 +91,69 @@ The lattice spacing $a$ defines a Brillouin zone $k_i\in[-\pi/a,\pi/a]$.
 Because Berry curvature is naturally defined over parameter spaces such as $\mathbf{k}$-space eigenbundles,
 the lattice formulation provides a direct route to Berry-curvature diagnostics on a discretized momentum lattice
 (see \Cref{sec:geophase}).
+
+\subsection{Explicit discrete 4D brane action}
+\label{subsec:discrete-4d-action}
+
+The spacelike-slice description of \Cref{subsec:lattice-substrate} treats the timelike direction implicitly, absorbing it into the kinetic term $\tfrac12 m |\dot{R}|^2$.
+For the foundational 4D-in-4D ontology of \Cref{subsec:ontology-kinematics} it is essential to make the timelike direction an explicit lattice link, placing all four spatial directions on equal footing as far as the link topology is concerned and making the Lorentzian sign structure a single explicit choice.
+Label each node by a spacelike triple $p=(i,j,k)$ and a timelike index $l\in\mathbb{Z}$, with 4D embedded position $R_p^l\in\R^4$.
+The six spacelike axial neighbours form the stencil $\mathcal{N}_s=\{\pm\hat{e}_x,\pm\hat{e}_y,\pm\hat{e}_z\}$ and the two temporal neighbours form $\mathcal{N}_t=\{l\pm 1\}$.
+
+\paragraph{The action.}
+The slice-restricted potential is the central-force sum over $\mathcal{N}_s$:
+\begin{equation}
+  V^l = \frac{k_s}{4}\sum_{p}\sum_{\delta\in\mathcal{N}_s}
+        \Bigl(\bigl|R_{p+\delta}^l - R_p^l\bigr| - \alpha a\Bigr)^2,
+  \label{eq:slice-potential}
+\end{equation}
+and the temporal kinetic term on the link $l\to l+1$ is
+\begin{equation}
+  T^{l+\frac{1}{2}} = \sum_{p}\frac{m}{2}
+        \left(\frac{R_p^{l+1}-R_p^l}{\Delta t}\right)^{\!2}.
+  \label{eq:temporal-kinetic}
+\end{equation}
+With the Lorentzian sign assignment --- spacelike links enter with $-$ (potential), temporal links enter with $+$ (kinetic); this is Assumption~A5 of the derivation and is \emph{posited}, not derived: it is the property of the brane action that selects one of the four equivalent ambient directions as timelike (backbone~\#21) --- the explicit discrete action is
+\begin{equation}
+  \boxed{
+  S[R] = \sum_l \Delta t\,\Bigl(T^{l+\frac{1}{2}} - V^l\Bigr).
+  }
+  \label{eq:discrete-4d-action}
+\end{equation}
+This is a sum over $6+2$ links per node with a single sign flip for the temporal family.
+
+\paragraph{Euler--Lagrange identity: Verlet is the variational integrator.}
+Varying \Cref{eq:discrete-4d-action} with respect to an interior node $R_p^l$ (the node appears in $T^{l\pm\frac{1}{2}}$ and $V^l$) yields
+\begin{equation}
+  m\,\frac{R_p^{l+1} - 2R_p^l + R_p^{l-1}}{\Delta t^2}
+  \;=\;
+  F_p^l
+  \;:=\;
+  -\frac{\partial V^l}{\partial R_p^l}
+  = k_s\!\sum_{\delta\in\mathcal{N}_s}
+    \Bigl(\bigl|R_{p+\delta}^l - R_p^l\bigr| - \alpha a\Bigr)
+    \,\widehat{(R_{p+\delta}^l - R_p^l)},
+  \label{eq:el-verlet}
+\end{equation}
+which is precisely the Störmer--Verlet update $R_p^{l+1} = 2R_p^l - R_p^{l-1} + (\Delta t^2/m)\,F_p^l$.
+This is the discrete-mechanics result (Marsden--West): the Euler--Lagrange equations of the discrete action $S$ are exactly Störmer--Verlet, and the flow is symplectic.
+Therefore \emph{Verlet is the discrete variational integrator of the action \eqref{eq:discrete-4d-action}}.
+The forward initial-value problem (prescribe $R^0, R^1$, march $l\to l+1$) and the foundational 4D block boundary-value problem (prescribe spacelike-slice data at $l=0$ and $l=N$, root-find the interior) share \emph{identical local stencil} \eqref{eq:el-verlet} and differ only in their global boundary conditions.
+
+\paragraph{Long-wavelength cone speeds.}
+Taking the continuum limit with $\rho_m = m/a^3$ and wave vector $\mathbf{k}=k\hat{e}_x$, the Christoffel matrix is diagonal on the axial stencil $\mathcal{N}_s$ (no off-diagonal coupling at any $\alpha$), giving the lattice light-cone speeds
+\begin{equation}
+  c_L^2 = \frac{k_s\,a^2}{m},
+  \qquad
+  c_T^2 = (1-\alpha)\,\frac{k_s\,a^2}{m}.
+  \label{eq:cone-speeds}
+\end{equation}
+In dimensionless units $k_s=a=m=1$ these reduce to $c_L=1$, $c_T=\sqrt{1-\alpha}$.
+At the default operating point $\alpha=0.2$ one obtains $c_T/c_L=\sqrt{0.8}\approx 0.894$, a residual $\sim 10.6\%$ longitudinal--transverse gap that is the leading-order consequence of prestretch; it is not retuned away (backbone~\#8, \#15).
+
+\paragraph{Outlook: foundational block solver.}
+The Lorentzian action \eqref{eq:discrete-4d-action} is a saddle (unbounded below), so a foundational block solver must root-find $\nabla S=0$ rather than minimize $S$.
+The well-posedness of the two-time boundary-value problem and the design choice between the kinetic-increment temporal model (model~a, baseline, used throughout this paper) and a central-force temporal spring model (model~b) are open questions tracked outside the manuscript.
 
 \subsection{Induced metric and isotropic reference metric}
 

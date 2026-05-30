@@ -252,7 +252,23 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       via the kinetic term `½ m v²`: this is the discrete form of a
       timelike-direction "link" with an opposite-sign contribution to the
       action. The 4D-in-4D reading makes that structure explicit instead of
-      implicit.
+      implicit. The explicit discrete 4D action (6 spacelike central-force
+      springs entering `−V`, 2 temporal links entering `+T`) is derived in
+      `paper/derivations/discrete_4d_brane_action.md`. Two results from it:
+      (a) its Euler–Lagrange stencil is *term-for-term* Störmer–Verlet —
+      Verlet is the discrete variational integrator of the action, so the
+      forward IVP and the 4D block BVP share the identical local stencil and
+      differ only in boundary conditions; (b) the long-wavelength cone speeds
+      are `c_L² = k_s a²/m` and `c_T² = (1−α) k_s a²/m`, fixing the lattice
+      light-cone via the temporal-to-spacelike stiffness ratio.
+    - **Design fork (open):** whether the temporal link is the zero-rest-length
+      kinetic increment (model a, baseline — recovers plain Newton and matches
+      the current code) or a genuine central-force spring with its own rest
+      length/prestress (model b — fully symmetric 4D-cubic, can represent #22's
+      unified contraction / gravitational time dilation, but its EL is no longer
+      plain Newton) is undecided. See the derivation §6 and `OPEN_PROBLEMS.md`.
+      The Lorentzian action is a saddle (unbounded below), so a foundational
+      block solver must root-find `∇S = 0`, not minimize `S` (OPEN_PROBLEMS §A).
 
 22. **The gauge / gravity split is observer-relative**
     - The 4-component displacement field `δX^μ` at each node has no
@@ -302,12 +318,8 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       two-state-vector formalism, Cramer's transactional interpretation,
       Price & Wharton's retrocausal models, and Sutherland's
       time-symmetric Bohmian model.
-    - **Open derivations** (flagged as future work; do not claim in the
-      paper as established):
-      - Reproduce Tsirelson's bound (`2√2`) from V-branching soliton
-        correlations on the substrate.
-      - Derive the no-signalling theorem as a theorem of substrate
-        dynamics rather than assuming it.
-      - Match the observed baryon-to-photon ratio from the
-        geometric-asymmetry picture (matter and antimatter expanding from
-        the Big Bang vertex in opposite time directions).
+    - **Open derivations** (flagged as future work; do **not** claim in the
+      paper as established, and do **not** present in the theory-structure
+      diagram as theory): Tsirelson's bound (`2√2`), the no-signalling
+      theorem, and the baryon-to-photon ratio. The live list is tracked
+      centrally in `OPEN_PROBLEMS.md` §B, not duplicated in the manuscript.
