@@ -12,7 +12,51 @@
 
 ---
 
-## Bottom line
+## ⚠️ CORRECTION (2026-05-30) — the confinement conclusion below is RETRACTED
+
+**The original "GO / stably confined" verdict is wrong. It rested entirely on
+`leakage_fraction = 0`, which is a self-referential metric and cannot detect
+spreading.** From `components/diagnostics/run.py`, leakage counts energy beyond
+`2 × radius_rms` — i.e. 2× the packet's *own current* spread. That threshold
+grows with the packet, so `leakage_fraction ≈ 0` is near-guaranteed for any
+smooth field, confined or not. (Verified: a synthetic *uniform* field also gives
+`leakage_fraction = 0.000`.)
+
+**What the data actually shows — dispersion to box-fill in all 13 completed runs.**
+Using non-self-referential metrics (added to `diagnostics/run.py` on 2026-05-30:
+`spread_ratio = radius_rms / box_fill_radius`, and `confined_fraction` = energy
+within a fixed box fraction):
+
+| metric (final) | confined target | observed (all 13 runs) |
+|---|---|---|
+| `spread_ratio` | « 1 | **0.86 – 1.18** (≈ box-fill) |
+| `confined_fraction` | → 1 | **≈ 0.08** (≈ the 0.067 uniform-fill value) |
+| `radius_growth` | ≈ 1 | **2.6 – 6.3×** |
+
+Example (`sthh_0p006_5_tanh`, seed w=5, 60³): `radius_rms` runs 5.4 → 29.2 with
+box-fill = 30. A localized seed expanding to fill the box is the **opposite** of
+confinement. The final `radius_rms ≈ N/2` is **independent of the seed width**
+(w=5 and w=17 both end at box-fill) — the hallmark of dispersion to equilibrium,
+not a soliton.
+
+**This contradicts the derivation it was benchmarked against.** `vsh_channel_decomposition.md`
+§2.5 predicts a metastable hedgehog at `R_h/a ≈ 10` for `u₀/ℓ₀ ≈ 0.03` (exactly
+the sweep's design point); no such bounded radius is observed.
+
+**Still valid below:** the `tanh` vs `power2` transient comparison (tanh starts
+nearer on-shell), and the failure analysis (§2 — the 7 failures were genuine
+`ENOSPC`, still physically untested). **Re-interpret with caution:** the
+`tr⊥/tr∥ = √2` and isotropic-partition "confirmations" are also exactly what
+uniform box-fill produces, so they are not evidence of a soliton.
+
+**Before any real go/no-go:** (i) use `spread_ratio` / `confined_fraction`, not
+`leakage_fraction`; (ii) re-run in a box ≫ seed (periodicity here masks
+dispersion — `radius_rms` saturates at N/2 instead of growing, and the dispersed
+field re-interferes with itself).
+
+---
+
+## Bottom line  *(SUPERSEDED — see correction above)*
 
 1. **At α = 0.20, the Skyrme-twisted hedgehog ansatz produces stably confined states
    in every config that completed.** All 13 reach `leakage_fraction = 0` by t ≲ 50

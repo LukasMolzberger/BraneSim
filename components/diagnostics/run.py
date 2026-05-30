@@ -30,13 +30,30 @@ def _safe_corrcoef(x: np.ndarray) -> np.ndarray:
     return np.corrcoef(x, rowvar=False)
 
 
+def _box_fill_radius(coords_xyz: np.ndarray) -> float:
+    """RMS node radius about the geometric centre (uniform weight).
+
+    Frame-invariant (depends only on the rest geometry). This is the value the
+    energy-weighted ``radius_rms`` approaches if the field disperses to fill the
+    box uniformly, so it is the natural fixed reference for confinement.
+    """
+    geom_center = np.mean(coords_xyz, axis=0)
+    r_geom = np.linalg.norm(coords_xyz - geom_center[None, :], axis=1)
+    return float(np.sqrt(np.mean(r_geom * r_geom)))
+
+
 def _frame_metrics(
     disp_xyz: np.ndarray,
     vel_xyz: np.ndarray,
     coords_xyz: np.ndarray,
     omega_ref: float,
     leakage_radius_factor: float,
+    confinement_radius_factor: float,
+    box_fill_radius: float,
 ) -> dict[str, float]:
+    # NOTE: this function is intentionally 3-channel. The 3 columns are the
+    # spacelike lateral triplet (the SU(3) gauge / colour sector, principles
+    # §1.1a), not an arbitrary spatial dimension; the caller slices [:, :3].
     energy_proxy = 0.5 * (disp_xyz ** 2 + (vel_xyz / max(omega_ref, 1e-12)) ** 2)
     channel_energy = np.mean(energy_proxy, axis=0)
     total_energy = float(np.sum(channel_energy))
@@ -47,11 +64,28 @@ def _frame_metrics(
 
     amp = np.linalg.norm(disp_xyz, axis=1)
     weights = amp * amp + 1e-20
-    center = np.sum(coords_xyz * weights[:, None], axis=0) / np.sum(weights)
+    total_weight = np.sum(weights)
+    center = np.sum(coords_xyz * weights[:, None], axis=0) / total_weight
     radial = np.linalg.norm(coords_xyz - center[None, :], axis=1)
-    radius_rms = float(np.sqrt(np.sum(weights * radial * radial) / np.sum(weights)))
+    radius_rms = float(np.sqrt(np.sum(weights * radial * radial) / total_weight))
     leak_threshold = leakage_radius_factor * radius_rms
-    leakage = float(np.sum(weights[radial > leak_threshold]) / np.sum(weights))
+    leakage = float(np.sum(weights[radial > leak_threshold]) / total_weight)
+
+    # Confinement (non-self-referential). The leakage metric above uses a
+    # threshold proportional to the *current* radius_rms, so it stays ~0 even
+    # when the packet disperses; it cannot detect spreading. These metrics
+    # instead compare against the fixed box geometry (box_fill_radius, passed
+    # in and frame-invariant):
+    #   spread_ratio      -- radius_rms / box_fill_radius. -> 1 means fully
+    #     dispersed (box-fill); << 1 means localized/confined.
+    #   confined_fraction -- weighted-energy fraction within a radius that is a
+    #     FIXED fraction of the box. The threshold is a box scale, but the
+    #     distance `radial` is measured from the energy-weighted centre, so
+    #     this reads "fraction of energy within confinement_radius of wherever
+    #     the packet currently sits" (robust to an off-centre packet).
+    spread_ratio = radius_rms / box_fill_radius if box_fill_radius > 1e-30 else float("nan")
+    confinement_radius = confinement_radius_factor * box_fill_radius
+    confined_fraction = float(np.sum(weights[radial <= confinement_radius]) / total_weight)
 
     corr = _safe_corrcoef(disp_xyz)
     mixing = float(np.nanmean(np.abs(corr[np.triu_indices(3, k=1)]))) if not np.isnan(corr).all() else float("nan")
@@ -64,6 +98,9 @@ def _frame_metrics(
         "trace_rms": float(np.sqrt(np.mean(trace_mode * trace_mode))),
         "traceless_rms": float(np.sqrt(np.mean(np.sum(traceless * traceless, axis=1)))),
         "radius_rms": radius_rms,
+        "box_fill_radius": box_fill_radius,
+        "spread_ratio": spread_ratio,
+        "confined_fraction": confined_fraction,
         "leakage_fraction": leakage,
         "mixing_strength": mixing,
     }
@@ -79,6 +116,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--berry-omega0", type=float, default=None)
     p.add_argument("--omega-ref", type=float, default=1.0)
     p.add_argument("--leakage-radius-factor", type=float, default=2.0)
+    p.add_argument("--confinement-radius-factor", type=float, default=0.5,
+                   help="confined_fraction counts energy within this fraction of "
+                        "box_fill_radius (a fixed box scale, not the packet's own spread).")
     p.add_argument("--render-berry-videos", action="store_true")
     return p.parse_args()
 
@@ -96,6 +136,9 @@ def main() -> None:
 
     rest = load_npy(args.input, "aux/rest_positions.npy")
     berry_idx = np.arange(0, rest.shape[0], max(int(args.berry_point_stride), 1), dtype=np.int64)
+
+    # Frame-invariant confinement reference (depends only on rest geometry).
+    box_fill_radius = _box_fill_radius(rest[:, :3])
 
     rows: list[dict[str, float]] = []
     berry_u: list[np.ndarray] = []
@@ -119,6 +162,8 @@ def main() -> None:
                 rest[:, :3],
                 omega_ref=float(args.omega_ref),
                 leakage_radius_factor=float(args.leakage_radius_factor),
+                confinement_radius_factor=float(args.confinement_radius_factor),
+                box_fill_radius=box_fill_radius,
             )
         )
         rows.append(row)
@@ -148,6 +193,15 @@ def main() -> None:
             for k in rows[0].keys()
             if k not in {"frame_index", "step", "time"}
         },
+        # Spreading over the run: radius_rms(final) / radius_rms(first sampled
+        # frame; note this is the first frame at --frame-stride, not necessarily
+        # t=0). > 1 means the mode expanded from its seed; combined with a final
+        # spread_ratio near 1 this is the signature of dispersion to box-fill
+        # (the opposite of confinement).
+        "radius_growth": (
+            rows[-1]["radius_rms"] / rows[0]["radius_rms"]
+            if rows[0]["radius_rms"] > 1e-30 else float("nan")
+        ),
     }
 
     if len(berry_u) >= 2:
