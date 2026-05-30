@@ -134,7 +134,32 @@ rather than merely permitting opposite-direction expansion in principle.
 
 ---
 
-## C. Pointers to scoped non-claims (tracked elsewhere)
+## C. Constitutive law & soliton stability
+
+### C1. StVK compression non-coercivity vs soliton stability — `open`
+**Statement.** The St. Venant–Kirchhoff baseline is neither polyconvex nor
+coercive in compression: its stored energy does not diverge as `det F → 0⁺`, so
+it does not penalize local volume collapse / element inversion and can soften
+under strong compression. This is **structural, not a continuum artifact**: the
+microscopic central-force pair energy `½ k_δ(|R_{p+δ}−R_p| − αa)²` stays bounded
+(→ `½ k_δ(αa)²`) as a link collapses `|R_{p+δ}−R_p| → 0`. The lattice spacing
+`a` masks the instability (cannot compress below the grid); the continuum
+exposes it.
+**Why it matters.** The decisive numerical target is a stable baryon-like
+soliton (backbone #12). A strongly localized mode could collapse through this
+compression instability rather than being protected. The Skyrme/geometric
+quartic (#17) guards only against **Derrick** (uniform-rescaling) collapse — a
+distinct failure mode — so it does not by itself remove this.
+**Candidate approach.** For soliton-scale runs either (i) monitor `det F` /
+minimum link length and verify configurations stay non-inverting within the
+StVK-valid regime, or (ii) substitute a polyconvex hyperelastic completion
+(neo-Hookean / Mooney–Rivlin / Ogden) within the *same* induced-metric
+framework, which leaves the geometric transverse–lateral coupling unchanged.
+Stated in paper §3 (constitutive subsection). Owner: soliton-hunter.
+
+---
+
+## D. Pointers to scoped non-claims (tracked elsewhere)
 
 The following are bounded-scope limits already stated honestly in paper §2
 "Non-claims"; listed here only so the central tracker is complete. They are

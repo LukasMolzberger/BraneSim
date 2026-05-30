@@ -220,10 +220,19 @@ This choice is not claimed unique; it is used because it is isotropic, analytic,
 geometric nonlinearity through $g_{ij}(\vecX)$.
 It also reduces to standard linear elasticity in the small-strain limit, making the longitudinal/transverse
 wave speeds and the linearized branch structure transparent.
-We emphasize that StVK is employed here as a \emph{baseline constitutive law} for analytic tractability, not as a
-claim of material realism at arbitrarily large strains; more robust hyperelastic energies (e.g.\ neo-Hookean,
-Mooney--Rivlin, Ogden-type) can be substituted within the same induced-metric framework without changing the
-geometric mechanism of transverse--lateral backreaction.
+We emphasize that StVK is employed here as a \emph{baseline constitutive law} for analytic tractability.
+Its relevant limitation is specific rather than a generic large-strain nicety: StVK is neither polyconvex nor coercive in compression --- its stored energy does not diverge as $\det F\to 0^+$, so it neither penalizes local volume collapse and element inversion nor stiffens sufficiently under strong compression.
+This feature is structural, not an artifact of the continuum approximation: the microscopic central-force lattice shares it, since the pair energy $\tfrac12 k_\delta(|R_{p+\delta}-R_p|-\alpha a)^2$ stays bounded --- tending to $\tfrac12 k_\delta(\alpha a)^2$ --- as a link collapses, $|R_{p+\delta}-R_p|\to 0$.
+The lattice spacing $a$ merely masks the instability (configurations cannot compress below the grid) that the continuum exposes.
+For the linear and moderate-strain results of \Cref{sec:emergent-relativity,sec:geophase} this is immaterial; for the strongly localized modes of \Cref{sec:localized} it must be controlled --- either by verifying that the relevant configurations remain non-inverting, or by substituting a polyconvex hyperelastic energy (e.g.\ neo-Hookean, Mooney--Rivlin, Ogden-type) within the same induced-metric framework, which leaves the geometric mechanism of transverse--lateral backreaction unchanged.
+The geometric quartic that stabilizes solitons against Derrick (uniform-rescaling) collapse is a distinct safeguard and does not by itself remove this local compression instability.
+
+\paragraph{Spacelike-slice versus 4D placement.}
+The strain \eqref{eq:green-lagrange-strain} is a spacelike-slice object: $E$ is $3\times 3$ and is referred to the Euclidean reference metric of the slice.
+Its placement in the foundational 4D action (\Cref{subsec:discrete-4d-action}) admits the two readings of the timelike-link choice.
+In the baseline, $W_{\text{StVK}}$ is the potential $V$ and the timelike direction contributes a separate kinetic term, so $S=\int(T-V)$ is ordinary elastodynamics and \eqref{eq:stvk} stands verbatim.
+In the symmetric alternative, the strain is promoted to a $4\times 4$ Green--Lagrange tensor $E_{\mu\nu}=\tfrac12(g_{\mu\nu}-\eta_{\mu\nu})$ referred to a Lorentzian reference $\eta_{\mu\nu}$.
+In either reading the Lorentzian signature resides in the \emph{sign structure of the action} (\Cref{subsec:ontology-kinematics}), not in the ambient or induced metric: the ambient is Euclidean, so $g_{\mu\nu}=\partial_\mu\vecX\cdot\partial_\nu\vecX$ is positive-definite and the timelike direction is distinguished only by the opposite sign with which its strain enters $S$.
 
 \subsection{Lagrangian, action, and equations of motion}
 
