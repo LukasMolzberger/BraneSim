@@ -1,0 +1,16 @@
+{
+  "config": "/Users/lukasmolzberger/PycharmProjects/BraneSim/orchestration/configs/baryon_candidates/sthh_0p006_15_tanh_off_high.json",
+  "output_dir": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high",
+  "initial_state": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/initial_state.npz",
+  "trajectory": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/trajectory.zip",
+  "visualizations": [
+    "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/plots/slice_xy_magnitude.mp4"
+  ],
+  "diagnostics": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/diagnostics/diagnostics_summary.json",
+  "commands": [
+    "/Users/lukasmolzberger/PycharmProjects/claude-code-is-programmable/.venv/bin/python3 -m components.initialization.skyrme_twisted_hedgehog --output /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/initial_state.npz --alpha 0.2 --u0 0.006 --w 15.0 --profile-shape tanh --tanh-steepness 3.0 --grid-size 90 --spacing 1.0 --periodic-axes True,True,True --spring-constant 1.0 --mass-density 1.0 --dt 0.05 --num-steps 10000 --checkpoint-interval 100 --axial-weight 1.0 --device auto --dtype float64",
+    "/Users/lukasmolzberger/PycharmProjects/claude-code-is-programmable/.venv/bin/python3 -m components.simulation.run --input /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/initial_state.npz --output /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/trajectory.zip --device auto",
+    "/Users/lukasmolzberger/PycharmProjects/claude-code-is-programmable/.venv/bin/python3 -m components.visualization.run --input /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/trajectory.zip --output /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/plots/slice_xy_magnitude.mp4 --mode slice --field-mode magnitude_all --plane xy --frame-stride 5 --fps 20 --dpi 80",
+    "/Users/lukasmolzberger/PycharmProjects/claude-code-is-programmable/.venv/bin/python3 -m components.diagnostics.run --input /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/trajectory.zip --output-dir /Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_15_tanh_off_high/diagnostics --frame-stride 5 --berry-point-stride 8 --omega-ref 1.0 --leakage-radius-factor 2.0"
+  ]
+}

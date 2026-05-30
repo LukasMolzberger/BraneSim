@@ -48,7 +48,13 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
-test-runs/
+
+# test-runs: version the interpretation (reports, analysis scripts, summaries,
+# logs) but never the heavy regenerable binaries (trajectories, raw arrays,
+# rendered videos). These are reproducible from the configs + scripts.
+test-runs/**/*.zip
+test-runs/**/*.npz
+test-runs/**/*.mp4
 
 # LaTeX
 paper/build/

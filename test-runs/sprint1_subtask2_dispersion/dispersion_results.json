@@ -1,0 +1,447 @@
+{
+  "alpha": 0.2,
+  "N": 32,
+  "dt": 0.01,
+  "amplitude": 0.001,
+  "k0": 1.0,
+  "rho": 1.0,
+  "spacing": 1.0,
+  "runs": [
+    {
+      "label": "100_L_n1",
+      "direction": "100",
+      "polarization_tag": "L",
+      "N": 32,
+      "k_index": [
+        1,
+        0,
+        0
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.19634954084936207,
+      "k_dot_a": 0.19634954084936207,
+      "omega_analytic": 0.1960342806591213,
+      "omega_measured": 0.19603431204877036,
+      "omega_err": 4.3593647343950895e-15,
+      "c_analytic": 0.9983943930356188,
+      "c_measured": 0.9983945529017888,
+      "c_rel_err": 1.6012326499809917e-07,
+      "num_steps": 19231,
+      "num_periods_run": 6.000038303895312,
+      "fit_residual_max": 2.4848179069891785e-14,
+      "wall_time_s": 104.86770009994507
+    },
+    {
+      "label": "100_T_n1",
+      "direction": "100",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        1,
+        0,
+        0
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.19634954084936207,
+      "k_dot_a": 0.19634954084936207,
+      "omega_analytic": 0.175338390989627,
+      "omega_measured": 0.1753384136496981,
+      "omega_err": 2.621003793357098e-13,
+      "c_analytic": 0.8929910924729145,
+      "c_measured": 0.892991207879709,
+      "c_rel_err": 1.2923622130946355e-07,
+      "num_steps": 21501,
+      "num_periods_run": 6.000062962267382,
+      "fit_residual_max": 1.5584742697749565e-12,
+      "wall_time_s": 119.12007999420166
+    },
+    {
+      "label": "111_px_n1",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        1,
+        1,
+        1
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.3400873807939158,
+      "k_dot_a": 0.3400873807939158,
+      "omega_analytic": 0.3160957796352266,
+      "omega_measured": 0.31609591149268146,
+      "omega_err": 1.348864759379505e-12,
+      "c_analytic": 0.9294545975134917,
+      "c_measured": 0.9294549852298913,
+      "c_rel_err": 4.1714399034620593e-07,
+      "num_steps": 11927,
+      "num_periods_run": 6.00025970808496,
+      "fit_residual_max": 4.906242729793564e-12,
+      "wall_time_s": 66.99285411834717
+    },
+    {
+      "label": "111_py_n1",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        1,
+        1,
+        1
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.3400873807939158,
+      "k_dot_a": 0.3400873807939158,
+      "omega_analytic": 0.3160957796352266,
+      "omega_measured": 0.31609591149269156,
+      "omega_err": 1.348819747358556e-12,
+      "c_analytic": 0.9294545975134917,
+      "c_measured": 0.9294549852299211,
+      "c_rel_err": 4.171440223585034e-07,
+      "num_steps": 11927,
+      "num_periods_run": 6.00025970808496,
+      "fit_residual_max": 4.906273954816132e-12,
+      "wall_time_s": 68.52557802200317
+    },
+    {
+      "label": "111_pz_n1",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        1,
+        1,
+        1
+      ],
+      "polarization": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.3400873807939158,
+      "k_dot_a": 0.3400873807939158,
+      "omega_analytic": 0.3160957796352266,
+      "omega_measured": 0.31609591149268906,
+      "omega_err": 1.348727744850551e-12,
+      "c_analytic": 0.9294545975134917,
+      "c_measured": 0.9294549852299137,
+      "c_rel_err": 4.17144014355429e-07,
+      "num_steps": 11927,
+      "num_periods_run": 6.00025970808496,
+      "fit_residual_max": 4.906063836435104e-12,
+      "wall_time_s": 67.94949793815613
+    },
+    {
+      "label": "100_L_n2",
+      "direction": "100",
+      "polarization_tag": "L",
+      "N": 32,
+      "k_index": [
+        2,
+        0,
+        0
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.39269908169872414,
+      "k_dot_a": 0.39269908169872414,
+      "omega_analytic": 0.3901806440322566,
+      "omega_measured": 0.39018089153868857,
+      "omega_err": 1.440051929030444e-14,
+      "c_analytic": 0.993586851144206,
+      "c_measured": 0.9935874814141595,
+      "c_rel_err": 6.343380579515074e-07,
+      "num_steps": 9662,
+      "num_periods_run": 6.000022597347852,
+      "fit_residual_max": 2.7072528246963046e-14,
+      "wall_time_s": 55.39827513694763
+    },
+    {
+      "label": "100_T_n2",
+      "direction": "100",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        2,
+        0,
+        0
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.39269908169872414,
+      "k_dot_a": 0.39269908169872414,
+      "omega_analytic": 0.3489881774243094,
+      "omega_measured": 0.34898835605616835,
+      "omega_err": 3.7694776885490545e-12,
+      "c_analytic": 0.8886910962833637,
+      "c_measured": 0.8886915511656573,
+      "c_rel_err": 5.118564769158939e-07,
+      "num_steps": 10803,
+      "num_periods_run": 6.000331195719257,
+      "fit_residual_max": 8.164895192244725e-12,
+      "wall_time_s": 64.51089906692505
+    },
+    {
+      "label": "111_px_n2",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        2,
+        2,
+        2
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.6801747615878316,
+      "k_dot_a": 0.6801747615878316,
+      "omega_analytic": 0.6291473841170357,
+      "omega_measured": 0.6291484238802136,
+      "omega_err": 1.2912530653822684e-11,
+      "c_analytic": 0.9249790195806807,
+      "c_measured": 0.9249805482513057,
+      "c_rel_err": 1.6526543765996453e-06,
+      "num_steps": 5993,
+      "num_periods_run": 6.000905732805274,
+      "fit_residual_max": 1.5356463930332742e-11,
+      "wall_time_s": 34.13793683052063
+    },
+    {
+      "label": "111_py_n2",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        2,
+        2,
+        2
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.6801747615878316,
+      "k_dot_a": 0.6801747615878316,
+      "omega_analytic": 0.6291473841170357,
+      "omega_measured": 0.6291484238802468,
+      "omega_err": 1.291349128152186e-11,
+      "c_analytic": 0.9249790195806807,
+      "c_measured": 0.9249805482513545,
+      "c_rel_err": 1.6526544292914251e-06,
+      "num_steps": 5993,
+      "num_periods_run": 6.000905732805274,
+      "fit_residual_max": 1.5357274046196023e-11,
+      "wall_time_s": 34.26629400253296
+    },
+    {
+      "label": "111_pz_n2",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        2,
+        2,
+        2
+      ],
+      "polarization": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.6801747615878316,
+      "k_dot_a": 0.6801747615878316,
+      "omega_analytic": 0.6291473841170357,
+      "omega_measured": 0.6291484238802721,
+      "omega_err": 1.2912090259255098e-11,
+      "c_analytic": 0.9249790195806807,
+      "c_measured": 0.9249805482513918,
+      "c_rel_err": 1.652654469620441e-06,
+      "num_steps": 5993,
+      "num_periods_run": 6.000905732805274,
+      "fit_residual_max": 1.5355721468685024e-11,
+      "wall_time_s": 34.26718306541443
+    },
+    {
+      "label": "100_L_n3",
+      "direction": "100",
+      "polarization_tag": "L",
+      "N": 32,
+      "k_index": [
+        3,
+        0,
+        0
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.5890486225480862,
+      "k_dot_a": 0.5890486225480862,
+      "omega_analytic": 0.5805693545089248,
+      "omega_measured": 0.5805701698753573,
+      "omega_err": 7.756024401168359e-15,
+      "c_analytic": 0.9856051474961742,
+      "c_measured": 0.9856065317052213,
+      "c_rel_err": 1.404425545632597e-06,
+      "num_steps": 6494,
+      "num_periods_run": 6.000487338599806,
+      "fit_residual_max": 1.0877908816764315e-14,
+      "wall_time_s": 38.082289934158325
+    },
+    {
+      "label": "100_T_n3",
+      "direction": "100",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        3,
+        0,
+        0
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 0.5890486225480862,
+      "k_dot_a": 0.5890486225480862,
+      "omega_analytic": 0.5192770169340519,
+      "omega_measured": 0.5192776050704506,
+      "omega_err": 3.064633274417769e-11,
+      "c_analytic": 0.8815520435100609,
+      "c_measured": 0.8815530419614216,
+      "c_rel_err": 1.1326062573972973e-06,
+      "num_steps": 7260,
+      "num_periods_run": 6.000063596140372,
+      "fit_residual_max": 3.27454523999654e-11,
+      "wall_time_s": 41.72711396217346
+    },
+    {
+      "label": "111_px_n3",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        3,
+        3,
+        3
+      ],
+      "polarization": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 1.0202621423817475,
+      "k_dot_a": 1.0202621423817475,
+      "omega_analytic": 0.9361399553628532,
+      "omega_measured": 0.9361433808669319,
+      "omega_err": 3.1492314298921034e-11,
+      "c_analytic": 0.9175484578673913,
+      "c_measured": 0.9175518153418446,
+      "c_rel_err": 3.6591794412152433e-06,
+      "num_steps": 4028,
+      "num_periods_run": 6.001369617243168,
+      "fit_residual_max": 1.633941267877026e-11,
+      "wall_time_s": 22.99914526939392
+    },
+    {
+      "label": "111_py_n3",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        3,
+        3,
+        3
+      ],
+      "polarization": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 1.0202621423817475,
+      "k_dot_a": 1.0202621423817475,
+      "omega_analytic": 0.9361399553628532,
+      "omega_measured": 0.936143380866926,
+      "omega_err": 3.1493237316801024e-11,
+      "c_analytic": 0.9175484578673913,
+      "c_measured": 0.9175518153418387,
+      "c_rel_err": 3.6591794348023047e-06,
+      "num_steps": 4028,
+      "num_periods_run": 6.001369617243168,
+      "fit_residual_max": 1.6339764719215666e-11,
+      "wall_time_s": 22.59855604171753
+    },
+    {
+      "label": "111_pz_n3",
+      "direction": "111",
+      "polarization_tag": "T",
+      "N": 32,
+      "k_index": [
+        3,
+        3,
+        3
+      ],
+      "polarization": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "alpha": 0.2,
+      "k_mag": 1.0202621423817475,
+      "k_dot_a": 1.0202621423817475,
+      "omega_analytic": 0.9361399553628532,
+      "omega_measured": 0.9361433808669254,
+      "omega_err": 3.1493559420234246e-11,
+      "c_analytic": 0.9175484578673913,
+      "c_measured": 0.9175518153418382,
+      "c_rel_err": 3.6591794341973106e-06,
+      "num_steps": 4028,
+      "num_periods_run": 6.001369617243168,
+      "fit_residual_max": 1.633991195387069e-11,
+      "wall_time_s": 23.01331400871277
+    }
+  ],
+  "wall_time_s_total": 800.7570397853851
+}

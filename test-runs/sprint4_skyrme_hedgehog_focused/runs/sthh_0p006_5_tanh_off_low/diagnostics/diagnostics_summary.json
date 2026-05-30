@@ -1,0 +1,35 @@
+{
+  "trajectory": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_5_tanh_off_low/trajectory.zip",
+  "num_frames_used": 21,
+  "frame_stride": 5,
+  "berry_point_stride": 8,
+  "qcd_metrics_csv": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_5_tanh_off_low/diagnostics/qcd_metrics.csv",
+  "final_metrics": {
+    "frame_index": 100.0,
+    "step": 10000.0,
+    "time": 500.0000000000794,
+    "energy_total_proxy": 3.879989307620235e-08,
+    "energy_frac_x": 0.3338505029678345,
+    "energy_frac_y": 0.3342081606388092,
+    "energy_frac_z": 0.3319413363933563,
+    "trace_rms": 0.0001255815454746444,
+    "traceless_rms": 0.0001766506175044924,
+    "radius_rms": 29.204763412475586,
+    "leakage_fraction": 0.0,
+    "mixing_strength": 0.0012808108530387014
+  },
+  "mean_metrics": {
+    "energy_total_proxy": 3.7411251662704325e-08,
+    "energy_frac_x": 0.3335487274896531,
+    "energy_frac_y": 0.33383458568936303,
+    "energy_frac_z": 0.33261670101256596,
+    "trace_rms": 0.00012922800620816105,
+    "traceless_rms": 0.00018188907484900917,
+    "radius_rms": 29.544008277711413,
+    "leakage_fraction": 4.853966727284128e-07,
+    "mixing_strength": 0.0013972108414832774
+  },
+  "berry_series": "/Users/lukasmolzberger/PycharmProjects/BraneSim/test-runs/sprint4_skyrme_hedgehog_focused/runs/sthh_0p006_5_tanh_off_low/diagnostics/berry_series.npz",
+  "berry_phase_std_final": 0.15897979014467364,
+  "berry_connection_mean_abs": 0.0011911291562396809
+}
