@@ -47,7 +47,7 @@ hyperbolic operator with prescribed boundary data. Nonlinear (StVK/soliton)
 case → nonlinear BVP via Newton–Krylov with the Verlet stencil as the interior
 residual.
 
-### A2. Well-posedness of the two-time (block) BVP — `open`
+### A2. Well-posedness of the two-time (block) BVP — `in-progress` (linear regime resolved 2026-05-30)
 **Statement.** Hyperbolic operators are naturally Cauchy/IVP problems. Posing
 the brane equation as a two-time boundary-value problem (data on past **and**
 future spacelike slices) is **not unconditionally well-posed**: when the
@@ -64,6 +64,25 @@ removes the ambiguity may be the *same* one already in the ontology:
 = backward worldtube). Test whether the chirality boundary condition and the
 BVP well-posedness condition are the same statement in disguise. See
 `[[retrocausal-worldtube-interpretation]]` (project memory).
+
+**Resolution (linear regime, 2026-05-30 — derivation + numerical confirmation).**
+The conjecture is **confirmed, as an exact algebraic identity.** Since the
+6-neighbor `D(k)` is diagonal, the block BVP decouples per spatial mode into the
+scalar recurrence `a^{l+1} − 2cosθ(k) a^l + a^{l−1} = 0`,
+`θ(k)=arccos(1−Δt²ω²(k)/2)`. The Dirichlet two-time operator has determinant
+`2i·sin(Nθ)` → singular at `Nθ=mπ` (resonances), generically ill-conditioned
+(`κ ~ 1/min_k|sin(Nθ(k))|`; ~most time-extents fail at realistic mode counts —
+verified: `|det|=2|sin(Nθ)|` to machine precision, 67/79 extents with `κ>10³` for
+an evenly-spaced 32-mode spectrum). Splitting into characteristics
+`a^l=a₊e^{−ilθ}+a₋e^{+ilθ}` and imposing **one characteristic per end** (fix
+forward `a₊` from the past slice; no-incoming/Sommerfeld `a^N−e^{−iθ}a^{N−1}=0`
+on the future, killing `a₋`) gives `κ=1` exactly ∀N — and this *is* the
+matter=forward/antimatter=backward selection (exact change of basis). DC modes
+(`θ→0`) route through Dirichlet (well-posed there). Implementation recipe in
+`ARCHITECTURE.md` §2 (D2). **Still open:** uniqueness of the *nonlinear* block BVP
+— the `κ=1` result is the conditioning of each linearized JFNK step (necessary,
+not sufficient globally); the geometric quartic re-couples modes. See
+`[[block-solver-bvp-chirality]]`.
 
 ### A3. `c²` tuning for emergent Lorentz invariance — `open`
 **Statement.** With explicit temporal links, the ratio of temporal stiffness
