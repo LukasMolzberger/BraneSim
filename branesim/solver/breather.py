@@ -81,6 +81,7 @@ from scipy.optimize import newton_krylov, NoConvergence
 from branesim.core.action import spacelike_force
 from branesim.core.conventions import ActionParams
 from branesim.core.lattice import SpacelikeLattice
+from branesim.initialization.seeds import skyrme_twisted_hedgehog
 
 
 # ---------------------------------------------------------------------------
@@ -663,6 +664,193 @@ def _make_G(
 
 
 # ---------------------------------------------------------------------------
+# Topological-breather (Skyrmion-carrier) seed builder
+# ---------------------------------------------------------------------------
+
+
+def breather_seed_skyrmion(
+    lattice: SpacelikeLattice,
+    m: int,
+    u0: float,
+    w: float,
+    P: int,
+    profile: str = "power2",
+) -> tuple[np.ndarray, float]:
+    """Build a topological-breather seed worldtube for the 3D skyrmion carrier.
+
+    The seed implements the "common-carrier breathing skyrmion" ansatz:
+
+        R_p^l = ref_p + u0 * cos(2π l/P)
+                          * [ sin F(r_p) * x̂_p^i  (components 0..dim-1)
+                            ; cos F(r_p)            (component dim = X⁴) ]
+
+    where F(r) is the Skyrme profile (power2: F(r) = π/(1+(r/w)²)),
+    x̂_p = (coords_p - centre)/|coords_p - centre|, and the WHOLE
+    (lateral, X⁴) 4-vector shares ONE scalar carrier  b(l) = cos(2π l/P).
+
+    The period seed is T_seed = 2π/ω_neon where ω_neon is the
+    dimension-aware band-top frequency (as in _build_seed).
+
+    Physical properties of the seed:
+    - At l=0: carrier = 1  →  reduces exactly to skyrme_twisted_hedgehog.
+    - At l=P/2: carrier = -1 → the anti-amplitude slice.
+    - B=1 winding preserved: degree depends only on the direction map
+      (sinF * x̂, cosF) which is time-frozen; the carrier rescales S³
+      radius but does not change the winding.
+    - The X⁴ component at the peak (r=0) node at l=0 is
+      u0 * cos(F(0)) = u0 * cos(π) = -u0  (nonzero → clean pin point).
+
+    Parameters
+    ----------
+    lattice : SpacelikeLattice
+        Must have dim=3 (the Skyrme winding requires S² → S² for B=1).
+        Works at any grid size.
+    m : int
+        Ambient dimension.  Must be >= dim+1 = 4 for the X⁴ channel.
+    u0 : float
+        S³ radius (carrier amplitude); the peak displacement magnitude.
+    w : float
+        Skyrme profile half-width in the same units as the lattice spacing.
+    P : int
+        Number of temporal slices per period.  Must be even.
+    profile : str
+        Skyrme profile for F(r): ``"power2"`` or ``"tanh"``.
+
+    Returns
+    -------
+    slices : ndarray, shape (P, n_nodes, m)
+        Seed worldtube.
+    T_seed : float
+        Seed period estimate (2π / band-top frequency).
+    """
+    if P % 2 != 0:
+        raise ValueError(f"P must be even; got P={P}")
+    if m < lattice.dim + 1:
+        raise ValueError(
+            f"breather_seed_skyrmion requires m >= dim+1 = {lattice.dim + 1}; got m={m}"
+        )
+
+    n_nodes = lattice.n_nodes
+    k_s = 1.0  # the seed T estimate only needs the band top; caller can override
+    # Use dim-aware band-top as the seed frequency (same formula as _build_seed)
+    # ω²_max(ndim) = 4*dim*(1-α)*k_s/m  but for the seed T we use
+    # a conservative estimate at the band-top edge.
+    # We delegate to the lattice params: if params were available we would use
+    # them, but here we just compute the seed T from the number of slices and
+    # a default band-top estimate, keeping the breather_seed_skyrmion API
+    # self-contained.  The caller (solve_breather) can override T_seed.
+    #
+    # Conservative estimate: use the transverse band-top at α=0.5 in 3D
+    # as a safe starting point.  The exact value doesn't matter much; Newton
+    # will correct it.  We compute it analytically so no lattice-action
+    # dependency creeps in.
+    dim = lattice.dim
+    # Approximate band-top for seed: use staggered 3D mode at alpha=0.5, k_s=1, m=1
+    # ω²_max = 4*dim*(1-0.5)*1/1 for a rough estimate.
+    # The real period is a free unknown; this just gives the seed T.
+    om_approx = math.sqrt(4.0 * dim * 0.5)  # ≈ 2*sqrt(dim)
+    T_seed = 2.0 * math.pi / om_approx
+
+    # Build the static (l=0) Skyrme slice: this is exactly skyrme_twisted_hedgehog
+    R0_static, _ = skyrme_twisted_hedgehog(
+        lattice, m=m, u0=u0, w=w, profile_shape=profile
+    )
+    ref = lattice.reference_positions(m)  # (n_nodes, m)
+    disp_static = R0_static - ref  # (n_nodes, m)  — the static displacement
+
+    # Build P slices by scaling the static displacement with the carrier
+    slices = np.zeros((P, n_nodes, m), dtype=np.float64)
+    for l_idx in range(P):
+        carrier = math.cos(2.0 * math.pi * l_idx / P)
+        slices[l_idx] = ref + carrier * disp_static
+
+    return slices, T_seed
+
+
+# ---------------------------------------------------------------------------
+# Topological-breather multi-component constraint factory
+# ---------------------------------------------------------------------------
+
+
+def _make_G_topological(
+    lattice: SpacelikeLattice,
+    params_like: ActionParams,
+    mass: float,
+    P: int,
+    u0: float,
+    peak_node: int,
+    x4_comp: int,
+    x4_pin_value: float,
+    opts: BreatherOpts,
+) -> "callable":
+    """Return G(z)=0 for the 4-component topological breather solve.
+
+    Constraint scheme (makes the system square):
+    - 1 amplitude pin:     R^0[peak, x4_comp] = x4_pin_value   (X⁴ at peak, l=0)
+                           x4_pin_value = u0 * cos(F(0)) = u0 * cos(π) = -u0
+                           (nonzero and sign-definite → clean, well-conditioned pin)
+    - 1 anti-amplitude:    R^{P/2}[peak, x4_comp] = -x4_pin_value   (= +u0 at half-period)
+                           This rules out static solutions and selects the breathing branch.
+    - 1 gauge fix:         R^1[peak, x4_comp] - R^{P-1}[peak, x4_comp] = 0
+                           (turning point: carrier velocity = 0 at l=0)
+
+    The 3 lateral components (indices 0..dim-1) at (peak, l=0) and (peak, l=P/2)
+    are NOT independently pinned.  They ride the SAME carrier as X⁴ via
+    Newton convergence; no independent lateral pin is imposed.  This is the
+    "common-carrier" discipline: 3 constraints total (1 pin + 1 anti-amp + 1 gauge),
+    same as the scalar breather, so the system remains square.
+
+    Parameters
+    ----------
+    peak_node : int
+        Index of the centre node (r=0).
+    x4_comp : int
+        Ambient component index for X⁴ (= dim = m_ambient-1).
+    x4_pin_value : float
+        The target value for R^0[peak, x4_comp].  Should equal u0*cos(F(0)) = -u0.
+    """
+    if P % 2 != 0:
+        raise ValueError(f"P must be even; got P={P}")
+
+    n_nodes = lattice.n_nodes
+    m_ambient = params_like.m_ambient or (lattice.dim + 1)
+    n_per_slice = n_nodes * m_ambient
+
+    # Flat index for X⁴ component at the peak node
+    # l=0 slice: amplitude pin
+    amp0_idx = 0 * n_per_slice + peak_node * m_ambient + x4_comp
+    # l=P/2 slice: anti-amplitude pin
+    ampP2_idx = (P // 2) * n_per_slice + peak_node * m_ambient + x4_comp
+
+    # Gauge fix indices: l=1 and l=P-1 at (peak, x4_comp)
+    idx_R1_peak_x4 = 1 * n_per_slice + peak_node * m_ambient + x4_comp
+    idx_RP1_peak_x4 = (P - 1) * n_per_slice + peak_node * m_ambient + x4_comp
+
+    def G(z: np.ndarray) -> np.ndarray:
+        slices, u = _unpack(z, P, n_nodes, m_ambient)
+        T = float(math.exp(u))
+
+        # Cyclic residual (P*n*m equations)
+        res = _cyclic_residual(slices, T, lattice, params_like, mass, P)
+        g = res.ravel().copy()
+
+        # Replace l=0 residual at (peak, X⁴) with the amplitude pin:
+        # R^0[peak, X⁴] = x4_pin_value  (= -u0 for the Skyrme carrier)
+        g[amp0_idx] = slices[0, peak_node, x4_comp] - x4_pin_value
+
+        # Replace l=P/2 residual at (peak, X⁴) with anti-amplitude pin:
+        # R^{P/2}[peak, X⁴] = -x4_pin_value  (= +u0 at half-period)
+        g[ampP2_idx] = slices[P // 2, peak_node, x4_comp] + x4_pin_value
+
+        # Append gauge fix: turning point at l=0 for the X⁴ carrier
+        g_gauge = float(z[idx_R1_peak_x4] - z[idx_RP1_peak_x4])
+
+        return np.append(g, g_gauge)
+
+    return G
+
+
+# ---------------------------------------------------------------------------
 # Main solver
 # ---------------------------------------------------------------------------
 
@@ -677,6 +865,9 @@ def solve_breather(
     seed: np.ndarray | None = None,
     T_seed: float | None = None,
     opts: BreatherOpts | None = None,
+    mode: str = "scalar",
+    skyrme_profile: str = "power2",
+    skyrme_w: float | None = None,
 ) -> dict[str, Any]:
     """Find a time-periodic discrete breather by JFNK root-finding.
 
@@ -698,15 +889,38 @@ def solve_breather(
         half-period anti-amplitude constraint that rules out static solutions);
         typically 16..64.
     amplitude : float
-        Peak lateral displacement A at l=0.  Fixes the non-trivial branch.
+        Peak displacement amplitude at l=0.
+        In ``"scalar"`` mode: peak lateral displacement A.
+        In ``"topological"`` mode: S³ radius u0 (same as skyrme_twisted_hedgehog u0).
     seed : ndarray, shape (P, n_nodes, m_ambient), optional
-        Initial guess for the slices.  If None, built from the small-amplitude
-        linear mode (staggered Gaussian envelope × cos carrier).
+        Initial guess for the slices.  If None, built automatically:
+        - ``"scalar"``: staggered Gaussian envelope × cos carrier.
+        - ``"topological"``: Skyrme-twisted hedgehog × cos carrier (via
+          :func:`breather_seed_skyrmion`).
     T_seed : float, optional
         Initial period guess.  Used when seed is not None.  If None, defaults
-        to 2π / ω_max.
+        to 2π / ω_max (scalar) or 2π / band-top estimate (topological).
     opts : BreatherOpts, optional
         Solver options (tolerances, iteration counts, etc.).
+    mode : str
+        Breather mode.  One of:
+
+        ``"scalar"`` (default)
+            Single-component staggered transverse breather.  Pins the LAST
+            ambient component (X⁴) at the peak node.  Works for any dimension.
+
+        ``"topological"``
+            Common-carrier Skyrme skyrmion breather.  Pins the X⁴ component
+            (amplitude channel, component dim) at the peak (r=0) node via the
+            Skyrme-profile value cos(F(0)) = cos(π) = -1.  Requires
+            m_ambient >= dim+1 (canonical: dim=3, m=4).  The 3 lateral
+            components ride the SAME carrier implicitly; only X⁴ is pinned.
+    skyrme_profile : str
+        Profile shape for the topological seed's F(r) function.
+        ``"power2"`` (default) or ``"tanh"``.  Ignored in ``"scalar"`` mode.
+    skyrme_w : float, optional
+        Skyrme profile half-width for the topological seed.  Defaults to
+        ``1.5 * lattice.params.spacing`` if None.  Ignored in ``"scalar"`` mode.
 
     Returns
     -------
@@ -720,12 +934,15 @@ def solve_breather(
         walltime_s   : float
         peak_node    : int
         lat_comp     : int
+        mode         : str — echoed mode
     """
     if opts is None:
         opts = BreatherOpts()
 
     if P % 2 != 0:
         raise ValueError(f"P must be even (required for half-period constraint); got P={P}")
+    if mode not in ("scalar", "topological"):
+        raise ValueError(f"mode must be 'scalar' or 'topological'; got {mode!r}")
 
     k_s = params_like.k_s
     alpha = params_like.alpha
@@ -733,43 +950,85 @@ def solve_breather(
     m_ambient = params_like.m_ambient or (lattice.dim + 1)
     n_nodes = lattice.n_nodes
 
-    # Identify peak node (center of the chain) and lateral component
+    # Identify peak node (center of the grid, r=0)
     mi = lattice.multi_indices  # (n_nodes, dim)
     center_mi = np.array([(s - 1) / 2.0 for s in lattice.params.grid_shape])
     d_to_center = np.linalg.norm((mi - center_mi) * a, axis=1)
     peak_node = int(np.argmin(d_to_center))
 
-    # Lateral component: last ambient component (index m_ambient-1).
-    # The ambient has m_ambient = dim + 1 components; the last one is the
-    # timelike/amplitude direction seen by the inside observer (backbone #22).
+    # Last ambient component (timelike / X⁴ direction, backbone #22)
     lat_comp = m_ambient - 1
 
-    # Sign of the staggered carrier at the peak node
-    peak_parity = int(mi[peak_node].sum() % 2)
-    peak_sign = float((-1) ** peak_parity)
+    if mode == "scalar":
+        # ---- SCALAR PATH (existing 1D/2D/3D staggered breather) ----
+        # Sign of the staggered carrier at the peak node
+        peak_parity = int(mi[peak_node].sum() % 2)
+        peak_sign = float((-1) ** peak_parity)
 
-    # Build seed if not provided
-    if seed is None:
-        slices_seed, T_seed_auto = _build_seed(
-            lattice, k_s, alpha, mass, a, P, amplitude, m_ambient
+        # Build seed
+        if seed is None:
+            slices_seed, T_seed_auto = _build_seed(
+                lattice, k_s, alpha, mass, a, P, amplitude, m_ambient
+            )
+            if T_seed is None:
+                T_seed = T_seed_auto
+        else:
+            slices_seed = seed.copy()
+            if T_seed is None:
+                T_seed = 2.0 * math.pi / omega_max(k_s, alpha, mass, a)
+
+        G = _make_G(
+            lattice, params_like, mass, P, amplitude,
+            peak_node, lat_comp, peak_sign, opts,
         )
-        if T_seed is None:
-            T_seed = T_seed_auto
+
     else:
-        slices_seed = seed.copy()
-        if T_seed is None:
-            T_seed = 2.0 * math.pi / omega_max(k_s, alpha, mass, a)
+        # ---- TOPOLOGICAL PATH (Skyrme common-carrier breather) ----
+        if m_ambient < lattice.dim + 1:
+            raise ValueError(
+                f"Topological mode requires m_ambient >= dim+1 = {lattice.dim + 1}; "
+                f"got m_ambient={m_ambient}"
+            )
 
-    # Build the residual function
-    G = _make_G(
-        lattice, params_like, mass, P, amplitude,
-        peak_node, lat_comp, peak_sign, opts,
-    )
+        # X⁴ component index (the amplitude channel)
+        x4_comp = lattice.dim  # = m_ambient - 1 for canonical m = dim+1
 
-    # Log-reparametrisation: pack u0 = ln(T_seed) so that the Newton unknown
-    # is u = ln(T) and T = exp(u) > 0 always — no hard clamp ever needed.
-    u0 = math.log(T_seed)
-    z0 = _pack(slices_seed, u0)
+        # Skyrme profile width: default 1.5*a
+        if skyrme_w is None:
+            skyrme_w = 1.5 * a
+
+        # Build the topological seed (Skyrme carrier)
+        if seed is None:
+            slices_seed, T_seed_auto = breather_seed_skyrmion(
+                lattice, m=m_ambient, u0=amplitude,
+                w=skyrme_w, P=P, profile=skyrme_profile,
+            )
+            if T_seed is None:
+                T_seed = T_seed_auto
+        else:
+            slices_seed = seed.copy()
+            if T_seed is None:
+                # Rough estimate: use approximate band-top
+                dim = lattice.dim
+                T_seed = 2.0 * math.pi / math.sqrt(4.0 * dim * 0.5)
+
+        # The X⁴ pin value: u0 * cos(F(0)) = amplitude * cos(π) = -amplitude
+        # F(0) = π for both power2 and tanh profiles (Skyrme boundary cond.)
+        x4_pin_value = -amplitude  # = u0 * cos(π) = -u0
+
+        G = _make_G_topological(
+            lattice, params_like, mass, P, amplitude,
+            peak_node, x4_comp, x4_pin_value, opts,
+        )
+
+        # For output consistency: lat_comp is still the last ambient component
+        lat_comp = x4_comp
+
+    # ---- Common Newton-Krylov solve path ----
+
+    # Log-reparametrisation: T = exp(u) > 0 for any real u — no hard clamp.
+    u0_log = math.log(T_seed)
+    z0 = _pack(slices_seed, u0_log)
 
     # Measure initial residual
     g0 = G(z0)
@@ -818,6 +1077,7 @@ def solve_breather(
         "peak_node": peak_node,
         "lat_comp": lat_comp,
         "residual_initial": res_init,
+        "mode": mode,
     }
 
 
@@ -932,6 +1192,50 @@ def _monodromy_matvec(
     return np.concatenate([dR.ravel(), dR_prev.ravel()])
 
 
+def _spectral_radius_power(
+    M_apply: "callable",
+    n_state: int,
+    *,
+    n_iter: int = 200,
+    burn_frac: float = 0.5,
+    n_restarts: int = 2,
+    seed: int = 0,
+) -> float:
+    """Spectral radius of the monodromy by normalised power iteration.
+
+    Robust, matrix-free estimate of max|ρ| = the per-period growth factor — the
+    quantity the stability verdict needs.  Never fails (unlike ARPACK on a
+    symplectic spectrum clustered on the unit circle).
+
+    The per-step growth ‖M z_k‖ converges to max|ρ| only AFTER the iterate aligns
+    with the dominant invariant subspace.  Because the monodromy is non-normal,
+    the early steps overshoot (transient/pseudospectral amplification), so we
+    discard a burn-in fraction and geometric-mean only the tail — this removes
+    the few-percent bias a full-sequence average would carry.  A complex
+    dominant pair makes the tail oscillate around max|ρ|; the geometric mean
+    still recovers it.  A couple of random restarts guard against an unlucky
+    start vector orthogonal to the dominant eigenspace.  Deterministic seed.
+    """
+    rng = np.random.default_rng(seed)
+    n_burn = int(burn_frac * n_iter)
+    best = 0.0
+    for _ in range(n_restarts):
+        z = rng.standard_normal(n_state)
+        z /= np.linalg.norm(z)
+        logs: list[float] = []
+        for _ in range(n_iter):
+            z = M_apply(z)
+            nrm = float(np.linalg.norm(z))
+            if nrm == 0.0 or not math.isfinite(nrm):
+                break
+            logs.append(math.log(nrm))
+            z /= nrm
+        tail = logs[n_burn:] if len(logs) > n_burn else logs
+        if tail:
+            best = max(best, math.exp(sum(tail) / len(tail)))
+    return best
+
+
 def floquet_multipliers(
     slices: np.ndarray,
     T: float,
@@ -941,6 +1245,8 @@ def floquet_multipliers(
     *,
     n_multipliers: int = 6,
     dense_threshold: int = 400,
+    want_multipliers: bool = False,
+    power_iter: int = 200,
     fd_eps: float = 1e-6,
     stability_tol: float = 1e-2,
 ) -> dict[str, Any]:
@@ -990,6 +1296,7 @@ def floquet_multipliers(
     def M_apply(z: np.ndarray) -> np.ndarray:
         return _monodromy_matvec(z, slices, T, mass, lattice, params_like, fd_eps)
 
+    method = "dense"
     if n_state <= dense_threshold:
         # Assemble the full monodromy by applying M to each basis vector.
         M = np.empty((n_state, n_state), dtype=np.float64)
@@ -1000,35 +1307,55 @@ def floquet_multipliers(
             e[j] = 0.0
         multipliers = np.linalg.eigvals(M)
         dense = True
+        order = np.argsort(-np.abs(multipliers))
+        multipliers = multipliers[order]
+        spectral_radius = float(np.abs(multipliers[0]))
     else:
-        from scipy.sparse.linalg import LinearOperator, eigs, ArpackNoConvergence
-
-        op = LinearOperator((n_state, n_state), matvec=M_apply, dtype=np.float64)
-        k = min(n_multipliers, n_state - 2)
-        # The monodromy is symplectic: many multipliers cluster on the unit
-        # circle (degenerate in magnitude), which makes ARPACK's "LM" search
-        # slow to fully converge.  Use a generous Krylov subspace + iteration
-        # budget, and on partial convergence keep the converged subset — for
-        # which="LM" those ARE the largest-magnitude multipliers, so the
-        # spectral radius (hence the stability verdict) is still reliable.
-        ncv = min(n_state - 1, max(2 * k + 1, 20))
-        try:
-            multipliers = eigs(
-                op, k=k, which="LM", ncv=ncv,
-                maxiter=10 * n_state, return_eigenvectors=False,
-            )
-        except ArpackNoConvergence as exc:
-            multipliers = exc.eigenvalues
-            if multipliers.size == 0:
-                raise
         dense = False
+        # The spectral radius (per-period growth factor) is the verdict driver;
+        # compute it robustly by normalised power iteration.  This NEVER fails
+        # and directly measures max|ρ|, independent of ARPACK's trouble with a
+        # symplectic spectrum clustered on the unit circle (which can converge
+        # ZERO eigenvalues and grind for thousands of iterations).
+        spectral_radius = _spectral_radius_power(M_apply, n_state)
+        method = "power"
+        multipliers = np.empty(0, dtype=complex)
 
-    # Sort by magnitude, descending.
-    order = np.argsort(-np.abs(multipliers))
-    multipliers = multipliers[order]
-    mags = np.abs(multipliers)
-    spectral_radius = float(mags[0])
-    n_unstable = int(np.sum(mags > 1.0 + stability_tol))
+        # ARPACK is an OPT-IN bonus (want_multipliers): it yields the individual
+        # dominant multipliers when it converges, but is slow/unreliable on this
+        # clustered symplectic spectrum, so it is OFF by default — the verdict
+        # already stands on the power-iteration radius.  A fail-fast budget keeps
+        # it from grinding when it cannot converge.
+        if want_multipliers:
+            from scipy.sparse.linalg import (
+                LinearOperator, eigs, ArpackNoConvergence,
+            )
+
+            op = LinearOperator((n_state, n_state), matvec=M_apply, dtype=np.float64)
+            k = min(n_multipliers, n_state - 2)
+            ncv = min(n_state - 1, max(2 * k + 1, 20))
+            try:
+                multipliers = eigs(
+                    op, k=k, which="LM", ncv=ncv,
+                    maxiter=300, return_eigenvectors=False,
+                )
+                method = "arnoldi+power"
+            except ArpackNoConvergence as exc:
+                multipliers = exc.eigenvalues
+            if multipliers.size:
+                order = np.argsort(-np.abs(multipliers))
+                multipliers = multipliers[order]
+                # Power iteration is the authority on the radius; ARPACK can miss
+                # the dominant when it only partially converges, so take the max.
+                spectral_radius = max(spectral_radius, float(np.abs(multipliers[0])))
+
+    # Count clearly-unstable multipliers when we have them; otherwise infer from
+    # the always-available spectral radius.
+    if multipliers.size:
+        n_unstable = int(np.sum(np.abs(multipliers) > 1.0 + stability_tol))
+    else:
+        n_unstable = 1 if spectral_radius > 1.0 + stability_tol else 0
+
     growth_rate = (
         float(math.log(spectral_radius) / T)
         if (spectral_radius > 0 and T > 0)
@@ -1043,6 +1370,7 @@ def floquet_multipliers(
         "stable": spectral_radius <= 1.0 + stability_tol,
         "n_unstable": n_unstable,
         "dense": dense,
+        "method": method,
         "n_state": n_state,
     }
 
