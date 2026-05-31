@@ -9,8 +9,9 @@ Status: runs the VALIDATED paths only —
   - mode="ivp"           : forward Verlet march (rest start), validated.
   - mode="bvp_dirichlet" : JFNK block-solve with Dirichlet two-time BCs derived
                            from an IVP march; validated to recover the march.
-  - mode="bvp_chiral"    : NOT available — the chiral characteristic BC is known
-                           broken (see ARCHITECTURE.md D2 / memory); raises.
+  - mode="bvp_chiral"    : Chiral Cauchy BC march from two past slices (R0, R1).
+                           Well-posed for all N; κ bounded and N-independent.
+                           Verdict (a) implemented 2026-05-30.
 
 Config schema (JSON)::
 
@@ -44,7 +45,7 @@ from branesim.core.conventions import LatticeParams, ActionParams
 from branesim.core.residual import residual_norm
 from branesim.solver.ivp import IVPProblem, march
 from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
-from branesim.solver.boundary import DirichletBC
+from branesim.solver.boundary import DirichletBC, ChiralBC
 from branesim.io.contracts import WorldVolumeWriter
 
 
@@ -146,12 +147,31 @@ def run(config: dict, output_dir: Path) -> dict:
         report["recovery_max_abs_vs_march"] = float(np.abs(wv.slices[1:N] - gt.slices[1:N]).max())
 
     elif mode == "bvp_chiral":
-        raise NotImplementedError(
-            "bvp_chiral is disabled: the chiral characteristic BC is known broken "
-            "(converges to a residual-zero but physically wrong solution; see "
-            "ARCHITECTURE.md D2 and memory project-experimental-rewrite). Use "
-            "'ivp' or 'bvp_dirichlet' until the chiral BC is fixed."
-        )
+        # Chiral Cauchy BC: build R1 from a one-step IVP march from R0.
+        # For a plane-wave seed this gives the exact second eigenmode slice;
+        # for other seeds it gives the stationary-start first step (zero vel).
+        R1 = R0.copy()
+        if scfg.get("kind") == "plane_wave":
+            # One Verlet step from R0 with zero velocity to get R1.
+            import math
+            dim = lp.dim
+            n_idx = np.asarray(scfg.get("k_index", [1] + [0] * (dim - 1)), dtype=np.float64)
+            kvec = 2.0 * np.pi * n_idx / (np.array(lp.grid_shape, dtype=np.float64) * lp.spacing)
+            pol_vec = np.asarray(scfg.get("polarization", [0.0, 1.0] + [0.0] * (m - 2)), dtype=np.float64)
+            pol_axis = int(np.argmax(np.abs(pol_vec)))
+            from branesim.core.conventions import d_of_k_eigenvalues
+            eig = d_of_k_eigenvalues(kvec, ap.alpha, ap.k_s, ap.rho, lp.spacing)
+            # arccos-domain guard only (math, not a physics clamp): a sub-CFL
+            # propagating mode has 1 - 0.5 dt^2 omega^2 in [-1,1]; a super-CFL
+            # (evanescent) mode would hit the clamp -> revisit dt if that happens.
+            theta_k = math.acos(max(-1.0, min(1.0, 1.0 - 0.5 * ap.dt ** 2 * eig[pol_axis])))
+            ref = lattice.reference_positions(m)
+            phase = ref[:, :dim] @ kvec
+            amp = float(scfg.get("amplitude", 1e-3))
+            R1 = ref + amp * np.cos(phase - theta_k)[:, None] * pol_vec[None, :]
+        bc = ChiralBC(R0=R0, R1=R1, chirality=solver_cfg.get("chirality", "forward"))
+        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc))
+        report = dict(wv.solver_report)
     else:
         raise ValueError(f"Unknown solver mode: {mode!r}")
 

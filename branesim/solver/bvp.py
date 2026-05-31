@@ -38,7 +38,7 @@ from scipy.optimize import newton_krylov, NoConvergence
 
 from branesim.core.conventions import ActionParams, LatticeParams
 from branesim.core.lattice import SpacelikeLattice
-from branesim.core.residual import residual as compute_residual, residual_norm
+from branesim.core.residual import residual as compute_residual
 from branesim.solver.boundary import (
     DirichletBC,
     ChiralBC,
@@ -47,6 +47,7 @@ from branesim.solver.boundary import (
     dirichlet_condition_estimate,
 )
 from branesim.solver.ivp import IVPProblem, WorldVolume, march
+from branesim.core.residual import residual_norm as _residual_norm
 
 
 # ---------------------------------------------------------------------------
@@ -180,15 +181,13 @@ def _make_residual_fn(
     m_ambient = problem.m_ambient
     n_interior = N - 1  # slices l=1..N-1
 
-    # Compute the fixed future boundary slice once (Dirichlet or Chiral).
-    if isinstance(bc, ChiralBC):
-        # Chiral BC: the future slice depends on bc.R0 and the mode structure.
-        # Compute it once and cache.
-        world_init, _ = apply_chiral(world_template, bc, lattice.params, params)
-        RN_fixed = world_init[-1].copy()
-    else:
-        # Dirichlet: RN is explicit.
-        RN_fixed = bc.RN.copy()
+    # Compute the fixed future boundary slice once (Dirichlet only;
+    # ChiralBC takes the fast-path in solve_block and never reaches here).
+    assert isinstance(bc, DirichletBC), (
+        "_make_residual_fn is only for DirichletBC; "
+        "ChiralBC is handled by the fast-path in solve_block."
+    )
+    RN_fixed = bc.RN.copy()
 
     R0_fixed = bc.R0.copy()
 
@@ -294,6 +293,42 @@ def solve_block(
     if opts is None:
         opts = SolveOpts()
 
+    bc = problem.boundary_condition
+    t0 = time.perf_counter()
+
+    # =========================================================================
+    # Fast-path: ChiralBC — the solution IS the Verlet march from (R0, R1).
+    # No JFNK needed; Cauchy data is well-posed (κ bounded, N-independent).
+    # =========================================================================
+    if isinstance(bc, ChiralBC):
+        world_out, condition_estimate = apply_chiral(
+            bc, problem.lattice, problem.params, problem.mass
+        )
+        elapsed = time.perf_counter() - t0
+        residual_final = float(_residual_norm(
+            world_out, problem.lattice, problem.params, problem.mass
+        ))
+        solver_report = {
+            "mode": "bvp",
+            "bc_scheme": "chiral",
+            "residual_initial": residual_final,   # march has no "before" phase
+            "residual_final": residual_final,
+            "iterations": 0,
+            "converged": True,
+            "condition_estimate": condition_estimate,
+            "walltime_s": elapsed,
+            "objective": OBJECTIVE,
+        }
+        return WorldVolume(
+            slices=world_out,
+            params=problem.params,
+            lattice_params=problem.lattice.params,
+            solver_report=solver_report,
+        )
+
+    # =========================================================================
+    # Standard path: DirichletBC — JFNK root-find over interior slices.
+    # =========================================================================
     N = problem.n_slices
     n_nodes = problem.n_nodes
     m_ambient = problem.m_ambient
@@ -304,8 +339,6 @@ def solve_block(
     world_template[0] = problem.R0
 
     # --- Warm start ---
-    t0 = time.perf_counter()
-
     if opts.warm_start:
         world_init = _ivp_warm_start(problem)
     else:
@@ -323,15 +356,9 @@ def solve_block(
     residual_initial = float(np.linalg.norm(r0))
 
     # --- Compute condition estimate ---
-    bc = problem.boundary_condition
-    if isinstance(bc, DirichletBC):
-        condition_estimate = dirichlet_condition_estimate(
-            problem.lattice.params, problem.params
-        )
-    else:
-        condition_estimate = bc.condition_estimate(
-            problem.lattice.params, problem.params
-        )
+    condition_estimate = dirichlet_condition_estimate(
+        problem.lattice.params, problem.params
+    )
 
     # --- JFNK solve ---
     # The solver root-finds F(x) = 0, where F is the interior residual.
@@ -375,7 +402,7 @@ def solve_block(
 
     solver_report = {
         "mode": "bvp",
-        "bc_scheme": "chiral" if isinstance(bc, ChiralBC) else "dirichlet",
+        "bc_scheme": "dirichlet",
         "residual_initial": residual_initial,
         "residual_final": residual_final,
         "iterations": iterations,
