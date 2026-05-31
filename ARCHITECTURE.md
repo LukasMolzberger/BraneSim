@@ -123,23 +123,28 @@ architecture is built so the choice is localized to the solver module.
     operator determinant is `2i·sin(Nθ(k))`, singular at `Nθ=mπ` (normal-mode
     resonances), so the block is generically ill-conditioned
     (`κ ~ 1/min_k|sin(Nθ(k))|`; ~most time-extents fail at realistic mode counts).
-  - **Chiral characteristic BC is the fix, and `κ=1` exactly ∀N:** split each mode
-    into forward/backward characteristics `a^l = a₊e^{−ilθ} + a₋e^{+ilθ}`; fix the
-    **forward** amplitude from the past slice (`l=0`) and impose **no-incoming**
-    on the future slice via the Sommerfeld/outgoing row `a^N − e^{−iθ}a^{N−1}=0`
-    (kills `a₋`). This *is* the matter=forward / antimatter=backward worldtube
-    selection (antimatter flips the roles) — an exact change of basis, not an
-    analogy: Dirichlet's `sin(Nθ)` is forward↔backward interference; the
-    characteristic basis diagonalizes it to the identity.
-  - **DC / near-zero modes** (`θ<θ_tol≈1e-6`): characteristic split degenerate →
-    route through plain Dirichlet (well-posed there, `a^l=A+Bl`, no resonance).
-  - **Implementation:** `solver/boundary.py` projects boundary slabs onto
-    Cartesian-polarization modes (cheap; `D(k)` diagonal), applies the per-mode
-    chiral (propagating) / Dirichlet (DC) split, projects back; report
-    `max_k κ_k` as `bvp_condition` and assert `≤10` (else a mode left the
-    propagating band → reduce `Δt`). **Still open:** uniqueness of the *nonlinear*
-    block BVP — the `κ=1` result is the conditioning of each linearized JFNK step,
-    necessary but not sufficient globally (stays in `OPEN_PROBLEMS A2`).
+  - **The fix is two-past-slice Cauchy data (verdict a, 2026-05-31 — implemented,
+    SUPERSEDES the characteristic-future-condition sketch).** The characteristic
+    "kill `a₋` per mode" idea is correct 2×2 algebra but **wrong for a real
+    field**: reality couples `a₊(k)=conj(a₋(−k))`, so zeroing `a₋` per mode
+    deletes both characteristics → non-real garbage. The correct, well-posed,
+    reality-respecting chiral BC is simply **two adjacent past slices `(R⁰, R¹)`
+    marched** — forward = matter/retarded, backward (reverse stencil) = antimatter.
+    One slice can't encode direction; two can. No FFT, no future condition, no DC
+    special case; reality is automatic (real stencil + real data). Condition is
+    bounded `O(10)`, N-independent (incl. at Dirichlet resonances). This *is* the
+    matter/antimatter worldtube orientation. Implemented in
+    `solver/{boundary,bvp}.py`; `ChiralBC(R0,R1,chirality)`, `solve_block` routes
+    it to `ivp.march` (no JFNK). Tested: recovers an exact forward eigenmode to
+    8e-14 at a resonant N where Dirichlet is `κ≈1e14`.
+  - **MAJOR IMPLICATION (reshapes step v / §14):** the well-posed chiral solve =
+    Cauchy march ≈ IVP for free waves. So the **two-time Dirichlet BVP is NOT the
+    vehicle for a bound particle.** A particle at rest is a **time-periodic
+    (carrier+envelope, #18) + spatially-localized** worldtube → the particle-search
+    block solver must be a **nonlinear eigen-BVP: periodic-in-time
+    (`R^{l+P}=R^l`, period/frequency the eigenparameter) + localized-in-space**,
+    not two-time Dirichlet and not IVP. Nonlinear global uniqueness stays open
+    (`OPEN_PROBLEMS A2`).
 - **D3 — Temporal-link model a vs b (A4, `discrete_4d_brane_action.md` §6).**
   Model (a): zero-rest-length kinetic increment (= plain Newton, matches the
   validated dispersion). Model (b): central-force temporal spring with rest

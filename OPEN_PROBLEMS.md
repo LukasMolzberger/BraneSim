@@ -84,6 +84,20 @@ matter=forward/antimatter=backward selection (exact change of basis). DC modes
 not sufficient globally); the geometric quartic re-couples modes. See
 `[[block-solver-bvp-chirality]]`.
 
+**Refinement — verdict (a), 2026-05-31 (implemented, supersedes the
+characteristic-future-condition recipe above).** Imposing "kill `a₋` per mode" is
+correct 2×2 algebra but **wrong for a real field**: reality couples
+`a₊(k)=conj(a₋(−k))`, so zeroing `a₋` per mode deletes both characteristics →
+non-real garbage. The correct chiral BC is simply **two adjacent past slices
+`(R⁰,R¹)` marched** (forward=matter, backward=antimatter); one slice can't encode
+direction, two can. Reality automatic; condition bounded `O(10)`. Implemented in
+`branesim/solver/{boundary,bvp}.py` (commit 4a2985c), tested to 8e-14 recovery at
+a Dirichlet-resonant N. **Implication:** the well-posed chiral solve = Cauchy
+march, so the **two-time Dirichlet BVP is the wrong vehicle for a bound
+particle** — that requires a **time-periodic (`R^{l+P}=R^l`) + spatially-localized
+nonlinear eigen-BVP** (the carrier+envelope worldtube, #18). New sub-problem to
+track below.
+
 ### A3. `c²` tuning for emergent Lorentz invariance — `open`
 **Statement.** With explicit temporal links, the ratio of temporal stiffness
 (`m/Δt²`) to spatial stiffness (`k`) sets the lattice light-cone speed,
