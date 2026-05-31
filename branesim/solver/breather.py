@@ -1263,30 +1263,47 @@ def floquet_multipliers(
     |ρ| = 1 and do NOT count as instabilities.  ``stability_tol`` absorbs the
     finite-difference + discretisation drift of that marginal pair.
 
-    Cost: 2N = 2·n_nodes·m_ambient state dimension.  If 2N ≤ ``dense_threshold``
-    the full spectrum is assembled (2N matvecs) and returned.  Otherwise only
-    the ``n_multipliers`` largest-magnitude multipliers are found matrix-free
-    via Arnoldi (``scipy.sparse.linalg.eigs``) — enough for the spectral radius,
-    hence the stability verdict, without forming M.
+    Cost & method: 2N = 2·n_nodes·m_ambient state dimension.  If 2N ≤
+    ``dense_threshold`` the full spectrum is assembled (2N matvecs) and the
+    radius is exact.  Otherwise (large 3D) the radius is obtained matrix-free by
+    normalised power iteration (``_spectral_radius_power``), which never fails;
+    the individual dominant multipliers are an OPT-IN bonus (``want_multipliers``
+    → ARPACK, off by default because it is slow/unreliable on this clustered
+    symplectic spectrum).  The returned ``method`` records which path ran.
+
+    ACCURACY CAVEAT (matrix-free path): a genuinely stable orbit has ALL |ρ| = 1
+    (no spectral gap), so power iteration converges only algebraically — its
+    worst-case positive bias is ~1% at the default ``power_iter`` and halves per
+    doubling of it.  Consequences: the gross bare-breather instability (ρ ≈
+    1.5–2) and the predicted topological "2× drop" are detected robustly, but a
+    DEFINITIVE stable/unstable call at the |ρ|−1 ~ 1% level needs a larger
+    ``power_iter`` (≈240–480) or the dense path on a small enough lattice.
 
     Parameters
     ----------
     slices : ndarray, shape (P, n_nodes, m_ambient)  — the converged orbit.
     T : float            — converged period.
-    n_multipliers : int  — # dominant multipliers in the matrix-free path.
+    n_multipliers : int  — # dominant multipliers requested when want_multipliers.
     dense_threshold : int — assemble the full 2N×2N M when 2N ≤ this.
+    want_multipliers : bool — also attempt ARPACK for the multiplier list
+                              (matrix-free path only; default False).
+    power_iter : int     — power-iteration steps for the matrix-free radius
+                           (default 200; raise to tighten a borderline verdict).
     stability_tol : float — |ρ| − 1 ≤ stability_tol counts as on the unit circle.
 
     Returns
     -------
     dict with keys:
-        multipliers      : ndarray (complex) — multipliers, |ρ| descending.
+        multipliers      : ndarray (complex) — multipliers, |ρ| descending
+                           (EMPTY on the matrix-free path unless want_multipliers).
         spectral_radius  : float  — max |ρ|.
         growth_per_period: float  — == spectral_radius (factor per period T).
         growth_rate      : float  — ln(spectral_radius)/T (per unit time).
         stable           : bool   — spectral_radius ≤ 1 + stability_tol.
-        n_unstable       : int    — # multipliers with |ρ| > 1 + stability_tol.
+        n_unstable       : int    — # multipliers with |ρ| > 1 + stability_tol
+                           (inferred from the radius if no multipliers computed).
         dense            : bool    — whether the full spectrum was computed.
+        method           : str     — "dense" | "power" | "arnoldi+power".
         n_state          : int     — 2N.
     """
     P, n_nodes, m_ambient = slices.shape
@@ -1317,7 +1334,7 @@ def floquet_multipliers(
         # and directly measures max|ρ|, independent of ARPACK's trouble with a
         # symplectic spectrum clustered on the unit circle (which can converge
         # ZERO eigenvalues and grind for thousands of iterations).
-        spectral_radius = _spectral_radius_power(M_apply, n_state)
+        spectral_radius = _spectral_radius_power(M_apply, n_state, n_iter=power_iter)
         method = "power"
         multipliers = np.empty(0, dtype=complex)
 

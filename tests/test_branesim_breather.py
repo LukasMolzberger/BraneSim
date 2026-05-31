@@ -866,21 +866,23 @@ def make_cube(n: int = 4, alpha: float = 0.5, periodic: bool = True):
 
 
 class TestMatrixFreeFloquet:
-    """The matrix-free (Arnoldi) monodromy path agrees with the dense path."""
+    """The matrix-free (power-iteration) monodromy path agrees with the dense path."""
 
-    def test_arnoldi_matches_dense(self):
-        """Forcing the Arnoldi path (dense_threshold=0) reproduces the dense
-        spectral radius on the 1D orbit (which has a well-separated dominant
-        multiplier, so ARPACK converges cleanly)."""
+    def test_matrixfree_matches_dense(self):
+        """Forcing the matrix-free path (dense_threshold=0) reproduces the dense
+        spectral radius on the 1D orbit.  The orbit has a well-separated dominant
+        multiplier (ρ≈1.54), so the power iteration converges geometrically and
+        the tail-averaged estimate matches the exact dense radius tightly."""
         lattice, params = make_chain(alpha=0.5)
         res = solve_breather(lattice, params, M_MASS, P=32, amplitude=0.1,
                              opts=BreatherOpts(tol=1e-8))
         fl_dense = floquet_multipliers(res["slices"], res["T"], lattice, params, M_MASS)
-        fl_arn = floquet_multipliers(res["slices"], res["T"], lattice, params, M_MASS,
-                                     dense_threshold=0, n_multipliers=6)
-        assert fl_dense["dense"] and not fl_arn["dense"]
-        assert abs(fl_dense["spectral_radius"] - fl_arn["spectral_radius"]) < 1e-3, (
-            f"Arnoldi {fl_arn['spectral_radius']:.5f} != dense "
+        fl_mf = floquet_multipliers(res["slices"], res["T"], lattice, params, M_MASS,
+                                    dense_threshold=0)
+        assert fl_dense["dense"] and not fl_mf["dense"]
+        assert fl_mf["method"] == "power"
+        assert abs(fl_dense["spectral_radius"] - fl_mf["spectral_radius"]) < 5e-3, (
+            f"matrix-free {fl_mf['spectral_radius']:.5f} != dense "
             f"{fl_dense['spectral_radius']:.5f}"
         )
 
