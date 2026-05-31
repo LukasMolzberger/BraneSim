@@ -1,0 +1,203 @@
+"""branesim experiment entrypoint (CLI).
+
+Reads a JSON config, builds the spacelike lattice + action parameters + a seed,
+runs a block-solve (or the IVP special case), and writes a world-volume zip plus
+a summary JSON to an output directory. This is the unit the AWS launcher runs
+remotely (see orchestration/aws/ and DEPLOYMENT.md).
+
+Status: runs the VALIDATED paths only —
+  - mode="ivp"           : forward Verlet march (rest start), validated.
+  - mode="bvp_dirichlet" : JFNK block-solve with Dirichlet two-time BCs derived
+                           from an IVP march; validated to recover the march.
+  - mode="bvp_chiral"    : NOT available — the chiral characteristic BC is known
+                           broken (see ARCHITECTURE.md D2 / memory); raises.
+
+Config schema (JSON)::
+
+    {
+      "lattice": {"grid_shape": [16,16,16], "spacing": 1.0,
+                  "periodic_axes": [true,true,true], "axial_weight": 1.0},
+      "action":  {"k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1,
+                  "n_slices": 64, "m_ambient": 4, "temporal_model": "a", "r_t": 0.0},
+      "seed":    {"kind": "plane_wave", "amplitude": 1e-3,
+                  "k_index": [1,0,0], "polarization": [0,1,0,0], "rng_seed": 0},
+      "solver":  {"mode": "ivp", "tol": 1e-9, "max_iter": 100, "warm_start": true}
+    }
+
+Usage::
+
+    branesim-run --config config.json --output-dir ./run-out
+    python -m branesim.run_experiment --config config.json --output-dir ./run-out
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import time
+from pathlib import Path
+
+import numpy as np
+
+from branesim.core.lattice import SpacelikeLattice
+from branesim.core.conventions import LatticeParams, ActionParams
+from branesim.core.residual import residual_norm
+from branesim.solver.ivp import IVPProblem, march
+from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
+from branesim.solver.boundary import DirichletBC
+from branesim.io.contracts import WorldVolumeWriter
+
+
+def _build_seed(seed_cfg: dict, lattice: SpacelikeLattice, m: int) -> np.ndarray:
+    """Return the past-slice configuration R0 (n_nodes, m) from the seed config."""
+    ref = lattice.reference_positions(m)
+    kind = seed_cfg.get("kind", "flat")
+    amp = float(seed_cfg.get("amplitude", 1e-3))
+    dim = lattice.params.dim
+
+    if kind == "flat":
+        return ref.copy()
+
+    if kind == "random":
+        rng = np.random.default_rng(int(seed_cfg.get("rng_seed", 0)))
+        return ref + amp * rng.standard_normal((lattice.n_nodes, m))
+
+    if kind == "plane_wave":
+        grid = np.asarray(lattice.params.grid_shape, dtype=np.float64)
+        a = lattice.params.spacing
+        n_idx = np.asarray(seed_cfg.get("k_index", [1] + [0] * (dim - 1)), dtype=np.float64)
+        if n_idx.shape[0] != dim:
+            raise ValueError(f"k_index must have length dim={dim}, got {n_idx.shape[0]}")
+        kvec = 2.0 * np.pi * n_idx / (grid * a)        # (dim,)
+        phase = ref[:, :dim] @ kvec                    # (n_nodes,)
+        pol = np.asarray(seed_cfg.get("polarization", [0.0, 1.0] + [0.0] * (m - 2)), dtype=np.float64)
+        if pol.shape[0] != m:
+            raise ValueError(f"polarization must have length m_ambient={m}, got {pol.shape[0]}")
+        return ref + amp * np.cos(phase)[:, None] * pol[None, :]
+
+    raise ValueError(f"Unknown seed kind: {kind!r}")
+
+
+def _memory_estimate_gb(n_slices: int, n_nodes: int, m: int, krylov_vectors: int = 30) -> float:
+    """Rough JFNK working-set estimate in GB (ARCHITECTURE.md / DEPLOYMENT.md).
+
+    One world-volume vector is (n_slices+1)*n_nodes*m*8 bytes; JFNK/GMRES holds
+    ~`krylov_vectors` of them. This is the figure that drives instance sizing.
+    """
+    one_vec = (n_slices + 1) * n_nodes * m * 8.0
+    return krylov_vectors * one_vec / 1e9
+
+
+def run(config: dict, output_dir: Path) -> dict:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    lcfg = config["lattice"]
+    acfg = config["action"]
+    scfg = config.get("seed", {"kind": "flat"})
+    solver_cfg = config.get("solver", {"mode": "ivp"})
+
+    lp = LatticeParams(
+        grid_shape=tuple(int(v) for v in lcfg["grid_shape"]),
+        spacing=float(lcfg.get("spacing", 1.0)),
+        periodic_axes=tuple(bool(v) for v in lcfg.get("periodic_axes", [True] * len(lcfg["grid_shape"]))),
+        axial_weight=float(lcfg.get("axial_weight", 1.0)),
+    )
+    lattice = SpacelikeLattice(lp)
+    m = int(acfg.get("m_ambient", lp.dim + 1))
+    ap = ActionParams(
+        k_s=float(acfg.get("k_s", 1.0)),
+        alpha=float(acfg.get("alpha", 0.2)),
+        rho=float(acfg.get("rho", 1.0)),
+        dt=float(acfg.get("dt", 0.1)),
+        n_slices=int(acfg["n_slices"]),
+        m_ambient=m,
+        temporal_model=str(acfg.get("temporal_model", "a")),
+        r_t=float(acfg.get("r_t", 0.0)),
+    )
+    mass = ap.rho * lp.spacing ** lp.dim
+    N = ap.n_slices
+
+    mem_gb = _memory_estimate_gb(N, lattice.n_nodes, m)
+    print(f"[branesim] lattice dim={lp.dim} grid={lp.grid_shape} n_nodes={lattice.n_nodes} "
+          f"m_ambient={m} n_slices={N}")
+    print(f"[branesim] JFNK working-set estimate ~{mem_gb:.2f} GB "
+          f"(={(N+1)*lattice.n_nodes*m*8/1e9:.3f} GB/vector x ~30)")
+
+    R0 = _build_seed(scfg, lattice, m)
+    mode = solver_cfg.get("mode", "ivp")
+    t0 = time.perf_counter()
+
+    if mode == "ivp":
+        prob = IVPProblem(lattice=lattice, params=ap, mass=mass, R0=R0, R1=R0.copy())
+        wv = march(prob)
+        report = {"mode": "ivp"}
+
+    elif mode == "bvp_dirichlet":
+        # Ground-truth march supplies the two-time Dirichlet data (l=0, l=N).
+        gt = march(IVPProblem(lattice=lattice, params=ap, mass=mass, R0=R0, R1=R0.copy()))
+        bc = DirichletBC(R0=gt.slices[0].copy(), RN=gt.slices[N].copy())
+        opts = SolveOpts(
+            tol=float(solver_cfg.get("tol", 1e-9)),
+            max_iter=int(solver_cfg.get("max_iter", 100)),
+            warm_start=bool(solver_cfg.get("warm_start", True)),
+        )
+        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts)
+        report = dict(wv.solver_report)
+        report["recovery_max_abs_vs_march"] = float(np.abs(wv.slices[1:N] - gt.slices[1:N]).max())
+
+    elif mode == "bvp_chiral":
+        raise NotImplementedError(
+            "bvp_chiral is disabled: the chiral characteristic BC is known broken "
+            "(converges to a residual-zero but physically wrong solution; see "
+            "ARCHITECTURE.md D2 and memory project-experimental-rewrite). Use "
+            "'ivp' or 'bvp_dirichlet' until the chiral BC is fixed."
+        )
+    else:
+        raise ValueError(f"Unknown solver mode: {mode!r}")
+
+    walltime = time.perf_counter() - t0
+
+    # Diagnostics summary (lightweight; full diagnostics port is future work).
+    disp = wv.slices - lattice.reference_positions(m)[None, :, :]
+    res_norm = float(residual_norm(wv.slices, lattice, ap, mass))
+    summary = {
+        "config": config,
+        "mode": mode,
+        "n_slices": N,
+        "n_nodes": lattice.n_nodes,
+        "m_ambient": m,
+        "memory_estimate_gb": mem_gb,
+        "walltime_s": walltime,
+        "max_abs_displacement": float(np.abs(disp).max()),
+        "interior_residual_norm": res_norm,
+        "solver_report": report,
+    }
+
+    wv_path = output_dir / "worldvolume.zip"
+    # Not using the context manager: we need to pass solver_report to close().
+    w = WorldVolumeWriter(wv_path, manifest_extra={"mode": mode})
+    for l in range(wv.slices.shape[0]):
+        w.write_slice(l, l * ap.dt, wv.slices[l])
+    w.write_npy("aux/ref_positions.npy", lattice.reference_positions(m))
+    w.close(solver_report=report)
+
+    (output_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(f"[branesim] wrote {wv_path} and summary.json  (walltime {walltime:.1f}s)")
+    return summary
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Run a branesim block-solve experiment from a JSON config.")
+    p.add_argument("--config", required=True, help="Path to JSON experiment config.")
+    p.add_argument("--output-dir", required=True, help="Directory for worldvolume.zip + summary.json.")
+    return p.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    config = json.loads(Path(args.config).read_text(encoding="utf-8"))
+    run(config, Path(args.output_dir))
+
+
+if __name__ == "__main__":
+    main()

@@ -398,9 +398,11 @@ with:
 ## 13. Risks & open problems (track in `OPEN_PROBLEMS.md`)
 - **A1 (root-find, not minimize):** non-negotiable; mis-implementing it silently
   solves the wrong (Euclidean) problem. Guard with test §11.5.
-- **A2 (BVP well-posedness / chirality):** the genuinely open core (D2). Needs a
-  derivation/spike before the BVP solver is trusted; until then BVP runs must
-  report conditioning and be treated as exploratory.
+- **A2 (BVP well-posedness / chirality):** the core is **resolved in the linear
+  regime** (D2: chiral characteristic BC, κ=1). The chiral BC *implementation* in
+  `solver/boundary.py` is currently **buggy** (converges to a residual-zero but
+  wrong solution — see memory). Until fixed, only the IVP and (ill-conditioned)
+  Dirichlet-BVP paths are usable. Nonlinear global uniqueness stays open.
 - **A4 (temporal model a/b):** parameterized (`r_t`), default (a); settle via the
   gravity channel.
 - **C1 (StVK non-coercivity):** the energy doesn't penalize collapse; relevant if
@@ -411,8 +413,42 @@ with:
 
 ---
 
-*This blueprint deliberately leaves D1–D4 open. Recommended sequence: (i) resolve
-D2 (BVP well-posedness + chirality) with a short derivation/spike on a 1D toy;
-(ii) implement `core/` + `solver/ivp.py` and pass regression §11.1–11.3; (iii)
-implement `solver/bvp.py` (JFNK) and validate against IVP; (iv) port diagnostics
-and seeds; (v) only then attempt block/retrocausal physics runs.*
+## 14. Program strategy — "all ingredients at once" (owner, 2026-05-31)
+
+A stable particle is **not** expected from any single ingredient: the
+elasticity-only IVP hedgehog provably disperses (`OPEN_PROBLEMS C1`,
+`[[project-c2-skyrme-no-confinement]]`). The particle is a stationary point of
+the **full 4D action** that requires, *together*: **BVP not IVP** (a whole
+time-coherent worldtube, not a radiating forward march); **colour from
+axis-alignment** (SU(3) on the lateral triplet, #16/#19); **Berry/Wilczek–Zee
+diagnostics** to see the gauge/binding holonomy; and **time-symmetry /
+chirality** (which is also what makes the BVP well-posed — D2). The target is
+likely a **time-periodic (carrier+envelope, #18) worldtube**, not a static blob.
+
+So the search is **holistic**: compose the ingredients into one block-solve and
+look for the particle there — do not expect it rung-by-rung. **Engineering
+caveat:** each ingredient must still be **unit-tested correct in isolation**
+before composition (the broken chiral BC is the cautionary tale — a wrong
+ingredient yields a residual-zero *garbage* solution that looks converged and is
+undebuggable inside a combined run). "Verify the parts, then run them together."
+
+Minimal coherent ingredient set for a first holistic attempt: working chiral BVP
++ a topological+colour seed (hedgehog/Skyrme with axis-colour) + Berry/WZ +
+confinement diagnostics, as one solve.
+
+## 15. Deployment
+
+Runs target **AWS, high-memory CPU** (numpy/scipy; no GPU rewrite — backend
+decision 2026-05-31). The block solve is memory-bound. Entry point:
+`branesim/run_experiment.py` (`branesim-run`), config-driven, writes
+`worldvolume.zip` + `summary.json`; cost-safe EC2 scaffolding in
+`orchestration/aws/`. **See `DEPLOYMENT.md`** for the memory-sizing formula,
+instance table, and the S3 launch/fetch flow. Packaging via `pyproject.toml`
+(`pip install -e .`).
+
+---
+
+*Recommended sequence: (i) D2 BVP well-posedness — RESOLVED (linear); (ii) `core/`
++ `solver/ivp.py` + regression — DONE; (iii) `solver/bvp.py` JFNK + Dirichlet —
+DONE, **chiral BC fix outstanding**; (iv) port diagnostics + colour/Berry + seeds;
+(v) compose the holistic particle-search block-solve (§14); deploy on AWS (§15).*

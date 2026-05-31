@@ -1,6 +1,12 @@
-# AWS Runbook for BraneSim Baryon Pipeline
+# AWS Runbook for BraneSim
 
-This folder provides scripts to run high-cost baryon simulation or rendering jobs on AWS EC2 and automatically clean up compute resources.
+> **See `DEPLOYMENT.md` (repo root) for the memory-sizing table and instance
+> recommendations.** This file documents the launcher mechanics only.
+
+This folder provides scripts to run memory-heavy `branesim` block-solve jobs on
+AWS EC2 and automatically clean up compute resources. The 4D block solve is
+memory-bound → use memory-optimized instances (`r7i.*` / `x2iedn.*`), not the
+old compute-optimized default.
 
 ## What the launcher does
 
@@ -34,7 +40,7 @@ orchestration/aws/package_project.sh /tmp/branesim-project.tar.gz
 python orchestration/aws/launch_branesim_job.py \
   --region us-east-1 \
   --ami-id ami-xxxxxxxx \
-  --instance-type c7i.2xlarge \
+  --instance-type r7i.4xlarge \
   --subnet-id subnet-xxxxxxxx \
   --security-group-id sg-xxxxxxxx \
   --iam-instance-profile BraneSimEc2Profile \
@@ -43,11 +49,14 @@ python orchestration/aws/launch_branesim_job.py \
   --project-archive /tmp/branesim-project.tar.gz
 ```
 
-Default remote command now runs:
+Default remote command now runs the branesim entrypoint:
 
 ```bash
-python orchestration/run_pipeline.py --config orchestration/configs/local_extensive.json --output-dir "$BRANESIM_RESULTS_DIR"
+python -m branesim.run_experiment --config orchestration/configs/branesim_ivp_smoke.json --output-dir "$BRANESIM_RESULTS_DIR"
 ```
+
+Point `--config` at `orchestration/configs/branesim_bvp_dirichlet.json` (or your
+own) for a block solve.
 
 Use `--remote-command` to run a custom workflow if needed.
 

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "branesim"
+version = "0.1.0"
+description = "BraneSim — 4D block/retrocausal brane solver (block-solver rewrite)"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[project.optional-dependencies]
+viz = ["matplotlib>=3.7.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+branesim-run = "branesim.run_experiment:main"
+
+[tool.setuptools.packages.find]
+include = ["branesim*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

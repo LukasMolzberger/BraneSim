@@ -30,7 +30,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Launch a BraneSim job on AWS EC2.")
     parser.add_argument("--region", default="us-east-1")
     parser.add_argument("--ami-id", required=True, help="Ubuntu AMI id, e.g. ami-xxxxxxxx")
-    parser.add_argument("--instance-type", default="c7i.2xlarge")
+    # Memory-optimized default: the 4D block BVP is memory-bound (state ~
+    # n_slices*N^dim*m*8 bytes; JFNK holds ~30 such vectors). See DEPLOYMENT.md
+    # for the sizing table; bump to r7i.8xlarge/16xlarge or x2iedn for big runs.
+    parser.add_argument("--instance-type", default="r7i.4xlarge")
     parser.add_argument("--key-name", default=None)
     parser.add_argument("--subnet-id", default=None)
     parser.add_argument("--security-group-id", action="append", default=[], help="Repeat for multiple SGs")
@@ -46,11 +49,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--remote-command",
         default=(
-            "python orchestration/run_pipeline.py "
-            "--config orchestration/configs/local_extensive.json "
+            "python -m branesim.run_experiment "
+            "--config orchestration/configs/branesim_ivp_smoke.json "
             "--output-dir \"$BRANESIM_RESULTS_DIR\""
         ),
-        help="Shell command executed on the EC2 instance inside the project directory",
+        help="Shell command executed on the EC2 instance inside the project directory. "
+             "Default is the branesim IVP smoke; pass a bvp_dirichlet config for a block solve.",
     )
 
     parser.add_argument("--enable-gdrive-sync", action="store_true")
