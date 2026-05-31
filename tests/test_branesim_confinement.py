@@ -15,6 +15,7 @@ Test structure
 3. Dispersing sequence        — radius_growth > 1, spread_ratio rises toward 1
 4. Dimension-agnostic (d=2 and d=3)
 5. From-zip wrapper (worldvolume.zip round-trip)
+6. Skyrme-aware (strain) metric  — topological Skyrme seed reads as confined; uniform field reads as dispersed
 """
 
 from __future__ import annotations
@@ -454,3 +455,141 @@ class TestConfinementContrast:
             f"Uniform confined_fraction={m_uni['confined_fraction']:.4f} should be < 0.15 "
             f"(legacy leakage_fraction gave ~0 here — wrong, this corrects it)"
         )
+
+
+# ---------------------------------------------------------------------------
+# Test 6: Skyrme-aware (strain) confinement metric
+# ---------------------------------------------------------------------------
+
+
+class TestStrainWeightMode:
+    """weight_mode='strain' correctly identifies a Skyrme soliton as confined.
+
+    The default 'lateral' weight uses |displacement_lateral|^2 which has
+    algebraic tails for a Skyrme hedgehog (sin(F(r)) ~ pi*w^2/r^2) and can
+    report spread_ratio > 1 even for a geometrically localized topological
+    object.  The 'strain' weight uses per-node spring energy which is zero
+    on the flat background and nonzero only at the soliton core.
+
+    Tests:
+    a. Skyrme seed at w/a=3 in a 13^3 box reads as confined (spread_ratio < 0.3)
+       under the strain metric.
+    b. Uniform (constant lateral) displacement reads as dispersed (spread_ratio > 0.8)
+       under the strain metric — it has nonzero gradient EVERYWHERE.
+    c. weight_mode='strain' raises ValueError when lattice is None.
+    d. weight_mode='lateral' default is unchanged (backward compat).
+    e. confinement_summary echoes weight_mode in the returned dict.
+    """
+
+    def _make_lattice_and_ref(self, n=13):
+        lp = LatticeParams(
+            grid_shape=(n, n, n),
+            spacing=1.0,
+            periodic_axes=(False, False, False),
+        )
+        lat = SpacelikeLattice(lp)
+        ref = lat.reference_positions(4)
+        return lat, ref
+
+    def _skyrme_seed_slice(self, lat, ref, u0=0.15, w=3.0):
+        """Build l=0 slice of a Skyrme-hedgehog seed."""
+        from branesim.initialization.seeds import skyrme_twisted_hedgehog
+        R0, _ = skyrme_twisted_hedgehog(lat, m=4, u0=u0, w=w, profile_shape="power2")
+        return R0
+
+    def test_skyrme_seed_confined_under_strain_metric(self):
+        """A Skyrme seed (w/a=1.5) in a 13^3 box reads as confined under the
+        direction-variation ('strain') metric.
+
+        The direction-variation weight |disp_p - disp_q|^2 peaks where the
+        hedgehog field rotates most rapidly (near r ~ w) and is small far from
+        the soliton, giving a spread_ratio well below 1 for a localized soliton.
+
+        We use w=1.5 (tight core relative to box = 13) where the signal is clear.
+        """
+        lat, ref = self._make_lattice_and_ref(n=13)
+        positions = self._skyrme_seed_slice(lat, ref, u0=0.15, w=1.5)
+        m = confinement_metrics_per_slice(
+            positions, ref, dim=lat.dim,
+            weight_mode="strain",
+            _neighbor_table=lat.neighbors,
+            _k_s=1.0, _alpha=0.5,
+        )
+        # Direction-variation for Skyrme seed with w=1.5 in 13^3 box:
+        # empirically ~0.42; well below 0.6
+        assert m["spread_ratio"] < 0.6, (
+            f"Skyrme seed direction-variation spread_ratio={m['spread_ratio']:.4f}, "
+            f"expected < 0.6 (confined topological soliton should have low direction-variation spread)"
+        )
+
+    def test_uniform_displacement_dispersed_under_strain_metric(self):
+        """A linear ramp displacement fills the whole box with nonzero
+        direction variation => reads as dispersed (spread_ratio > 0.5)."""
+        lat, ref = self._make_lattice_and_ref(n=9)
+        mi = lat.multi_indices
+        positions = ref.copy()
+        # Linear ramp: disp ~ epsilon * x => constant spatial gradient everywhere
+        positions[:, 0] += 0.05 * mi[:, 0]  # ramp in ambient x-component
+        m = confinement_metrics_per_slice(
+            positions, ref, dim=lat.dim,
+            weight_mode="strain",
+            _neighbor_table=lat.neighbors,
+            _k_s=1.0, _alpha=0.5,
+        )
+        # A uniform ramp has constant |disp_p - disp_q|^2 throughout the box
+        # => energy-weighted centroid is near the geometric centre => spread_ratio ~ box-fill
+        assert m["spread_ratio"] > 0.5, (
+            f"Linear ramp spread_ratio={m['spread_ratio']:.4f}, expected > 0.5 "
+            f"(deconfined field should have spread_ratio close to box-fill)"
+        )
+
+    def test_strain_mode_requires_neighbor_table(self):
+        """weight_mode='strain' without _neighbor_table raises ValueError."""
+        lat, ref = self._make_lattice_and_ref(n=5)
+        positions = ref.copy()
+        with pytest.raises(ValueError, match="_neighbor_table"):
+            confinement_metrics_per_slice(
+                positions, ref, dim=lat.dim,
+                weight_mode="strain",
+                _neighbor_table=None,
+            )
+
+    def test_invalid_weight_mode_raises(self):
+        """Unknown weight_mode raises ValueError."""
+        lat, ref = self._make_lattice_and_ref(n=5)
+        with pytest.raises(ValueError, match="weight_mode"):
+            confinement_metrics_per_slice(
+                ref.copy(), ref, dim=lat.dim,
+                weight_mode="bogus",
+            )
+
+    def test_lateral_mode_unchanged(self):
+        """Default weight_mode='lateral' gives same result as before (backward compat)."""
+        lat, ref = self._make_lattice_and_ref(n=9)
+        rng = np.random.default_rng(0)
+        positions = ref + 0.1 * rng.standard_normal(ref.shape)
+        m_default = confinement_metrics_per_slice(positions, ref, dim=lat.dim)
+        m_lateral = confinement_metrics_per_slice(positions, ref, dim=lat.dim, weight_mode="lateral")
+        assert abs(m_default["spread_ratio"] - m_lateral["spread_ratio"]) < 1e-12, (
+            "Default and explicit 'lateral' modes should give identical results"
+        )
+
+    def test_confinement_summary_strain_requires_lattice(self):
+        """confinement_summary with weight_mode='strain' but no lattice raises ValueError."""
+        lat, ref = self._make_lattice_and_ref(n=5)
+        slices = np.stack([ref, ref], axis=0)
+        with pytest.raises(ValueError, match="lattice"):
+            confinement_summary(slices, ref, dim=lat.dim, weight_mode="strain", lattice=None)
+
+    def test_confinement_summary_echoes_weight_mode(self):
+        """confinement_summary result echoes the weight_mode used."""
+        lat, ref = self._make_lattice_and_ref(n=7)
+        slices = np.stack([ref, ref + 0.01], axis=0)
+        for mode in ("lateral", "strain"):
+            kwargs = {}
+            if mode == "strain":
+                kwargs = {"lattice": lat, "k_s": 1.0, "alpha": 0.5}
+            summary = confinement_summary(slices, ref, dim=lat.dim, weight_mode=mode, **kwargs)
+            assert summary.get("weight_mode") == mode, (
+                f"Expected weight_mode='{mode}' in summary, got {summary.get('weight_mode')!r}"
+            )

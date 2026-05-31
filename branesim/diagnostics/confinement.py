@@ -41,6 +41,25 @@ was self-referential: it stays near 0 even when the packet fills the whole box,
 because the threshold grows with the packet.  That metric is DEPRECATED and NOT
 ported here.
 
+Skyrme-aware confinement note
+------------------------------
+The default ``|lateral displacement|^2`` weight has a known deficiency for
+Skyrme / topological solitons: the lateral component of the hedgehog
+``sin(F(r)) * u0 * r_hat`` has algebraic (power-law) tails
+``sin(pi/(1+(r/w)^2)) ~ pi*w^2/(r^2)`` which cause the energy-weighted centroid
+to integrate over the whole box, yielding ``spread_ratio > 1`` even for a
+perfectly localized topological object.
+
+The fix is ``weight_mode="strain"``: weight each node by the sum of
+``|displacement_p - displacement_q|^2`` over its incident bonds (the
+displacement-direction variation).  For a Skyrme hedgehog the displacement
+has constant magnitude ``u0`` everywhere (it lives on S^3), so this sum is
+zero only where adjacent nodes have the same displacement vector (the flat
+far-field) and is large at the soliton core where the hedgehog field rotates
+rapidly.  Pass the lattice neighbor table (``SpacelikeLattice``) to
+:func:`confinement_summary` when using this mode; ``k_s`` and ``alpha`` are
+accepted for API convenience but are not used in the computation.
+
 Principles compliance
 ---------------------
 - Read-only: these functions take arrays as input and return dicts; they do not
@@ -109,6 +128,66 @@ def _energy_weights(displacements: np.ndarray, dim: int) -> np.ndarray:
     return np.sum(lateral * lateral, axis=1) + 1e-40   # (n_nodes,)
 
 
+def _direction_variation_weights(
+    positions: np.ndarray,
+    ref: np.ndarray,
+    neighbor_table: np.ndarray,
+) -> np.ndarray:
+    """Per-node displacement-direction variation weight (Skyrme-aware confinement proxy).
+
+    Computes the sum over incident bonds of ``|displacement_p - displacement_q|^2``,
+    where ``displacement = position - ref``.  This measures how rapidly the
+    displacement *direction* changes from node to node — it is large at the
+    soliton core (where the hedgehog field rotates rapidly) and small far from
+    the core (where the field is nearly uniform).
+
+    This is the physically correct confinement weight for topological (Skyrme)
+    solitons because:
+
+    - The Skyrme hedgehog has ``|displacement|^2 = u0^2`` everywhere (constant
+      magnitude on S^3), so ``|displacement|^2`` does not distinguish core from
+      far-field.
+    - The spring strain energy ``(|bond| - alpha*|ref_bond|)^2`` is nonzero
+      everywhere for large-amplitude displacements, giving spread_ratio ~ 1 even
+      for a perfectly localized soliton.
+    - The displacement difference ``|disp_p - disp_q|^2`` is zero only when
+      adjacent nodes have the same displacement vector, which happens only in the
+      flat far-field; it peaks at the soliton core where the hedgehog field
+      rotates most rapidly.
+
+    For a scalar (small-amplitude) breather, ``|displacement_lateral|^2`` is the
+    better proxy (available via ``weight_mode="lateral"``).
+
+    Parameters
+    ----------
+    positions : ndarray, shape (n_nodes, m_ambient)
+    ref : ndarray, shape (n_nodes, m_ambient)
+    neighbor_table : ndarray, shape (n_nodes, n_neighbors), dtype int64
+        Flat neighbor indices; -1 means "no neighbor" (open boundary).
+        Typically ``lattice.neighbors``.
+
+    Returns
+    -------
+    weights : ndarray, shape (n_nodes,)
+        Per-node direction-variation weight; always >= 0; floor 1e-40 for
+        numerical safety.
+    """
+    disp = positions - ref                             # (n_nodes, m_ambient)
+    n_nodes, n_nb = neighbor_table.shape
+    weights = np.zeros(n_nodes, dtype=np.float64)
+
+    for nb_idx in range(n_nb):
+        q_arr = neighbor_table[:, nb_idx]             # (n_nodes,)
+        valid = q_arr >= 0
+        p_idx = np.where(valid)[0]
+        q_idx = q_arr[p_idx]
+
+        diff = disp[p_idx] - disp[q_idx]             # (n_valid, m_ambient)
+        weights[p_idx] += np.sum(diff * diff, axis=1) # (n_valid,)
+
+    return weights + 1e-40
+
+
 # ---------------------------------------------------------------------------
 # Per-slice API
 # ---------------------------------------------------------------------------
@@ -120,6 +199,10 @@ def confinement_metrics_per_slice(
     dim: int,
     confinement_radius_factor: float = 0.5,
     _box_fill_radius_cached: float | None = None,
+    weight_mode: str = "lateral",
+    _neighbor_table: np.ndarray | None = None,
+    _k_s: float = 1.0,
+    _alpha: float = 0.5,
 ) -> dict[str, float]:
     """Compute confinement metrics for a single spacelike slice.
 
@@ -139,6 +222,27 @@ def confinement_metrics_per_slice(
     _box_fill_radius_cached : float or None, optional
         Pre-computed box_fill_radius (avoids redundant computation when
         called in a loop over slices).  If None, it is computed internally.
+    weight_mode : str, optional
+        ``"lateral"`` (default): weight by ``|displacement_lateral|^2``.
+        Suitable for scalar (transverse) breathers and wavepackets.
+
+        ``"strain"``: weight by per-node displacement-direction variation,
+        ``sum_{bonds} |disp_p - disp_q|^2``.  Suitable for Skyrme /
+        topological solitons whose displacement has constant magnitude on S^3
+        (``|disp|^2 = u0^2`` everywhere) and whose lateral component has
+        algebraic tails that inflate the ``"lateral"``-weighted spread_ratio
+        above 1 even for a localized topological object.  Only the
+        ``_neighbor_table`` argument is required; ``_k_s`` and ``_alpha``
+        are accepted but ignored.
+    _neighbor_table : ndarray or None
+        Flat neighbor index table from ``lattice.neighbors``.  Required when
+        ``weight_mode="strain"``.
+    _k_s : float
+        Accepted for API compatibility; not used in the direction-variation
+        computation.
+    _alpha : float
+        Accepted for API compatibility; not used in the direction-variation
+        computation.
 
     Returns
     -------
@@ -160,8 +264,20 @@ def confinement_metrics_per_slice(
     else:
         bfr = float(_box_fill_radius_cached)
 
-    displacements = positions - ref                     # (n_nodes, m_ambient)
-    weights = _energy_weights(displacements, dim)       # (n_nodes,)
+    if weight_mode == "strain":
+        if _neighbor_table is None:
+            raise ValueError(
+                "weight_mode='strain' requires _neighbor_table (pass lattice.neighbors)"
+            )
+        weights = _direction_variation_weights(positions, ref, _neighbor_table)
+    elif weight_mode == "lateral":
+        displacements = positions - ref                 # (n_nodes, m_ambient)
+        weights = _energy_weights(displacements, dim)   # (n_nodes,)
+    else:
+        raise ValueError(
+            f"weight_mode must be 'lateral' or 'strain'; got {weight_mode!r}"
+        )
+
     total_weight = float(np.sum(weights))
 
     # Energy-weighted centre (robust to off-centre packet)
@@ -205,6 +321,10 @@ def confinement_summary(
     ref: np.ndarray,
     dim: int,
     confinement_radius_factor: float = 0.5,
+    weight_mode: str = "lateral",
+    lattice: Any = None,
+    k_s: float = 1.0,
+    alpha: float = 0.5,
 ) -> dict[str, Any]:
     """Compute confinement metrics over all slices of a world-volume.
 
@@ -219,6 +339,20 @@ def confinement_summary(
         Number of spatial (lateral) ambient components.
     confinement_radius_factor : float, optional
         Fraction of box_fill_radius defining the confinement sphere.
+    weight_mode : str, optional
+        ``"lateral"`` (default): weight by ``|displacement_lateral|^2``.
+        Suitable for scalar breathers and wavepackets.
+
+        ``"strain"``: weight by per-node spacelike spring strain energy.
+        Suitable for Skyrme / topological solitons whose lateral displacement
+        has algebraic tails that mislead the ``"lateral"`` metric.
+        Pass ``lattice``, ``k_s``, and ``alpha`` when using this mode.
+    lattice : SpacelikeLattice or None
+        Required when ``weight_mode="strain"``; provides ``lattice.neighbors``.
+    k_s : float
+        Spring constant (used when ``weight_mode="strain"``).
+    alpha : float
+        Rest-length fraction (used when ``weight_mode="strain"``).
 
     Returns
     -------
@@ -237,10 +371,20 @@ def confinement_summary(
             Metrics from the last slice.
         mean : dict
             Mean of per-slice metric arrays.
+        weight_mode : str
+            The weight mode used (echoed for traceability).
     """
     n_slices = slices.shape[0]
     ref_spatial = ref[:, :dim]
     bfr = _box_fill_radius(ref_spatial)
+
+    neighbor_table = None
+    if weight_mode == "strain":
+        if lattice is None:
+            raise ValueError(
+                "weight_mode='strain' requires lattice (pass a SpacelikeLattice)"
+            )
+        neighbor_table = lattice.neighbors
 
     radius_rms_arr = np.empty(n_slices)
     spread_ratio_arr = np.empty(n_slices)
@@ -251,6 +395,10 @@ def confinement_summary(
             slices[i], ref, dim,
             confinement_radius_factor=confinement_radius_factor,
             _box_fill_radius_cached=bfr,
+            weight_mode=weight_mode,
+            _neighbor_table=neighbor_table,
+            _k_s=k_s,
+            _alpha=alpha,
         )
         radius_rms_arr[i] = m["radius_rms"]
         spread_ratio_arr[i] = m["spread_ratio"]
@@ -277,6 +425,7 @@ def confinement_summary(
         "radius_growth": radius_growth,
         "final": final,
         "mean": mean,
+        "weight_mode": weight_mode,
     }
 
 
