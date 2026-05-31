@@ -1,0 +1,23 @@
+"""Initialization layer — pure initial-condition generators.
+
+No solver, no diagnostics, no physics beyond setting node positions.
+All functions return a full spacelike-slice configuration
+    R0 : ndarray, shape (n_nodes, m_ambient), float64
+  = ref + displacement.
+
+The only nonlinearity in this project is the geometric Euclidean link-norm
+inside the solver.  Seed functions here are pure arithmetic on positions;
+they must not introduce additional energy terms, damping, or clamping.
+"""
+
+from branesim.initialization.seeds import (
+    hedgehog,
+    skyrme_twisted_hedgehog,
+    axis_triplet,
+)
+
+__all__ = [
+    "hedgehog",
+    "skyrme_twisted_hedgehog",
+    "axis_triplet",
+]

@@ -76,6 +76,33 @@ def _build_seed(seed_cfg: dict, lattice: SpacelikeLattice, m: int) -> np.ndarray
             raise ValueError(f"polarization must have length m_ambient={m}, got {pol.shape[0]}")
         return ref + amp * np.cos(phase)[:, None] * pol[None, :]
 
+    if kind in ("hedgehog", "skyrme_twisted", "axis_triplet"):
+        from branesim.initialization.seeds import (
+            hedgehog as _hedgehog,
+            skyrme_twisted_hedgehog as _skyrme,
+            axis_triplet as _axis_triplet,
+        )
+        u0 = float(seed_cfg.get("u0", amp))
+        w = float(seed_cfg.get("w", 5.0))
+        profile_shape = str(seed_cfg.get("profile_shape", "gaussian"))
+        if kind == "hedgehog":
+            R0, _ = _hedgehog(lattice, m, u0=u0, w=w, profile_shape=profile_shape)
+        elif kind == "skyrme_twisted":
+            tanh_steepness = float(seed_cfg.get("tanh_steepness", 3.0))
+            R0, _ = _skyrme(
+                lattice, m, u0=u0, w=w,
+                profile_shape=profile_shape,
+                tanh_steepness=tanh_steepness,
+            )
+        else:  # axis_triplet
+            weights = seed_cfg.get("weights", None)
+            R0, _ = _axis_triplet(
+                lattice, m, u0=u0, w=w,
+                weights=weights,
+                profile_shape=profile_shape,
+            )
+        return R0
+
     raise ValueError(f"Unknown seed kind: {kind!r}")
 
 
