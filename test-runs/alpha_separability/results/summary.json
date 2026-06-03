@@ -1,0 +1,88 @@
+{
+  "run_id": "alpha_separability_2026-06-03",
+  "date": "2026-06-03",
+  "status": "PASS",
+  "track_a": {
+    "status": "PASS",
+    "checks": {
+      "closed_form_vs_numerical": {
+        "max_err": 4.44e-16,
+        "tolerance": 1e-10,
+        "pass": true,
+        "note": "Near machine-epsilon; closed-form and explicit bond-sum D(k) are identical"
+      },
+      "traceless_linear_in_alpha": {
+        "max_rel_err": 4.82e-15,
+        "tolerance": 1e-10,
+        "pass": true,
+        "note": "traceless(alpha)/alpha is k-dependent constant; zero at alpha=0 and at [111] for all alpha"
+      },
+      "g_111_zero": {
+        "g_111": 0.0,
+        "max_over_magnitudes": 0.0,
+        "tolerance": 1e-14,
+        "pass": true,
+        "note": "Triplet degeneracy along [111] confirmed exactly; h_x=h_y=h_z => h_a-H/3=0"
+      },
+      "rho_SU3_coefficient": {
+        "measured_rho_SU3_at_alpha020_along_100": 0.10879,
+        "g_100": 0.81650,
+        "coefficient": 0.13323,
+        "expected": "g * sqrt(3)*0.2/(3-0.4) = 0.10879",
+        "pass": true
+      }
+    },
+    "projection_operators": {
+      "P_U1": "(1/3)*ones(3,3)  [dilatational, U(1)]",
+      "P_SU3": "I - P_U1        [shear, SU(3)]",
+      "partition_of_unity": "P_U1 + P_SU3 = I  [verified]"
+    }
+  },
+  "prediction_p1": {
+    "status": "PASS",
+    "setup": {
+      "carrier": "[100]",
+      "k0a": 0.7854,
+      "N": 32,
+      "dt": 0.01,
+      "amplitude": 0.001,
+      "envelope_width_over_a": 8.0,
+      "n_periods": 6.0,
+      "linearity_check": {
+        "delta_omega_rel_at_half_amplitude": 0.0,
+        "pass": true
+      }
+    },
+    "alpha_0.2": {
+      "omega_L": 0.765367,
+      "omega_T": 0.684565,
+      "omega_T_over_omega_L_measured": 0.894427,
+      "sqrt_1_minus_alpha": 0.894427,
+      "rel_err": 0.0,
+      "v_T_over_v_L_heff": 0.894427,
+      "v_T_over_v_L_finite_diff": 0.894427,
+      "pass": true
+    },
+    "alpha_0.5": {
+      "omega_L": 0.765367,
+      "omega_T": 0.541196,
+      "omega_T_over_omega_L_measured": 0.707107,
+      "sqrt_1_minus_alpha": 0.707107,
+      "rel_err": -1.57e-16,
+      "v_T_over_v_L_heff": 0.707107,
+      "v_T_over_v_L_finite_diff": 0.707107,
+      "pass": true
+    }
+  },
+  "files": {
+    "diagnostic_module": "branesim/diagnostics/alpha_separability.py",
+    "p1_experiment": "test-runs/alpha_separability/run_p1_wavepacket.py",
+    "unit_tests": "tests/test_alpha_separability.py",
+    "full_json": "test-runs/alpha_separability/results/p1_results.json"
+  },
+  "tests": {
+    "total": 33,
+    "passed": 33,
+    "failed": 0
+  }
+}
