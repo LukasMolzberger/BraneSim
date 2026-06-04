@@ -516,7 +516,14 @@ def group_velocity_ratio_p1(
     """
     k0_arr = np.asarray(k0, dtype=float).ravel()
     omega_sq = d_of_k_eigenvalues(k0_arr, alpha, k_s=k_s, rho=rho, a=a)
-    omega = np.sqrt(np.maximum(omega_sq, 0.0))
+    # omega^2 >= 0 analytically for alpha in [0,1]; clamp only roundoff at k=0,
+    # raise on a genuine negative rather than silently flooring it to 0.
+    if np.any(omega_sq < -1e-12):
+        raise ValueError(
+            f"Negative dynamical-matrix eigenvalue at k0={k0_arr}, alpha={alpha}: "
+            f"omega^2={omega_sq} signals instability (alpha outside [0,1]?)."
+        )
+    omega = np.sqrt(np.clip(omega_sq, 0.0, None))
 
     omega_L = float(omega[0])   # x-channel at k=(k0,0,0)
     omega_T = float(omega[1])   # y-channel at k=(k0,0,0): same h_x but (1-alpha) weight

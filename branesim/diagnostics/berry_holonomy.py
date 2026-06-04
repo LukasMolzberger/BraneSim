@@ -96,7 +96,16 @@ def heff_eigenframe(
     """
     k0 = np.asarray(k0, dtype=float).ravel()
     omega_sq = d_of_k_eigenvalues(k0, alpha, k_s=k_s, rho=rho, a=a)
-    evals = np.sqrt(np.maximum(omega_sq, 0.0))
+    # For physical alpha in [0,1] the eigenvalues omega^2 are >= 0 analytically;
+    # a genuinely negative value signals dynamical instability (e.g. out-of-range
+    # alpha) and must NOT be silently hidden (principles: no hand-imposed clamps).
+    # Only roundoff near k=0 is clamped; real negatives raise.
+    if np.any(omega_sq < -1e-12):
+        raise ValueError(
+            f"Negative dynamical-matrix eigenvalue at k0={k0}, alpha={alpha}: "
+            f"omega^2={omega_sq} signals instability (alpha outside [0,1]?)."
+        )
+    evals = np.sqrt(np.clip(omega_sq, 0.0, None))
     evecs = np.eye(3, dtype=float)   # Cartesian columns, k-independent
     return evecs, evals
 
@@ -290,11 +299,13 @@ def verify_p2_all_alpha(
             # for a flat bundle, to gauge-invariance tolerance for a curved one).
             gauge_devs = []
             for _ in range(n_gauge_trials):
-                # Random unitary in U(3): random orthogonal rotation applied to each frame
-                # For rank-3: U(3) random rotation preserves subspace
-                Q = random_unitary_3(rng)
+                # Gauge-randomize the eigenframe at each k-corner (a per-k U(3)
+                # rephasing) and check the holonomy is unchanged.
                 gauge_wz = np.eye(3, dtype=complex)
                 q0 = np.pi / 4.0
+                # NB: this reuses the default (axis-0, axis-1) plane of
+                # plaquette_holonomy_p2; verify_p2_all_alpha only ever uses that
+                # plane, so the gauge check is consistent with the base test.
                 corners_k = []
                 for ii, jj in [(0, 0), (1, 0), (1, 1), (0, 1)]:
                     kc = k_vec.copy()
@@ -335,6 +346,7 @@ def verify_p2_all_alpha(
                 "max_gauge_dev": max_gauge_dev,
                 "pass_gauge": pass_gauge,
                 "wz_dev_fine": r_fine["wz_dev_from_id"],
+                "refine_dev": refine_dev,
                 "pass_refine": pass_refine,
                 "pass_all": pass_all_k,
             }
