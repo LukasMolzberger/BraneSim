@@ -115,11 +115,11 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       `D(k)` has maximally split eigenvalues and the transverse modes are at
       zero frequency. Channels are decoupled and the triplet is far from
       degenerate — closest to a U(1)³ structure.
-    - At `α = 0` (maximum prestress) the energy is purely geometric and
-      isotropic: `D(k) ∝ I`. The three lateral channels are fully degenerate
-      and the Wilczek–Zee gauge group on the 3-dimensional retained subspace
-      is the full `U(3) = U(1) × SU(3)`. The current default `α = 0.2` sits
-      close to this end.
+      - At `α = 0` (maximum prestress) the energy is purely geometric and
+        isotropic: `D(k) ∝ I`. The three lateral channels are fully degenerate
+        and the Wilczek–Zee gauge group on the 3-dimensional retained subspace
+        is the full `U(3) = U(1) × SU(3)`. The current default `α = 0.2` sits
+        close to this end.
     - **What the cubic anisotropy provides is not the *existence* of U(3),
       which is a generic representation-theoretic fact about any 3-dim
       complex vector space.** It provides the *physically meaningful
