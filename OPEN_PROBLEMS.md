@@ -232,7 +232,7 @@ no sign error in the α≈0.5–0.8 sweet-spot story.
 **Status.** open. Owner: soliton-hunter. Feeds the sprint4 re-run target
 (α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
 
-### C2. Rest baryon: static soliton + iso-rotation, not a breather — `open` (static B=1 minimum confirmed `N_neg=0`; localization box-dependence is the live question, 2026-06-05)
+### C2. Rest baryon: static soliton + iso-rotation, not a breather — `open` (static B=1 min is `N_neg=0` but BOUNDARY-CONFINED at w=2a — Derrick wins; continuum binding `a≪w≪box` untested, 2026-06-05)
 **Statement.** The time-periodic, amplitude-breathing baryon ansatz (the
 common-carrier Skyrme breather, `solve_breather(mode="topological")`) **exists
 but is dynamically unstable, and prestress α does not stabilize it.** Converged
@@ -313,6 +313,31 @@ box-independent and `spread_ratio` stays `~0.5`, the soliton is genuinely
 **self-localized** (route alive); if `spread_ratio → 1` as the box grows, it is
 **boundary-confined** and Derrick wins (route fails). Until this is run, `N_neg=0`
 proves a stable extremum *exists* but not that it is a *localized particle*.
+
+**BOX-DOUBLING RESULT — 2026-06-05, DECISIVE (`box_doubling_study.py`,
+`box_doubling_sweep.csv`).** Verdict: **BOUNDARY-CONFINED — Derrick wins.**
+Holding `(α=0.7, w=2a)` and growing only the box `grid_n = 13→20→26`: `V* =
+273.8→1026→2282`, i.e. `V*/N_nodes = 0.125/0.128/0.130` — **constant to 4% across
+an 8× volume range**. The minimized energy is proportional to box volume, the
+hallmark of a box-filling texture, *not* a finite-energy localized soliton (whose
+`V*` would converge to a box-independent constant). `spread_ratio` stays
+`0.75/0.76/0.69` (does **not** shrink with the box); `radius_rms` grows
+`4.8→7.6→8.9a` (1.85× for a 2× box). `B = 1.000` preserved throughout. The
+`N_neg=0` minimum at 13³ is therefore a **Dirichlet-boundary artifact** — the BC
+itself creates the well — not a self-localized particle. *Root cause:* at `w=2a`
+the hedgehog profile `F = π/(1+(r/w)²)` has power-law tails (`F_edge = 0.27 ≫
+0.05`) that never vanish in the box, and lattice (UV) stabilization — not the
+Skyrme quartic — sets the scale (principles §1.1a: `w~a` ⇒ UV-tied mass, no
+continuum limit).
+**Net squeeze on the static route (both regimes now negative).** C1 closed
+`w≫a` (no interior energy minimum); C2 now shows `w~a` is UV/boundary-confined.
+The only untested window is the genuine continuum corner `a ≪ w ≪ box`
+(`w≈5–8a`, `grid_n≳60`, AWS-scale). **Open question that gates further spend:**
+does the substrate's lone geometric quartic (`∝ k_sα/a`, #17) bind a B=1 soliton
+at *any* continuum `w`, or does binding require the nonlinear **fibre-metric `C`**
+([[project_alpha_undetermined_at_linear_order]])? A **Derrick scaling analysis** of
+the substrate energy `E(λ) = λ E_2 + λ^{-1} E_4` (does it have an interior minimum
+at `w≫a`?) should answer this analytically *before* an intermediate-`w` AWS run.
 
 **Competing live hypothesis (kept, ranked below).** Larger *breather* solitons
 stabilize (48³/64³, AWS). Ranked below the static route because `ρ≈3.5` is flat in
