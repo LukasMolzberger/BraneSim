@@ -104,6 +104,12 @@ It is intended to prevent core assumptions from being lost during paper edits, c
     - Convention (matches code and derivations): `α := rest_length / spacing`,
       so `α = 1` ↔ no prestress and `α = 0` ↔ maximum prestress (rest length
       zero). The default operating point is `α = 0.2`.
+    - **Notation:** `α` is the **single 4D prestress** — one parameter governing all
+      four lattice directions, spatial and temporal alike (rest length = `α ×` held
+      spacing on every link; A4a, adopted 2026-06-05). It carries **no** spatial
+      subscript. `α_t` appears only *provisionally* inside the A4a verification (testing
+      `α_t = α`); a permanent split into `α_s`/`α_t` would be introduced only if that
+      verification fails.
 
 16. **Prestress `α` and the U(1)³ → U(3) crossover (Mechanism ii)**
     - On the 6-neighbor axial-only lattice the dynamical matrix `D(k)` is
