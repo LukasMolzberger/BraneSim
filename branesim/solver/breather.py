@@ -192,6 +192,58 @@ def omega_longitudinal_top(k_s: float, mass: float, a: float = 1.0) -> float:
     return math.sqrt(4.0 * k_s / mass)
 
 
+def omega_band_top_analytic(
+    k_s: float,
+    mass: float,
+    dim: int,
+    a: float = 1.0,
+) -> float:
+    """Dim-D analytic upper bound for the phonon band top of a staggered cubic lattice.
+
+    Returns
+    -------
+    float
+        ω_band_top = √(4 · dim · k_s / m).
+
+    Derivation
+    ----------
+    In the dim-D hypercubic lattice with nearest-neighbour central-force springs
+    the nonlinear breather frequency approaches
+
+        lim_{A→∞} ω(A) = √(4·dim·k_s/m)
+
+    because each of the 2·dim bonds contributes a stiffness k_s in the staggered
+    (q=π) limit, and the transverse tension term α/√(1+4A²/a²) → 0.  This is
+    therefore a conservative OVER-ESTIMATE of the true phonon band top: the actual
+    finite-lattice spectrum maximum is below this value for α > 0 (verified against
+    the numeric phonon_band_top at 16³; see NOTES.md §analytic-band-top-validation).
+
+    The key consequence for :func:`harmonic_resonance_check`: because this is an
+    OVER-ESTIMATE, passing band_top=omega_band_top_analytic(...) makes the
+    radiationless verdict strictly MORE CONSERVATIVE — a harmonic is only called
+    "radiationless" if it clears this higher threshold.  The false-negative rate
+    (calling a radiating breather "radiationless") is zero under this estimate.
+
+    Dim-agnostic: for dim=1 this equals :func:`omega_longitudinal_top` exactly.
+    For dim=3 and the smoke-run parameters (k_s=1, m=1) it returns √12 ≈ 3.464,
+    which is ~38% above the numeric finite-lattice value of ~2.518 (see NOTES.md).
+
+    Motivation: the dense phonon eigensystem of :func:`phonon_band_top` costs
+    O(N³) for N = n_nodes · m_ambient — infeasible at 32³+ grids (313 s at 16³).
+    This closed form costs O(1) and unblocks large-grid sweeps.  Always validate
+    the analytic vs numeric values on a small grid before relying on it for a
+    physics verdict (the NOTES.md validation provides this certificate).
+
+    Parameters
+    ----------
+    k_s : float    — spring constant (same units as ActionParams.k_s).
+    mass : float   — node mass m (= rho * a^dim for uniform lattice).
+    dim : int      — spatial dimension of the brane (e.g. 3 for 3D).
+    a : float      — lattice spacing (default 1.0; cancels in the final formula).
+    """
+    return math.sqrt(4.0 * dim * k_s / mass)
+
+
 # ---------------------------------------------------------------------------
 # Force Jacobian  J = dF/dR  (matrix-free directional derivative + dense build)
 # ---------------------------------------------------------------------------

@@ -1,0 +1,2 @@
+label,alpha,u0,w,grid_n,P,m_ambient,converged,residual_initial,residual_final,T,omega,floquet_spectral_radius,floquet_stable,floquet_method,radiationless,lowest_in_band_n_ge_2,band_top,transverse_top,R_h,walltime_s
+smoke_a0p7_u3_w2p5,0.7,3.0,2.5,16,16,4,False,3202.8625132450693,0.005041639012195305,2.56594995128331,2.448678043793166,4.759709089097073,False,power,True,,2.51764034280664,1.0954451150103324,2.289229289921136,528.1234331250016

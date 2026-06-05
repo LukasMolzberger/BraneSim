@@ -190,9 +190,104 @@ StVK-valid regime, or (ii) substitute a polyconvex hyperelastic completion
 framework, which leaves the geometric transverse–lateral coupling unchanged.
 Stated in paper §3 (constitutive subsection). Owner: soliton-hunter.
 
+### C1a. StVK quartic coefficient has the wrong α-scaling — `open`
+**Statement.** The lattice spring `½k_s(|ΔR|−αa)²` is quadratic in *stretch*; StVK
+is quadratic in Green–Lagrange *strain* `E`. They agree at quadratic order
+(identical wave speeds) but disagree at quartic: the lattice-exact transverse
+quartic is `+k_s α/(8a²) ∝ α` (continuum `W_4 ∝ k_s α/a`, vanishing at α→0; from the
+norm term `−k_s αa|ΔR|`, see
+`paper/derivations/geometric_nonlinearity_alpha_scaling.md` §4), whereas a naive
+StVK identification locks the quartic to `μ ∝ (1−α)` — inverted α-scaling.
+**Why it matters.** Any soliton-width / hedgehog-radius formula built on the StVK
+quartic prefactor must be re-derived. `vsh_channel_decomposition.md` §2.5's old
+`R_h/a ~ (ℓ₀/u₀)^{2/3}` is superseded by `R_h/a = κ(A/a)√(α/(1−α))` (corrected
+balance, 2026-06-04): radius grows with α as `√(α/(1−α))` and is *linear* in
+amplitude `A` — the opposite of the old note on both axes. The Derrick `λ`-scaling
+(backbone #17) is α-independent and unaffected; only the coefficient was wrong, so
+no sign error in the α≈0.5–0.8 sweet-spot story.
+**Status.** open. Owner: soliton-hunter. Feeds the sprint4 re-run target
+(α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
+
 ---
 
-## D. Pointers to scoped non-claims (tracked elsewhere)
+## D. Gauge sector — emergent quantum numbers
+
+### D1. EM-charge ⇄ spin-½ bridge (spin-from-isospin) — `open`
+**Statement.** Two emergent quantum numbers are currently scoped *independently*:
+(i) the trace-`U(1)` holonomy is read as electromagnetism (backbone #19); (ii)
+spin-½ is scoped as an L5 *soliton-rotation* effect — a `π₁(SO(3))=ℤ₂`
+Finkelstein–Rubinstein phase under `2π` rigid rotation of a winding-odd hedgehog
+(prediction P3, `test-runs/alpha_separability/derivation_H_eff.md`). Established
+field theory (Jackiw–Rebbi 1976; Hasenfratz–'t Hooft 1976; Witten's dyon 1979)
+makes these *not* independent: a bosonic soliton carrying one quantum of
+`U(1)`/non-Abelian charge acquires **half-integer spin and Fermi statistics** when
+the charge collective coordinate is quantized ("spin from isospin") — the same
+mechanism that turns a charged Skyrmion/monopole into a fermion.
+**Why it matters.** If it holds on the substrate, the `ℤ₂` spin phase is *sourced
+by* the trace-`U(1)` charge rather than being an unrelated topological accident.
+It yields a sharp, falsifiable correlation that strengthens P3: **only
+trace-`U(1)`-charged solitons are fermions (spin-½); `U(1)`-neutral solitons stay
+integer/spin-1.** With the working proton/neutron hypothesis
+(`BAYRON_SIMULATION_ROADMAP.md` Phase 2) this predicts the charged (proton-class,
+trace-admixed) and neutral (neutron-class, trace-cancelled) seeds carry the *same*
+baryon winding, but the spin-statistics phase tracks the `U(1)` charge — testable
+by the same `2π`-rotation holonomy experiment run on charged vs neutral seeds.
+**Candidate approach.** Identify the collective coordinate on the lattice hedgehog
+whose quantization carries the trace-`U(1)` charge; compute the induced
+rotation/exchange phase (Witten-effect / `θ`-term analogue from the geometric
+coupling); compare to the directly-measured `2π`-rotation holonomy of charged vs
+neutral seeds. This is a *soliton-layer* (L5) statement — the linear spectrum
+gives spin-1 at all α (proven, same derivation) — so it is gated on a confined
+soliton. Owners: physics-derivation (the spin-from-isospin reduction) +
+berry-validator (the L5 charged-vs-neutral rotation holonomy). See
+`[[project_spin_half_is_soliton_layer]]`.
+
+### D2. Prestress α from the EM/colour coupling ratio — `resolved (linear: undetermined)` · `open (nonlinear)`
+**Statement.** Can the empirical EM-vs-strong coupling ratio fix the prestress α?
+The linear *spectrum* cannot: the traceless/`SU(3)` content `∝ α` and the trace/
+`U(1)` content `∝ (1−2α/3)` stay comparable (≈13% apart at α=0.2) and both vanish
+together as α→0, so the spectrum produces **no** EM/colour hierarchy — the famous
+`α_EM/α_s` must live in the *connection/curvature normalization*, not eigenvalue
+magnitudes. Compounding this, the **k-space Berry/WZ curvature is identically zero
+∀α** (real-symmetric `D(k)`; `derivation_H_eff.md`), so any coupling ratio is a
+*fibre-internal* `(x,t)` holonomy object.
+**Why it matters.** A derived α would convert the project's one free linear
+parameter into a prediction. A clean *negative* result (α undetermined at linear
+order) is itself valuable: it localizes the EM/colour hierarchy in the nonlinear
+normalization and rules out spectrum-ratio "derivations" of `1/137`.
+**Lorentz-bound corollary (already usable).** Mutual photon/gluon Lorentz
+invariance (no measured vacuum birefringence between EM and colour) does *not*
+bound α small; it forces physical carriers onto the `[111]` isotropic locus where
+all three lateral eigenvalues are exactly degenerate ∀α (`g([111])=0`). This
+*frees* α to sit at O(0.1–0.5) and is the cleanest current "SM fact → lattice"
+import.
+**Resolution (linear order, 2026-06-04 — derivation; α NOT determined, by design).**
+The fibre-internal holonomy ratio is `R(α) = (C/g(k̂))·(3−2α)/(√3 α)`, where
+`g(k̂)=√(Σ_a(h_a−H/3)²)/H` is the directional anisotropy and `C = N_U(1)/N_SU(3)`
+is the **relative gauge-kinetic normalization** = `tr(P_U(1)𝒢)/tr(P_SU(3)𝒢)` set by
+the fibre metric `𝒢_ij=⟨∂_iΨ|∂_jΨ⟩`. At linear order `𝒢 ∝ 𝟙` (envelope norm is
+flat ℓ² on ℂ³), so `C` reduces to pure dimension-counting (`1/√2`) with **no
+α-dependence** — the EM/colour hierarchy is therefore *absent* from the linear
+theory and the naive inversion gives `α≈1.2 > 1` (out of range, a self-flag that
+the linear identification is invalid). **α is normalization-undetermined at linear
+order.** The missing ingredient is the *sector-dependent* fibre metric supplied by
+the geometric quartic (backbone #17), which couples the trace/dilatational
+direction to the `X⁴` gravity channel differently from the traceless/shear
+directions — a nonlinear computation. **Sharpest new gap surfaced:** the triplet is
+coherent only for `k₀∥[111]`, but `g([111])=0` kills the colour content there
+(`R→∞`); off-[111] the branches dephase. There is **no linear direction that is
+both coherent and colour-active** — color curvature is intrinsically a
+soliton-layer (nonlinear) object. **Falsifiable, normalization-independent
+spin-off (decisive):** the α-scaling is `R(α₂)/R(α₁) = [(3−2α₂)/α₂]/[(3−2α₁)/α₁]`;
+for `(α₁,α₂)=(0.2,0.5)` this is **0.3077** — measurable by extending
+`branesim/diagnostics/berry_holonomy.py` to transport a band-isolated ℂ³ envelope
+around a fixed `(x,t)` loop off-[111]; a >10% deviation falsifies the
+spectral-susceptibility factorization. Full derivation:
+`paper/derivations/alpha_holonomy_estimator.md`.
+
+---
+
+## E. Pointers to scoped non-claims (tracked elsewhere)
 
 The following are bounded-scope limits already stated honestly in paper §2
 "Non-claims"; listed here only so the central tracker is complete. They are

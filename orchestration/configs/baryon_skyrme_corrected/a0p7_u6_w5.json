@@ -1,0 +1,30 @@
+{
+  "_comment": "Sprint 4b corrected Skyrme-twisted hedgehog sweep. alpha=0.7, u0=6.0, w=5.0. Fixed-alpha amplitude trace point 1/2: R_h proportional to u0. Physics targets fixed by vsh_channel_decomposition.md §2.5a.",
+  "_sizing": "64^3 grid: n_nodes=262144, n_slices=500, wv=4.203 GB, t_phys=25.0, box_crossings=0.39. box/w=12.8x (good). WARNING: t_phys < several box-crossings; checkpoint subsampling required for production -- see README.",
+  "lattice": {
+    "grid_shape": [64, 64, 64],
+    "spacing": 1.0,
+    "periodic_axes": [true, true, true],
+    "axial_weight": 1.0
+  },
+  "action": {
+    "k_s": 1.0,
+    "alpha": 0.7,
+    "rho": 1.0,
+    "dt": 0.05,
+    "n_slices": 500,
+    "m_ambient": 4,
+    "temporal_model": "a",
+    "r_t": 0.0
+  },
+  "seed": {
+    "kind": "skyrme_twisted",
+    "u0": 6.0,
+    "w": 5.0,
+    "profile_shape": "tanh",
+    "tanh_steepness": 3.0
+  },
+  "solver": {
+    "mode": "ivp"
+  }
+}

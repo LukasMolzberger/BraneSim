@@ -18,12 +18,22 @@ from pathlib import Path
 
 
 def run_cmd(args: list[str], *, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        args,
-        check=True,
-        text=True,
-        capture_output=capture_output,
-    )
+    try:
+        return subprocess.run(
+            args,
+            check=True,
+            text=True,
+            capture_output=capture_output,
+        )
+    except subprocess.CalledProcessError as e:
+        # Surface the captured AWS error instead of swallowing it (was a silent
+        # exit-254 with no message when capture_output=True).
+        import sys
+        if e.stderr:
+            print(f"[run_cmd] command failed (exit {e.returncode}):\n{e.stderr}", file=sys.stderr)
+        if e.stdout:
+            print(f"[run_cmd] stdout:\n{e.stdout}", file=sys.stderr)
+        raise
 
 
 def parse_args() -> argparse.Namespace:

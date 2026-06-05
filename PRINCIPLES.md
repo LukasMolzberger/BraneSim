@@ -151,11 +151,18 @@ change.
   the eight SU(3) traceless generators as "colour" labels), and the natural
   identification of the U(1) trace with the EM-like sector. See backbone #19.
 - **Geometric quartic = Skyrme-class stabilization.** The induced-metric
-  contribution `∂_i u ∂_j u` enters the StVK energy as `(μ/4ℓ₀⁴)(|∇u|²)²`,
-  which under Derrick scaling `u(x) → u(λx)` scales as `λ^{+1}` in 3D and
-  resists collapse. Combined with the `λ^{−1}` quadratic-gradient term, this
-  is the standard Skyrme balance and *defeats Derrick's no-go at the
-  continuum level*. Lattice spacing `a` provides an independent UV cutoff.
+  contribution `∂_i u ∂_j u` gives a `(|∇u|²)²` term, which under Derrick
+  scaling `u(x) → u(λx)` scales as `λ^{+1}` in 3D and resists collapse.
+  Combined with the `λ^{−1}` quadratic-gradient term, this is the standard
+  Skyrme balance and *defeats Derrick's no-go at the continuum level*.
+  Lattice spacing `a` provides an independent UV cutoff.
+  **Coefficient (lattice-exact, ∝ α).** The quartic prefactor is `∝ k_s α/a`
+  (continuum `W_4 = (k_s α/8a)|∂u_⊥|⁴`), derived from the norm term
+  `−k_s αa|ΔR|` of the central-force spring — it vanishes at α→0. A naive StVK
+  identification `(μ/4ℓ₀⁴)(|∇u|²)²` locks the prefactor to `μ ∝ (1−α)` and has
+  the α-scaling **inverted**; do not use it for soliton sizing. The Derrick
+  `λ`-scaling above is α-independent and unaffected. See
+  `paper/derivations/geometric_nonlinearity_alpha_scaling.md`.
 - **Two soliton regimes.** Width `~ a` (lattice-stabilized) → strong
   Peierls–Nabarro pinning, soliton mass tied to the UV scale, no continuum
   limit. Width `≫ a` (Skyrme-stabilized) → exponentially suppressed PN,

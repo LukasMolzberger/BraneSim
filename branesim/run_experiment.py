@@ -222,7 +222,16 @@ def run(config: dict, output_dir: Path) -> dict:
 
     wv_path = output_dir / "worldvolume.zip"
     # Not using the context manager: we need to pass solver_report to close().
-    w = WorldVolumeWriter(wv_path, manifest_extra={"mode": mode})
+    # Include lattice metadata so that confinement_from_worldvolume can read dim
+    # without needing the original config (contracts.py / confinement.py API).
+    manifest_lattice = {
+        "grid_shape": list(lp.grid_shape),
+        "spacing": lp.spacing,
+        "periodic_axes": list(lp.periodic_axes),
+        "axial_weight": lp.axial_weight,
+        "dim": lp.dim,
+    }
+    w = WorldVolumeWriter(wv_path, manifest_extra={"mode": mode, "lattice": manifest_lattice})
     for l in range(wv.slices.shape[0]):
         w.write_slice(l, l * ap.dt, wv.slices[l])
     w.write_npy("aux/ref_positions.npy", lattice.reference_positions(m))

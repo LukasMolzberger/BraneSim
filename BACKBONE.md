@@ -136,10 +136,17 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       `test-runs/sprint2_subtask8_u3_decomposition/` for the detailed result.
 
 17. **Geometric quartic provides Skyrme-class soliton stabilization**
-    - The induced-metric correction `∂_i u ∂_j u` in StVK gives a `(|∇u|²)²`
+    - The induced-metric correction `∂_i u ∂_j u` gives a `(|∇u|²)²`
       term that scales as `λ^{+1}` under Derrick scaling, balancing the
       `λ^{−1}` quadratic-gradient term. This defeats Derrick collapse at the
       continuum level without any added field.
+    - **Coefficient α-scaling (lattice-exact).** The quartic prefactor is
+      `∝ k_s α/a` (vanishes at α→0), from the norm term `−k_s αa|ΔR|` of the
+      central-force spring; a naive StVK identification `(μ/4ℓ₀⁴)` locks it to
+      `μ ∝ (1−α)` and **inverts** the α-scaling. The Derrick `λ`-scaling above is
+      α-independent and unaffected — only the *coefficient* was wrong. Radius
+      grows with α (`R_h/a = κ(A/a)√(α/(1−α))`). See
+      `paper/derivations/geometric_nonlinearity_alpha_scaling.md`.
     - **Target soliton width ≫ a** (Skyrme-stabilized regime), not `~ a`
       (lattice-stabilized regime). The latter has Peierls–Nabarro pinning
       that breaks emergent Lorentz invariance.

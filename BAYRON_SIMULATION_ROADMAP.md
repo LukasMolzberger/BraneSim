@@ -5,6 +5,18 @@
 Adapt the current BraneSim code so that it can search for stable baryon-like localized modes on the cubic substrate,
 with proton/neutron configurations treated as the first decisive particle target.
 
+> **Solver vehicle (2026-06-04).** The bound-particle search uses the
+> TIME-SYMMETRIC time-periodic eigen-BVP `branesim/solver/breather.py::solve_breather(mode="topological")`
+> (cyclic `R^P≡R^0` Skyrme common-carrier breather, root-finding `‖ℛ‖=0`), **not**
+> the forward Verlet IVP march. IVP reintroduces a causal time-direction (violating
+> the time-symmetry stance, OPEN_PROBLEMS A) and cannot find a bound eigenstate, so a
+> non-eigenstate seed radiates regardless of parameters. Decisive verdicts:
+> `converged` AND `floquet_multipliers` spectral radius ≤ 1 (stable) AND
+> `harmonic_resonance_check` radiationless. Harness:
+> `test-runs/sprint4b_skyrme_corrected/run_breather_sweep.py`. See
+> `[[project_baryon_search_vehicle_breather]]`. IVP/Verlet remains the right tool
+> for wave-propagation / dispersion, not bound states.
+
 ## What the current code already gets right
 
 - The core force model already contains the **essential geometric nonlinearity**.
@@ -88,6 +100,16 @@ F(0) = π,  F(∞) = 0
   topological-stability requirement of backbone #17.
 - Sweep parameters: amplitude `A`, characteristic width `w` (defined by
   the radius at which `F(r) = π/2`), prestress `α`, profile shape.
+- **Corrected seed target (2026-06-04).** The Derrick balance with the
+  lattice-exact quartic (`W_4 ∝ k_s α/a`) gives `R_h/a = κ(A/a)√(α/(1−α))`,
+  `κ = O(1)` (see `paper/derivations/vsh_channel_decomposition.md` §2.5a and
+  `geometric_nonlinearity_alpha_scaling.md`). Radius is **linear in amplitude `A`**
+  and **increasing in α** — the opposite of the old §2.5 `(ℓ₀/u₀)^{2/3}` target.
+  Seed at **α = 0.7, A/a ≈ 10** (⇒ `R_h/a ≈ 8`); bracket **α ∈ {0.5, 0.7, 0.8}** at
+  fixed `A/a ≈ 10` to trace the falsifiable curve `R_h(α)/R_h(0.5) = √(α/(1−α))`
+  (0.65 / 1.00 / 1.53 / 2.00 at α = 0.3 / 0.5 / 0.7 / 0.8). NB the May-2026 sprint4
+  sweep used tiny `u₀ ∼ 0.003–0.025` at α=0.2 — the collapse corner on *both* axes,
+  which is why it dispersed. Use a box ≫ seed (periodicity masked dispersion).
 
 #### Candidate 3 — Hedgehog with U(1) trace admixture (J=0, L=1 + L=0)
 
@@ -114,6 +136,41 @@ F(0) = π,  F(∞) = 0
   that the search distinguishes partial-wave-locked configurations from
   unlocked ones. If candidate 4 confines but candidates 1-3 do not, the
   framework is wrong.
+
+#### Candidate 5 — Hopfion / linked vortex ring (Hopf charge Q_H=1)
+
+```
+ξⁱ(x) = A · g(r) · n̂ⁱ(x/w)
+```
+
+with `n̂ ∈ S²` the charge-1 Hopf texture, written via the stereographic coordinate
+`w_s = (n̂₁ + i n̂₂)/(1 − n̂₃)` of the lateral-triplet *direction*:
+
+```
+w_s(x) = 2 w (x + i y) / (2 w z + i (r² − w²)),    r² = x²+y²+z²
+```
+
+so `n̂ → ẑ` at infinity; `g(r)` localizes the amplitude (Gaussian / sech).
+
+- **Topology: `π₃(S²) = ℤ`.** Preimages of any two target directions are **linked
+  circles** — the "donut + central-axis line" structure. The Hopf charge is the
+  linking number.
+- **Distinct from Candidate 2.** The Skyrme-twisted hedgehog is `π₃(S³)` and wraps
+  into the `X⁴` gravity channel; the Hopfion lives **entirely in the lateral-triplet
+  direction field** (no `X⁴` escape required). If the amplitude `g` stays finite the
+  texture is smooth (no core singularity); if `g → 0` on the central ring it
+  degrades to a genuine vortex-ring `π₁` core.
+- Stabilization against Derrick collapse needs a Skyrme-type quartic, which the
+  geometric link-norm nonlinearity supplies (`Q = 8 k_s α / a² > 0` hardens —
+  `[[project_pythagorean_breather_go]]`). Faddeev–Niemi Hopfions are the canonical
+  stable knotted 3D solitons, so this may confine where the C2 Skyrme hedgehog
+  disperses (`[[project_c2_skyrme_no_confinement]]`).
+- Spin-statistics: under a `2π` rotation the Hopfion phase is tied to `Q_H` and to
+  its trace-`U(1)` charge (spin-from-isospin, `OPEN_PROBLEMS.md` D1).
+- Sweep parameters: amplitude `A`, ring scale `w`, profile shape, prestress `α`,
+  optional internal twist (`Q_H > 1`), trace admixture (charged vs neutral).
+
+This is a working simulation hypothesis, not a derived claim.
 
 #### Working proton/neutron hypothesis
 
