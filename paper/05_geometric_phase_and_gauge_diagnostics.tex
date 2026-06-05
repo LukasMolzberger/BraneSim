@@ -211,8 +211,23 @@ in a homogeneous medium with an extractable Wilson loop and Zitterbewegung-like 
 The present claim is the analogous statement for the mechanical polarization eigenbundle of the cubic brane, extended
 to the triplet sector.
 
-\subsection{Berry curvature on a discretized Brillouin zone (link-variable method)}
+\subsection{Brillouin-zone link-variable method --- and why the gauge structure lives in $(x,t)$}
 \label{subsec:bz-berry}
+
+\paragraph{Where the gauge structure lives.}
+The emergent gauge structure of this model is \emph{not} Brillouin-zone band topology. The
+substrate field is real, so the band eigenbundle of $D(\mathbf{k})$ is trivial and its
+momentum-space Berry/Wilczek--Zee curvature vanishes identically (proved and numerically
+verified in the caveat below). The physical gauge connection instead lives over
+\emph{physical spacetime} $(x,t)$: it is the holonomy of the complex carrier envelope
+$\Psi\in\C^3$ (\Cref{subsec:axis-triplet}), transported around loops in real space and time,
+with the $U(1)$ trace read as the electromagnetic sector. Bloch's theorem and the Brillouin
+zone enter only to supply the \emph{carrier band} and the narrowband isolation of a wavepacket
+about its carrier $\mathbf{k}_0$; they are not the base space of the gauge connection. The
+link-variable construction below is accordingly a \emph{template diagnostic} --- it returns
+nonzero curvature only once an intrinsically complex effective operator is supplied (the
+envelope's $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$), and exactly zero on the bare real
+$D(\mathbf{k})$.
 
 For a lattice substrate, Berry curvature can be computed directly on the discretized Brillouin zone using
 link variables and plaquettes, closely analogous to lattice-QCD Berry-curvature constructions
