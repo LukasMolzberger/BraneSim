@@ -9,15 +9,18 @@ This section makes precise the sense in which Lorentz kinematics emerge as a kin
 
 Linearizing \Cref{eq:eom} about a homogeneous background yields a multi-branch wave system.
 For isotropic elastic media, one expects (at long wavelengths) transverse and longitudinal branches.
-In the StVK baseline around a homogeneous state, the characteristic speeds take the familiar form
+From the quadratic term $W_2$ of the central-force spring's continuum expansion
+(\Cref{subsec:constitutive-law}), the characteristic speeds at long wavelengths are
 \begin{equation}
-  c_T^2 \sim \frac{\mu}{\rho_m},
+  c_T^2 = \frac{\mu(\alpha)}{\rho_m} = \frac{(1-\alpha)\,k_s a^2}{m},
   \qquad
-  c_L^2 \sim \frac{\lambda+2\mu}{\rho_m},
+  c_L^2 = \frac{\lambda+2\mu}{\rho_m} = \frac{k_s a^2}{m},
   \label{eq:cl-ct}
 \end{equation}
-up to the details of the chosen background and the pre-stress encoded by $\alpha$.
-On the explicit 6-neighbor axial lattice of \Cref{subsec:discrete-4d-action}, the continuum limit of the discrete action \eqref{eq:discrete-4d-action} yields the closed-form values $c_L^2=k_s a^2/m$ and $c_T^2=(1-\alpha)\,k_s a^2/m$ (\Cref{eq:cone-speeds}).
+derived from the acoustic tensor \eqref{eq:acoustic-tensor} on the 6-neighbor stencil.
+These coincide with the closed-form dispersion of the discrete action \eqref{eq:discrete-4d-action}
+(\Cref{eq:cone-speeds}), confirming that the spring and its $W_2$ continuum limit are
+self-consistent across all levels of description.
 More generally, for each polarization branch $b$ one has the long-wavelength dispersion
 \begin{equation}
   \omega_b^2(\veck)\;\approx\; c_b^2\,|\veck|^2 \quad \text{for } |\veck|\to 0,

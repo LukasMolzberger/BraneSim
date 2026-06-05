@@ -194,47 +194,174 @@ transverse gradients backreact on in-brane stresses through the geometric nonlin
 In the lattice substrate picture (\Cref{subsec:lattice-substrate}), the same $\alpha$ multiplies the geometric
 neighbor distances to set spring rest lengths; \Cref{eq:alpha-def} is the continuum encoding of that uniform prestretch.
 
-\subsection{Constitutive law: St.\ Venant--Kirchhoff (Green--Lagrange strain)}
+\subsection{Constitutive law: central-force spring and its continuum expansion}
+\label{subsec:constitutive-law}
 
-As a concrete baseline we use the St.\ Venant--Kirchhoff (StVK) energy expressed in terms of the
+\paragraph{The exact constitutive law.}
+The substrate's stored energy is determined entirely by the central-force spring potential.
+On the 6-neighbor axial-only stencil $\mathcal{N}_6 = \{\pm\hat{e}_i\}$,
+the exact slice-restricted potential (\Cref{eq:slice-potential}) is
+\begin{equation}
+  V = \frac{k_s}{4}\sum_{p}\sum_{\delta\in\mathcal{N}_6}
+        \Bigl(\bigl|R_{p+\delta} - R_p\bigr| - \alpha a\Bigr)^2.
+  \label{eq:spring-potential-exact}
+\end{equation}
+This is the energy the simulation kernel \texttt{branesim/core/action.py} computes exactly.
+It is \emph{frame-indifferent}: it depends only on the Euclidean link length $|R_{p+\delta}-R_p|$,
+not on rigid motions of the ambient.
+The induced-metric line element $|\Delta R|^2 = |\partial_i\vecX\,\dd x^i|^2$ is the discrete
+counterpart of the Riemannian pull-back \eqref{eq:induced-metric}: both measure the physical
+distance between neighboring material points, confirming that \eqref{eq:spring-potential-exact}
+is the natural elastic energy for an embedded lattice.
+
+\paragraph{Exact link decomposition.}
+Writing $E_{\mathrm{link}} = \tfrac12 k_s\bigl(|\Delta R|-\alpha a\bigr)^2$ and splitting into the
+squared-norm and the Euclidean-norm terms,
+\begin{equation}
+  E_{\mathrm{link}}
+  = \underbrace{\tfrac12 k_s|\Delta R|^2}_{\text{exactly quadratic}}
+  \;-\; \underbrace{k_s\alpha a\,|\Delta R|}_{\text{entire anharmonic sector}}
+  \;+\; \tfrac12 k_s\alpha^2 a^2.
+  \label{eq:link-decomp}
+\end{equation}
+The squared-norm term $\tfrac12 k_s|\Delta R|^2$ is a degree-2 polynomial in node coordinates and
+contributes \emph{only} to the quadratic (linear-elasticity) sector.
+Every cubic and higher term in the energy descends from the Euclidean-norm term
+$-k_s\alpha a\,|\Delta R|$, which carries an explicit factor $\alpha$.
+Consequently, \emph{all anharmonic physics vanishes as $\alpha\to 0$} (backbone~\#17).
+
+\paragraph{Continuum expansion: $W = W_2 + W_4 + \cdots$}
+In the long-wavelength regime ($a|k|\ll 1$, $|\nabla u|\ll 1$) the exact spring energy coarse-grains
+to a gradient expansion $W = W_2 + W_4 + \cdots$ derived in
+\texttt{paper/derivations/spring\_constitutive\_continuum\_limit.md}.
+
+\smallskip
+\noindent\textbf{Leading term $W_2$ (linear elasticity).}
+Using the quadratic link strain
+$\bigl(s_\delta^2\bigr)^{(2)} = \alpha(\hat\delta\cdot\Delta u)^2 + (1-\alpha)|\Delta u|^2$
+and the axial tensor sums $T^{(2)}_{ab}=2\delta_{ab}$, $T^{(4)}_{abcd}=2Q_{abcd}$
+(where $Q_{abcd}=1$ iff $a=b=c=d$), the acoustic tensor on $\mathcal{N}_6$ evaluates to
+\begin{equation}
+  A_{abcd} = \frac{k_s}{a}\bigl[\alpha\,Q_{abcd} + (1-\alpha)\,\delta_{ac}\delta_{bd}\bigr].
+  \label{eq:acoustic-tensor}
+\end{equation}
+The Christoffel matrix along $k=k\hat{e}_1$ is diagonal, giving
+\begin{equation}
+  c_L^2 = \frac{k_s a^2}{m},
+  \qquad
+  c_T^2 = (1-\alpha)\,\frac{k_s a^2}{m},
+  \label{eq:wave-speeds-derived}
+\end{equation}
+in exact agreement with the lattice closed-form dispersion of \texttt{branesim/core/conventions.py}
+(cross-checked at every $\alpha$).
+The effective Lam\'e parameters on the 6-neighbor stencil are
+\begin{equation}
+  \mu(\alpha) = \frac{(1-\alpha)\,k_s}{a},
+  \qquad
+  \lambda = C_{1122} = 0.
+  \label{eq:lame-6neighbor}
+\end{equation}
+The vanishing of $\lambda$ and the off-diagonal entries of $A_{abcd}$ confirm that the
+6-neighbor stencil is structurally \emph{cubically anisotropic}
+($C_{1111}-C_{1122}-2C_{1212}=(2\alpha-1)k_s/a\ne0$ for $\alpha\ne\tfrac12$):
+this is a feature, not a bug --- it is the structural source of the gauge sector
+(backbone~\#8, \#15, \#16, \#19).
+
+\smallskip
+\noindent\textbf{Cubic term $W_3 = 0$.}
+On purely longitudinal modes ($\Delta u_\perp=0$) the link length is
+$|\Delta R|=|a+\Delta u_\parallel|$, which is exactly Hookean --- no odd anharmonic terms.
+On purely transverse modes the displacement $q\equiv|\Delta u_\perp|$ appears
+only through $q^2$, so $W_3=0$ by parity.
+\emph{The geometric nonlinearity is intrinsically transverse.}
+
+\smallskip
+\noindent\textbf{Quartic term $W_4$ (soliton stabilizer).}
+Expanding the Euclidean-norm term on the pure-transverse slice
+($\Delta u_\parallel=0$, $q=|\Delta u_\perp|$):
+\begin{equation}
+  |\Delta R| = \sqrt{a^2+q^2} = a + \frac{q^2}{2a} - \frac{q^4}{8a^3}+\cdots,
+  \label{eq:link-length-expand}
+\end{equation}
+and collecting the quartic contribution from $-k_s\alpha a\,|\Delta R|\supset +(k_s\alpha/8a^2)q^4$,
+the continuum coarse-graining gives
+\begin{equation}
+  \boxed{W_4 = \frac{k_s\alpha}{8a}\,\bigl|\partial u_\perp\bigr|^4,}
+  \label{eq:W4}
+\end{equation}
+with coefficient $\propto\alpha$ that \emph{vanishes at $\alpha\to 0$} and is positive
+(geometric hardening, $Q>0$, backbone~\#17).
+In 4D the transverse component includes both the lateral and the timelike displacement
+channels, producing the lateral--amplitude geometric quartic
+$(k_s\alpha/4a)|\partial u^{\mathrm{lat}}|^2(\partial u^{X^4})^2$ that stabilizes solitons
+against Derrick (uniform-rescaling) collapse (backbone~\#17).
+This is the standard Skyrme balance: $W_2\sim\lambda^{-1}$ and $W_4\sim\lambda^{+1}$
+under $u(x)\mapsto u(\lambda x)$ in 3D --- here $\lambda$ denotes the Derrick rescaling
+factor, not the Lam\'e parameter (which vanishes on this stencil) --- with an
+independent UV cutoff at the lattice spacing $a$.
+
+\paragraph{Green--Lagrange strain and the StVK quadratic-order proxy.}
+For analytic comparison with the textbook literature it is useful to introduce the
 Green--Lagrange strain tensor
 \begin{equation}
   E := \tfrac12\big(\widehat g - I\big)
-  \qquad\text{(with $I$ the $3\times 3$ identity)}.
+  \qquad\text{(with $I$ the $3\times 3$ identity)},
   \label{eq:green-lagrange-strain}
 \end{equation}
-The StVK stored energy density is
+and the St.\ Venant--Kirchhoff (StVK) stored energy density
 \begin{equation}
   W_{\text{StVK}}(E)
-  = \mu\,\mathrm{tr}(E^2)+\frac{\lambda}{2}\,\big(\mathrm{tr}E\big)^2,
+  = \mu\,\mathrm{tr}(E^2)+\frac{\lambda}{2}\,\big(\mathrm{tr}E\big)^2.
   \label{eq:stvk}
 \end{equation}
-with Lam\'e parameters $\mu>0$ and $\lambda$ (units: Pa). In terms of Poisson ratio $\nu\in(0,1/2)$,
+\emph{StVK is a quadratic-order proxy for the central-force spring, not the substrate's
+constitutive law.}
+At quadratic order in $\nabla u$, StVK reproduces the same wave speeds \eqref{eq:wave-speeds-derived}
+and the same $\mu$, $\lambda$ as the spring \eqref{eq:lame-6neighbor}: the two descriptions
+are indistinguishable in the linear-elasticity regime of \Cref{sec:emergent-relativity,sec:geophase}.
+At quartic order, however, they diverge critically: the spring's geometric quartic
+\eqref{eq:W4} has coefficient $\propto k_s\alpha/a$, whereas a naive StVK identification
+locks the quartic to $\mu\propto(1-\alpha)$ and \emph{inverts} the $\alpha$-scaling.
+\emph{Quantitative soliton sizing (\Cref{sec:localized}) must use the spring law
+\eqref{eq:spring-potential-exact}--\eqref{eq:W4}, not StVK.}
+
+In terms of Poisson ratio $\nu\in(0,1/2)$,
 \begin{equation}
 \nu=\frac{\lambda}{2(\lambda+\mu)},
 \qquad
 \lambda=\frac{2\mu\nu}{1-2\nu}.
 \label{eq:poisson-lame}
 \end{equation}
-This choice is not claimed unique; it is used because it is isotropic, analytic, and captures the
-geometric nonlinearity through $g_{ij}(\vecX)$.
-It also reduces to standard linear elasticity in the small-strain limit, making the longitudinal/transverse
-wave speeds and the linearized branch structure transparent.
-We emphasize that StVK is employed here as a \emph{baseline constitutive law} for analytic tractability.
-Its relevant limitation is specific rather than a generic large-strain nicety: StVK is neither polyconvex nor coercive in compression --- its stored energy does not diverge as $\det F\to 0^+$, so it neither penalizes local volume collapse and element inversion nor stiffens sufficiently under strong compression.
-This feature is structural, not an artifact of the continuum approximation: the microscopic central-force lattice shares it, since the pair energy $\tfrac12 k_\delta(|R_{p+\delta}-R_p|-\alpha a)^2$ stays bounded --- tending to $\tfrac12 k_\delta(\alpha a)^2$ --- as a link collapses, $|R_{p+\delta}-R_p|\to 0$.
-The lattice spacing $a$ merely masks the instability (configurations cannot compress below the grid) that the continuum exposes.
-For the linear and moderate-strain results of \Cref{sec:emergent-relativity,sec:geophase} this is immaterial; for the strongly localized modes of \Cref{sec:localized} it must be controlled --- either by verifying that the relevant configurations remain non-inverting, or by substituting a polyconvex hyperelastic energy (e.g.\ neo-Hookean, Mooney--Rivlin, Ogden-type) within the same induced-metric framework, which leaves the geometric mechanism of transverse--lateral backreaction unchanged.
-The geometric quartic that stabilizes solitons against Derrick (uniform-rescaling) collapse is a distinct safeguard and does not by itself remove this local compression instability.
+On the 6-neighbor stencil $\lambda=0$, so $\nu=0$ structurally.
 
-A second, distinct caveat concerns the \emph{quartic} order. StVK is quadratic in the Green--Lagrange strain $E$, whereas the microscopic central-force spring is quadratic in the \emph{stretch} $(|R_{p+\delta}-R_p|-\alpha a)$; the two coincide at quadratic order (identical wave speeds, \Cref{sec:emergent-relativity}) but differ at quartic order. Writing the exact link energy as $\tfrac12 k_s|R_{p+\delta}-R_p|^2 - k_s\alpha a\,|R_{p+\delta}-R_p| + \text{const}$, the squared-norm term is exactly quadratic and the \emph{entire} anharmonic sector is the Euclidean-norm term $-k_s\alpha a\,|R_{p+\delta}-R_p|$, which is proportional to $\alpha$. The lattice-exact geometric quartic therefore has coefficient $\propto k_s\alpha/a$ (vanishing as $\alpha\to0$), whereas a naive StVK identification locks it to $\mu\propto(1-\alpha)$ and inverts the $\alpha$-scaling. Quantitative soliton sizing (\Cref{sec:localized}) must accordingly use the lattice-derived quartic rather than the StVK one.
+\paragraph{Compression non-coercivity.}
+The central-force spring \eqref{eq:spring-potential-exact} is not polyconvex nor coercive in
+compression: as a link collapses ($|R_{p+\delta}-R_p|\to 0$), the pair energy
+$\tfrac12 k_s(\alpha a)^2$ remains bounded rather than diverging.
+The lattice spacing $a$ masks this in practice (configurations cannot compress below the
+grid), but the continuum limit exposes it.
+For the linear and moderate-strain results of \Cref{sec:emergent-relativity,sec:geophase}
+this is immaterial; for the strongly localized modes of \Cref{sec:localized} it must be
+controlled --- either by verifying that the relevant configurations remain non-inverting, or
+by substituting a polyconvex hyperelastic energy (e.g.\ neo-Hookean, Mooney--Rivlin,
+Ogden-type) within the same induced-metric framework, which leaves the geometric mechanism
+of transverse--lateral backreaction unchanged.
+The geometric quartic \eqref{eq:W4} that stabilizes solitons against Derrick collapse is
+a distinct safeguard and does not by itself remove this local compression instability.
 
 \paragraph{Spacelike-slice versus 4D placement.}
-The strain \eqref{eq:green-lagrange-strain} is a spacelike-slice object: $E$ is $3\times 3$ and is referred to the Euclidean reference metric of the slice.
-Its placement in the foundational 4D action (\Cref{subsec:discrete-4d-action}) admits the two readings of the timelike-link choice.
-In the baseline, $W_{\text{StVK}}$ is the potential $V$ and the timelike direction contributes a separate kinetic term, so $S=\int(T-V)$ is ordinary elastodynamics and \eqref{eq:stvk} stands verbatim.
-In the symmetric alternative, the strain is promoted to a $4\times 4$ Green--Lagrange tensor $E_{\mu\nu}=\tfrac12(g_{\mu\nu}-\eta_{\mu\nu})$ referred to a Lorentzian reference $\eta_{\mu\nu}$.
-In either reading the Lorentzian signature resides in the \emph{sign structure of the action} (\Cref{subsec:ontology-kinematics}), not in the ambient or induced metric: the ambient is Euclidean, so $g_{\mu\nu}=\partial_\mu\vecX\cdot\partial_\nu\vecX$ is positive-definite and the timelike direction is distinguished only by the opposite sign with which its strain enters $S$.
+The strain \eqref{eq:green-lagrange-strain} is a spacelike-slice object: $E$ is $3\times 3$
+and is referred to the Euclidean reference metric of the slice.
+Its placement in the foundational 4D action (\Cref{subsec:discrete-4d-action}) admits the
+two readings of the timelike-link choice.
+In the baseline, the spring potential $V$ \eqref{eq:spring-potential-exact} covers the
+spacelike links and the timelike direction contributes a separate kinetic term, so
+$S=\int(T-V)$ is ordinary elastodynamics.
+In either reading the Lorentzian signature resides in the \emph{sign structure of the action}
+(\Cref{subsec:ontology-kinematics}), not in the ambient or induced metric: the ambient is
+Euclidean, so $g_{\mu\nu}=\partial_\mu\vecX\cdot\partial_\nu\vecX$ is positive-definite and
+the timelike direction is distinguished only by the opposite sign with which its contribution
+enters $S$.
 
 \subsection{Lagrangian, action, and equations of motion}
 

@@ -137,6 +137,14 @@ $$
 
 ### 3.3 Lattice tensor sums for the 26-neighbor stencil
 
+> **Superseded for the locked minimal model.** The shell sums below are for the
+> 26-neighbor stencil and are superseded by the 6-neighbor axial-only results in
+> `paper/derivations/spring_constitutive_continuum_limit.md` §3 for the canonical
+> stencil $\mathcal{N}_6$. On $\mathcal{N}_6$: $T^{(2)}_{ab}=2\delta_{ab}$,
+> $T^{(4)}_{abcd}=2Q_{abcd}$, giving $c_L^2=k_s a^2/m$, $c_T^2=(1-\alpha)k_s a^2/m$,
+> $\mu=(1-\alpha)k_s/a$, $\lambda=0$. The 26-neighbor results below remain valid for
+> alternative stencil choices.
+
 Shell-by-shell ($N_{\rm I}=6$ axial, $N_{\rm II}=12$ face-diagonal,
 $N_{\rm III}=8$ body-diagonal):
 
