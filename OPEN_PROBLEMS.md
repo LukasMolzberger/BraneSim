@@ -232,6 +232,96 @@ no sign error in the α≈0.5–0.8 sweet-spot story.
 **Status.** open. Owner: soliton-hunter. Feeds the sprint4 re-run target
 (α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
 
+### C2. Rest baryon: static soliton + iso-rotation, not a breather — `open` (static B=1 minimum confirmed `N_neg=0`; localization box-dependence is the live question, 2026-06-05)
+**Statement.** The time-periodic, amplitude-breathing baryon ansatz (the
+common-carrier Skyrme breather, `solve_breather(mode="topological")`) **exists
+but is dynamically unstable, and prestress α does not stabilize it.** Converged
+32³ orbits at α=0.80/0.85/0.90 give Floquet `ρ = 3.59 / 3.47 / 3.70` — robustly
+`>1`, flat in α (ticks *up* at 0.9), and robust to `inner_maxiter` (physical, not
+a solver artifact); the earlier apparent "α-stabilizing trend" (95→54→3.6) was an
+artifact of non-converged orbits at α=0.5/0.7 (residual 8–27) and must be
+excluded (`test-runs/sprint4b_skyrme_corrected/trend_sweep.csv`). The breather
+*mechanism* is sound — Pythagorean hardening `Q = 8k_sα/a² > 0` places a localized
+mode above the transverse band ([[project_pythagorean_breather_go]]) — but the
+breathing/scale degree of freedom itself carries the instability.
+**Why it matters.** A stable baryon-like soliton is the decisive numerical target
+(backbone #12). The breather was the leading candidate vehicle
+([[project_baryon_search_vehicle_breather]]); it is now closing negative, so the
+program needs a replacement.
+**Replacement (proposed, not yet owner-locked).** The rest baryon is a **static**
+topological soliton — an extremum of the *spatial* potential `V` at fixed winding
+`B=1` — dressed by a rigid internal **iso-rotation** collective coordinate
+(spin-from-isospin, D1), **not** a pulsating lump. Rationale: (i) it removes the
+breathing DOF that carries the Floquet instability; (ii) it is the bound object
+that the kinematic color-confinement conclusion (backbone #24) *requires* anyway —
+color has no free linear state and lives only in a phase-locked soliton; (iii) it
+is the same hedgehog that carries the spin-½ `ℤ₂` Finkelstein–Rubinstein holonomy
+([[project_spin_half_is_soliton_layer]], D1); (iv) it is cheaper than the breather.
+**Variational principle (consistency note).** Unlike the Lorentzian *action* `S`
+(a saddle, unbounded below — must root-find `∇S=0`, principles §saddle), the
+*static spatial energy* `V` on a single slice is bounded below, so the static
+soliton is a genuine **constrained minimization of `V` at fixed `B=1`** (or
+equivalently `∇V=0` + Hessian check). Derrick's theorem is the obstruction; the
+geometric quartic (#17, coeff `∝ k_sα/a`) supplies the `λ^{+1}` balance.
+**Regime (load-bearing).** This must live in the **lattice-scale `w~a`,
+large-amplitude (O(1) strain)** corner — **not** the wide `w≫a` regime, which C1
+closed negatively (no interior energy minimum; no hyperelastic rescue). A `w~a`
+static soliton is Peierls–Nabarro grid-pinned, re-opening the PN / emergent-Lorentz
+tension (#8, #17): the test **must report `w/a` and quantify the PN barrier**.
+**Test spec.**
+- (a) *Static extremum.* Constrained-minimize `V` (or root-find `∇V=0`) on a `B=1`
+  hedgehog + `X⁴`-twist seed at α≈0.5–0.8, large `A`, **open** boundary, box ≫ seed;
+  verify `B(slice)=1` preserved and the config stays localized
+  (`spread_ratio ≪ 1`, not box-fill — use the corrected metrics from
+  [[project_c2_skyrme_no_confinement]], never `leakage_fraction`).
+- (b) *Stability.* Spectrum of the static Hessian (second variation of `V`):
+  require **no negative-eigenvalue directions** beyond the allowed zero modes
+  (3 translations + the iso-rotation/orientation moduli). This replaces the
+  Floquet test, which only applies to the (now-abandoned) periodic orbit.
+- (c) *Spin.* Quantize the `SO(3)`/iso collective coordinate; the rigid `2π`
+  rotation must give the π (`ℤ₂`) FR holonomy via the **open-path** Fukui–Hatsugai
+  product (closed loop → silent false-negative; see
+  [[project_spin_half_is_soliton_layer]]). Already scoped:
+  `test-runs/alpha_separability/L5_spin_half_target.md`.
+**RESULT — corrected harness, 2026-06-05 (`test-runs/static_soliton_c2_corrected/c2_corrected.py`).**
+*Harness fix.* The v1/v2 `B≈0.12` was a **measurement artifact, not a physics
+negative**: the Jacobian-determinant degree estimator was applied on an **even-N
+grid**, where the soliton core `r=0` (the S³-map singularity, `x̂` undefined though
+`sinF=0` removes it analytically) falls *between* nodes; central-difference
+gradients there accumulate O(1) error and lose ~85% of the integral. Fix: the
+**analytic** degree `B = −(2/π)[𝒜(F_edge) − 𝒜(F(0)=π)]` (antiderivative `𝒜`, using
+the BC `F(0)=π`) gives `B = 1.0000 ± 0.0001` whenever `F(box edge) < 0.05`. The
+analytic estimator is authoritative; the Jacobian one is kept only for qualitative
+B-preservation monitoring on even grids.
+*Single config — α=0.7, w=2a, 13³, Dirichlet vacuum BC `n̂(∂)=ê₄`.* `B` preserved
+`1.000` seed→final; **`V* = 273.8 > 0`** (genuine non-vacuum extremum — did *not*
+collapse to vacuum); `min|ΔR| = 1.000a` (no bond collapse); **`N_neg = 0`** — all
+5324 interior DOF have positive stiffness, `λ_min = 0.061`, zero negative *and* zero
+zero modes → a genuine **local minimum of `V` in the `B=1` sector** under the
+Dirichlet BC. This is the test-(b) verdict, and it is **positive** (contrast the
+breather's Floquet `ρ≈3.5`). **PN barrier `ΔV_PN/V* ≈ 0` (~1e-16)** — no grid
+pinning, notable for `w~a`.
+*The catch (test-(a) not yet met).* `spread_ratio` (strain-weighted, interior
+bonds) `= 0.745`, **above** the `≪0.5` localization target; the equilibrium width
+under Dirichlet BC is comparable to the box. This is the Derrick tension surfacing:
+the config may be **boundary-confined** rather than self-localized. α (the Skyrme
+quartic `∝ k_sα/a`) is the right knob — `spread_ratio` falls `0.62→0.53` as `α:
+0.5→0.8`, so **α≈0.7–0.8 is the best corner** — but the magnitude is not yet `≪0.5`.
+*Decisive next test → **box-doubling**.* Rerun the same config at `grid_n=26` (box
+doubled) and check box-scaling: if `V*` and the equilibrium width are
+box-independent and `spread_ratio` stays `~0.5`, the soliton is genuinely
+**self-localized** (route alive); if `spread_ratio → 1` as the box grows, it is
+**boundary-confined** and Derrick wins (route fails). Until this is run, `N_neg=0`
+proves a stable extremum *exists* but not that it is a *localized particle*.
+
+**Competing live hypothesis (kept, ranked below).** Larger *breather* solitons
+stabilize (48³/64³, AWS). Ranked below the static route because `ρ≈3.5` is flat in
+α and shows no approach to 1 at the resolutions tried — no evidence stability is
+hiding just past 32³.
+**Owner.** soliton-hunter (static extremum + Hessian) + physics-derivation
+(iso-rotation quantization) + berry-validator (L5 spin holonomy). See
+`BAYRON_SIMULATION_ROADMAP.md` Phase 2.
+
 ---
 
 ## D. Gauge sector — emergent quantum numbers
