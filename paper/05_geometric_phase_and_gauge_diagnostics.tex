@@ -54,6 +54,26 @@ and the holonomy (geometric phase) around a closed loop $\Gamma$ is
   \label{eq:berry-holonomy}
 \end{equation}
 
+\paragraph{Electromagnetic reading: four-potential and field tensor.}
+In the $U(1)$ trace sector (\Cref{subsec:axis-triplet}) the Berry connection
+\eqref{eq:berry-connection} \emph{is} the electromagnetic four-potential, $A_\mu\equiv a_\mu$, and
+its curvature \eqref{eq:berry-curvature} \emph{is} the field tensor $F_{\mu\nu}\equiv f_{\mu\nu}$,
+with $E_i=F_{0i}$ (the time--space part) and $B_i=\tfrac12\epsilon_{ijk}F_{jk}$ (the space--space
+part): the electric and magnetic fields are the two faces of how the carrier's worldtube phase fails
+to commute between the timelike and spacelike directions.
+Two consequences are then \emph{automatic}, requiring no field dynamics: the gauge freedom
+\eqref{eq:berry-gauge} is exactly the unobservable choice of carrier phase reference, and the
+homogeneous Maxwell equations are the Bianchi identity $\partial_{[\lambda}F_{\mu\nu]}=0$, which holds
+identically because $F=dA$.
+A \emph{nonzero} field ($F\neq0$) requires the phase to be non-integrable --- the polarization state
+$\lvert u\rangle$ must genuinely rotate within $\C^{N}$ ($N\ge2$), not merely carry an overall phase,
+since a pure gradient $A_\mu=\partial_\mu\chi$ is pure gauge.
+Because the index $\mu$ runs over the 4D worldtube, $A_\mu$ transforms as a Lorentz four-vector only
+insofar as the emergent light-cone is isotropic (\Cref{sec:emergent-relativity}).
+What this kinematics does \emph{not} fix is the field's \emph{dynamics}: the inhomogeneous equations
+$d{\star}F=J$ hold only if the substrate furnishes the Maxwell action $-\tfrac14\int F\wedge{\star}F$
+(with its emergent Hodge star and coupling), a separate derivation not established here.
+
 \subsection{What the geometric phase is ``of'': eigenmode bundles and adiabaticity}
 \label{subsec:berry-of}
 

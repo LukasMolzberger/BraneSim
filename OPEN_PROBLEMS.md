@@ -309,6 +309,31 @@ around a fixed `(x,t)` loop off-[111]; a >10% deviation falsifies the
 spectral-susceptibility factorization. Full derivation:
 `paper/derivations/alpha_holonomy_estimator.md`.
 
+### D3. Dynamical Maxwell: effective action for the EM four-potential — `open`
+**Statement.** Electromagnetism is the `U(1)`-trace Berry connection of the carrier — the
+**electromagnetic four-potential** `A_μ = i⟨u|∂_μu⟩` — with **field tensor**
+`F_μν = ∂_μA_ν − ∂_νA_μ` (`E_i = F_{0i}`, the time–space part; `B_i = ½ε_{ijk}F_{jk}`, the
+space–space part). The **kinematics is direct** (no dynamics needed): (a) gauge invariance
+`A_μ → A_μ + ∂_μχ` is the unobservable choice of carrier phase reference; (b) the **homogeneous**
+Maxwell equations are the Bianchi identity `dF = 0`, automatic because `F = dA`. What is **not**
+derived is the **dynamics** — the **inhomogeneous** equations `d⋆F = J` — which hold only if
+integrating out the substrate around the carrier band yields the Maxwell action
+`S_eff[A] = −¼ ∫ F∧⋆F`, requiring: (i) the right **form** (`∝ F²`, not another functional of `F`);
+(ii) **masslessness** (no `m²A²`; the `U(1)` must be an exact flat direction); (iii) the emergent
+**Hodge `⋆`** = isotropic light-cone (ties A4a / `[111]`); (iv) the **coupling** normalization
+(undetermined at linear order, D2 — lives in the nonlinear fibre metric). Also open: what
+dynamically forces a **nonzero, propagating** `F` (the phase must be non-integrable — the carrier
+state must rotate in `ℂ^N`, `N≥2`, not merely carry an overall phase; a pure gradient is pure
+gauge, `F=0`).
+**Why it matters.** Closes the EM sector from "gauge kinematics" (done) to "Maxwell dynamics"
+(the field equations + the photon). Until derived, the paper claims only the kinematic/gauge
+structure, not full Maxwell dynamics (§2 non-claims). Recurs across §5.6, D2, and the complex-`U(1)`
+discussion. The complex structure / the `i` is the carrier's rotation along the timelike worldtube
+axis (`[[project_complex_u1_from_time]]`), so `A_μ` is intrinsically a 4-covector on `(x,t)`.
+**Candidate approach.** Effective-field-theory reduction of the substrate action about the carrier
+band → `S_eff[A]`; verify the `F²` form + masslessness; read the coupling from the fibre metric
+(D2). Owner: physics-derivation + berry-validator. See `paper/05` §5.2.
+
 ---
 
 ## E. Pointers to scoped non-claims (tracked elsewhere)
