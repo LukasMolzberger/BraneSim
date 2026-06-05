@@ -232,7 +232,7 @@ no sign error in the α≈0.5–0.8 sweet-spot story.
 **Status.** open. Owner: soliton-hunter. Feeds the sprint4 re-run target
 (α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
 
-### C2. Rest baryon: static soliton + iso-rotation, not a breather — `open` (static B=1 min is `N_neg=0` but BOUNDARY-CONFINED at w=2a — Derrick wins; continuum binding `a≪w≪box` untested, 2026-06-05)
+### C2. Rest baryon — `open` · ⚠ ALL prior nonlinear runs RETRACTED 2026-06-05 (unclamped pretension + hard-coded B-estimator); restarting periodic-clamped + eigenstate
 **Statement.** The time-periodic, amplitude-breathing baryon ansatz (the
 common-carrier Skyrme breather, `solve_breather(mode="topological")`) **exists
 but is dynamically unstable, and prestress α does not stabilize it.** Converged
@@ -283,61 +283,48 @@ tension (#8, #17): the test **must report `w/a` and quantify the PN barrier**.
   product (closed loop → silent false-negative; see
   [[project_spin_half_is_soliton_layer]]). Already scoped:
   `test-runs/alpha_separability/L5_spin_half_target.md`.
-**RESULT — corrected harness, 2026-06-05 (`test-runs/static_soliton_c2_corrected/c2_corrected.py`).**
-*Harness fix.* The v1/v2 `B≈0.12` was a **measurement artifact, not a physics
-negative**: the Jacobian-determinant degree estimator was applied on an **even-N
-grid**, where the soliton core `r=0` (the S³-map singularity, `x̂` undefined though
-`sinF=0` removes it analytically) falls *between* nodes; central-difference
-gradients there accumulate O(1) error and lose ~85% of the integral. Fix: the
-**analytic** degree `B = −(2/π)[𝒜(F_edge) − 𝒜(F(0)=π)]` (antiderivative `𝒜`, using
-the BC `F(0)=π`) gives `B = 1.0000 ± 0.0001` whenever `F(box edge) < 0.05`. The
-analytic estimator is authoritative; the Jacobian one is kept only for qualitative
-B-preservation monitoring on even grids.
-*Single config — α=0.7, w=2a, 13³, Dirichlet vacuum BC `n̂(∂)=ê₄`.* `B` preserved
-`1.000` seed→final; **`V* = 273.8 > 0`** (genuine non-vacuum extremum — did *not*
-collapse to vacuum); `min|ΔR| = 1.000a` (no bond collapse); **`N_neg = 0`** — all
-5324 interior DOF have positive stiffness, `λ_min = 0.061`, zero negative *and* zero
-zero modes → a genuine **local minimum of `V` in the `B=1` sector** under the
-Dirichlet BC. This is the test-(b) verdict, and it is **positive** (contrast the
-breather's Floquet `ρ≈3.5`). **PN barrier `ΔV_PN/V* ≈ 0` (~1e-16)** — no grid
-pinning, notable for `w~a`.
-*The catch (test-(a) not yet met).* `spread_ratio` (strain-weighted, interior
-bonds) `= 0.745`, **above** the `≪0.5` localization target; the equilibrium width
-under Dirichlet BC is comparable to the box. This is the Derrick tension surfacing:
-the config may be **boundary-confined** rather than self-localized. α (the Skyrme
-quartic `∝ k_sα/a`) is the right knob — `spread_ratio` falls `0.62→0.53` as `α:
-0.5→0.8`, so **α≈0.7–0.8 is the best corner** — but the magnitude is not yet `≪0.5`.
-*Decisive next test → **box-doubling**.* Rerun the same config at `grid_n=26` (box
-doubled) and check box-scaling: if `V*` and the equilibrium width are
-box-independent and `spread_ratio` stays `~0.5`, the soliton is genuinely
-**self-localized** (route alive); if `spread_ratio → 1` as the box grows, it is
-**boundary-confined** and Derrick wins (route fails). Until this is run, `N_neg=0`
-proves a stable extremum *exists* but not that it is a *localized particle*.
+**⚠ RETRACTED — 2026-06-05. ALL executed nonlinear-soliton runs in this thread are INVALID.**
+Two independent harness errors invalidate every C2-thread numerical result — the
+"corrected harness" `N_neg=0` minimum, the box-doubling "boundary-confined" verdict,
+the w-scan, the saturation analysis, and the worldtube-tornado run:
 
-**BOX-DOUBLING RESULT — 2026-06-05, DECISIVE (`box_doubling_study.py`,
-`box_doubling_sweep.csv`).** Verdict: **BOUNDARY-CONFINED — Derrick wins.**
-Holding `(α=0.7, w=2a)` and growing only the box `grid_n = 13→20→26`: `V* =
-273.8→1026→2282`, i.e. `V*/N_nodes = 0.125/0.128/0.130` — **constant to 4% across
-an 8× volume range**. The minimized energy is proportional to box volume, the
-hallmark of a box-filling texture, *not* a finite-energy localized soliton (whose
-`V*` would converge to a box-independent constant). `spread_ratio` stays
-`0.75/0.76/0.69` (does **not** shrink with the box); `radius_rms` grows
-`4.8→7.6→8.9a` (1.85× for a 2× box). `B = 1.000` preserved throughout. The
-`N_neg=0` minimum at 13³ is therefore a **Dirichlet-boundary artifact** — the BC
-itself creates the well — not a self-localized particle. *Root cause:* at `w=2a`
-the hedgehog profile `F = π/(1+(r/w)²)` has power-law tails (`F_edge = 0.27 ≫
-0.05`) that never vanish in the box, and lattice (UV) stabilization — not the
-Skyrme quartic — sets the scale (principles §1.1a: `w~a` ⇒ UV-tied mass, no
-continuum limit).
-**Net squeeze on the static route (both regimes now negative).** C1 closed
-`w≫a` (no interior energy minimum); C2 now shows `w~a` is UV/boundary-confined.
-The only untested window is the genuine continuum corner `a ≪ w ≪ box`
-(`w≈5–8a`, `grid_n≳60`, AWS-scale). **Open question that gates further spend:**
-does the substrate's lone geometric quartic (`∝ k_sα/a`, #17) bind a B=1 soliton
-at *any* continuum `w`, or does binding require the nonlinear **fibre-metric `C`**
-([[project_alpha_undetermined_at_linear_order]])? A **Derrick scaling analysis** of
-the substrate energy `E(λ) = λ E_2 + λ^{-1} E_4` (does it have an interior minimum
-at `w≫a`?) should answer this analytically *before* an intermediate-`w` AWS run.
+1. **Pretension not clamped (dominant error).** The runs used **open spatial
+   boundaries** on a *prestressed* lattice (bonds stretched to `a`, rest length
+   `αa < a`, so the medium is under tension). An unpinned tensioned network relaxes
+   its prestress — it contracts globally toward `αa`. The **`A=0` control proves it**:
+   with *no soliton at all*, the open-BC march still collapses to `E_excess ≈ −V_vac`
+   (every bond reaches rest length, releasing the entire tension). The "vacuum" was
+   never held at the intended tensioned equilibrium, so the dynamics measured tension
+   relaxation, not soliton physics. Test-spec (a)'s "**open** boundary" above is the
+   error and is withdrawn.
+2. **B was never measured.** `compute_B_analytic` hard-codes `F_inner = math.pi`, so
+   it returns `B ≈ 1` whenever the boundary is at vacuum — *regardless of the interior
+   field*. Every "B = 1 preserved" claim is this artifact. Under static FIRE the field
+   in fact **unwound to the square-lattice vacuum**: the celebrated `N_neg=0, V*=273.8`
+   minimum is exactly the `13³` vacuum prestress floor
+   (`(k_s/2)·3·13²·12·(0.3)² = 273.78`) — the stable *vacuum*, mislabeled `B=1`.
+
+**Corrected standard for the restart (non-negotiable):**
+- **Clamp the pretension with periodic spatial BC.** The period fixes the box at
+  `N·a`, holds the tension, and the tensioned lattice is then a *stable* vacuum —
+  confirmed: `A=0` periodic → `E_excess ≡ 0` to machine precision.
+- **A bound particle is an eigenstate**, not a marched/relaxed seed. Every
+  seed-and-watch run here dispersed / unwound / contracted because the seed was not a
+  stationary solution. Solve for the self-consistent (rotating worldtube) state.
+- **Real diagnostics only:** vacuum-subtracted excess energy against the stable
+  periodic vacuum, and a winding degree computed from the *actual* field. The
+  hard-coded B-estimator is deleted.
+
+**What survives (unaffected by the bug):** the linear dispersion/anisotropy layer
+(machine-exact, periodic, small-amplitude), the `bvp_chiral` solver, the
+geometric-nonlinearity-∝α decomposition, and kinematic color confinement (backbone
+#24). The breather Floquet result (`ρ≈3.5`) is a distinct code path; held pending
+re-validation under this standard, but its instability is not attributable to the
+pretension bug.
+
+**Status.** open — restarting from the periodic-clamped tensioned vacuum (step 1)
+toward a periodic-BC **eigenstate** baryon (step 2). The static-min test spec (a/b/c)
+above is superseded by the eigenstate approach.
 
 **Competing live hypothesis (kept, ranked below).** Larger *breather* solitons
 stabilize (48³/64³, AWS). Ranked below the static route because `ρ≈3.5` is flat in

@@ -1,0 +1,20 @@
+{
+  "mode": "validation",
+  "grid_n": 32,
+  "w": 3.0,
+  "alpha": 0.7,
+  "B_seed": 0.9999876609049193,
+  "V_seed": 4466.662802484432,
+  "F_edge": 0.10669559955587977,
+  "FIRE_status": "converged",
+  "FIRE_steps": 2899,
+  "FIRE_V_star": 4285.440000116671,
+  "FIRE_grad_norm": 9.97896992775769e-05,
+  "FIRE_B_final": 1.0,
+  "FIRE_walltime_s": 64.45785695798986,
+  "GD_200steps_V": 4345.791300673388,
+  "GD_200steps_grad_norm": 4.544357236935869,
+  "GD_200steps_walltime_s": 3.227694540997618,
+  "spread_ratio": 0.6019508845042302,
+  "radius_rms": 9.626510262091344
+}
