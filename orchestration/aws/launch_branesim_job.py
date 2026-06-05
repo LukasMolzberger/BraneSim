@@ -71,6 +71,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gdrive-remote", default="")
     parser.add_argument("--gdrive-dest", default="BraneSim")
 
+    parser.add_argument(
+        "--watch",
+        action="store_true",
+        help="After launch, run watch_job.py in-process to poll S3 markers and "
+             "auto-terminate if a DOA tripwire fires.",
+    )
+
     parser.add_argument("--spot", action="store_true", help="Launch as one-time spot instance")
     parser.add_argument("--volume-size-gb", type=int, default=120)
 
@@ -116,6 +123,8 @@ def main() -> None:
         template_path,
         {
             "__JOB_ID__": job_id,
+            "__S3_BUCKET__": args.s3_bucket,
+            "__S3_PREFIX__": args.s3_prefix,
             "__S3_PROJECT_URI__": project_uri,
             "__S3_RESULTS_URI__": s3_results_uri,
             "__REMOTE_COMMAND_B64__": command_b64,
@@ -190,11 +199,26 @@ def main() -> None:
     os.unlink(user_data_path)
 
     print("EC2 job launched")
-    print(f"  job_id: {job_id}")
-    print(f"  instance_id: {instance_id}")
+    print(f"  job_id:          {job_id}")
+    print(f"  instance_id:     {instance_id}")
     print(f"  project_archive: {project_uri}")
-    print(f"  results_s3: {s3_results_uri}")
+    print(f"  results_s3:      {s3_results_uri}")
+    print(f"  markers_s3:      s3://{args.s3_bucket}/{args.s3_prefix}/{job_id}/markers/")
     print("Instance will self-terminate after syncing results.")
+
+    if args.watch:
+        import importlib.util, sys as _sys
+        watcher_path = Path(__file__).with_name("watch_job.py")
+        spec = importlib.util.spec_from_file_location("watch_job", watcher_path)
+        watcher_mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(watcher_mod)  # type: ignore[union-attr]
+        watcher_mod.watch(
+            region=args.region,
+            instance_id=instance_id,
+            s3_bucket=args.s3_bucket,
+            s3_prefix=args.s3_prefix,
+            job_id=job_id,
+        )
 
 
 if __name__ == "__main__":

@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
+# shellcheck shell=bash
+# NOTE: shebang must stay /usr/bin/env bash (not /usr/bin/bash — absent on some AMIs;
+# falling back to dash silently drops pipefail and changes set -e semantics, which
+# prevents the cleanup/shutdown trap from running on early failure).
 set -euo pipefail
 
 JOB_ID="__JOB_ID__"
+S3_BUCKET="__S3_BUCKET__"
+S3_PREFIX="__S3_PREFIX__"
 S3_PROJECT_URI="__S3_PROJECT_URI__"
 S3_RESULTS_URI="__S3_RESULTS_URI__"
-REMOTE_COMMAND_B64="__REMOTE_COMMAND_B64__"
-REMOTE_COMMAND="$(printf '%s' \"${REMOTE_COMMAND_B64}\" | base64 --decode)"
 ENABLE_GDRIVE_SYNC="__ENABLE_GDRIVE_SYNC__"
 GDRIVE_REMOTE="__GDRIVE_REMOTE__"
 GDRIVE_DEST="__GDRIVE_DEST__"
@@ -13,9 +17,29 @@ GDRIVE_DEST="__GDRIVE_DEST__"
 WORKDIR="/opt/brane-job"
 RESULTS_DIR="${WORKDIR}/results"
 LOG_DIR="${WORKDIR}/logs"
+MARKERS_S3="s3://${S3_BUCKET}/${S3_PREFIX}/${JOB_ID}/markers"
 mkdir -p "${RESULTS_DIR}" "${LOG_DIR}"
 
 exec > >(tee "${LOG_DIR}/user-data.log") 2>&1
+
+# ---------------------------------------------------------------------------
+# S3 tripwire marker — non-fatal; lets watch_job.py detect DOA early.
+# ---------------------------------------------------------------------------
+put_marker() {
+  # NOTE: `aws s3 cp /dev/null ...` is rejected ("character special device"),
+  # so the marker object is never created. Pipe a tiny timestamp from stdin instead.
+  printf 'ts=%s\n' "$(date -u +%s)" | aws s3 cp - "${MARKERS_S3}/$1" || true
+}
+
+# ---------------------------------------------------------------------------
+# Decode the remote command to a file to avoid:
+#   - base64 "no newline" parse error when captured into a shell variable
+#   - re-quoting hazard when & ; $ VAR appear in the command string
+# ---------------------------------------------------------------------------
+decode_remote_command() {
+  printf '%s\n' "__REMOTE_COMMAND_B64__" | base64 -d > "${WORKDIR}/remote_command.sh"
+  chmod +x "${WORKDIR}/remote_command.sh"
+}
 
 sync_results() {
   echo "[sync] Uploading results to ${S3_RESULTS_URI}"
@@ -36,6 +60,9 @@ cleanup_and_exit() {
   local code=$1
   echo "[cleanup] Exit code: ${code}"
   sync_results
+  if [[ "${code}" == "0" ]]; then
+    put_marker "job-complete"
+  fi
   echo "[cleanup] Requesting shutdown"
   sudo shutdown -h now || true
   exit "${code}"
@@ -43,9 +70,19 @@ cleanup_and_exit() {
 
 trap 'cleanup_and_exit $?' EXIT
 
+# ---------------------------------------------------------------------------
+# Install prerequisites FIRST: the AMI has no `aws` on PATH, and put_marker
+# needs it — calling put_marker before this silently no-ops (the cause of the
+# missing bootstrap-started marker in the 2026-06-05 smoke test).
+# ---------------------------------------------------------------------------
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get install -y python3-pip python3-venv ffmpeg awscli rclone git
+
+# TRIPWIRE 1: bootstrap-started — earliest reliable marker (requires awscli above).
+# A total AMI/boot failure writes no markers at all and is still caught by the
+# watcher deadline + the 'terminated without job-complete' check.
+put_marker "bootstrap-started"
 
 python3 -m venv "${WORKDIR}/venv"
 source "${WORKDIR}/venv/bin/activate"
@@ -68,9 +105,23 @@ pip install -r requirements.txt
 pip install scipy
 pip install -e .
 
+# ---------------------------------------------------------------------------
+# TRIPWIRE 2: bootstrap-pip-ok — pip install -e . succeeded.
+# If watch_job.py sees bootstrap-started but not this within ~20 min → DOA.
+# ---------------------------------------------------------------------------
+put_marker "bootstrap-pip-ok"
+
 export BRANESIM_RESULTS_DIR="${RESULTS_DIR}"
 
-echo "[run] Executing remote command"
-bash -lc "${REMOTE_COMMAND}"
+# Decode remote command to a file (avoids variable-capture quoting issues).
+decode_remote_command
 
-# Final sync happens in EXIT trap.
+# ---------------------------------------------------------------------------
+# TRIPWIRE 3: run-started — emitted immediately before the remote command.
+# ---------------------------------------------------------------------------
+put_marker "run-started"
+
+echo "[run] Executing remote command"
+bash -l "${WORKDIR}/remote_command.sh"
+
+# Final sync + job-complete marker happen in EXIT trap.
