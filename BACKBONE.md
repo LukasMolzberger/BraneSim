@@ -167,6 +167,19 @@ It is intended to prevent core assumptions from being lost during paper edits, c
     - Therefore "narrowband ordered sector" as previously stated in v3 is
       replaced by "per-wavepacket band isolation". This removes the
       dependence on an unmotivated global oscillation.
+    - **Origin of the complex structure (the `i`):** the `i` that promotes the
+      real lateral triplet to `Ψ ∈ ℂ³` is not fundamental and is not an
+      analytic-signal trick on a slice — it originates in the **timelike**
+      direction of the worldtube. The carrier phase is the rotation of the real
+      field as one advances along the time axis; the two real DOF spanning `ℂ`
+      are the field and its time-quadrature (`Ψ ≈ ξ + (i/ω₀)ξ̇`, with `i` the
+      time-evolution generator `i∂_tΨ = H_eff Ψ`). A single spacelike slice is a
+      real snapshot with no phase; the `U(1)` exists only across the time extent.
+      This is **why** the emergent gauge (EM/`U(1)`) connection's base space is
+      `(x,t)`, not the Brillouin zone (paper §5.6 / backbone #9), and why two
+      adjacent time slices are the minimum data that fix it (the block-solver
+      chiral BC, OPEN_PROBLEMS A2). Consistent with the model-(b) timelike spring
+      (#21): time is a genuine direction carrying real structure.
 
 19. **Sector mapping: lab anisotropy is the structural source of three force
     sectors**

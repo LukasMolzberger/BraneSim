@@ -223,8 +223,18 @@ verified in the caveat below). The physical gauge connection instead lives over
 $\Psi\in\C^3$ (\Cref{subsec:axis-triplet}), transported around loops in real space and time,
 with the $U(1)$ trace read as the electromagnetic sector. Bloch's theorem and the Brillouin
 zone enter only to supply the \emph{carrier band} and the narrowband isolation of a wavepacket
-about its carrier $\mathbf{k}_0$; they are not the base space of the gauge connection. The
-link-variable construction below is accordingly a \emph{template diagnostic} --- it returns
+about its carrier $\mathbf{k}_0$; they are not the base space of the gauge connection.
+
+The reason the base space is $(x,t)$ and not a spatial slice is that the complex structure
+itself originates in the \emph{timelike} direction: the $U(1)$ phase is the rotation of the
+real carrier field as one advances along the time axis, the two real degrees of freedom that
+span $\C$ being the field and its time-quadrature
+($\Psi\approx\xi+\tfrac{i}{\omega_0}\dot\xi$; here ``$i$'' is the quarter-period time shift,
+i.e.\ the time-evolution generator $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$). A single spacelike
+slice is a real snapshot and carries no phase; the $U(1)$ exists only across the time extent of
+the worldtube --- equivalently, two adjacent time slices are the minimum data that fix it.
+
+The link-variable construction below is accordingly a \emph{template diagnostic} --- it returns
 nonzero curvature only once an intrinsically complex effective operator is supplied (the
 envelope's $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$), and exactly zero on the bare real
 $D(\mathbf{k})$.
