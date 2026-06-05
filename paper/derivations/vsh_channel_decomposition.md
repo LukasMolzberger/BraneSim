@@ -231,54 +231,13 @@ core. The Derrick balance gives the *size*; topology gives *existence*. Both are
 
 ### 2.5 Predicted hedgehog radius
 
-> **⚠ Correction (2026-06-04).** The quartic prefactor is taken below as
-> $\sim\mu/(4\ell_0^4)$ with $\ell_0=\alpha a$, i.e. $\propto 1/\alpha^4$
-> (diverging as $\alpha\to0$). This α-dependence is **inverted**. The exact
-> lattice ground truth is that the *entire* anharmonic sector is the norm term
-> $-k_s\alpha a|\Delta R|$, so the geometric quartic coefficient is
-> $\propto k_s\alpha/a$ — it **vanishes** at $\alpha\to0$. See
-> `geometric_nonlinearity_alpha_scaling.md`. The $R_h/a$ scaling below inherits
-> the error and must be re-derived with $W_4\propto k_s\alpha/a$.
-
-Dimensional analysis at α=0.2 with units $a, \rho_m, c_L = 1$: the only physical
-length scale in $W_2 + W_4$ is set by the ratio of quartic to quadratic stiffness.
-The quadratic gives a length scale $\sqrt{(\lambda+2\mu)/E_4^{\rm density}}$, where
-$E_4^{\rm density}$ has units of energy/length$^{-1}$ (one less inverse length than
-$W_2$). The geometric quartic from `∂_i u ∂_j u` (paper backbone #17, principles §1.1a)
-has prefactor $\sim \mu/(4\ell_0^4)$, with $\ell_0 \sim a$. Therefore
-$$
-R_h \sim a \cdot \sqrt{\frac{\lambda+2\mu}{\mu/\ell_0^2}} \cdot \mathcal O(1)
-   = a \cdot \mathcal O(1) \cdot \sqrt{1 + \lambda/2\mu},
-$$
-**i.e. $R_h \sim a$ in natural units.** This is the *lattice-scale* regime (width
-$\sim a$), which is exactly the regime we want to **avoid** (backbone #17, principles
-§1.1a).
-
-**To push to the Skyrme regime $w \gg a$ requires either:**
-(a) suppressing the quartic prefactor (it is *not* free — it is set by geometry);
-(b) increasing the *quadratic* stiffness selectively in the relevant channel (which the
-isotropy approximation forbids); or
-(c) coupling to $X^4$, where the gradient scale $|\partial u|$ is independent and can
-be made small for a fat soliton.
-
-**Mechanism (c) is the Skyrme-twist route in backbone #19.** Restoring $u(r) = u_0 \cos F(r)$:
-the quartic becomes
-$$
-W_4 \supset (\mu/4 \ell_0^4)(\partial_i u\, \partial_j u)^2 = (\mu/4\ell_0^4)\,(u_0 F'(r))^4 \cdot O(1).
-$$
-The parameter $u_0$ is the amplitude of the $X^4$ profile and is a free dimensionful
-quantity in the ansatz (set by total energy normalization, paper §6.4). The natural
-soliton width therefore scales as
-$$
-\boxed{R_h / a \;\sim\; (\ell_0/u_0)^{2/3} \cdot \mathcal O(1).}
-$$
-For $u_0 \ll \ell_0$ (small amplitude) we get $R_h \gg a$ as desired.
-
-**Concrete prediction at α=0.2:** assuming the natural mass normalization fixes
-$u_0$ to be a fraction of $\ell_0 = \alpha a = 0.2 a$ (because $\ell_0$ is the only
-microscopic length in the problem at this α), we expect
-$R_h/a$ to range over an order of magnitude as $u_0$ is scanned. A useful operational
-target is $u_0/\ell_0 \approx 0.03$ to get $R_h/a \approx 10$.
+> **Superseded (2026-06-04) — replaced by §2.5a below.** The original §2.5
+> derivation used a $\mu/(4\ell_0^4)$ quartic with $\ell_0=\alpha a$, giving
+> $R_h/a \sim (\ell_0/u_0)^{2/3}$. That α-scaling is **inverted**: the lattice-exact
+> geometric quartic is $\propto k_s\alpha/a$ (vanishing at $\alpha\to0$), not
+> $\propto \mu/\ell_0^4$. Use §2.5a; see `geometric_nonlinearity_alpha_scaling.md`.
+> (The full original derivation is preserved verbatim in git history at commit
+> `6352daf`.)
 
 ### 2.5a Corrected hedgehog radius (2026-06-04) — supersedes 2.5
 
