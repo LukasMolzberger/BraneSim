@@ -110,7 +110,7 @@ regime.
 **Candidate approach.** Connect to the dispersion layer (`c_T²`, `c_L²`,
 anisotropy vs `k·a`); quantify the tuning window. Owner: dispersion-analyst.
 
-### A4. Temporal-link form — model (a) vs model (b) — `parked`
+### A4. Temporal-link form — model (a) vs model (b) — `resolved (model b, 2026-06-05)`
 **Statement.** What is the precise form of the timelike link?
 - **Model (a) — kinetic (baseline, = current code):** zero-rest-length
   quadratic `½ (m/Δt²) |ΔR|²`. EL = plain Newton = Verlet stencil.
@@ -135,10 +135,34 @@ dial between "matches Newton + existing code" and "a gravitating time link".
 *(Note: the distinction is the norm-nonlinearity, not transverse stiffness —
 `½ k_t|ΔR|²` already has isotropic Hessian.)*
 
-**Status / resolution criterion.** Parked. Settled by the gravity/contraction
-channel (layer 6): if backbone #22's time-dilation face requires the time-link
-geometric quartic, model (b) with `r_t ≠ 0` is forced; otherwise keep (a).
-Owner: contraction-channel.
+**Resolution (2026-06-05, owner decision): model (b) chosen.** The timelike link is a
+genuine central-force spring `½k_t(|ΔR|−r_t)²` with its own rest length `r_t ≠ 0`
+(temporal prestress `α_t`). Rationale: (i) keeps the 4D lattice genuinely symmetric
+rather than special-casing time; (ii) `r_t` is a real degree of freedom and should be
+exposed, not hidden; (iii) the foundational block solver (root-find `∇S=0`) is required
+regardless; (iv) backbone #22's unified contraction (gravitational time dilation) *needs*
+the time-link geometric quartic, which only model (b) provides — so #22 was already
+implicitly assuming it. **Consequences:** forward Verlet / IVP (model a) is now the
+`r_t=0` *special case*, not the general dynamics — the block solver is mandatory; A2
+well-posedness must be re-checked with the time-link quartic restored; and a new
+sub-question opens (A4a). Code note: `ActionParams` keeps `temporal_model="a"` (r_t=0) as
+the validated special case until the block solver implements model (b). Moved into
+backbone #21/#22. Owner: contraction-channel (gravity derivation).
+
+### A4a. Single 4D prestress `α_t = α` — `adopted (2026-06-05); verification open`
+**Decision.** A **single** prestress `α` governs all four lattice directions: every
+link's rest length is `α ×` its held spacing (spatial `ℓ₀ = αa`, temporal `r_t = α·βΔt`).
+This is the symmetric reading of model (b) (A4) and ties soliton binding (spatial
+geometric quartic `∝ α`) and gravitational time dilation (temporal quartic `∝ α`) to
+**one** dial — the unified-contraction picture (#22) taken literally, and a strong
+falsifiable structural prediction: gravity strength and soliton confinement are **not**
+independently tunable.
+**Open (verification, not the decision).** `α_t = α` is adopted as the working model but
+is not yet proven consistent. Two checks must pass: (i) a single `α` keeps the emergent
+long-wavelength light-cone **isotropic** (this is the `c²`-tuning of A3, now *constrained*
+by `α` rather than free); (ii) it reproduces the correct **Newtonian limit** in the
+contraction channel. If either fails, `α_t` must be freed from `α` again. Owner:
+contraction-channel + physics-derivation.
 
 ---
 

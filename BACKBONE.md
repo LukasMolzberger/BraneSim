@@ -268,12 +268,19 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       differ only in boundary conditions; (b) the long-wavelength cone speeds
       are `c_L² = k_s a²/m` and `c_T² = (1−α) k_s a²/m`, fixing the lattice
       light-cone via the temporal-to-spacelike stiffness ratio.
-    - **Design fork (open):** whether the temporal link is the zero-rest-length
-      kinetic increment (model a, baseline — recovers plain Newton and matches
-      the current code) or a genuine central-force spring with its own rest
-      length/prestress (model b — fully symmetric 4D-cubic, can represent #22's
-      unified contraction / gravitational time dilation, but its EL is no longer
-      plain Newton) is undecided. See the derivation §6 and `OPEN_PROBLEMS.md`.
+    - **Temporal-link form (decided 2026-06-05): model (b).** The timelike link is
+      a genuine central-force spring `½ k_t (|ΔR| − r_t)²` with its own rest length
+      `r_t ≠ 0` (temporal prestress `α_t`) — fully symmetric 4D-cubic. This exposes a
+      real model parameter rather than hiding it, and supplies the time-link geometric
+      quartic that #22's unified contraction (gravitational time dilation) requires.
+      Model (a) (zero-rest-length kinetic, plain Newton, current code) is the `r_t = 0`
+      *special case*; the exact dynamics is non-Newtonian, so the block solver is the
+      foundational integrator and forward Verlet is its `r_t = 0` IVP limit. A
+      **single** prestress `α` governs all four directions (each link's rest length
+      = `α ×` its held spacing; adopted 2026-06-05), tying soliton binding and
+      gravitational time dilation to one dial; consistency (light-cone isotropy +
+      Newtonian limit) is the open verification, `OPEN_PROBLEMS.md` A4a.
+      See the derivation §6 and `OPEN_PROBLEMS.md` A4.
       The Lorentzian action is a saddle (unbounded below), so a foundational
       block solver must root-find `∇S = 0`, not minimize `S` (OPEN_PROBLEMS §A).
 
@@ -301,7 +308,12 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       contraction (timelike displacement stretching spacelike links) and
       gravitational time dilation (spacelike displacement / kinetic energy
       stretching the timelike link) are two faces of the same rule. The
-      two faces of gravity unify under one mechanism.
+      two faces of gravity unify under one mechanism. This rests on the
+      **model-(b)** timelike spring (#21 / A4, decided 2026-06-05): only a time
+      link with its own rest length `r_t ≠ 0` carries the geometric quartic that
+      lets a spacelike displacement stretch the timelike link. With the single 4D
+      prestress `α_t = α` (A4a, adopted), the strength of both faces is set by the
+      *same* `α` that governs soliton binding — gravity and confinement share one dial.
 
 23. **Bell's theorem and the retrocausal worldtube interpretation**
     - BraneSim is manifestly local and deterministic — a classical lattice
