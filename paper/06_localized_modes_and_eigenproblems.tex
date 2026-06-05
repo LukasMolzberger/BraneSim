@@ -142,6 +142,47 @@ scalar extension.
 Constitutive refinements may strengthen or weaken localization, but the underlying nonlinear feedback comes from the
 same geometry that couples transverse amplitude to lateral strain.
 
+\subsection{Kinematic confinement of color}
+\label{sec:color-confinement}
+
+Before asking whether the substrate supports a bound colored mode, it is worth recording a
+structural fact about the \emph{unbound} spectrum: the linear theory carries no colored asymptotic
+free state. Recall from \Cref{sec:geophase} that the $U(1)$ trace of the lateral triplet is read as
+electromagnetism and the $SU(3)$ traceless content as color, both carried by the per-wavepacket
+complex envelope $\Psi \in \mathbb{C}^3$.
+
+On the 6-neighbor stencil the dynamical matrix $D(k)$ is diagonal in the axis-aligned basis, with
+three lateral branch frequencies $h_a(k)$ whose spread is measured by the directional anisotropy
+$g(\hat k) = \sqrt{\sum_a (h_a - \bar h)^2}/\bar h$. Two requirements on a freely propagating triplet
+wavepacket are then mutually exclusive:
+\begin{itemize}
+  \item \textbf{Coherence.} A wavepacket whose three components stay phase-aligned as it propagates
+    requires the three branches to be degenerate, $g(\hat k) = 0$. On the cubic lattice this holds
+    \emph{only} along the body-diagonal $k \parallel [111]$.
+  \item \textbf{Color-activity.} Operationally meaningful $SU(3)$-traceless content --- a finite
+    fibre-internal holonomy distinguishing the three axis components --- requires the branches to be
+    \emph{non-degenerate}, $g(\hat k) \neq 0$, i.e.\ propagation \emph{off} $[111]$. Exactly on
+    $[111]$ the degenerate triplet has no preferred internal basis and the color holonomy is
+    undefined.
+\end{itemize}
+No linear propagation direction satisfies both at once: off $[111]$ the unequal branch speeds
+dephase the triplet over long range, while on $[111]$ there is no resolvable color. Consequently
+\emph{color charge cannot be carried to infinity by a free linear excitation.} It has support only
+in a nonlinear, phase-locked bound state, where the three components are held together by the
+geometric coupling of \Cref{sec:continuum-model} rather than by spectral degeneracy. We refer to
+this as the \emph{kinematic confinement of color}.
+
+This is a statement about asymptotic states --- there is no colored free particle --- and not a
+dynamical derivation of a linear inter-quark potential, string tension, or area law, which remain
+outside the present scope (\Cref{sec:scope}). It is consistent with the vanishing of the
+Brillouin-zone Berry/Wilczek--Zee curvature noted in \Cref{sec:geophase}: color is not a curvature
+on the Brillouin zone but a fibre-internal object on $(x,t)$ that only closes around a localized
+worldtube. The picture carries a falsifiable, normalization-independent handle: the off-$[111]$
+fibre-holonomy ratio scales with prestress as
+$R(\alpha_2)/R(\alpha_1) = \big[(3-2\alpha_2)/\alpha_2\big]\big/\big[(3-2\alpha_1)/\alpha_1\big]$,
+equal to $0.3077$ for $(\alpha_1,\alpha_2) = (0.2,0.5)$; a deviation above $\sim 10\%$ would falsify
+the spectral-susceptibility factorization underlying it.
+
 \subsection{Why the baryon sector is the next numerical target}
 
 The cubic substrate naturally singles out three axis-associated channels.

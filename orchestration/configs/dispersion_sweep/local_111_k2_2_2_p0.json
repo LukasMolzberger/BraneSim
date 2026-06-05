@@ -1,0 +1,21 @@
+{
+  "_comment": "Local validation: [111] k=[2,2,2] pol_axis=0 (larger k, dispersion vs ka). 24^3 x 256, bvp_chiral.",
+  "lattice": {
+    "grid_shape": [24, 24, 24],
+    "spacing": 1.0,
+    "periodic_axes": [true, true, true],
+    "axial_weight": 1.0
+  },
+  "action": {
+    "k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1,
+    "n_slices": 256, "m_ambient": 4,
+    "temporal_model": "a", "r_t": 0.0
+  },
+  "seed": {
+    "kind": "plane_wave", "amplitude": 1e-3,
+    "k_index": [2, 2, 2],
+    "polarization": [1, 0, 0, 0],
+    "rng_seed": 0
+  },
+  "solver": {"mode": "bvp_chiral", "chirality": "forward"}
+}

@@ -361,3 +361,36 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       diagram as theory): Tsirelson's bound (`2√2`), the no-signalling
       theorem, and the baryon-to-photon ratio. The live list is tracked
       centrally in `OPEN_PROBLEMS.md` §B, not duplicated in the manuscript.
+
+24. **Color is kinematically confined: no coherent colored free mode**
+    - The linear spectrum carries **no colored asymptotic free state**. Two
+      requirements are mutually exclusive at linear order:
+      - *Coherence* (a lateral-triplet wavepacket whose three components stay
+        phase-aligned as it propagates) requires the three lateral branches of
+        `D(k)` to be degenerate. On the 6-neighbor stencil this holds **only**
+        on the body-diagonal `k ∥ [111]`, where the directional anisotropy
+        `g(k̂)=0` (per #15, #16).
+      - *Color-activity* (operationally meaningful `SU(3)`-traceless content; a
+        finite fibre-internal holonomy) requires the three branches to be
+        **non-degenerate**, i.e. `g(k̂) ≠ 0`, which holds only **off** `[111]`.
+        Exactly on `[111]` the color holonomy is undefined (degenerate triplet,
+        no preferred basis; the D2 ratio `R → ∞`).
+    - Hence **no linear propagation direction is simultaneously coherent and
+      color-active**: off `[111]` the unequal branch speeds dephase the triplet,
+      on `[111]` there is no resolvable color. Color charge therefore cannot be
+      carried to infinity by a free linear excitation. It has support only in a
+      **nonlinear, phase-locked bound state** (a soliton), where the three
+      components are held together by the geometric coupling rather than by
+      spectral degeneracy. This is **kinematic confinement of color**.
+    - **Scope caveat (load-bearing).** This is a statement about *asymptotic
+      states* (there is no colored free particle), **not** a dynamical
+      derivation of a linear potential / string tension / area law — those
+      remain open (paper §2 non-claims). It is consistent with the identically
+      vanishing k-space Berry/WZ curvature ∀α (#16): color is not a curvature on
+      the Brillouin zone but a fibre-internal `(x,t)` object that only closes
+      around a localized worldtube.
+    - **Quantitative, falsifiable handle.** The off-`[111]` fibre-holonomy ratio
+      scales as `R(α₂)/R(α₁) = [(3−2α₂)/α₂] / [(3−2α₁)/α₁]`; for `(α₁,α₂)=(0.2,0.5)`
+      this is `0.3077` (`OPEN_PROBLEMS.md` D2;
+      `paper/derivations/alpha_holonomy_estimator.md`). A `>10%` deviation
+      falsifies the spectral-susceptibility factorization behind this picture.

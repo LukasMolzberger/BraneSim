@@ -1,0 +1,47 @@
+{
+  "lattice": {
+    "grid_shape": [
+      96,
+      96,
+      96
+    ],
+    "spacing": 1.0,
+    "periodic_axes": [
+      true,
+      true,
+      true
+    ],
+    "axial_weight": 1.0
+  },
+  "action": {
+    "k_s": 1.0,
+    "alpha": 0.2,
+    "rho": 1.0,
+    "dt": 0.1,
+    "n_slices": 512,
+    "m_ambient": 4,
+    "temporal_model": "a",
+    "r_t": 0.0
+  },
+  "solver": {
+    "mode": "bvp_chiral",
+    "chirality": "forward"
+  },
+  "_comment": "AWS sweep: [111] k=[4, 4, 4] pol_axis=1. 96^3 x 512, bvp_chiral. Memory per worldvolume: ~14.5 GB.",
+  "seed": {
+    "kind": "plane_wave",
+    "amplitude": 0.001,
+    "k_index": [
+      4,
+      4,
+      4
+    ],
+    "polarization": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "rng_seed": 0
+  }
+}
