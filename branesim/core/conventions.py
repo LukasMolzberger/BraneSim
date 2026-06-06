@@ -105,7 +105,21 @@ class ActionParams:
         ``"a"`` (zero-rest-length kinetic) or ``"b"`` (central-force temporal
         spring).  Default ``"a"`` — the validated IVP model.
     r_t : float
-        Temporal rest length for model ``"b"``; must be 0.0 for model ``"a"``.
+        Temporal rest length.  Must be 0.0 for model ``"a"``.
+        For model ``"b"`` must equal ``alpha * beta * dt`` (enforced in
+        ``__post_init__``).  Use 0.0 as a sentinel to trigger auto-computation
+        from ``alpha``, ``beta``, and ``dt`` for model ``"b"`` — but note
+        that r_t==0 is explicitly rejected for model ``"b"`` after that
+        computation (a zero rest length collapses model b back to model a
+        and is caught as a user error).
+    k_t : float or None
+        Temporal spring constant for model ``"b"``.  ``None`` (default)
+        means use ``m / dt^2`` where ``m = rho * a^dim``; the caller
+        must supply ``m`` when resolving ``k_t`` at runtime (see
+        ``resolved_k_t``).
+    beta : float
+        Rest-length scale factor; ``r_t = alpha * beta * dt`` for model
+        ``"b"``.  Default 1.0 (canonical physical value).
     """
 
     k_s: float = 1.0
@@ -116,6 +130,8 @@ class ActionParams:
     m_ambient: int | None = None
     temporal_model: str = "a"
     r_t: float = 0.0
+    k_t: float | None = None
+    beta: float = 1.0
 
     def __post_init__(self) -> None:
         if not (0.0 <= self.alpha <= 1.0):
@@ -126,8 +142,32 @@ class ActionParams:
             raise ValueError("n_slices must be >= 1")
         if self.temporal_model not in ("a", "b"):
             raise ValueError("temporal_model must be 'a' or 'b'")
-        if self.temporal_model == "a" and self.r_t != 0.0:
-            raise ValueError("r_t must be 0.0 for temporal_model='a'")
+        if self.temporal_model == "a":
+            if self.r_t != 0.0:
+                raise ValueError("r_t must be 0.0 for temporal_model='a'")
+        else:
+            # model "b": enforce r_t == alpha * beta * dt (α_t = α commitment)
+            r_t_required = self.alpha * self.beta * self.dt
+            if self.r_t == 0.0:
+                # Allow the caller to omit r_t; set it automatically.
+                object.__setattr__(self, "r_t", r_t_required)
+            else:
+                # Caller supplied r_t explicitly; validate it matches.
+                if not math.isclose(self.r_t, r_t_required, rel_tol=1e-12, abs_tol=1e-15):
+                    raise ValueError(
+                        f"For temporal_model='b', r_t must equal alpha*beta*dt = "
+                        f"{r_t_required:.6g}; got r_t={self.r_t:.6g}. "
+                        "Pass r_t=0.0 (or omit it) to auto-compute."
+                    )
+            # After potential auto-set, validate r_t is strictly positive.
+            if self.r_t == 0.0:
+                raise ValueError(
+                    "temporal_model='b' with r_t==0 is not allowed: "
+                    "a zero rest length collapses model b to model a. "
+                    "Use temporal_model='a' for the zero-rest-length path."
+                )
+        if self.k_t is not None and self.k_t <= 0.0:
+            raise ValueError(f"k_t must be positive when supplied; got {self.k_t}")
 
     def mass(self, lattice: LatticeParams) -> float:
         return self.rho * lattice.spacing ** lattice.dim
@@ -135,6 +175,22 @@ class ActionParams:
     def ambient_dim(self, spatial_dim: int) -> int:
         """Ambient component count m (default d+1)."""
         return self.m_ambient if self.m_ambient is not None else spatial_dim + 1
+
+    def resolved_k_t(self, mass: float) -> float:
+        """Return the effective temporal spring constant.
+
+        If ``k_t`` was supplied explicitly, return it.
+        Otherwise return the canonical default ``m / dt^2`` which makes the
+        r_t→0 limit of model (b) reduce term-for-term to the model (a) stencil.
+
+        Parameters
+        ----------
+        mass : float
+            Node mass ``m = rho * a^dim``.
+        """
+        if self.k_t is not None:
+            return self.k_t
+        return mass / (self.dt * self.dt)
 
 
 # ---------------------------------------------------------------------------

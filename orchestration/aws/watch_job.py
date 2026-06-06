@@ -39,10 +39,6 @@ JOB_COMPLETE_TIMEOUT = 4 * 60 * 60   # 4 h overall; adjust for long runs
 POLL_INTERVAL = 30                    # seconds between S3 head-object checks
 
 
-def _run(args: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(args, capture_output=True, text=True, check=True)
-
-
 def _marker_exists(s3_bucket: str, s3_prefix: str, job_id: str, marker: str, region: str) -> bool:
     key = f"{s3_prefix}/{job_id}/markers/{marker}"
     result = subprocess.run(
@@ -54,13 +50,30 @@ def _marker_exists(s3_bucket: str, s3_prefix: str, job_id: str, marker: str, reg
 
 
 def _instance_state(instance_id: str, region: str) -> str:
-    result = _run([
-        "aws", "ec2", "describe-instances",
-        "--region", region,
-        "--instance-ids", instance_id,
-        "--query", "Reservations[0].Instances[0].State.Name",
-        "--output", "text",
-    ])
+    """Return the EC2 instance state, or ``"unknown"`` on a transient AWS error.
+
+    A single failed ``describe-instances`` poll (throttling, a network blip, an
+    expired token) must NOT crash the watch loop — previously ``check=True``
+    turned one transient exit-254 into a fatal CalledProcessError that killed
+    monitoring while the job kept running. Returning ``"unknown"`` makes the
+    caller fall through to the next poll; a real termination is still caught on
+    a later poll and a genuine DOA is still caught by the marker deadlines.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "aws", "ec2", "describe-instances",
+                "--region", region,
+                "--instance-ids", instance_id,
+                "--query", "Reservations[0].Instances[0].State.Name",
+                "--output", "text",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        return "unknown"
     return result.stdout.strip()
 
 

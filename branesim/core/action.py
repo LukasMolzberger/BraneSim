@@ -206,7 +206,7 @@ def spacelike_force(
 
 
 # ---------------------------------------------------------------------------
-# Kinetic energy T^{l+1/2}
+# Kinetic energy T^{l+1/2}  (model a: zero rest-length temporal links)
 # ---------------------------------------------------------------------------
 
 
@@ -240,6 +240,49 @@ def kinetic_energy(
 
 
 # ---------------------------------------------------------------------------
+# Temporal link energy (model b: central-force temporal spring)
+# ---------------------------------------------------------------------------
+
+
+def temporal_link_energy(
+    R_l: np.ndarray,
+    R_l1: np.ndarray,
+    k_t: float,
+    r_t: float,
+) -> float:
+    """Temporal link energy T^{l+1/2} between slices l and l+1 (model b).
+
+    T^{l+1/2} = (k_t / 2) * sum_p (|R_p^{l+1} - R_p^l| - r_t)^2
+
+    Uses the full m_ambient-component Euclidean norm (all components including
+    the timelike one).  No minimum-image convention on the temporal axis.
+    No epsilon guard, no clamp — matches the spacelike_force policy
+    (principles §3.2, non-negotiable #4).
+
+    At r_t=0 this reduces to (k_t/2)*sum_p |ΔR|^2, which with k_t=m/dt^2
+    equals the model-(a) kinetic_energy exactly.
+
+    Parameters
+    ----------
+    R_l : ndarray, shape (n_nodes, m_ambient)  — slice l
+    R_l1 : ndarray, shape (n_nodes, m_ambient) — slice l+1
+    k_t : float
+        Temporal spring constant.
+    r_t : float
+        Temporal rest length.
+
+    Returns
+    -------
+    float
+        Scalar temporal link energy.
+    """
+    delta = R_l1 - R_l  # (n_nodes, m_ambient)
+    dist = np.linalg.norm(delta, axis=1)  # (n_nodes,) — full ambient norm
+    strain = dist - r_t
+    return float(0.5 * k_t * np.sum(strain ** 2))
+
+
+# ---------------------------------------------------------------------------
 # Total action S[R] over a world-volume
 # ---------------------------------------------------------------------------
 
@@ -252,7 +295,13 @@ def action(
 ) -> float:
     """Discrete Lorentzian brane action S[R] over the full world-volume.
 
-    S[R] = sum_l dt * (T^{l+1/2} - V^l)
+    Model a (default, temporal_model='a'):
+        S[R] = sum_l dt * (T^{l+1/2} - V^l)
+        T^{l+1/2} = (m/2) * sum_p |(R^{l+1} - R^l) / dt|^2   (r_t = 0)
+
+    Model b (temporal_model='b'):
+        S[R] = sum_l dt * (T_b^{l+1/2} - V^l)
+        T_b^{l+1/2} = (k_t/2) * sum_p (|R^{l+1} - R^l| - r_t)^2
 
     IMPORTANT: S is Lorentzian and therefore a SADDLE — unbounded below.
     The solver must root-find grad S = 0, not minimize S.
@@ -274,9 +323,16 @@ def action(
     N_plus_1 = world.shape[0]
     dt = params.dt
 
+    if params.temporal_model == "b":
+        k_t = params.resolved_k_t(mass)
+        r_t = params.r_t
+
     S = 0.0
     for l in range(N_plus_1 - 1):
-        T = kinetic_energy(world[l], world[l + 1], mass, dt)
+        if params.temporal_model == "b":
+            T = temporal_link_energy(world[l], world[l + 1], k_t, r_t)
+        else:
+            T = kinetic_energy(world[l], world[l + 1], mass, dt)
         V = spacelike_potential(world[l], lattice, params)
         S += dt * (T - V)
     return S
