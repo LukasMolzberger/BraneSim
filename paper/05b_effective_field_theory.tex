@@ -74,6 +74,41 @@ invariant content is the holonomy/curvature of the transported subspace (Wilczek
 In that sense, the triplet sector is the natural effective setting in which a baryon-like confined mode should first be
 searched numerically on the cubic substrate.
 
+\paragraph{EM as the symmetric (trace) direction.}
+The $U(1)$/trace component of $\Psi=(\psi_x,\psi_y,\psi_z)^\top$ is the projection onto the
+symmetric triplet direction $(1,1,1)/\sqrt{3}$:
+\begin{equation}
+  \Psi_{\mathrm{EM}} \;=\; \frac{1}{\sqrt{3}}(\psi_x+\psi_y+\psi_z)\,\frac{(1,1,1)^\top}{\sqrt{3}}.
+  \label{eq:em-trace}
+\end{equation}
+A pure-EM (charge-carrying) excitation therefore displaces all three lateral axis components
+\emph{in phase} with equal weight; the traceless complement ($SU(3)$) encodes differential
+phase and amplitude relationships \emph{between} the three components.
+As a consequence, a single-component displacement (e.g.\ $\psi_x\neq0$, $\psi_y=\psi_z=0$)
+projects as $\tfrac{1}{3}$ into the $U(1)$ trace and $\tfrac{2}{3}$ into the $SU(3)$-traceless
+sector; it is therefore not a pure-EM excitation.
+
+\paragraph{Topological structure of the two sectors.}
+The $U(1)$ and $SU(3)$ factors carry sharply different topology, which is a mathematical fact about
+the target spaces of the respective $\Psi$-sectors:
+\begin{itemize}
+  \item $\pi_1(U(1)) = \mathbb{Z}$: the $U(1)$/EM sector admits \emph{line vortex defects} (codimension~2
+    in the 3D slice; a 2D worldsheet in the 4D ambient).
+    A $U(1)$ vortex is a configuration in which the carrier phase winds by $2\pi$ around the
+    vortex core.
+  \item $\pi_1(SU(3)) = 0$ (simply connected): the $SU(3)$/color sector admits \emph{no} vortices.
+  \item $\pi_3(SU(3)) = \mathbb{Z}$: the $SU(3)$ sector admits \emph{textures} (Skyrmion/instanton-type,
+    codimension~3; a localized lump / worldline in 4D).
+\end{itemize}
+The two emergent charge sectors therefore support topologically \emph{different} classes of
+localized objects: codim-2 vortex worldsheets in the EM/$U(1)$ sector versus codim-3 texture
+worldlines in the color/$SU(3)$ sector.
+This is a structural observation about the target space of the $U(3)$ field; which of these
+topological objects the substrate dynamics actually stabilizes, and the identification of specific
+objects with physical particles, are targets of the numerical program rather than conclusions of
+the present paper.
+(Open investigations under \texttt{OPEN\_PROBLEMS.md} D4 and \texttt{EXPERIMENT.md}.)
+
 Geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
 What is specific here is the identification of the physically relevant gauge structure with the
 connection induced by adiabatic transport of a band-isolated wavepacket's eigenbundle on the substrate.

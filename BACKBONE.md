@@ -406,16 +406,35 @@ It is intended to prevent core assumptions from being lost during paper edits, c
         worldsheet** in 4D. A `2π` tumble of its axis gives the `ℤ₂`
         Finkelstein–Rubinstein holonomy (**spin-½**); the temporal carrier holonomy
         is the geometric phase / **EM charge**. The two holonomies are distinct.
+        *(This `π₁` protection holds for the `U(1)` sector in isolation; with `SU(3)`
+        unfrozen — see below — the full vacuum is simply connected and the realized
+        object is instead a semilocal vortex, stabilized dynamically, not topologically.)*
       - `π₁(SU(3))=0` (no vortices), `π₃(SU(3))=ℤ` → **textures**. The color / baryon
         object is an `SU(3)` Skyrmion/instanton texture — codim-3, a localized lump /
         worldline. Topologically and geometrically a *different* object from the EM
         vortex (this is why the baryon search behaved nothing like the vortex).
-    - **Protection ≠ participation.** It is *one* `U(3)` field, so both sectors
-      participate in every particle: the `SU(3)` sector is `π₁`-trivial yet
-      dynamically coexcited around a `U(1)` vortex and can be load-bearing for its
-      stabilization — a **color-singlet electron may still be `SU(3)`-stabilized**
-      (a baryon is colorless yet `SU(3)`-confined *inside*). The sectors cannot be
-      cleanly separated; `SU(3)` is never frozen.
+    - **EM = the trace (symmetric) direction.** The `U(1)`/EM charge lives in the
+      symmetric `(1,1,1)` lateral direction — a pure-EM excitation displaces the
+      lateral triplet *symmetrically* (all three components sharing the winding phase);
+      the traceless complement is `SU(3)`/color. A *single*-lateral-component vortex is
+      therefore **not** pure EM: it reads `⅓` trace + `⅔` traceless by the projection
+      (verified on a seed, 2026-06-06). A genuine electron-vortex must wind the trace
+      direction.
+    - **Stability is dynamical (semilocal), not topological — and `SU(3)` participates**
+      (2026-06-06 lit research). It is *one* `U(3)` field, so both sectors are present
+      in every particle. Once `SU(3)` is unfrozen the full vacuum manifold is **simply
+      connected** (trivial `π₁`), so the `U(1)` vortex is **not** topologically
+      protected — it is a **semilocal / non-Abelian vortex** (Vachaspati–Achucarro
+      1991), stable only as a **dynamical binding condition**:
+      `β = (m_scalar/m_vector)² < 1` (the type-I/II superconductor parameter) — the
+      field-theory form of the hardening-nonlinearity bound mode (#17,
+      `[[project_pythagorean_breather_go]]`). The **color-neutral electron** is then a
+      known object type: a non-Abelian/semilocal vortex carrying internal
+      `CP^{N-1}=SU(N)/[SU(N-1)×U(1)]` orientational moduli on its core (prior art:
+      semilocal strings; Auzzi–Bolognesi–Evslin–Konishi–Yung non-Abelian vortices; Eto
+      et al. 2021). So `SU(3)` is dynamically load-bearing and **never frozen**.
+      **Novelty:** no prior work unifies an EM-like `U(1)` vortex with an `SU(3)` `π₃`
+      baryon texture in *one* soliton spectrum.
     - **Deterministic extended particles.** The model is deterministic (no
       probabilities); a particle is a real extended `U(3)` wave-structure with an
       actual size/shape — the quantum "point-like electron" does not apply here.
@@ -424,4 +443,9 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       scales — the candidate origin of the QCD (confinement, tiny) vs EM/atomic
       (large) scale split. Falsifiable: the scale ratio of the `U(1)` vortex vs the
       `SU(3)` texture should track `f(α)`. The hierarchy lives in the `α`-controlled
-      nonlinear sector, not the curvature-free linear spectrum (#16).
+      nonlinear sector, not the curvature-free linear spectrum (#16). **Caveat
+      (open):** the canonical `U(1)/SU(3)` split is *dynamical* (running couplings,
+      β-function signs); a *static* prestress `α` most naturally yields a coupling
+      *ratio*, and whether it produces a true *scale* hierarchy (not merely a ratio) is
+      unsettled. The geometric-`α` split has no direct precedent (closest: algebraic
+      `3-3-3-1`-type constructions).

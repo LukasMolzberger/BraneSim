@@ -443,12 +443,19 @@ charge from the temporal carrier); the color/baryon is a `π₃(SU(3))=ℤ` **te
 (`π₁(SU(3))=0` — no vortex). They are one field, so **protection ≠ participation**:
 `SU(3)` is dynamically coexcited around a `U(1)` vortex and may be load-bearing even at
 net-zero color (a color-singlet electron `SU(3)`-stabilized).
-**Open questions.** (i) Does the substrate **bind** the protected `U(1)` vortex
-worldtube at all (clean periodic-clamped `r_t>0` eigenstate — supersedes the retracted
-C2-class attempts)? (ii) Does the `SU(3)` sector coexcite and **stabilize** the
-color-neutral electron? (iii) **Scale hierarchy:** does the size ratio of the `U(1)`
+**Open questions.** (i) Does the substrate **bind** the `U(1)` vortex worldtube — which,
+with `SU(3)` unfrozen, is a **semilocal vortex** (simply-connected full vacuum, *not*
+topologically protected), so binding is a **dynamical** condition (the `β<1` /
+hardening-bound-mode regime; Vachaspati–Achucarro), on a clean periodic-clamped `r_t>0`
+eigenstate (supersedes the retracted C2-class attempts)? (ii) Does the `SU(3)` sector
+coexcite and **stabilize** the color-neutral electron (its non-Abelian/semilocal core
+moduli)? (iii) **Scale hierarchy:** does the size ratio of the `U(1)`
 vortex vs the `SU(3)` texture track `f(α)` — the candidate origin of the QCD-vs-EM
-scale split? (iv) the worldsheet's periodic-closure / `(ω,T)` quantization condition.
+scale split? *Caveat:* the canonical `U(1)/SU(3)` split is dynamical (running
+couplings); a static `α` most naturally gives a coupling *ratio*, so a true *scale*
+hierarchy is not guaranteed (no geometric-`α` precedent — see the prior-art note).
+(iv) the worldsheet's periodic-closure / `(ω,T)` quantization condition. (v) EM =
+the **trace `(1,1,1)`** lateral direction — a single-component seed is only `⅓` EM.
 **Status.** This is the active single experiment — full spec in `EXPERIMENT.md`
 (object, injection ansatz, one parameter set, measurement suite, scale ladder).
 Owner: physics-derivation (ansatz/closure) + the build.

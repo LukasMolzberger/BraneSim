@@ -40,9 +40,14 @@ Order parameter `Ψ(x,t) = A(ρ)·exp(i[ m·χ + ω·t ])`:
 - donut profile `A(ρ) = A₀ (ρ/w) e^{−ρ²/2w²}` (0 on axis, peak `~w`).
 - axis `n̂(t)` tumbles over the loop (the twisted worldsheet → spin).
 
-Translate down to the **carrier 2-plane** ("i-from-time" plane) of ambient `ℝ⁴`:
-`u` carries `Re/Im Ψ` on the prestressed-vacuum drift; the full `U(3)` field free to
-relax. `R = R_vacuum + u`.
+Translate down to the substrate (`R = R_vacuum + u`) with the carrier in the
+**trace direction** — `Ψ` populates the **symmetric `(1,1,1)` lateral direction**
+(all three lateral components equally, sharing the winding phase), so the object is a
+pure **EM/`U(1)`** vortex. (Construction check 2026-06-06: writing the phase into a
+*single* lateral component is **not** pure EM — it reads `⅓` trace + `⅔` traceless
+(color) by the `U(3)` projection. The bare seed populates only the trace; the full
+`U(3)` field is then **free to relax**, so `SU(3)` can coexcite — which the per-color
+diagnostic measures.)
 
 **Phase must close two ways:** spatially (`2π`-single-valued winding, integer `m`) and
 around the time loop (`ωT + tumble = 2π·integer`). So **`T` is the existence /
@@ -86,8 +91,26 @@ Local pre-test `48³×64` (validate injection + solve + measurement pipeline) �
 production `96³×128`.
 
 ## What this experiment answers
-1. Does the substrate **bind** a protected `U(1)` vortex worldtube at all — on a clean
-   periodic-clamped, `r_t>0`, eigenstate footing (the open C2-class question)?
-2. Does the **`SU(3)` sector coexcite and stabilize** the color-neutral electron
-   (BACKBONE #25; OPEN_PROBLEMS D4)?
+1. Does the substrate **bind** the `U(1)` vortex worldtube — which, with `SU(3)`
+   unfrozen, is a **semilocal vortex** (the full vacuum is simply connected, so it is
+   *not* topologically protected)? Binding is therefore a **dynamical** condition (the
+   `β<1` / hardening-bound-mode regime, BACKBONE #25), on a clean periodic-clamped,
+   `r_t>0`, eigenstate footing.
+2. Does the **`SU(3)` sector coexcite and stabilize** the color-neutral electron — the
+   non-Abelian/semilocal-vortex core moduli (BACKBONE #25; OPEN_PROBLEMS D4)?
 3. The **geometric (carrier) phase** and the **spin-½ `ℤ₂`** holonomy, measured directly.
+
+## Build status (2026-06-06)
+- **Injection layer** (`branesim/initialization/vortex_worldtube.py`): single vortex
+  **ring** (smoke-ring core, donut/torus energy), periodic-clamp-consistent
+  (contractible → net winding machine-zero). Renders as one torus.
+- **Renderers** (`branesim/visualization/volume_render.py`, recovered from `c0f1aaa7`):
+  multi-color volume movie (opacity = energy, hue = `U(1)` phase) + 2D slice movies.
+- **Measurement suite** (`branesim/diagnostics/run_measurements.py`): 7 devices
+  (energy/consistency, confinement, winding, Berry/phase, EM `A_μ`/`F_μν`,
+  per-color-channel `SU(3)`/QCD, spectra) → CSV + paper-ready PNG + `report.md`.
+- **Run folder**: `runs/<exp>_<date>_<time>/` with config, worldvolume, diagnostics, renders.
+- **Next**: (i) re-inject in the **trace (EM) direction**; (ii) add the **tumble**
+  (spin) + set the **`ωT` quantization** (BVP eigenvalue); (iii) the eigen-solve
+  (`solve_block`, periodic + rotating-frame-periodic BC); (iv) local `48³×64` pre-test;
+  (v) AWS production (new generic bucket + owner-run scripts).

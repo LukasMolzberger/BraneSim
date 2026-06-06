@@ -15,9 +15,21 @@ from branesim.initialization.seeds import (
     skyrme_twisted_hedgehog,
     axis_triplet,
 )
+from branesim.initialization.vortex_worldtube import (
+    VortexParams,
+    inject_vortex_worldtube,
+    measure_winding_closure,
+    CARRIER_RE,
+    CARRIER_IM,
+)
 
 __all__ = [
     "hedgehog",
     "skyrme_twisted_hedgehog",
     "axis_triplet",
+    "VortexParams",
+    "inject_vortex_worldtube",
+    "measure_winding_closure",
+    "CARRIER_RE",
+    "CARRIER_IM",
 ]

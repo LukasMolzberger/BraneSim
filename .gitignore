@@ -66,3 +66,6 @@ paper/build/
 *.out
 *.toc
 *.synctex.gz
+
+# Per-run experiment outputs (heavy mp4/npz); regenerated from code.
+runs/
