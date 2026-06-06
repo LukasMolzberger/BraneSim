@@ -1,5 +1,9 @@
 # Validation roadmap
 
+> **ARCHIVED / historical** — see `archive/README.md`. Predates the
+> 6-neighbor-only commitment and the U(3) reframing; uses the old `L0–L8`
+> layering and 26-neighbor shell-weight language. Snapshot, not the current plan.
+
 This file lists the discrete subtasks needed to rigorously test the BraneSim
 core claims. Each subtask has a clear input, output, falsifiable success
 criterion, and an owner agent (see `.claude/agents/`). Subtasks are organized

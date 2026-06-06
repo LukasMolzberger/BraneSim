@@ -108,6 +108,9 @@ class ChiralBC:
     The chiral "solve" is the forward (or backward) Verlet march from the two
     past slices.  No FFT, no characteristic projection, no future condition is
     needed.  Reality is automatic: real stencil + real data → real world-volume.
+    This is the **r_t=0 linear/Verlet limit** (free-wave Cauchy march); a
+    prestressed r_t>0 worldtube is implicit and time-periodic — ``apply_chiral``
+    raises for r_t>0 (use ``solve_block`` Dirichlet or ``solver/breather.py``).
 
     Attributes
     ----------
@@ -280,6 +283,21 @@ def apply_chiral(
     condition_estimate : float
         N-independent bounded condition estimate from bc.condition_estimate().
     """
+    # The chiral solve below is the explicit Störmer–Verlet Cauchy march, which
+    # equals the discrete Euler–Lagrange equation ONLY in the r_t=0 linear/Verlet
+    # limit (free-wave propagation).  For r_t>0 the temporal central-force spring
+    # makes the forward step implicit, so this march would report a residual-zero
+    # claim on a non-stationary world-volume.  A prestressed (r_t>0) worldtube is
+    # not a two-past-slice Cauchy march: it is a bound, time-periodic eigenstate —
+    # solve it with the block root-find (Dirichlet solve_block) or the periodic
+    # eigen-BVP in solver/breather.py.  (ARCHITECTURE.md §2 D2 / A4.)
+    if params.r_t > 0.0:
+        raise NotImplementedError(
+            f"apply_chiral() is the r_t=0 linear/Verlet Cauchy march, but "
+            f"params.r_t={params.r_t} > 0.  The prestressed worldtube is implicit "
+            "and time-periodic; use solve_block() or solver/breather.py instead."
+        )
+
     N = params.n_slices
     dt2_over_m = (params.dt * params.dt) / mass
     n_nodes, m_ambient = bc.R0.shape

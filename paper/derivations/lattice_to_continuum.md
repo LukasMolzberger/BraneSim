@@ -1,13 +1,13 @@
 # Lattice → continuum: long-wavelength elastic constants of the BraneSim cubic lattice
 
-Sprint 1, subtask 1 of `paper/validation_roadmap.md`.
+Sprint 1, subtask 1 of `archive/VALIDATION_ROADMAP.md`.
 Author: `physics-derivation` agent.
 
 > **Historical scope.** This derivation was carried out for the 26-neighbor
 > stencil (axial + face-diagonal + body-diagonal shells) with `1/|δ|²` shell
 > weights, which was the canonical lattice at the time. The project has since
 > committed to a **6-neighbor axial-only** stencil as the minimal model (see
-> `paper/backbone.md` #15). The algebra in §3.1 — including the key
+> `BACKBONE.md` #15). The algebra in §3.1 — including the key
 > decomposition `(s_δ²)⁽²⁾ = α(δ̂·Δu)² + (1−α)|Δu|²` — is unchanged on any
 > stencil, but the elastic constants, anisotropy index `η_cub`, and shell sums
 > in §3.3–§3.7 are specific to the 26-neighbor case. On 6-neighbor axial-only
@@ -256,7 +256,7 @@ anisotropy). At $\alpha=0.2$: $\eta_{\rm cub}\approx-0.0207$.
 
 ### 3.7 Comparison with the principles claim
 
-`principles.md` §1.1a and `paper/backbone.md` point 15 assert that the
+`PRINCIPLES.md` §1.1a and `BACKBONE.md` point 15 assert that the
 26-neighbor central-force lattice with $1/|\delta|^2$ shell weights satisfies
 the cubic isotropy condition automatically, with anisotropy first appearing at
 $O((ka)^4)$. **The derivation above does not support this claim.** What is
@@ -373,7 +373,7 @@ $c_{L,[111]}\approx2.002$ and $c_{T,[111]}\approx1.905$, i.e. a small but
 leading-order shift relative to the axis values ($+0.65\%$ longitudinal,
 $-0.35\%$ transverse in speed).
 
-**Measurement procedure** (executable in current `components/`):
+**Measurement procedure** (executable in `branesim/`):
 
 1. Initialize a periodic 32³ lattice flat ($u\equiv0$) and superpose a small
    plane-wave seed $u_a(x,0)=\epsilon\,\hat p_a\cos(k\cdot x)$ with
@@ -440,7 +440,7 @@ $-0.35\%$ transverse in speed).
    A2 for the reviewer.
 5. **Higher-order anisotropy ($O((ka)^4)$).** The derivation here is at
    $O((ka)^0)$ in the long-wavelength limit; the claimed $O((ka)^4)$
-   anisotropy of `principles.md` would presumably be the next non-trivial
+   anisotropy of `PRINCIPLES.md` would presumably be the next non-trivial
    correction beyond a hypothetical leading-order isotropic theory. Since
    the leading order is **already** anisotropic in the present derivation,
    computing the $O((ka)^2)$ dispersion correction is the next natural

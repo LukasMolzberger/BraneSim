@@ -1,4 +1,8 @@
-# baryon_simulation_roadmap.md
+# BARYON_SIMULATION_ROADMAP.md
+
+> **ARCHIVED / historical** — see `archive/README.md`. Superseded by the
+> post-retraction program (`OPEN_PROBLEMS.md` C2/D4, `EXPERIMENT.md`). Kept for
+> the VSH ansatz menu (Candidates 1–5), still cited by `BACKBONE.md` #20.
 
 ## Goal
 

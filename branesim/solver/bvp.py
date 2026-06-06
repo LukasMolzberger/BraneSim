@@ -31,7 +31,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Literal
 
 import numpy as np
 from scipy.optimize import newton_krylov, NoConvergence
@@ -242,6 +241,11 @@ def _ivp_warm_start(
     # gives a stationary-start IVP which is close to any smooth solution.
     R1 = R0.copy()
 
+    # The warm start is only an initial guess for the interior; use the explicit
+    # r_t=0 Verlet march (which is what ``march`` implements).  For an r_t>0
+    # problem the JFNK solve then enforces the true r_t-aware residual on top of
+    # this guess, so the guess need not itself satisfy the r_t>0 equations —
+    # and ``march`` would raise if handed r_t>0.
     ivp_problem = IVPProblem(
         lattice=problem.lattice,
         params=ActionParams(
@@ -251,7 +255,7 @@ def _ivp_warm_start(
             dt=params.dt,
             n_slices=N,
             m_ambient=params.m_ambient,
-            r_t=params.r_t,
+            r_t=0.0,
         ),
         mass=problem.mass,
         R0=R0,
@@ -313,7 +317,10 @@ def solve_block(
             "residual_initial": residual_final,   # march has no "before" phase
             "residual_final": residual_final,
             "iterations": 0,
-            "converged": True,
+            # Report convergence against tolerance, never an unconditional True —
+            # the r_t=0 chiral march satisfies the EL equation to ~machine eps, but
+            # a non-stationary world-volume must NOT be scored as converged.
+            "converged": residual_final <= opts.tol,
             "condition_estimate": condition_estimate,
             "walltime_s": elapsed,
             "objective": OBJECTIVE,

@@ -4,9 +4,12 @@ Implements the Störmer–Verlet stencil (ARCHITECTURE.md §1.4 IVP mode):
 
     R^{l+1} = 2 R^l - R^{l-1} + (dt^2 / m) * F(R^l)
 
-This is the exact discrete Euler–Lagrange equation of the brane action
-(discrete_4d_brane_action.md §3) — Verlet IS the discrete variational
-integrator of this action.
+In the r_t=0 linear/Verlet limit this is the exact discrete Euler–Lagrange
+equation of the brane action (discrete_4d_brane_action.md §3) — Verlet IS the
+discrete variational integrator of this action.  For r_t>0 (prestressed
+temporal spring) the forward step becomes implicit and this explicit march no
+longer solves the equations; ``march`` raises in that case (use ``solve_block``
+or ``solver/breather.py``).
 
 The IVP mode prescribes two past slices (l=0, l=1) as boundary data and
 marches forward.  It is used only for regression; the block BVP solver
@@ -129,6 +132,22 @@ def march(problem: IVPProblem) -> WorldVolume:
     lattice = problem.lattice
     params = problem.params
     mass = problem.mass
+
+    # The explicit Störmer–Verlet stencil below equals the discrete
+    # Euler–Lagrange equation of the brane action ONLY in the r_t=0 linear/Verlet
+    # limit.  For r_t>0 the temporal central-force spring makes the forward step
+    # implicit (R^{l+1} sits inside |ΔR^+|), so an explicit march does not solve
+    # the equations and would silently produce a non-stationary world-volume.
+    # The foundational r_t>0 integrator is the block root-find (solve_block) or
+    # the periodic eigen-BVP (solver/breather.py).  (ARCHITECTURE.md §1.4, A4;
+    # core/residual.py routes on r_t.)
+    if params.r_t > 0.0:
+        raise NotImplementedError(
+            f"march() is the r_t=0 linear/Verlet limit, but params.r_t={params.r_t} > 0. "
+            "For the prestressed temporal spring the forward step is implicit; "
+            "use solve_block() (block root-find) or solver/breather.py instead."
+        )
+
     dt = params.dt
     dt2_over_m = (dt * dt) / mass
     N = params.n_slices  # total time steps; world-volume has N+1 slices

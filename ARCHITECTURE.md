@@ -1,7 +1,8 @@
 # BraneSim — Experimental Code Architecture (block-solver-centric blueprint)
 
-**Status:** design blueprint for a clean reimplementation. The existing
-`components/` (forward-Verlet) code is treated as **legacy to be replaced**.
+**Status:** blueprint for the `branesim/` reimplementation (now implemented; some sections
+remain forward-looking). The former `components/` (forward-Verlet) code has been
+**replaced by the `branesim/` package** described here.
 This document is meant to be specific enough to reimplement from scratch.
 
 **Scope note.** The *foundational solver algorithm* (root-finding the Lorentzian
@@ -12,8 +13,8 @@ default. Those decisions must be resolved (a short derivation/spike) before the
 solver core is finalized — but the rest of the architecture does not depend on
 which choice is made.
 
-Canonical sources this blueprint is bound to: `paper/backbone.md` (#1, #15, #21,
-#22), `principles.md` (§1.1, §1.2, §1.5, §6), `paper/derivations/discrete_4d_brane_action.md`
+Canonical sources this blueprint is bound to: `BACKBONE.md` (#1, #15, #21,
+#22), `PRINCIPLES.md` (§1.1, §1.2, §1.5, §6), `paper/derivations/discrete_4d_brane_action.md`
 (the action and the EL=Verlet identity), `OPEN_PROBLEMS.md` §A.
 
 ---
@@ -301,7 +302,8 @@ branesim/
   io/
     contracts.py             #   §6 readers/writers, FORMAT_VERSION
   orchestration/
-    run_pipeline.py          #   init → solver → {diag, viz}; JSON config; subprocess + files
+    (run via branesim/run_experiment.py — init+solve→worldvolume; diagnostics via
+    #                              branesim/diagnostics/run_measurements.py)
     configs/*.json
   tests/                     # see §12 (this time: real coverage)
 ```
@@ -407,10 +409,11 @@ with:
 - **A1 (root-find, not minimize):** non-negotiable; mis-implementing it silently
   solves the wrong (Euclidean) problem. Guard with test §11.5.
 - **A2 (BVP well-posedness / chirality):** the core is **resolved in the linear
-  regime** (D2: chiral characteristic BC, κ=1). The chiral BC *implementation* in
-  `solver/boundary.py` is currently **buggy** (converges to a residual-zero but
-  wrong solution — see memory). Until fixed, only the IVP and (ill-conditioned)
-  Dirichlet-BVP paths are usable. Nonlinear global uniqueness stays open.
+  regime** (D2: two-past-slice chiral BC; tested to 8e-14 eigenmode recovery,
+  verdict-a 2026-05-31 — see `OPEN_PROBLEMS.md` A2 and `LESSONS_LEARNED.md`).
+  Remaining open: the chiral march in `solver/boundary.py` currently uses the
+  `r_t=0` Verlet stencil, so `r_t>0` chiral solves need an `r_t`-aware step; and
+  nonlinear global uniqueness stays open.
 - **A4 (temporal link):** one 4D-isotropic spring parameterized by `r_t` (0 = linear
   limit, the default; `α·β·dt` = prestressed) — implemented; `α_t=α` Newtonian-limit
   /isotropy settled via the gravity channel.
@@ -437,7 +440,7 @@ likely a **time-periodic (carrier+envelope, #18) worldtube**, not a static blob.
 So the search is **holistic**: compose the ingredients into one block-solve and
 look for the particle there — do not expect it rung-by-rung. **Engineering
 caveat:** each ingredient must still be **unit-tested correct in isolation**
-before composition (the broken chiral BC is the cautionary tale — a wrong
+before composition (an earlier broken chiral BC was the cautionary tale — a wrong
 ingredient yields a residual-zero *garbage* solution that looks converged and is
 undebuggable inside a combined run). "Verify the parts, then run them together."
 
@@ -459,5 +462,5 @@ instance table, and the S3 launch/fetch flow. Packaging via `pyproject.toml`
 
 *Recommended sequence: (i) D2 BVP well-posedness — RESOLVED (linear); (ii) `core/`
 + `solver/ivp.py` + regression — DONE; (iii) `solver/bvp.py` JFNK + Dirichlet —
-DONE, **chiral BC fix outstanding**; (iv) port diagnostics + colour/Berry + seeds;
+DONE (chiral BC resolved in the linear regime; `r_t>0` march still needs an `r_t`-aware step); (iv) port diagnostics + colour/Berry + seeds;
 (v) compose the holistic particle-search block-solve (§14); deploy on AWS (§15).*

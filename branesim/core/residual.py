@@ -79,7 +79,7 @@ def _temporal_force_linear(
     temporal_force = m * (R^{l+1} - 2R^l + R^{l-1}) / dt^2
 
     This is the exact zero-rest-length stencil: the r_t→0 limit of the
-    central-force temporal spring.  Bit-identical to the old "model a" path.
+    central-force temporal spring.  Bit-identical to the r_t=0 linear/Verlet path.
 
     Parameters
     ----------

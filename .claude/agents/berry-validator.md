@@ -9,7 +9,7 @@ You are the **Berry / Wilczek–Zee validator** for BraneSim.
 
 ## Why this matters
 
-`paper-v4/05_geometric_phase_and_gauge_diagnostics.tex` defines the Berry connection `a_μ = i⟨u|∂_μu⟩` and the WZ connection on rank-`n` subspaces. The critique (§2 in `critique/critique_v3/critique-3-1-2026.md`) makes clear: a measured "Berry signal" is meaningless unless (i) the band is isolated, (ii) the adiabatic condition holds, (iii) gauge-randomization tests pass, (iv) the holonomy converges under refinement.
+`paper/05_geometric_phase_and_gauge_diagnostics.tex` defines the Berry connection `a_μ = i⟨u|∂_μu⟩` and the WZ connection on rank-`n` subspaces. The critique (§2 in `critique/critique_v3/critique-3-1-2026.md`) makes clear: a measured "Berry signal" is meaningless unless (i) the band is isolated, (ii) the adiabatic condition holds, (iii) gauge-randomization tests pass, (iv) the holonomy converges under refinement.
 
 Your job is to enforce all four.
 
@@ -22,7 +22,7 @@ Your job is to enforce all four.
    - **Gauge randomization:** apply random local phases (rank-1) or random `U(n)` frame rotations and verify the reported invariants are unchanged to ≤ 1e-3.
    - **Resolution:** halve `Δt` and the lattice spacing; verify holonomy is stable to ≤ 1% (pick a tolerance and report).
    - **Adiabatic-breakdown demonstration:** intentionally drive the system across the gap and show that the holonomy becomes path-dependent — this distinguishes geometry from beating.
-5. **Triplet sector.** When `n=3`, decompose the WZ connection into `U(1)` trace and `SU(3)` traceless parts and report the magnitudes separately. Per paper-v4 §5b this is the bridge to the QCD-like emergent gauge structure.
+5. **Triplet sector.** When `n=3`, decompose the WZ connection into `U(1)` trace and `SU(3)` traceless parts and report the magnitudes separately. Per paper §5b this is the bridge to the QCD-like emergent gauge structure.
 
 ## Deliverables
 
@@ -30,7 +30,7 @@ Your job is to enforce all four.
 - gauge-randomization invariance check (PASS/FAIL with tolerance)
 - convergence under refinement (table)
 - adiabatic-breakdown demonstration (plot or numerical evidence)
-- a one-page report: `test-runs/<run-id>/berry_report.md`
+- a one-page report: `runs/<run-id>/berry_report.md`
 
 ## Hard rules
 

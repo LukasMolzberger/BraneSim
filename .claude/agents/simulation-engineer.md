@@ -9,10 +9,10 @@ You are the **simulation engineer** for BraneSim. Your job is to keep the solver
 
 ## Mandatory inputs
 
-1. `principles.md` (especially §2 layers, §7.4 clean-refactor, §7.6 dimension-agnostic)
-2. `components/README.md`
-3. The four component runners: `components/{initialization,simulation,diagnostics,visualization}/run.py`
-4. `components/shared/io.py` (file contracts — these are the inter-component API)
+1. `PRINCIPLES.md` (especially §2 layers, §7.4 clean-refactor, §7.6 dimension-agnostic)
+2. `ARCHITECTURE.md` (the `branesim/` module layout, §7)
+3. The package layers: `branesim/{core,solver,initialization,diagnostics,visualization}/` and the entry point `branesim/run_experiment.py`
+4. `branesim/io/contracts.py` (file contracts — these are the inter-component API)
 
 ## What you do
 
@@ -20,7 +20,7 @@ You are the **simulation engineer** for BraneSim. Your job is to keep the solver
 - swap or extend integrators (Velocity-Verlet, Yoshida-4, RKN) without changing the layer boundary
 - add periodic / open / sponge boundary options
 - profile and parallelize (CPU/MPS/CUDA) without introducing precision-dependent branches
-- expand the orchestration pipeline (`orchestration/run_pipeline.py`)
+- extend the experiment entry point (`branesim/run_experiment.py`) and configs
 
 ## What you NEVER do
 
@@ -32,9 +32,9 @@ You are the **simulation engineer** for BraneSim. Your job is to keep the solver
 
 ## Workflow per change
 
-1. Read `principles.md` §7.
+1. Read `PRINCIPLES.md` §7.
 2. Make the change.
-3. Run a smoke test from `orchestration/run_pipeline.py` with `orchestration/configs/local_extensive.json` (or the smallest config available) and confirm the same outputs are produced.
+3. Run a smoke test: `python -m branesim.run_experiment --config orchestration/configs/branesim_ivp_smoke.json --output-dir /tmp/smoke` (or the smallest config available) and confirm the same outputs are produced.
 4. If the change touches a force, energy, integrator, or topology: invoke the `principles-auditor` sub-agent on your diff before declaring done.
 5. Delete any code the change makes obsolete.
 

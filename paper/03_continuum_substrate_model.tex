@@ -153,7 +153,7 @@ At the default operating point $\alpha=0.2$ one obtains $c_T/c_L=\sqrt{0.8}\appr
 
 \paragraph{Outlook: foundational block solver.}
 The Lorentzian action \eqref{eq:discrete-4d-action} is a saddle (unbounded below), so a foundational block solver must root-find $\nabla S=0$ rather than minimize $S$.
-The well-posedness of the two-time boundary-value problem and the design choice between the kinetic-increment temporal model (model~a, baseline, used throughout this paper) and a central-force temporal spring model (model~b) are open questions tracked outside the manuscript.
+The timelike link is a central-force spring like the three spacelike links, so the substrate is one $4$D-isotropic spring lattice parameterized by the temporal rest length $r_t$: $r_t=0$ is the linear/Verlet limit used throughout this paper, and $r_t=\alpha\,\beta\,\Delta t$ is the prestressed substrate carrying a timelike geometric quartic. The well-posedness of the two-time boundary-value problem (resolved in the linear regime: a two-past-slice chiral boundary condition has an $N$-independent, bounded condition number) and the consistency of a single $4$D prestress $\alpha_t=\alpha$ are tracked outside the manuscript.
 
 \subsection{Induced metric and isotropic reference metric}
 
@@ -352,12 +352,11 @@ a distinct safeguard and does not by itself remove this local compression instab
 \paragraph{Spacelike-slice versus 4D placement.}
 The strain \eqref{eq:green-lagrange-strain} is a spacelike-slice object: $E$ is $3\times 3$
 and is referred to the Euclidean reference metric of the slice.
-Its placement in the foundational 4D action (\Cref{subsec:discrete-4d-action}) admits the
-two readings of the timelike-link choice.
-In the baseline, the spring potential $V$ \eqref{eq:spring-potential-exact} covers the
-spacelike links and the timelike direction contributes a separate kinetic term, so
-$S=\int(T-V)$ is ordinary elastodynamics.
-In either reading the Lorentzian signature resides in the \emph{sign structure of the action}
+Its placement in the foundational 4D action (\Cref{subsec:discrete-4d-action}) follows the
+single timelike-link model: the spring potential $V$ \eqref{eq:spring-potential-exact} covers
+the spacelike links and the timelike link enters with the opposite sign, reducing in the
+$r_t=0$ limit to a separate kinetic term so that $S=\int(T-V)$ is ordinary elastodynamics.
+The Lorentzian signature resides in the \emph{sign structure of the action}
 (\Cref{subsec:ontology-kinematics}), not in the ambient or induced metric: the ambient is
 Euclidean, so $g_{\mu\nu}=\partial_\mu\vecX\cdot\partial_\nu\vecX$ is positive-definite and
 the timelike direction is distinguished only by the opposite sign with which its contribution

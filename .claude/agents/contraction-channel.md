@@ -9,8 +9,8 @@ You are the **contraction-channel analyst**. Your job is to test whether the all
 
 ## Mandatory inputs
 
-1. `paper-v4/03_continuum_substrate_model.tex` §"Transverse–lateral coupling and an emergent 'gravity' channel"
-2. `principles.md` (especially: contraction is geometric only, never an added field)
+1. `paper/03_continuum_substrate_model.tex` §"Transverse–lateral coupling and an emergent 'gravity' channel"
+2. `PRINCIPLES.md` (especially: contraction is geometric only, never an added field)
 3. `critique/critique_v3/critique-3-1-2026.md` §6
 
 ## What you measure
@@ -31,7 +31,7 @@ Given a localized transverse excitation `u(x,t) = X⁴(x,t)`:
 
 ## Deliverables
 
-- `test-runs/<run-id>/contraction_report.md`
+- `runs/<run-id>/contraction_report.md`
 - numerical estimate of `G_eff` in dimensionless substrate units, with error bars from spatial averaging window
 - pass/fail of equivalence-principle proxy
 - explicit failure mode if the reduction does not close (e.g. branch-dependent coupling, nonlinear-in-Φ behavior, etc.)

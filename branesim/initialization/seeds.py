@@ -3,7 +3,7 @@
 Background
 ----------
 These seeds implement the Phase 2 baryon-candidate menu from
-``paper/baryon_simulation_roadmap.md`` (BAYRON_SIMULATION_ROADMAP.md).
+``archive/BARYON_SIMULATION_ROADMAP.md``.
 The defining idea is **colour = axis-alignment**: for the locked seeds the
 lateral displacement component ``i`` is locked to the spatial radial unit
 vector ``x_hat_i``, which is the VSH-L=1 / hedgehog SU(3) colour structure
@@ -28,7 +28,7 @@ Every public function returns ``R0 = ref + displacement`` with shape
 ``(n_nodes, m_ambient)`` and dtype float64.  No energy term is evaluated,
 no force is applied — these are pure initial displacements.
 
-Principles compliance (principles.md §2, §3, §7.4, §7.6)
+Principles compliance (PRINCIPLES.md §2, §3, §7.4, §7.6)
 ---------------------------------------------------------
 - No solver state is touched (Layer C: initialization only).
 - No extra energy / force / damping is introduced.

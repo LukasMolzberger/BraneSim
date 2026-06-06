@@ -55,7 +55,7 @@ SADDLE DISCIPLINE: the solver targets ‖ℛ‖ = 0 (root-find).
 The brane action S is Lorentzian (saddle, unbounded below) — minimising S
 would diverge or solve the wrong Euclidean problem.  This module enforces
 the root-find discipline: OBJECTIVE == "residual_norm" (not "action").
-(ARCHITECTURE.md §1.3, principles.md §1.2, OPEN_PROBLEMS.md A1.)
+(ARCHITECTURE.md §1.3, PRINCIPLES.md §1.2, OPEN_PROBLEMS.md A1.)
 
 API
 ---
@@ -92,7 +92,7 @@ OBJECTIVE: str = "residual_norm"
 assert OBJECTIVE == "residual_norm", (
     "breather.py: solver targets residual_norm (root-find), NOT the Lorentzian "
     "action S.  S is a saddle, unbounded below — minimising it would diverge or "
-    "solve the wrong Euclidean problem.  (ARCHITECTURE.md §1.3, principles.md §1.2)"
+    "solve the wrong Euclidean problem.  (ARCHITECTURE.md §1.3, PRINCIPLES.md §1.2)"
 )
 
 

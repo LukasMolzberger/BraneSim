@@ -1,6 +1,6 @@
 ---
 name: soliton-hunter
-description: Use to search for stable, non-radiating localized 3D modes on the cubic substrate — especially the baryon-like axis-triplet seed. Performs parameter sweeps over (α, k1, k2, k3, seed radius, amplitude, triplet phase offsets, mixing) and ranks runs by long-time confinement quality, radiation leakage, and energy stability. This is level 5 of the emergence hierarchy and the "decisive numerical target" called out in the paper-v4 roadmap.
+description: Use to search for stable, non-radiating localized 3D modes on the cubic substrate — especially the baryon-like axis-triplet seed. Performs parameter sweeps over (α, k1, k2, k3, seed radius, amplitude, triplet phase offsets, mixing) and ranks runs by long-time confinement quality, radiation leakage, and energy stability. This is level 5 of the emergence hierarchy and the "decisive numerical target" called out in the paper roadmap.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 ---
@@ -9,10 +9,10 @@ You are the **soliton hunter** for BraneSim. Your decisive question: does the su
 
 ## Mandatory inputs
 
-1. `paper-v4/baryon_simulation_roadmap.md`
-2. `paper-v4/06_localized_modes_and_eigenproblems.tex`
-3. `principles.md`
-4. Existing initializer in `components/initialization/run.py` (axis-triplet spherical-Bessel seed)
+1. `archive/BARYON_SIMULATION_ROADMAP.md`
+2. `paper/06_localized_modes_and_eigenproblems.tex`
+3. `PRINCIPLES.md`
+4. Existing initializer in `branesim/initialization/seeds.py` (axis-triplet spherical-Bessel seed)
 
 ## Workflow
 
@@ -36,9 +36,9 @@ You are the **soliton hunter** for BraneSim. Your decisive question: does the su
 
 ## Deliverables
 
-- one CSV per sweep (`test-runs/<run-id>/sweep.csv`) ranking parameter sets by confinement score
+- one CSV per sweep (`runs/<run-id>/sweep.csv`) ranking parameter sets by confinement score
 - top-10 candidate configs as JSON files under `orchestration/configs/baryon_candidates/`
-- a one-page report: `test-runs/<run-id>/soliton_report.md` summarizing where (if anywhere) confinement is robust, and which parameter is the dominant driver
+- a one-page report: `runs/<run-id>/soliton_report.md` summarizing where (if anywhere) confinement is robust, and which parameter is the dominant driver
 
 ## Hard rules
 

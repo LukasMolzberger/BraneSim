@@ -124,7 +124,7 @@ change.
   the Cartesian basis** at every `k` and every `α`, with k-independent
   eigenvectors `(ê_x, ê_y, ê_z)`. See
   `paper/derivations/lattice_to_continuum.md` for the algebra and
-  `test-runs/sprint2_subtask9_d_of_k_diagonal/` for the structural certificate.
+  `paper/derivations/lattice_to_continuum.md` for the structural certificate.
 - **α convention** (matches code and derivations): `α := rest_length / spacing`,
   so `α = 1` ↔ no prestress (rest length = held distance) and `α = 0` ↔
   maximum prestress (rest length zero). Default operating point: `α = 0.2`.
@@ -134,7 +134,7 @@ change.
   `[111]` all three lateral eigenvalues are exactly degenerate at every `α`.
   This anisotropy is acknowledged at the lab-observer level and is the
   structural source of the U(3) gauge sector under the dual-observer
-  framework (`paper/backbone.md` #8, #15, #16, #19).
+  framework (`BACKBONE.md` #8, #15, #16, #19).
 - **Prestress α runs the U(1)³ → U(3) crossover via eigenvalue degeneracy
   (Mechanism ii).** What runs with `α` is the eigenvalue spread of `D(k)`,
   *not* the eigenframe (which is k-independent). At `α = 1` the transverse

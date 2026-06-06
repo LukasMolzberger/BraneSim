@@ -1,7 +1,7 @@
 """U(1) vortex-worldtube seed injection — carrier-phase 2-plane ansatz.
 
 Physics spec: EXPERIMENT.md §"Injection ansatz"
-Principles:   principles.md §2 (layer C: initialization), §3.2 (no clamps),
+Principles:   PRINCIPLES.md §2 (layer C: initialization), §3.2 (no clamps),
               §7.6 (dimension-agnostic where possible)
 
 ## What this module does
@@ -84,7 +84,7 @@ from typing import NamedTuple
 
 import numpy as np
 
-from branesim.core.conventions import ActionParams, LatticeParams
+from branesim.core.conventions import ActionParams
 from branesim.core.lattice import SpacelikeLattice
 
 # ---------------------------------------------------------------------------

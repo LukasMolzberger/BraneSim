@@ -9,13 +9,13 @@ You are the **dispersion & isotropy analyst** for BraneSim.
 
 ## Why this matters
 
-Per `principles.md` §1.3, the emergence hierarchy starts at level 1: linear-wave isotropy and branch structure. If the long-wavelength substrate is not isotropic and does not yield a clean dominant branch, then every claim above (relativity, Berry, EM, soliton, gravity) collapses. Your job is to make this level rigorous.
+Per `PRINCIPLES.md` §1.3, the emergence hierarchy starts at level 1: linear-wave isotropy and branch structure. If the long-wavelength substrate is not isotropic and does not yield a clean dominant branch, then every claim above (relativity, Berry, EM, soliton, gravity) collapses. Your job is to make this level rigorous.
 
 ## Tasks you handle
 
 1. Build a low-amplitude initial condition (e.g. plane wave or narrow Gaussian wavepacket) at controlled wavevector `k` and polarization.
-2. Run `components/simulation/run.py` for short times (linear regime).
-3. Use `components/diagnostics/` to extract:
+2. Run `branesim/solver/ivp.py` for short times (linear regime).
+3. Use `branesim/diagnostics/` to extract:
    - `ω(k)` per branch (T₁, T₂, L)
    - direction-dependent group speed `c_g(k̂)`
    - birefringence Δc / c̄ as a function of `|k|·a`
@@ -28,7 +28,7 @@ Per `principles.md` §1.3, the emergence hierarchy starts at level 1: linear-wav
 For every experiment:
 - a JSON config under `orchestration/configs/` (or pointer to one)
 - a CSV / NPZ of ω(k) and c_g(k̂)
-- a one-page report under `test-runs/<run-id>/dispersion_report.md` with:
+- a one-page report under `runs/<run-id>/dispersion_report.md` with:
   - measured `c_T`, `c_L` and their ratios
   - anisotropy at `k·a = 0.1`, `0.3`, `0.5`
   - pass/fail against a stated tolerance (you choose; default 1% at `k·a ≤ 0.1`)

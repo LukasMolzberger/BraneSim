@@ -1,7 +1,7 @@
 """BraneSim — block-solver-centric reimplementation.
 
-Increment 1: core physics primitives + IVP Verlet march + tests.
-BVP/JFNK solver is the next increment.
+Core physics primitives, the forward-Verlet IVP march, and the 4D block
+(BVP) root-find solver, with diagnostics, initializers, and renderers.
 """
 
 __version__ = "0.1.0"

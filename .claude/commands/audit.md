@@ -1,5 +1,5 @@
 ---
-description: Audit the current diff or named files against principles.md non-negotiables. Spawns the principles-auditor agent.
+description: Audit the current diff or named files against PRINCIPLES.md non-negotiables. Spawns the principles-auditor agent.
 ---
 
 Run the `principles-auditor` agent against the current changes.

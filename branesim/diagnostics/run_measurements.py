@@ -14,7 +14,7 @@ and writes into <run_dir>/diagnostics/:
     spectra.csv / spectra.png             — D7: spatial-FFT energy spectrum
     report.md                             — stitched verdict document
 
-Design constraints (principles.md):
+Design constraints (PRINCIPLES.md):
   - Read-only: no modification of solver state, no back-reaction.
   - Vacuum-subtracted excess energy (LESSONS_LEARNED discipline).
   - No hard-coded winding estimator — uses actual field plaquette sum.

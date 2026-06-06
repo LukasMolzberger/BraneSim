@@ -470,3 +470,45 @@ class TestChiralResidualNearZero:
             f"grid={grid_shape} chiral residual per dof = {res_per_dof:.3e}, "
             f"expected < 1e-10"
         )
+
+
+# ---------------------------------------------------------------------------
+# Test: explicit Verlet march paths reject r_t>0 (C-H2 guard)
+# ---------------------------------------------------------------------------
+
+class TestRtGuard:
+    """march() and apply_chiral() are the r_t=0 linear/Verlet limit only.
+
+    For r_t>0 the temporal central-force spring makes the forward step implicit,
+    so the explicit stencil does NOT solve the discrete EL equations.  These
+    paths must raise loudly rather than silently produce a non-stationary
+    world-volume scored as 'converged' (ARCHITECTURE.md §1.4 / A4).
+    """
+
+    def test_march_rejects_r_t_positive(self):
+        lattice = _make_lattice((6, 6, 6))
+        m = lattice.params.dim + 1
+        params = ActionParams(
+            k_s=K_S, alpha=ALPHA, rho=RHO, dt=DT, n_slices=8,
+            m_ambient=m, r_t=0.175,
+        )
+        mass = RHO * SPACING ** lattice.params.dim
+        ref = lattice.reference_positions(m)
+        with pytest.raises(NotImplementedError):
+            march(IVPProblem(lattice=lattice, params=params, mass=mass,
+                             R0=ref.copy(), R1=ref.copy()))
+
+    def test_chiral_solve_rejects_r_t_positive(self):
+        lattice = _make_lattice((6, 6, 6))
+        m = lattice.params.dim + 1
+        params = ActionParams(
+            k_s=K_S, alpha=ALPHA, rho=RHO, dt=DT, n_slices=8,
+            m_ambient=m, r_t=0.175,
+        )
+        mass = RHO * SPACING ** lattice.params.dim
+        ref = lattice.reference_positions(m)
+        bc = ChiralBC(R0=ref.copy(), R1=ref.copy())
+        # solve_block routes ChiralBC to apply_chiral, which must reject r_t>0
+        # (rather than report converged=True on a non-stationary march).
+        with pytest.raises(NotImplementedError):
+            solve_block(BoundaryProblem(lattice, params, mass, bc))

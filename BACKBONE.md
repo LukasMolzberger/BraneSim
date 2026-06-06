@@ -1,4 +1,4 @@
-# backbone.md
+# BACKBONE.md
 
 This file is the short, non-negotiable backbone of the project.
 It is intended to prevent core assumptions from being lost during paper edits, code changes, or simulation planning.
@@ -65,7 +65,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
      units. This is the **load-bearing assumption** for emergent Lorentz
      kinematics in this project.
    - Decisive empirical test: Sprint 3 subtask 11 (observer universality) in
-     `paper/validation_roadmap.md`. If two solitons of different polarizations
+     `archive/VALIDATION_ROADMAP.md`. If two solitons of different polarizations
      or orientations report different effective `g^eff_{μν}` after their own
      emergent rods/clocks are accounted for, this assumption fails.
 
@@ -139,7 +139,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       meaningful gauge object lives on the **per-wavepacket complex envelope**
       `Ψ ∈ ℂ³` (per #18), not on the BZ link-variable construction in
       paper §5.6 as previously formulated. See
-      `test-runs/sprint2_subtask8_u3_decomposition/` for the detailed result.
+      `OPEN_PROBLEMS.md` D2 for the detailed result.
 
 17. **Geometric quartic provides Skyrme-class soliton stabilization**
     - The induced-metric correction `∂_i u ∂_j u` gives a `(|∇u|²)²`
@@ -256,7 +256,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       radially. Proton-vs-neutron distinction enters as a `J=0` trace
       admixture on top of the hedgehog, not as an unrelated seed.
     - Concrete ansatz menu used in the simulation search is recorded in
-      `paper/baryon_simulation_roadmap.md` Phase 2.
+      `archive/BARYON_SIMULATION_ROADMAP.md` Phase 2.
 
 21. **Asymmetry lives in the brane, not the ambient**
     - The 4D ambient (per #1) is fully symmetric Euclidean — just a stage

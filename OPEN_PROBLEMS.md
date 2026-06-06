@@ -10,14 +10,14 @@ in the manuscript.
 Conventions:
 - **Status:** `open` · `in-progress` · `resolved` (link the result) · `parked`
 - Keep each entry to: *statement → why it matters → candidate approach → status*.
-- When an item is resolved, move its conclusion into `principles.md` /
-  `paper/backbone.md` / the paper, and mark it `resolved` here with a pointer.
+- When an item is resolved, move its conclusion into `PRINCIPLES.md` /
+  `BACKBONE.md` / the paper, and mark it `resolved` here with a pointer.
 
-Related living documents (not duplicated here):
-- `principles.md` — canonical non-negotiables
-- `paper/backbone.md` — canonical project backbone
-- `paper/validation_roadmap.md` — numerical validation sprints
-- `paper/baryon_simulation_roadmap.md` — soliton search program
+Related documents (not duplicated here):
+- `PRINCIPLES.md` — canonical non-negotiables
+- `BACKBONE.md` — canonical project backbone
+- `archive/VALIDATION_ROADMAP.md` — numerical validation sprints *(archived/historical)*
+- `archive/BARYON_SIMULATION_ROADMAP.md` — soliton search program *(archived/historical)*
 - Paper §2 "Non-claims" — honest scope limits (distinct from open *derivations*)
 
 ---
@@ -162,7 +162,7 @@ contraction-channel + physics-derivation.
 
 ## B. Quantum-foundations derivations (Bell stance)
 
-Carried over from `principles.md` §1.5 and `paper/backbone.md` #23. These are
+Carried over from `PRINCIPLES.md` §1.5 and `BACKBONE.md` #23. These are
 constraints the retrocausal worldtube interpretation places on the program —
 honest debts, not results. **Do not claim as established in the paper.**
 
@@ -239,7 +239,7 @@ but is dynamically unstable, and prestress α does not stabilize it.** Converged
 `>1`, flat in α (ticks *up* at 0.9), and robust to `inner_maxiter` (physical, not
 a solver artifact); the earlier apparent "α-stabilizing trend" (95→54→3.6) was an
 artifact of non-converged orbits at α=0.5/0.7 (residual 8–27) and must be
-excluded (`test-runs/sprint4b_skyrme_corrected/trend_sweep.csv`). The breather
+excluded (sprint4b trend-sweep; data retired with `test-runs/`, result in `LESSONS_LEARNED.md`). The breather
 *mechanism* is sound — Pythagorean hardening `Q = 8k_sα/a² > 0` places a localized
 mode above the transverse band ([[project_pythagorean_breather_go]]) — but the
 breathing/scale degree of freedom itself carries the instability.
@@ -281,7 +281,7 @@ tension (#8, #17): the test **must report `w/a` and quantify the PN barrier**.
   rotation must give the π (`ℤ₂`) FR holonomy via the **open-path** Fukui–Hatsugai
   product (closed loop → silent false-negative; see
   [[project_spin_half_is_soliton_layer]]). Already scoped:
-  `test-runs/alpha_separability/L5_spin_half_target.md`.
+  at L5 (D1; `[[project_spin_half_is_soliton_layer]]`).
 **⚠ RETRACTED — 2026-06-05. ALL executed nonlinear-soliton runs in this thread are INVALID.**
 Two independent harness errors invalidate every C2-thread numerical result — the
 "corrected harness" `N_neg=0` minimum, the box-doubling "boundary-confined" verdict,
@@ -331,7 +331,7 @@ stabilize (48³/64³, AWS). Ranked below the static route because `ρ≈3.5` is 
 hiding just past 32³.
 **Owner.** soliton-hunter (static extremum + Hessian) + physics-derivation
 (iso-rotation quantization) + berry-validator (L5 spin holonomy). See
-`BAYRON_SIMULATION_ROADMAP.md` Phase 2.
+`archive/BARYON_SIMULATION_ROADMAP.md` Phase 2.
 
 ---
 
@@ -342,7 +342,7 @@ hiding just past 32³.
 (i) the trace-`U(1)` holonomy is read as electromagnetism (backbone #19); (ii)
 spin-½ is scoped as an L5 *soliton-rotation* effect — a `π₁(SO(3))=ℤ₂`
 Finkelstein–Rubinstein phase under `2π` rigid rotation of a winding-odd hedgehog
-(prediction P3, `test-runs/alpha_separability/derivation_H_eff.md`). Established
+(prediction P3; see `[[project_spin_half_is_soliton_layer]]`). Established
 field theory (Jackiw–Rebbi 1976; Hasenfratz–'t Hooft 1976; Witten's dyon 1979)
 makes these *not* independent: a bosonic soliton carrying one quantum of
 `U(1)`/non-Abelian charge acquires **half-integer spin and Fermi statistics** when
@@ -353,7 +353,7 @@ by* the trace-`U(1)` charge rather than being an unrelated topological accident.
 It yields a sharp, falsifiable correlation that strengthens P3: **only
 trace-`U(1)`-charged solitons are fermions (spin-½); `U(1)`-neutral solitons stay
 integer/spin-1.** With the working proton/neutron hypothesis
-(`BAYRON_SIMULATION_ROADMAP.md` Phase 2) this predicts the charged (proton-class,
+(`archive/BARYON_SIMULATION_ROADMAP.md` Phase 2) this predicts the charged (proton-class,
 trace-admixed) and neutral (neutron-class, trace-cancelled) seeds carry the *same*
 baryon winding, but the spin-statistics phase tracks the `U(1)` charge — testable
 by the same `2π`-rotation holonomy experiment run on charged vs neutral seeds.
@@ -374,7 +374,7 @@ The linear *spectrum* cannot: the traceless/`SU(3)` content `∝ α` and the tra
 together as α→0, so the spectrum produces **no** EM/colour hierarchy — the famous
 `α_EM/α_s` must live in the *connection/curvature normalization*, not eigenvalue
 magnitudes. Compounding this, the **k-space Berry/WZ curvature is identically zero
-∀α** (real-symmetric `D(k)`; `derivation_H_eff.md`), so any coupling ratio is a
+∀α** (real-symmetric `D(k)`; k-space connection ≡ 0 ∀α, BACKBONE #16), so any coupling ratio is a
 *fibre-internal* `(x,t)` holonomy object.
 **Why it matters.** A derived α would convert the project's one free linear
 parameter into a prediction. A clean *negative* result (α undetermined at linear

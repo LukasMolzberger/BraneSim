@@ -16,7 +16,7 @@ resolve).
 > force code; only the global solution philosophy (forward IVP vs 4D block
 > BVP) differs.
 
-Conventions match `principles.md` §1.1/§1.1a, `backbone.md` #15/#21/#22, and
+Conventions match `PRINCIPLES.md` §1.1/§1.1a, `BACKBONE.md` #15/#21/#22, and
 `lattice_to_continuum.md` (6-neighbor axial-only spatial stencil,
 `α := rest_length/spacing`, default `α = 0.2`).
 
@@ -209,7 +209,7 @@ links, so the substrate is one 4D-isotropic spring lattice. The `r_t = 0` limit
 recovers the zero-rest-length kinetic increment of §2 (the linear/Verlet limit):
 
 $$
-T^{l+\frac12}_{(b)} = \sum_p \frac{k_t}{2}\Big(\big|R_p^{l+1}-R_p^l\big| - \alpha_t\,\beta\,\Delta t\Big)^2 .
+T^{l+\frac12}_{\mathrm{time}} = \sum_p \frac{k_t}{2}\Big(\big|R_p^{l+1}-R_p^l\big| - \alpha_t\,\beta\,\Delta t\Big)^2 .
 $$
 
 All 8 links are then the same kind of central-force spring, differing only by
@@ -227,12 +227,13 @@ The bracket is a **nonlinear time-link force**.
 `k_t = m/Δt²` gives a single closed-form difference:
 
 $$
-E_{(b)} - E_{(a)} = \tfrac12 k_t\big(|\Delta R| - r_t\big)^2 - \tfrac12 k_t|\Delta R|^2
+E(r_t) - E(0) = \tfrac12 k_t\big(|\Delta R| - r_t\big)^2 - \tfrac12 k_t|\Delta R|^2
 = -\,k_t\,r_t\,|\Delta R| + \tfrac12 k_t r_t^2 .
 $$
 
 The entire difference is the term `−k_t r_t |ΔR|` (plus an irrelevant additive
-constant). It is **exactly proportional to `r_t`**, so the two models coincide
+constant). It is **exactly proportional to `r_t`**, so the temporal spring and
+its `r_t = 0` (kinetic) limit coincide
 **identically (not approximately) iff `r_t = 0`** — i.e. `α_t = 0` (maximal
 temporal prestress), with `k_t = m/Δt²`. No condition on `β Δt` is needed: the
 identity `|ΔR|\widehat{ΔR} = ΔR` is exact, so at `r_t = 0` the EL force collapses
@@ -255,7 +256,7 @@ distinction is the norm-nonlinearity / geometric quartic, present iff `r_t ≠ 0
 So `r_t` dials between the **linear/Verlet limit** ("matches plain Newton and the
 existing Verlet code", `r_t = 0`) and the **canonical prestressed substrate** ("a
 non-Newtonian time link that carries gravity's second face", `r_t = α·β·dt`); the
-two touch only at `r_t = 0`. This is **one model parameterized by `r_t`** —
+two limits coincide only at `r_t = 0`. This is **one model parameterized by `r_t`** —
 resolved and implemented (`ActionParams.r_t`; OPEN_PROBLEMS A4); the `α_t = α`
 consistency is the open verification (A4a).
 

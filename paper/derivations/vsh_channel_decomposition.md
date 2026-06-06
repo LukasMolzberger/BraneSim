@@ -1,6 +1,6 @@
 # VSH channel decomposition of the StVK + geometric quartic action at the soliton scale
 
-**Sprint:** Soliton-hunt prerequisite (paper/backbone.md #20 verification).
+**Sprint:** Soliton-hunt prerequisite (BACKBONE.md #20 verification).
 **Author:** mathematical-physics agent.
 **Operating point:** `α = 0.2`, `w/a ∈ {5, 10, 20}`, 6-neighbor axial-only cubic lattice.
 **Question:** Is the vector-spherical-harmonic (VSH) description protocol of backbone #20

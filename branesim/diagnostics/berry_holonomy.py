@@ -889,7 +889,7 @@ def decompose_wz_u1_sun(holonomy_matrix: np.ndarray) -> dict:
         U(1) part: phase = arg(det U) / n   (Abelian trace, SPEC.md B.2)
         SU(n) part: U_SU = U / exp(i * phase)  (traceless)
 
-    As per paper-v4 §5b, the U(1) trace channel corresponds to the dilatational
+    As per paper §5b, the U(1) trace channel corresponds to the dilatational
     mode (lambda_bar) and the SU(n) traceless part to the shear modes.
 
     Parameters

@@ -44,8 +44,9 @@ matrix-free streaming/slab storage in ARCHITECTURE.md D4.
 
 > Practical note: today's deployable BVP path is **Dirichlet**, which is
 > ill-conditioned (`κ≈1e14`) and makes JFNK slow (minutes even for tiny grids).
-> The well-posed **chiral** BC (`κ=1`) is still broken (ARCHITECTURE.md D2); once
-> fixed, block solves become fast. For now, `mode="ivp"` is the cheap smoke and
+> The well-posed **chiral** BC (`κ=1`, two-past-slice) is implemented and fast in
+> the linear regime; for `r_t>0` the chiral march still needs an `r_t`-aware step
+> (ARCHITECTURE.md D2). For now, `mode="ivp"` is the cheap smoke and
 > `bvp_dirichlet` is a correctness check, not a performance target.
 
 ---

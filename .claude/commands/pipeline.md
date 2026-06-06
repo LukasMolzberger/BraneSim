@@ -1,16 +1,25 @@
 ---
-description: Run the 4-component pipeline (init → sim → viz → diag) using a JSON config. Defaults to orchestration/configs/local_extensive.json.
+description: Run a BraneSim solver experiment (init+solve → worldvolume) from a JSON config. Defaults to orchestration/configs/branesim_ivp_smoke.json.
 ---
 
-Run the BraneSim 4-component pipeline.
+Run a BraneSim experiment via the package entry point `branesim.run_experiment`
+(initialization + solve, writing `worldvolume.zip` + `summary.json`).
 
-If `$ARGUMENTS` is empty, use `orchestration/configs/local_extensive.json`.
+If `$ARGUMENTS` is empty, use `orchestration/configs/branesim_ivp_smoke.json`.
 Otherwise, treat `$ARGUMENTS` as the path to a JSON config.
 
 Execute:
 
 ```
-PYTHONPATH=/Users/lukasmolzberger/PycharmProjects/BraneSim MPLBACKEND=Agg python3 -m orchestration.run_pipeline --config <config>
+python -m branesim.run_experiment --config <config> --output-dir ./run-out
 ```
 
-Report the resulting `pipeline_summary.json` and the path to the diagnostics summary.
+Report `run-out/summary.json` (mode, `interior_residual_norm`, `solver_report`).
+
+For the full measurement suite (energy / confinement / winding / Berry / EM /
+per-colour SU(3) / spectra → CSV + paper-ready PNG + `report.md`) on an
+experiment run folder, use:
+
+```
+python -m branesim.diagnostics.run_measurements <run_dir>
+```
