@@ -1,1 +1,0 @@
-run_stem,alpha,u0,w,profile_shape,tanh_steepness,n_slices,n_nodes,m_ambient,grid_shape,t_phys,walltime_s,max_abs_displacement,box_fill_radius,spread_ratio_mean,spread_ratio_final,confined_fraction_mean,confined_fraction_final,radius_growth,interior_residual_norm,weight_mode,status
