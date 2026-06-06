@@ -110,49 +110,43 @@ regime.
 **Candidate approach.** Connect to the dispersion layer (`c_T²`, `c_L²`,
 anisotropy vs `k·a`); quantify the tuning window. Owner: dispersion-analyst.
 
-### A4. Temporal-link form — model (a) vs model (b) — `resolved (model b, 2026-06-05)`
-**Statement.** What is the precise form of the timelike link?
-- **Model (a) — kinetic (baseline, = current code):** zero-rest-length
-  quadratic `½ (m/Δt²) |ΔR|²`. EL = plain Newton = Verlet stencil.
-- **Model (b) — central-force temporal spring:** `½ k_t (|ΔR| − r_t)²` with its
-  own rest length `r_t` and prestress, Lorentzian sign. Fully symmetric
-  4D-cubic; EL is non-Newtonian.
+### A4. Temporal-link form — `resolved + implemented (2026-06-05): one 4D-isotropic spring`
+**Resolved.** The timelike link is a central-force spring `½ k_t (|ΔR| − r_t)²` —
+the same law as the three spacelike links — so the substrate is a fully symmetric
+4D-cubic spring lattice. There is **one model parameterized by the temporal rest
+length `r_t`**, not an "a vs b" fork:
+- `r_t = α·β·dt` (single prestress, A4a): the canonical prestressed substrate.
+- `r_t = 0`: the **linear/Verlet limit** — `½ (m/Δt²) |ΔR|²` kinetic, EL = plain
+  Newton = the Verlet stencil. Used for small-amplitude wave/dispersion validation.
 
-**Exact convergence.** At matched stiffness `k_t = m/Δt²` the two link energies
-differ by a single closed-form term:
-`E_(b) − E_(a) = −k_t r_t |ΔR| + ½ k_t r_t²`. The difference is `∝ r_t`, so the
-models coincide **identically iff `r_t = 0`** (`α_t = 0`); no condition on the
-held spacing `β Δt` is needed. See `discrete_4d_brane_action.md` §6.
+**Exact reduction.** At matched stiffness `k_t = m/Δt²` the spring force reduces
+*term-for-term* to the Verlet stencil as `r_t → 0` (the energies differ by
+`−k_t r_t |ΔR| + ½ k_t r_t² ∝ r_t`); verified machine-precision in the
+implementation. See `discrete_4d_brane_action.md` §6.
 
-**Why it matters / what `r_t` controls.** The distinguishing term carries the
-Euclidean *norm* `|ΔR|` (not `|ΔR|²`), which generates a **geometric quartic**
-in the time link with coefficient `∝ r_t` — the time-link analogue of the
-Skyrme/contraction term (#17) and the natural home for backbone #22's unified
-contraction (gravitational time dilation = spatial displacement stretching the
-timelike link). Model (a) (`r_t = 0`) has no such quartic, so the convergence
-point is exactly where model (b) loses its distinctive physics. `r_t` is the
-dial between "matches Newton + existing code" and "a gravitating time link".
-*(Note: the distinction is the norm-nonlinearity, not transverse stiffness —
-`½ k_t|ΔR|²` already has isotropic Hessian.)*
+**What `r_t` controls.** The distinguishing term carries the Euclidean *norm*
+`|ΔR|` (not `|ΔR|²`), which generates a **geometric quartic** in the time link with
+coefficient `∝ r_t` — the time-link analogue of the Skyrme/contraction term (#17)
+and the natural home for backbone #22's unified contraction (gravitational time
+dilation). The `r_t = 0` limit has no such quartic. *(The distinction is the
+norm-nonlinearity, not transverse stiffness — `½ k_t|ΔR|²` already has isotropic
+Hessian.)*
 
-**Resolution (2026-06-05, owner decision): model (b) chosen.** The timelike link is a
-genuine central-force spring `½k_t(|ΔR|−r_t)²` with its own rest length `r_t ≠ 0`
-(temporal prestress `α_t`). Rationale: (i) keeps the 4D lattice genuinely symmetric
-rather than special-casing time; (ii) `r_t` is a real degree of freedom and should be
-exposed, not hidden; (iii) the foundational block solver (root-find `∇S=0`) is required
-regardless; (iv) backbone #22's unified contraction (gravitational time dilation) *needs*
-the time-link geometric quartic, which only model (b) provides — so #22 was already
-implicitly assuming it. **Consequences:** forward Verlet / IVP (model a) is now the
-`r_t=0` *special case*, not the general dynamics — the block solver is mandatory; A2
-well-posedness must be re-checked with the time-link quartic restored; and a new
-sub-question opens (A4a). Code note: `ActionParams` keeps `temporal_model="a"` (r_t=0) as
-the validated special case until the block solver implements model (b). Moved into
-backbone #21/#22. Owner: contraction-channel (gravity derivation).
+**Implemented (2026-06-05).** `ActionParams` exposes `r_t` (plus `k_t`, `beta`); the
+residual routes on `r_t` — `r_t = 0` uses the linear Verlet stencil (the fast exact
+path and the **default**), `r_t > 0` uses the central-force spring force (block
+solve). The `r_t → 0` reduction is bit-identical to the prior linear path; principles
+audit clean. The Lorentzian action is a saddle, so the foundational solve is
+root-find `∇S = 0`, not minimization. **Consequences:** forward Verlet / IVP is the
+`r_t = 0` limit, not the general dynamics — the block solver is mandatory for
+`r_t > 0`; A2 well-posedness must be re-checked with the time-link quartic restored;
+A4a opens. Folded into backbone #21/#22. Owner: contraction-channel (gravity
+derivation).
 
 ### A4a. Single 4D prestress `α_t = α` — `adopted (2026-06-05); verification open`
 **Decision.** A **single** prestress `α` governs all four lattice directions: every
 link's rest length is `α ×` its held spacing (spatial `ℓ₀ = αa`, temporal `r_t = α·βΔt`).
-This is the symmetric reading of model (b) (A4) and ties soliton binding (spatial
+This is the symmetric reading of the 4D-isotropic spring (A4) and ties soliton binding (spatial
 geometric quartic `∝ α`) and gravitational time dilation (temporal quartic `∝ α`) to
 **one** dial — the unified-contraction picture (#22) taken literally, and a strong
 falsifiable structural prediction: gravity strength and soliton confinement are **not**

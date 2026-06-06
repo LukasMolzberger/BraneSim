@@ -61,9 +61,12 @@ def _make_lattice(grid_shape: tuple, periodic: bool = True) -> SpacelikeLattice:
 
 
 def _make_action_params(n_slices: int, m_ambient: int | None = None) -> ActionParams:
+    # r_t=0.0: the linear/Verlet limit (BVP chiral/Dirichlet tests use the
+    # Verlet-stencil EL equations; the temporal-spring path is validated
+    # separately via the canonical-substrate tests).
     return ActionParams(
         k_s=K_S, alpha=ALPHA, rho=RHO, dt=DT, n_slices=n_slices,
-        m_ambient=m_ambient,
+        m_ambient=m_ambient, r_t=0.0,
     )
 
 

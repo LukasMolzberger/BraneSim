@@ -1,7 +1,7 @@
 {
   "_comment": "branesim IVP smoke: small forward-Verlet march of a transverse plane wave. Validated path; deployable today.",
   "lattice": {"grid_shape": [16, 16, 16], "spacing": 1.0, "periodic_axes": [true, true, true]},
-  "action":  {"k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1, "n_slices": 32, "m_ambient": 4, "temporal_model": "a"},
+  "action":  {"k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1, "n_slices": 32, "m_ambient": 4, "r_t": 0.0},
   "seed":    {"kind": "plane_wave", "amplitude": 1e-3, "k_index": [1, 0, 0], "polarization": [0, 1, 0, 0]},
   "solver":  {"mode": "ivp"}
 }

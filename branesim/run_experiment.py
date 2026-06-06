@@ -19,7 +19,7 @@ Config schema (JSON)::
       "lattice": {"grid_shape": [16,16,16], "spacing": 1.0,
                   "periodic_axes": [true,true,true], "axial_weight": 1.0},
       "action":  {"k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1,
-                  "n_slices": 64, "m_ambient": 4, "temporal_model": "a", "r_t": 0.0},
+                  "n_slices": 64, "m_ambient": 4, "r_t": 0.0},
       "seed":    {"kind": "plane_wave", "amplitude": 1e-3,
                   "k_index": [1,0,0], "polarization": [0,1,0,0], "rng_seed": 0},
       "solver":  {"mode": "ivp", "tol": 1e-9, "max_iter": 100, "warm_start": true}
@@ -132,6 +132,7 @@ def run(config: dict, output_dir: Path) -> dict:
     )
     lattice = SpacelikeLattice(lp)
     m = int(acfg.get("m_ambient", lp.dim + 1))
+    r_t_cfg = acfg.get("r_t", None)
     ap = ActionParams(
         k_s=float(acfg.get("k_s", 1.0)),
         alpha=float(acfg.get("alpha", 0.2)),
@@ -139,8 +140,7 @@ def run(config: dict, output_dir: Path) -> dict:
         dt=float(acfg.get("dt", 0.1)),
         n_slices=int(acfg["n_slices"]),
         m_ambient=m,
-        temporal_model=str(acfg.get("temporal_model", "a")),
-        r_t=float(acfg.get("r_t", 0.0)),
+        r_t=float(r_t_cfg) if r_t_cfg is not None else None,
     )
     mass = ap.rho * lp.spacing ** lp.dim
     N = ap.n_slices

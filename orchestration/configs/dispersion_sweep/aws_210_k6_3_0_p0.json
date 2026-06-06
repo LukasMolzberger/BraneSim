@@ -20,7 +20,6 @@
     "dt": 0.1,
     "n_slices": 512,
     "m_ambient": 4,
-    "temporal_model": "a",
     "r_t": 0.0
   },
   "solver": {

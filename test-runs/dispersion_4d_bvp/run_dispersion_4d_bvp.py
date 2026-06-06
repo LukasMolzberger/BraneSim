@@ -208,7 +208,6 @@ def run_one(
         dt=float(acfg["dt"]),
         n_slices=int(acfg["n_slices"]),
         m_ambient=m,
-        temporal_model=str(acfg.get("temporal_model", "a")),
         r_t=float(acfg.get("r_t", 0.0)),
     )
     mass = ap.rho * lp.spacing ** lp.dim

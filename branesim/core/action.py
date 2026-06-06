@@ -206,7 +206,7 @@ def spacelike_force(
 
 
 # ---------------------------------------------------------------------------
-# Kinetic energy T^{l+1/2}  (model a: zero rest-length temporal links)
+# Kinetic energy T^{l+1/2} — linear/Verlet limit (r_t = 0)
 # ---------------------------------------------------------------------------
 
 
@@ -216,11 +216,11 @@ def kinetic_energy(
     mass: float,
     dt: float,
 ) -> float:
-    """Kinetic energy T^{l+1/2} between slices l and l+1 (model a).
+    """Kinetic energy T^{l+1/2} between slices l and l+1 (r_t = 0 limit).
 
     T^{l+1/2} = sum_p (m/2) * ((R_p^{l+1} - R_p^l) / dt)^2
 
-    The temporal link has zero rest length (model a).
+    This is the r_t→0 limit of the temporal spring energy with k_t = m/dt².
     The squared norm is the full ambient dot product.
 
     Parameters
@@ -240,7 +240,7 @@ def kinetic_energy(
 
 
 # ---------------------------------------------------------------------------
-# Temporal link energy (model b: central-force temporal spring)
+# Temporal link energy — central-force temporal spring (r_t > 0)
 # ---------------------------------------------------------------------------
 
 
@@ -250,7 +250,7 @@ def temporal_link_energy(
     k_t: float,
     r_t: float,
 ) -> float:
-    """Temporal link energy T^{l+1/2} between slices l and l+1 (model b).
+    """Temporal link energy T^{l+1/2} between slices l and l+1.
 
     T^{l+1/2} = (k_t / 2) * sum_p (|R_p^{l+1} - R_p^l| - r_t)^2
 
@@ -260,7 +260,7 @@ def temporal_link_energy(
     (principles §3.2, non-negotiable #4).
 
     At r_t=0 this reduces to (k_t/2)*sum_p |ΔR|^2, which with k_t=m/dt^2
-    equals the model-(a) kinetic_energy exactly.
+    equals the kinetic_energy exactly (the linear limit).
 
     Parameters
     ----------
@@ -295,13 +295,15 @@ def action(
 ) -> float:
     """Discrete Lorentzian brane action S[R] over the full world-volume.
 
-    Model a (default, temporal_model='a'):
-        S[R] = sum_l dt * (T^{l+1/2} - V^l)
-        T^{l+1/2} = (m/2) * sum_p |(R^{l+1} - R^l) / dt|^2   (r_t = 0)
+    Routes on params.r_t:
 
-    Model b (temporal_model='b'):
-        S[R] = sum_l dt * (T_b^{l+1/2} - V^l)
-        T_b^{l+1/2} = (k_t/2) * sum_p (|R^{l+1} - R^l| - r_t)^2
+    r_t == 0 (linear/Verlet limit):
+        S[R] = sum_l dt * (T^{l+1/2} - V^l)
+        T^{l+1/2} = (m/2) * sum_p |(R^{l+1} - R^l) / dt|^2
+
+    r_t > 0 (canonical prestressed temporal spring):
+        S[R] = sum_l dt * (T_spring^{l+1/2} - V^l)
+        T_spring^{l+1/2} = (k_t/2) * sum_p (|R^{l+1} - R^l| - r_t)^2
 
     IMPORTANT: S is Lorentzian and therefore a SADDLE — unbounded below.
     The solver must root-find grad S = 0, not minimize S.
@@ -323,13 +325,14 @@ def action(
     N_plus_1 = world.shape[0]
     dt = params.dt
 
-    if params.temporal_model == "b":
+    use_spring = (params.r_t > 0.0)
+    if use_spring:
         k_t = params.resolved_k_t(mass)
         r_t = params.r_t
 
     S = 0.0
     for l in range(N_plus_1 - 1):
-        if params.temporal_model == "b":
+        if use_spring:
             T = temporal_link_energy(world[l], world[l + 1], k_t, r_t)
         else:
             T = kinetic_energy(world[l], world[l + 1], mass, dt)

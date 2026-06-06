@@ -251,7 +251,6 @@ def _ivp_warm_start(
             dt=params.dt,
             n_slices=N,
             m_ambient=params.m_ambient,
-            temporal_model=params.temporal_model,
             r_t=params.r_t,
         ),
         mass=problem.mass,

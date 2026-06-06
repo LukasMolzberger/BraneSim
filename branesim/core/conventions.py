@@ -87,6 +87,10 @@ class LatticeParams:
 class ActionParams:
     """Parameters for the discrete brane action.
 
+    The substrate is the 4D-isotropic central-force spring lattice.  Every
+    link (3 spatial + 1 temporal) is the same spring ½k(|ΔR|−r)².  The
+    temporal link's rest length is ``r_t``.
+
     Parameters
     ----------
     k_s : float
@@ -101,25 +105,27 @@ class ActionParams:
         Number of timelike slices ``N`` (world-volume has slices 0..N).
     m_ambient : int or None
         Number of ambient components (default dim+1; canonical d=3 → m=4).
-    temporal_model : str
-        ``"a"`` (zero-rest-length kinetic) or ``"b"`` (central-force temporal
-        spring).  Default ``"a"`` — the validated IVP model.
-    r_t : float
-        Temporal rest length.  Must be 0.0 for model ``"a"``.
-        For model ``"b"`` must equal ``alpha * beta * dt`` (enforced in
-        ``__post_init__``).  Use 0.0 as a sentinel to trigger auto-computation
-        from ``alpha``, ``beta``, and ``dt`` for model ``"b"`` — but note
-        that r_t==0 is explicitly rejected for model ``"b"`` after that
-        computation (a zero rest length collapses model b back to model a
-        and is caught as a user error).
+    r_t : float or None
+        Temporal rest length.  ONE 4D-isotropic spring law parameterized by
+        r_t — not two models; the r_t→0 limit is linear.
+
+        - ``None`` or ``0.0`` (default): the linear/Verlet limit — the temporal
+          force collapses exactly to the second-difference ``m/dt²(R⁺−2R+R⁻)``.
+          The safe default and the validated wave/dispersion regime.
+        - ``alpha * beta * dt``: the canonical prestressed substrate (α_t = α),
+          where the temporal link is a central-force spring like the spatial
+          ones.  Opt in by setting this explicitly in the experiment config.
+        - Any positive value: explicit temporal rest length.
+
+        Must be >= 0.  Validated in ``__post_init__``.
     k_t : float or None
-        Temporal spring constant for model ``"b"``.  ``None`` (default)
-        means use ``m / dt^2`` where ``m = rho * a^dim``; the caller
-        must supply ``m`` when resolving ``k_t`` at runtime (see
-        ``resolved_k_t``).
+        Temporal spring constant.  ``None`` (default) means use ``m / dt²``
+        where ``m = rho * a^dim``; the caller must supply ``m`` when
+        resolving ``k_t`` at runtime (see ``resolved_k_t``).
     beta : float
-        Rest-length scale factor; ``r_t = alpha * beta * dt`` for model
-        ``"b"``.  Default 1.0 (canonical physical value).
+        Scale factor for the canonical prestressed rest length
+        ``r_t = alpha * beta * dt``.  Default 1.0.  (Only relevant when a caller
+        sets r_t to the prestressed value; the default r_t is the 0 limit.)
     """
 
     k_s: float = 1.0
@@ -128,8 +134,7 @@ class ActionParams:
     dt: float = 0.1
     n_slices: int = 10
     m_ambient: int | None = None
-    temporal_model: str = "a"
-    r_t: float = 0.0
+    r_t: float | None = None
     k_t: float | None = None
     beta: float = 1.0
 
@@ -140,32 +145,15 @@ class ActionParams:
             raise ValueError("dt must be positive")
         if self.n_slices < 1:
             raise ValueError("n_slices must be >= 1")
-        if self.temporal_model not in ("a", "b"):
-            raise ValueError("temporal_model must be 'a' or 'b'")
-        if self.temporal_model == "a":
-            if self.r_t != 0.0:
-                raise ValueError("r_t must be 0.0 for temporal_model='a'")
-        else:
-            # model "b": enforce r_t == alpha * beta * dt (α_t = α commitment)
-            r_t_required = self.alpha * self.beta * self.dt
-            if self.r_t == 0.0:
-                # Allow the caller to omit r_t; set it automatically.
-                object.__setattr__(self, "r_t", r_t_required)
-            else:
-                # Caller supplied r_t explicitly; validate it matches.
-                if not math.isclose(self.r_t, r_t_required, rel_tol=1e-12, abs_tol=1e-15):
-                    raise ValueError(
-                        f"For temporal_model='b', r_t must equal alpha*beta*dt = "
-                        f"{r_t_required:.6g}; got r_t={self.r_t:.6g}. "
-                        "Pass r_t=0.0 (or omit it) to auto-compute."
-                    )
-            # After potential auto-set, validate r_t is strictly positive.
-            if self.r_t == 0.0:
-                raise ValueError(
-                    "temporal_model='b' with r_t==0 is not allowed: "
-                    "a zero rest length collapses model b to model a. "
-                    "Use temporal_model='a' for the zero-rest-length path."
-                )
+
+        # Resolve r_t: None → 0.0 (the linear/Verlet limit, the safe default).
+        # The canonical prestressed substrate is opt-in via an explicit
+        # r_t = alpha * beta * dt set in the experiment config.
+        if self.r_t is None:
+            object.__setattr__(self, "r_t", 0.0)
+
+        if self.r_t < 0.0:
+            raise ValueError(f"r_t must be >= 0; got {self.r_t}")
         if self.k_t is not None and self.k_t <= 0.0:
             raise ValueError(f"k_t must be positive when supplied; got {self.k_t}")
 
@@ -181,7 +169,7 @@ class ActionParams:
 
         If ``k_t`` was supplied explicitly, return it.
         Otherwise return the canonical default ``m / dt^2`` which makes the
-        r_t→0 limit of model (b) reduce term-for-term to the model (a) stencil.
+        ``r_t → 0`` spring force reduce term-for-term to the linear Verlet stencil.
 
         Parameters
         ----------

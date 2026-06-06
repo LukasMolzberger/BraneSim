@@ -70,8 +70,9 @@ T^{l+½}    = Σ_p (m/2) ( (R_p^{l+1} − R_p^l)/Δt )²                       (
 - Spacelike links enter with `−` (potential), temporal with `+` (kinetic): this
   sign **is** the Lorentzian signature (backbone #21, A5). The ambient is
   Euclidean/symmetric; the signature lives in the action.
-- Temporal link (model a) is zero-rest-length, quadratic in the raw 4-vector
-  increment (no norm-then-subtract). See DESIGN DECISION D3 for model (b).
+- The temporal link is a central-force spring `½ k_t(|ΔR| − r_t)²` like the
+  spacelike links; its `r_t = 0` limit is the zero-rest-length kinetic increment
+  (quadratic, no norm-then-subtract). See DESIGN DECISION D3.
 
 ### 1.3 The solve (the core problem)
 Stationarity `δS/δR_p^l = 0` at every **interior** node gives the discrete
@@ -145,13 +146,15 @@ architecture is built so the choice is localized to the solver module.
     (`R^{l+P}=R^l`, period/frequency the eigenparameter) + localized-in-space**,
     not two-time Dirichlet and not IVP. Nonlinear global uniqueness stays open
     (`OPEN_PROBLEMS A2`).
-- **D3 — Temporal-link model a vs b (A4, `discrete_4d_brane_action.md` §6).**
-  Model (a): zero-rest-length kinetic increment (= plain Newton, matches the
-  validated dispersion). Model (b): central-force temporal spring with rest
-  length `r_t=α_t βΔt`, which adds a geometric quartic in the time link (the
-  natural home for backbone #22's time-dilation face). They coincide iff
-  `r_t=0`. **Default: model (a)**; expose `r_t` as a parameter so (b) is reachable
-  without an architecture change. Settle via the gravity/contraction channel.
+- **D3 — Temporal-link form (A4, `discrete_4d_brane_action.md` §6).** The temporal
+  link is a central-force spring with rest length `r_t`, the same law as the
+  spacelike links — **one 4D-isotropic spring parameterized by `r_t`, not a fork**.
+  `r_t = 0` is the linear/Verlet limit (zero-rest-length kinetic = plain Newton,
+  matches the validated dispersion — the **default**); `r_t = α·β·dt` is the
+  prestressed substrate, adding the time-link geometric quartic (backbone #22's
+  time-dilation face). IMPLEMENTED 2026-06-05: `ActionParams.r_t`; the residual
+  routes on `r_t` (0 → Verlet stencil, >0 → spring force), bit-identical at `r_t→0`.
+  Newtonian-limit/isotropy of `α_t=α` settled via the gravity/contraction channel.
 - **D4 — Solver state size.** A full block at `N` slices × `N_x³` nodes × 4
   components × float64 is large. DESIGN DECISION: matrix-free residual (never
   assemble the Jacobian); slab/streaming storage; optionally solve in a reduced
@@ -257,7 +260,7 @@ length-1 string arrays inside `.npz`; `allow_pickle=False` everywhere.
 | `boundary_indices` | i64 `(Nb,)` | which `l` each boundary slice pins (e.g. `[0,1]` IVP, `[0,N]` BVP) |
 | `boundary_mask_json` | str[1] | which components/nodes are fixed (for partial BCs / chirality) |
 | `lattice_json` | str[1] | `{grid_shape, spacing, periodic_axes, axial_weight, dim}` |
-| `action_json` | str[1] | `{k_s, m (or ρ), alpha, dt, n_slices N, temporal_model:"a"|"b", r_t}` |
+| `action_json` | str[1] | `{k_s, m (or ρ), alpha, dt, n_slices N, r_t (0 = linear limit; α·β·dt = prestressed), k_t}` |
 | `seed_json` | str[1] | seed/ansatz metadata (J, L, B_winding, …) |
 | `metadata_json` | str[1] | provenance |
 
@@ -326,7 +329,7 @@ def march(problem: BoundaryProblem, opts: SolveOpts) -> WorldVolume:
   "initialization": {"module": "...seeds.skyrme_twisted", "n_slices": 200,
                      "grid_size": 60, "spacing": 1.0, "alpha": 0.2,
                      "periodic_axes": [true,true,true], "seed_params": {...}},
-  "solver": {"mode": "bvp", "temporal_model": "a", "r_t": 0.0,
+  "solver": {"mode": "bvp", "r_t": 0.0,
              "method": "jfnk", "tol_residual": 1e-8, "max_iter": 200,
              "warm_start": "ivp", "dt": 0.05},
   "diagnostics": {"frame_stride": 5, "confinement_radius_factor": 0.5, ...},
@@ -408,8 +411,9 @@ with:
   `solver/boundary.py` is currently **buggy** (converges to a residual-zero but
   wrong solution — see memory). Until fixed, only the IVP and (ill-conditioned)
   Dirichlet-BVP paths are usable. Nonlinear global uniqueness stays open.
-- **A4 (temporal model a/b):** parameterized (`r_t`), default (a); settle via the
-  gravity channel.
+- **A4 (temporal link):** one 4D-isotropic spring parameterized by `r_t` (0 = linear
+  limit, the default; `α·β·dt` = prestressed) — implemented; `α_t=α` Newtonian-limit
+  /isotropy settled via the gravity channel.
 - **C1 (StVK non-coercivity):** the energy doesn't penalize collapse; relevant if
   lattice-scale/large-amplitude solitons are pursued — possible polyconvex
   completion is a deliberate, separate change.

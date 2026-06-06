@@ -24,7 +24,7 @@ BASE = {
     "action": {
         "k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1,
         "n_slices": 512, "m_ambient": 4,
-        "temporal_model": "a", "r_t": 0.0,
+        "r_t": 0.0,
     },
     "solver": {"mode": "bvp_chiral", "chirality": "forward"},
 }

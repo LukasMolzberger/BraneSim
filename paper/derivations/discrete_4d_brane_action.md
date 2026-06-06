@@ -41,9 +41,9 @@ Conventions match `principles.md` §1.1/§1.1a, `backbone.md` #15/#21/#22, and
   Skyrme term, backbone #17, is next order).
 - **A8.** Inversion-symmetric stencil (each `δ` paired with `−δ`, equal weights).
 - **A9 (constitutive).** Spacelike: central-force pair springs
-  `U_link = ½ k_s (|R_{p+δ}^l − R_p^l| − α a)²`. Temporal (model a):
-  zero-rest-length quadratic in the raw 4-vector increment,
-  `½ m ((R_p^{l+1} − R_p^l)/Δt)²`.
+  `U_link = ½ k_s (|R_{p+δ}^l − R_p^l| − α a)²`. Temporal: the same central-force
+  spring `½ k_t (|R_p^{l+1} − R_p^l| − r_t)²` (§6); its `r_t = 0` linear limit is
+  the zero-rest-length kinetic increment `½ m ((R_p^{l+1} − R_p^l)/Δt)²`.
 
 ---
 
@@ -201,11 +201,12 @@ isotropic-Lorentzian only when:
 
 ---
 
-## 6. Alternative model (b): temporal central-force spring
+## 6. The temporal central-force spring and its linear limit
 
-**Design alternative, not baseline.** Replace the zero-rest-length increment
-with a genuine central-force spring along time (own rest length
-`α_t β Δt`, prestress), Lorentzian sign:
+**The temporal link is a central-force spring** along time (own rest length
+`r_t = α_t β Δt`, prestress), Lorentzian sign — the same law as the spacelike
+links, so the substrate is one 4D-isotropic spring lattice. The `r_t = 0` limit
+recovers the zero-rest-length kinetic increment of §2 (the linear/Verlet limit):
 
 $$
 T^{l+\frac12}_{(b)} = \sum_p \frac{k_t}{2}\Big(\big|R_p^{l+1}-R_p^l\big| - \alpha_t\,\beta\,\Delta t\Big)^2 .
@@ -246,18 +247,17 @@ quartic** (and higher norm-nonlinearities) in the time link whose coefficient is
 quartic is the time-link analogue of the Skyrme/contraction term (#17) and is
 the natural home for backbone #22's unified contraction — gravitational time
 dilation sourced by spacelike/kinetic displacement stretching the timelike link.
-**Correction to an earlier framing:** the distinction is *not* transverse
-stiffness — `½ k_t |ΔR|²` already has isotropic Hessian, so model (a)'s time link
-does respond to transverse changes (that response is literally the kinetic
-energy). The genuine distinction is the norm-nonlinearity / geometric quartic,
-present iff `r_t ≠ 0`.
+**Note:** the distinction is *not* transverse stiffness — `½ k_t |ΔR|²` already
+has isotropic Hessian, so the `r_t = 0` limit's time link does respond to
+transverse changes (that response is literally the kinetic energy). The genuine
+distinction is the norm-nonlinearity / geometric quartic, present iff `r_t ≠ 0`.
 
-Consequently the convergence point `r_t = 0` is exactly where model (b) loses
-its reason to exist: `r_t` dials between "matches plain Newton and the existing
-Verlet code" (`r_t = 0`) and "a non-Newtonian time link that can carry gravity's
-second face" (`r_t > 0`), and the two models touch only at that endpoint.
-Whether (a) or (b) is the correct foundational choice is **undecided**
-(OPEN_PROBLEMS, design fork).
+So `r_t` dials between the **linear/Verlet limit** ("matches plain Newton and the
+existing Verlet code", `r_t = 0`) and the **canonical prestressed substrate** ("a
+non-Newtonian time link that carries gravity's second face", `r_t = α·β·dt`); the
+two touch only at `r_t = 0`. This is **one model parameterized by `r_t`** —
+resolved and implemented (`ActionParams.r_t`; OPEN_PROBLEMS A4); the `α_t = α`
+consistency is the open verification (A4a).
 
 ---
 
@@ -302,14 +302,16 @@ assumption (A9) or the integrator's variational property.
 2. **Posited (A5):** the Lorentzian sign. The ambient is symmetric; the
    signature is an input (backbone #21).
 3. **Posited (A2):** the held timelike spacing `β Δt`; whether `β` is physical
-   or a discretization gauge is not fixed in model (a) (the time link has zero
-   rest length). It becomes physical only in model (b).
+   or a discretization gauge is not fixed in the `r_t = 0` limit (the time link
+   has zero rest length). It becomes physical when `r_t > 0`.
 4. **Not derived:** emergent isotropic Lorentz invariance (§4 gives only the
    tuning condition); inside-observer blindness to the `√(1−α)` anisotropy is
    the load-bearing conjecture (backbone #8, OPEN_PROBLEMS A3).
 5. **Pointed to, not derived:** unboundedness / BVP well-posedness (§5,
    OPEN_PROBLEMS A1/A2).
-6. **Undecided:** model (a) vs (b) (§6).
+6. **Resolved + implemented:** the temporal link is a central-force spring
+   parameterized by `r_t` (§6); `r_t = 0` is the linear/Verlet limit. The open
+   piece is the `α_t = α` consistency (A4a), not the link form.
 7. **Constitutive dependence:** the EL = Verlet identity (§3) and unboundedness
    (§5) are constitutive-law-independent (survive any isotropic hyperelastic
    `V`); the specific `c_L, c_T` values (§4) are StVK/central-force-specific.

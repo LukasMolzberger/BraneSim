@@ -61,7 +61,7 @@ def save_boundary_problem(
     lattice : dict
         Keys: grid_shape, spacing, periodic_axes, axial_weight, dim.
     action : dict
-        Keys: k_s, alpha, rho, dt, n_slices, temporal_model, r_t.
+        Keys: k_s, alpha, rho, dt, n_slices, r_t.
     boundary_mask : dict, optional
         Which components/nodes are fixed (for partial BCs / chirality).
     seed : dict, optional

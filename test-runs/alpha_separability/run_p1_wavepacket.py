@@ -153,7 +153,6 @@ def run_standing_wave(
         rho=RHO,
         dt=dt,
         n_slices=n_steps,
-        temporal_model="a",
         r_t=0.0,
     )
     mass = RHO * A_SPACING**3

@@ -358,7 +358,6 @@ def find_resonant_N(
             dt=action_params_template.dt,
             n_slices=N,
             m_ambient=action_params_template.m_ambient,
-            temporal_model=action_params_template.temporal_model,
             r_t=action_params_template.r_t,
         )
         cond = dirichlet_condition_estimate(lattice_params, ap)

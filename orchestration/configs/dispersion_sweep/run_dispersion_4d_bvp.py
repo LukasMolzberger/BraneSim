@@ -201,6 +201,7 @@ def run_one(
     )
     lattice = SpacelikeLattice(lp)
     m = int(acfg.get("m_ambient", lp.dim + 1))
+    r_t_cfg = acfg.get("r_t", None)
     ap = ActionParams(
         k_s=float(acfg["k_s"]),
         alpha=float(acfg["alpha"]),
@@ -208,8 +209,7 @@ def run_one(
         dt=float(acfg["dt"]),
         n_slices=int(acfg["n_slices"]),
         m_ambient=m,
-        temporal_model=str(acfg.get("temporal_model", "a")),
-        r_t=float(acfg.get("r_t", 0.0)),
+        r_t=float(r_t_cfg) if r_t_cfg is not None else None,
     )
     mass = ap.rho * lp.spacing ** lp.dim
     N = ap.n_slices

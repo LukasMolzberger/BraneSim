@@ -287,19 +287,20 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       differ only in boundary conditions; (b) the long-wavelength cone speeds
       are `c_L² = k_s a²/m` and `c_T² = (1−α) k_s a²/m`, fixing the lattice
       light-cone via the temporal-to-spacelike stiffness ratio.
-    - **Temporal-link form (decided 2026-06-05): model (b).** The timelike link is
-      a genuine central-force spring `½ k_t (|ΔR| − r_t)²` with its own rest length
-      `r_t ≠ 0` (temporal prestress `α_t`) — fully symmetric 4D-cubic. This exposes a
-      real model parameter rather than hiding it, and supplies the time-link geometric
-      quartic that #22's unified contraction (gravitational time dilation) requires.
-      Model (a) (zero-rest-length kinetic, plain Newton, current code) is the `r_t = 0`
-      *special case*; the exact dynamics is non-Newtonian, so the block solver is the
-      foundational integrator and forward Verlet is its `r_t = 0` IVP limit. A
-      **single** prestress `α` governs all four directions (each link's rest length
-      = `α ×` its held spacing; adopted 2026-06-05), tying soliton binding and
-      gravitational time dilation to one dial; consistency (light-cone isotropy +
-      Newtonian limit) is the open verification, `OPEN_PROBLEMS.md` A4a.
-      See the derivation §6 and `OPEN_PROBLEMS.md` A4.
+    - **Temporal-link form: the timelike link is a central-force spring**, like the
+      three spacelike links — `½ k_t (|ΔR| − r_t)²` with temporal rest length `r_t` —
+      so the substrate is a fully symmetric 4D-cubic spring lattice. This is **one
+      model parameterized by `r_t`, not a fork**: `r_t = α·β·dt` is the canonical
+      prestressed substrate (a **single** prestress `α` governs all four directions —
+      each link's rest length = `α ×` its held spacing; adopted 2026-06-05), and
+      `r_t = 0` is the **linear/Verlet limit** (zero-rest-length kinetic, plain
+      Newton) used for wave/dispersion validation. The prestressed time link supplies
+      the geometric quartic that #22's unified contraction (gravitational time
+      dilation) requires, tying soliton binding and time dilation to the one dial `α`.
+      The exact dynamics is non-Newtonian, so the 4D block solver is the foundational
+      integrator and forward Verlet is its `r_t = 0` IVP limit. Consistency of
+      `α_t = α` (light-cone isotropy + Newtonian limit) is the open verification,
+      `OPEN_PROBLEMS.md` A4a. See the derivation §6 and `OPEN_PROBLEMS.md` A4.
       The Lorentzian action is a saddle (unbounded below), so a foundational
       block solver must root-find `∇S = 0`, not minimize `S` (OPEN_PROBLEMS §A).
 

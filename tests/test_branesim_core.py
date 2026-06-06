@@ -59,8 +59,9 @@ def flat_positions(lattice: SpacelikeLattice, m_ambient: int) -> np.ndarray:
 
 
 def make_params(n_slices=20, dt=0.1, alpha=ALPHA):
+    # r_t=0.0: the linear/Verlet limit (dispersion and residual validation tests).
     return ActionParams(
-        k_s=1.0, alpha=alpha, rho=1.0, dt=dt, n_slices=n_slices,
+        k_s=1.0, alpha=alpha, rho=1.0, dt=dt, n_slices=n_slices, r_t=0.0,
     )
 
 
@@ -220,7 +221,7 @@ class TestDispersionRegression:
         n_slices = 6 * int(2 * math.pi / theta) + 10
 
         params = ActionParams(
-            k_s=1.0, alpha=ALPHA, rho=1.0, dt=self.DT, n_slices=n_slices,
+            k_s=1.0, alpha=ALPHA, rho=1.0, dt=self.DT, n_slices=n_slices, r_t=0.0,
         )
 
         R_ref = flat_positions(lattice, m_ambient)
@@ -341,7 +342,7 @@ class TestDynamicalMatrix:
         """A pure Cartesian-polarized wave stays in its polarization direction."""
         grid_shape = (16, 16, 16)
         lattice = make_lattice(grid_shape, periodic=True)
-        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=20)
+        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=20, r_t=0.0)
         mass = 1.0
         m_ambient = 4
 
@@ -666,7 +667,6 @@ class TestIOContracts:
             "rho": params.rho,
             "dt": params.dt,
             "n_slices": params.n_slices,
-            "temporal_model": params.temporal_model,
             "r_t": params.r_t,
         }
 
@@ -824,7 +824,7 @@ class TestEnergyConservation:
 
     def test_energy_drift_small(self):
         lattice = make_lattice((8, 8, 8), periodic=True)
-        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=100)
+        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=100, r_t=0.0)
         mass = 1.0
         m_ambient = 4
 
