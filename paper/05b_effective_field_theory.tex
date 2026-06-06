@@ -69,6 +69,8 @@ Decomposing into trace and traceless parts,
 suggests a direct route to a ``QCD-like'' internal gauge structure in the slow-sector EFT:
 the $U(1)$ part behaves electromagnetism-like, while the traceless part carries non-Abelian self-couplings through
 the curvature commutator term in $\mathcal{F}_{\mu\nu}$.
+The pairing of an Abelian factor with a non-Abelian one, and the normalization relating them, is the familiar
+structure of unified gauge theory \citep{GeorgiGlashow1974,BaezHuerta2010GUTAlgebra}.
 Crucially, for nonzero inter-axis mixing, statements about ``a Berry phase per axis'' are not gauge-invariant; the
 invariant content is the holonomy/curvature of the transported subspace (Wilczek--Zee).
 In that sense, the triplet sector is the natural effective setting in which a baryon-like confined mode should first be
@@ -90,19 +92,25 @@ sector; it is therefore not a pure-EM excitation.
 
 \paragraph{Topological structure of the two sectors.}
 The $U(1)$ and $SU(3)$ factors carry sharply different topology, which is a mathematical fact about
-the target spaces of the respective $\Psi$-sectors:
+the target spaces of the respective $\Psi$-sectors
+\citep{Kibble1976Topology,VilenkinShellard1994,MantonSutcliffe2004}:
 \begin{itemize}
   \item $\pi_1(U(1)) = \mathbb{Z}$: the $U(1)$/EM sector admits \emph{line vortex defects} (codimension~2
     in the 3D slice; a 2D worldsheet in the 4D ambient).
     A $U(1)$ vortex is a configuration in which the carrier phase winds by $2\pi$ around the
-    vortex core.
+    vortex core \citep{NielsenOlesen1973,HindmarshKibble1995CosmicStrings}.
   \item $\pi_1(SU(3)) = 0$ (simply connected): the $SU(3)$/color sector admits \emph{no} vortices.
   \item $\pi_3(SU(3)) = \mathbb{Z}$: the $SU(3)$ sector admits \emph{textures} (Skyrmion/instanton-type,
-    codimension~3; a localized lump / worldline in 4D).
+    codimension~3; a localized lump / worldline in 4D) \citep{Skyrme1962,AtiyahManton1989}.
 \end{itemize}
 The two emergent charge sectors therefore support topologically \emph{different} classes of
 localized objects: codim-2 vortex worldsheets in the EM/$U(1)$ sector versus codim-3 texture
 worldlines in the color/$SU(3)$ sector.
+Field theory provides explicit precedents both for the coexistence of these sectors and for the subtlety of
+their stability: a gauged $U(1)$ vortex can carry internal non-Abelian orientational moduli (semilocal and
+non-Abelian vortices), and such defects can be stable for dynamical rather than purely topological reasons---e.g.\
+semilocal strings are stable on a simply connected vacuum below a critical scalar-to-vector mass ratio
+\citep{VachaspatiAchucarro1991Semilocal,AchucarroVachaspati2000,AuzziBolognesiEvslinKonishiYung2003,Eto2021OrientationalModuli}.
 This is a structural observation about the target space of the $U(3)$ field; which of these
 topological objects the substrate dynamics actually stabilizes, and the identification of specific
 objects with physical particles, are targets of the numerical program rather than conclusions of
@@ -129,3 +137,7 @@ An effective Dirac-type envelope equation is then understood as a compact coupli
 In particular, a ``charge''-like coupling parameter is not introduced as a fundamental constant of a new field;
 it appears as an effective conversion factor between the normalization conventions of the envelope field and the
 geometric connection extracted from the substrate.
+That a single parameter can set the relative normalization between Abelian and non-Abelian gauge sectors is itself
+familiar---e.g.\ the Abelian kinetic-mixing parameter \citep{Holdom1986KineticMixing,Fabbrichesi2021DarkPhoton} and
+the single charge-embedding parameter that fixes the Abelian-to-non-Abelian coupling ratio in extended gauge groups
+\citep{Hati2017LeftRight3331}.
