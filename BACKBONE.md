@@ -395,3 +395,33 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       this is `0.3077` (`OPEN_PROBLEMS.md` D2;
       `paper/derivations/alpha_holonomy_estimator.md`). A `>10%` deviation
       falsifies the spectral-susceptibility factorization behind this picture.
+
+25. **Two particle sectors in `U(3)`, with sharply different topology — and they do
+    not fully separate** (design discussion 2026-06-06; experiment in `EXPERIMENT.md`)
+    - The carrier-complexified substrate displacement is a `U(3)` field,
+      `U(3)=U(1)×SU(3)`, split by the rest length `α`. The two factors carry
+      *different* topology:
+      - `π₁(U(1))=ℤ` → **line vortices**. The EM / electron-like object is a `U(1)`
+        carrier-phase vortex — codim-2: a line (donut axis) in a 3D slice, a **2D
+        worldsheet** in 4D. A `2π` tumble of its axis gives the `ℤ₂`
+        Finkelstein–Rubinstein holonomy (**spin-½**); the temporal carrier holonomy
+        is the geometric phase / **EM charge**. The two holonomies are distinct.
+      - `π₁(SU(3))=0` (no vortices), `π₃(SU(3))=ℤ` → **textures**. The color / baryon
+        object is an `SU(3)` Skyrmion/instanton texture — codim-3, a localized lump /
+        worldline. Topologically and geometrically a *different* object from the EM
+        vortex (this is why the baryon search behaved nothing like the vortex).
+    - **Protection ≠ participation.** It is *one* `U(3)` field, so both sectors
+      participate in every particle: the `SU(3)` sector is `π₁`-trivial yet
+      dynamically coexcited around a `U(1)` vortex and can be load-bearing for its
+      stabilization — a **color-singlet electron may still be `SU(3)`-stabilized**
+      (a baryon is colorless yet `SU(3)`-confined *inside*). The sectors cannot be
+      cleanly separated; `SU(3)` is never frozen.
+    - **Deterministic extended particles.** The model is deterministic (no
+      probabilities); a particle is a real extended `U(3)` wave-structure with an
+      actual size/shape — the quantum "point-like electron" does not apply here.
+    - **Scale hierarchy (falsifiable).** `α` sets the *differential* stiffness of the
+      trace-`U(1)` vs traceless-`SU(3)` sectors, hence wildly different characteristic
+      scales — the candidate origin of the QCD (confinement, tiny) vs EM/atomic
+      (large) scale split. Falsifiable: the scale ratio of the `U(1)` vortex vs the
+      `SU(3)` texture should track `f(α)`. The hierarchy lives in the `α`-controlled
+      nonlinear sector, not the curvature-free linear spectrum (#16).

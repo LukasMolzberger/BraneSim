@@ -227,6 +227,11 @@ no sign error in the α≈0.5–0.8 sweet-spot story.
 (α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
 
 ### C2. Rest baryon — `open` · ⚠ ALL prior nonlinear runs RETRACTED 2026-06-05 (unclamped pretension + hard-coded B-estimator); restarting periodic-clamped + eigenstate
+**Reframed 2026-06-06 (BACKBONE #25, D4):** the baryon is specifically the `SU(3)`
+`π₃` **texture** (a localized Skyrmion/instanton, codim-3) — topologically a different
+object from the `U(1)` carrier-phase **vortex** (the EM/electron-like object, codim-2,
+`π₁`). The **active first experiment is the `U(1)` vortex** (`EXPERIMENT.md`/D4),
+which is `π₁`-protected and the cleaner test; the `SU(3)` texture (this entry) follows.
 **Statement.** The time-periodic, amplitude-breathing baryon ansatz (the
 common-carrier Skyrme breather, `solve_breather(mode="topological")`) **exists
 but is dynamically unstable, and prestress α does not stabilize it.** Converged
@@ -429,6 +434,24 @@ axis (`[[project_complex_u1_from_time]]`), so `A_μ` is intrinsically a 4-covect
 **Candidate approach.** Effective-field-theory reduction of the substrate action about the carrier
 band → `S_eff[A]`; verify the `F²` form + masslessness; read the coupling from the fibre metric
 (D2). Owner: physics-derivation + berry-validator. See `paper/05` §5.2.
+
+### D4. EM = `U(1)` vortex / color = `SU(3)` texture; do they bind, and does color stabilize the electron? — `open` (active experiment, 2026-06-06)
+**Statement.** The `U(3)=U(1)×SU(3)` field carries two topologically distinct particle
+sectors (BACKBONE #25): the EM/electron-like object is a `π₁(U(1))=ℤ` carrier-phase
+**vortex** (codim-2 worldsheet, donut cross-section, spin-½ from the `2π` axis tumble,
+charge from the temporal carrier); the color/baryon is a `π₃(SU(3))=ℤ` **texture**
+(`π₁(SU(3))=0` — no vortex). They are one field, so **protection ≠ participation**:
+`SU(3)` is dynamically coexcited around a `U(1)` vortex and may be load-bearing even at
+net-zero color (a color-singlet electron `SU(3)`-stabilized).
+**Open questions.** (i) Does the substrate **bind** the protected `U(1)` vortex
+worldtube at all (clean periodic-clamped `r_t>0` eigenstate — supersedes the retracted
+C2-class attempts)? (ii) Does the `SU(3)` sector coexcite and **stabilize** the
+color-neutral electron? (iii) **Scale hierarchy:** does the size ratio of the `U(1)`
+vortex vs the `SU(3)` texture track `f(α)` — the candidate origin of the QCD-vs-EM
+scale split? (iv) the worldsheet's periodic-closure / `(ω,T)` quantization condition.
+**Status.** This is the active single experiment — full spec in `EXPERIMENT.md`
+(object, injection ansatz, one parameter set, measurement suite, scale ladder).
+Owner: physics-derivation (ansatz/closure) + the build.
 
 ---
 
