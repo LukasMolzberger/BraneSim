@@ -462,20 +462,34 @@ couplings); a static `α` most naturally gives a coupling *ratio*, so a true *sc
 hierarchy is not guaranteed (no geometric-`α` precedent — see the prior-art note).
 (iv) the worldsheet's periodic-closure / `(ω,T)` quantization condition. (v) EM =
 the **trace `(1,1,1)`** lateral direction — a single-component seed is only `⅓` EM.
+**Paper (2026-06-07).** §6.8 now presents this as one of **two complementary numerical
+targets** (the `U(1)` carrier-phase vortex alongside the baryon/`π₃` texture), with the
+vortex framed as a **semilocal** (non-topologically-protected) bound state stable only in
+the type-I `β=(m_scalar/m_vector)²<1` regime (below the Bogomol'nyi point;
+Vachaspati–Achúcarro). The framing — not the resolution — moved into the manuscript; the
+binding question stays open.
 **Status.** This is the active single experiment — full spec in `EXPERIMENT.md`
 (object, injection ansatz, one parameter set, measurement suite, scale ladder).
 Owner: physics-derivation (ansatz/closure) + the build.
 
 ### D5. Massive-vs-massless: the substrate must not Meissner-screen its own `U(1)` photon — `open` (2026-06-06)
-**Statement.** Standard Abelian-Higgs / Ginzburg–Landau is unambiguous: a *condensed*
-medium with a spontaneously fixed order-parameter amplitude `|Ψ|>0` **gives its `U(1)`
-gauge boson a mass** (Anderson–Higgs), `m_γ ∝ |Ψ|`, so the gauge field is **short-range /
-Meissner-screened** with penetration depth `λ`. But the active `U(1)` carrier-phase vortex
-(D4, `EXPERIMENT.md`) is meant to model the **electron/EM**, whose photon is **massless and
-long-range** (Coulomb). A naïvely condensed prestressed substrate therefore risks producing
-the *opposite* regime — a screened, massive, short-range gauge boson (a `W/Z`-like object,
-not the photon). The Meissner screening that GL hands you "for free" is exactly wrong for the
-electron's long-range field.
+**Ontology note (owner, 2026-06-07) — read first.** This entry tracks an *empirical* worry
+about field **range** (does the trace field fall off as `1/r` or exponentially), **not** a
+claim that mass originates from a Higgs mechanism. In this theory **mass is the energy of a
+self-confined wave** — an excitation trapped in an infinite loop back on itself
+(geometric-self-guidance / trapped-mode picture, paper §6.6) — *never* a property handed to a
+gauge field by a symmetry-breaking condensate. The Anderson–Higgs/GL language below is the
+**standard-physics expectation the substrate must NOT inherit**, recorded so the risk is
+explicit; the resolution routes are exactly the ones that avoid it.
+**Statement.** Standard Abelian-Higgs / Ginzburg–Landau would *naively* predict: a *condensed*
+medium with a spontaneously fixed order-parameter amplitude `|Ψ|>0` makes its `U(1)` gauge
+field **short-range / Meissner-screened** (penetration depth `λ<∞`). But the active `U(1)`
+carrier-phase vortex (D4, `EXPERIMENT.md`) is meant to model the **electron/EM**, whose photon
+is **free and long-range** (Coulomb `1/r`). A naïvely condensed prestressed substrate therefore
+risks producing the *opposite* regime — a short-range, **self-trapped, non-radiative** trace
+field where a free photon is required. The screening that GL hands you "for free" is exactly
+wrong for the electron's long-range field, and the job here is to confirm the substrate does
+**not** sit in that regime for the trace-`U(1)`.
 **Why it matters.** This is load-bearing for the experiment being built now. If the
 in-substrate vortex screens its own emergent gauge field, the object is not EM-like, and the
 `F_μν → E,B` gauge-layer measurement would show exponential (not `1/r`) fall-off. It is the
@@ -496,6 +510,11 @@ vortices live precisely in the window where masslessness can survive. **Decisive
 (`λ → ∞`, power-law `B`/current tail) confirms massless EM; exponential screening falsifies the
 EM identification and flags a `W/Z`-class object instead. **Do not import `e* = 2e`** (Cooper
 pairing) — the carrier is single-charge.
+**Note (2026-06-07).** Kept out of the paper — this screening worry is an internal tracker
+item only. (A `§6.5` "companion falsifiable check" paragraph was briefly added and then
+**removed**: the owner does not want an Anderson–Higgs / screening discussion in the
+manuscript. Mass in this theory is a self-confined wave, not a Higgs effect; see
+[[feedback_mass_is_self_confinement]].)
 **Status.** open. Owner: physics-derivation (which `U(1)` survives massless) + the active
 build (screening-length diagnostic). Tightens D3(ii); shares the semilocal-binding regime with
 D4(i). Surfaced from R. Behiel's *Superconductivity and the Higgs Field* (Anderson–Higgs).
