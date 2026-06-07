@@ -99,7 +99,17 @@ eigen-BVP, rather than fixing `n_t` a priori.
 
 ## Group II — Instrumentation: devices that report misleading verdicts
 
-### E5. D3 winding device has inverted pass/fail and a self-contradictory verdict — `open`
+### E5. D3 winding device has inverted pass/fail and a self-contradictory verdict — `resolved` (2026-06-07)
+
+> **Resolved.** `device_winding` now targets the real physics: `winding_z ≈ m`
+> (from `config["vortex_params"]["m"]`, threaded through the dispatch like the
+> binding probe's `n_t`) AND `winding_x, winding_y ≈ 0` AND constant across the
+> loop. Returns `winding_ok`/`verdict`; the stale contractible-ring note is gone.
+> Verified: the m=1 seed now reads **PASS** (was "FAIL"); the non-converged
+> relaxed state reads **FAIL** with a correct reason (winding_z drifted to −1.94,
+> off-axis 2.0) — which also gives E9 real teeth (winding preservation is now
+> actually checked, and currently fails on the WIP relaxation, as expected).
+
 
 For the `Y_1^1` seed the experiment *wants* `winding_z = m = 1`
 (`winding_closure.json`: `winding_through_z_normal = 1.0`, `winding_ok = true`).
@@ -209,6 +219,22 @@ independently of the actual nonlinear JFNK behavior. It is surfaced as the run's
 capture. Either compute an empirical conditioning estimate from the Krylov
 iteration, or label this number as "linear modal estimate (not the achieved
 nonlinear conditioning)."
+
+### E13. `_write_report` crashes when run on a device subset — `open`
+
+`run_measurements(..., devices=[...])` with a subset (e.g. `["winding"]`) crashes
+in `_write_report`: absent devices leave their metrics as the default string
+`'N/A'`, which is then fed to a `:.4g`/`:.2e` format spec
+(`ValueError: Unknown format code 'g' for object of type 'str'`,
+`run_measurements.py:1116`). The full 8-device suite runs every device so this is
+invisible in production, but it blocks re-running a single device on an existing
+run folder (e.g. to re-check D3 after a fix). Pre-existing; found while verifying
+the E5 fix.
+
+**Falsifier / fix.** Format report values through a small safe-format helper that
+passes non-numeric defaults through unformatted (e.g. `_fmt(v, ".4g")` returning
+`str(v)` when `v` is not a number), so a partial `results` dict renders "N/A"
+rather than raising.
 
 ---
 

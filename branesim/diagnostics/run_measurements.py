@@ -387,59 +387,107 @@ def device_winding(
     lattice: SpacelikeLattice,
     params: ActionParams,
     out_dir: Path,
+    m_expected: int | None = None,
 ) -> dict[str, Any]:
     """D3: U(1) phase winding per time slice.
 
-    No hard-coded estimator: uses discrete plaquette sum through actual field.
-    For a contractible vortex ring, expected net winding = 0 through all planes.
-    The LOCAL winding density (±1 around the tube) is measured implicitly via
-    the confinement of the excess energy in D1/D2.
+    No hard-coded estimator: uses a discrete plaquette sum through the actual
+    field on a contour *enclosing* each central axis (see
+    ``measure_winding_closure``).  For the canonical ``Y_l^m`` seed the contour
+    about z encloses the vortex axis, so the **target** is
+
+        winding_z ≈ m   (the U(1) charge),   winding_x ≈ winding_y ≈ 0,
+
+    held **constant across every slice** of the loop (the topological charge is
+    conserved).  ``m_expected`` (from ``config["vortex_params"]["m"]``) sets the
+    z-target; when it is ``None`` the device reports the measured winding without
+    a pass/fail.  (Earlier versions targeted net winding = 0 — that was the
+    contractible smoke-ring seed, and is wrong for the line-vortex ``Y_l^m``.)
     """
     n_slices_plus1 = world.shape[0]
     dt = params.dt
     times = np.arange(n_slices_plus1) * dt
 
     windings = _winding_per_slice(world, lattice, r_t=params.r_t)
+    wz, wy, wx = windings["z"], windings["y"], windings["x"]
 
     csv_path = out_dir / "winding.csv"
-    rows = np.column_stack([times, windings["z"], windings["y"], windings["x"]])
+    rows = np.column_stack([times, wz, wy, wx])
     np.savetxt(
         str(csv_path), rows, delimiter=",",
         header="time,winding_z_normal,winding_y_normal,winding_x_normal", comments="",
     )
 
-    max_abs = max(
-        float(np.max(np.abs(windings["z"]))),
-        float(np.max(np.abs(windings["y"]))),
-        float(np.max(np.abs(windings["x"]))),
-    )
-    closure_ok = max_abs < 0.1
+    # Target: winding_z ≈ m, off-axis ≈ 0, all constant across the loop.
+    wz_mean = float(np.mean(wz))
+    wz_spread = float(np.max(wz) - np.min(wz))          # constancy over the loop
+    max_off_axis = max(float(np.max(np.abs(wy))), float(np.max(np.abs(wx))))
+    tol = 0.1
+
+    if m_expected is not None:
+        z_dev = float(np.max(np.abs(wz - m_expected)))
+        z_ok = z_dev < tol
+        off_ok = max_off_axis < tol
+        const_ok = wz_spread < tol
+        winding_ok = bool(z_ok and off_ok and const_ok)
+        if winding_ok:
+            verdict = (
+                f"PASS — winding_z = {wz_mean:+.3f} ≈ m = {m_expected:+d}, "
+                f"off-axis max = {max_off_axis:.2e} ≈ 0, slice spread = {wz_spread:.2e} ≈ 0: "
+                "a unit U(1) line vortex about z with the charge conserved across the loop."
+            )
+        else:
+            reasons = []
+            if not z_ok:
+                reasons.append(f"|winding_z - m| = {z_dev:.2e} > {tol}")
+            if not off_ok:
+                reasons.append(f"off-axis winding {max_off_axis:.2e} > {tol}")
+            if not const_ok:
+                reasons.append(f"winding varies over the loop (spread {wz_spread:.2e} > {tol})")
+            verdict = (
+                f"FAIL — winding_z = {wz_mean:+.3f} (target m = {m_expected:+d}): "
+                + "; ".join(reasons) + "."
+            )
+    else:
+        winding_ok = None
+        verdict = (
+            f"winding_z = {wz_mean:+.3f}, off-axis max = {max_off_axis:.2e}, "
+            f"slice spread = {wz_spread:.2e}. No m_expected in config — "
+            "reporting measured winding without a pass/fail."
+        )
 
     # PNG
     _apply_style()
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.plot(times, windings["z"], label="winding_z (xy-plane)")
-    ax.plot(times, windings["y"], label="winding_y (xz-plane)", linestyle="--")
-    ax.plot(times, windings["x"], label="winding_x (yz-plane)", linestyle=":")
+    ax.plot(times, wz, label="winding_z (xy-plane)")
+    ax.plot(times, wy, label="winding_y (xz-plane)", linestyle="--")
+    ax.plot(times, wx, label="winding_x (yz-plane)", linestyle=":")
     ax.axhline(0, color="gray", linewidth=0.8)
+    if m_expected is not None:
+        ax.axhline(m_expected, color="tab:blue", linewidth=0.9, linestyle="-",
+                   alpha=0.35, label=f"target winding_z = m = {m_expected}")
+        status = "PASS" if winding_ok else "FAIL"
+        subtitle = (f"winding_z={wz_mean:+.2f} (target m={m_expected:+d}), "
+                    f"off-axis={max_off_axis:.1e}, spread={wz_spread:.1e}  [{status}]")
+    else:
+        subtitle = (f"winding_z={wz_mean:+.2f}, off-axis={max_off_axis:.1e}, "
+                    f"spread={wz_spread:.1e}  [no m_expected]")
     ax.set_xlabel("time"); ax.set_ylabel("Net winding number")
     ax.legend()
     ax.set_title(
-        f"D3 — U(1) Phase Winding (discrete plaquette, actual field)\n"
-        f"Max |winding| = {max_abs:.2e}  {'[OK — contractible ring]' if closure_ok else '[WARNING: nonzero!]'}"
+        f"D3 — U(1) Phase Winding (discrete plaquette, actual field)\n{subtitle}"
     )
     fig.suptitle("D3 — Winding", fontweight="bold")
 
     _savefig(fig, out_dir / "winding.png")
 
     return {
-        "max_abs_winding": max_abs,
-        "closure_ok": closure_ok,
-        "note": (
-            "Net winding = 0 through all planes for a contractible vortex ring. "
-            "Local ±1 winding around tube cross-section is encoded in the amplitude "
-            "profile (localized donut) measured by D1/D2."
-        ),
+        "m_expected": m_expected,
+        "winding_z_mean": wz_mean,
+        "winding_z_slice_spread": wz_spread,
+        "max_off_axis_winding": max_off_axis,
+        "winding_ok": winding_ok,
+        "verdict": verdict,
         "csv": str(csv_path),
         "png": str(out_dir / "winding.png"),
     }
@@ -1097,15 +1145,20 @@ def _write_report(
 
     # D3
     d3 = results.get("winding", {})
+    _m_exp = d3.get("m_expected")
+    _wok = d3.get("winding_ok")
+    _wok_str = {True: "PASS", False: "FAIL", None: "n/a (no m_expected)"}.get(_wok, "?")
     lines += [
         f"## D3 — Phase Winding",
         f"",
-        f"| Metric | Value |",
-        f"|--------|-------|",
-        f"| max |winding| | {d3.get('max_abs_winding', 'N/A'):.2e} |",
-        f"| closure OK | {d3.get('closure_ok', 'N/A')} |",
+        f"| Metric | Value | Target |",
+        f"|--------|-------|--------|",
+        f"| winding_z mean | {d3.get('winding_z_mean', float('nan')):.4g} | m = {_m_exp if _m_exp is not None else '?'} |",
+        f"| winding_z slice spread | {d3.get('winding_z_slice_spread', float('nan')):.2e} | ~0 (const over loop) |",
+        f"| max off-axis winding | {d3.get('max_off_axis_winding', float('nan')):.2e} | ~0 |",
+        f"| winding check | {_wok_str} | PASS |",
         f"",
-        f"**Note:** {d3.get('note', '')}",
+        f"**Verdict:** {d3.get('verdict', '')}",
         f"",
         f"![Winding plot](winding.png)",
         f"",
@@ -1219,8 +1272,9 @@ def _write_report(
         f"Residual: {d1.get('residual_norm_DOF', 'N/A')} (seed; full check requires BVP solve).",
         f"- **D2 Confinement**: spread_ratio ~ {d2.get('spread_ratio_mean', '?'):.3g}; "
         f"confined_fraction ~ {d2.get('confined_fraction_mean', '?'):.3g}.",
-        f"- **D3 Winding**: net winding = 0 (closure {'OK' if d3.get('closure_ok') else 'FAIL'}); "
-        f"local ±1 around tube confirmed by amplitude donut.",
+        f"- **D3 Winding**: winding_z = {d3.get('winding_z_mean', float('nan')):.3g} "
+        f"(target m={_m_exp if _m_exp is not None else '?'}), "
+        f"off-axis ~ {d3.get('max_off_axis_winding', float('nan')):.2g} — check {_wok_str}.",
         f"- **D4 Berry**: carrier amplitude peak {d4.get('amp_max_t0', '?'):.3g} ≈ 0.607 × A0 (donut profile). "
         f"Berry phase accumulated over all slices.",
         f"- **D5 EM**: Berry connection A_mu computed from phase gradient; B field shows vortex topology.",
@@ -1298,6 +1352,12 @@ def run_measurements(
             config_n_t = int(vp["n_t"])
         except (TypeError, ValueError):
             pass
+    config_m: int | None = None
+    if "m" in vp:
+        try:
+            config_m = int(vp["m"])
+        except (TypeError, ValueError):
+            pass
 
     all_devices = ["energy", "confinement", "winding", "berry",
                    "em_fields", "color_channels", "spectra", "binding_probe"]
@@ -1328,6 +1388,12 @@ def run_measurements(
                 # binding_probe accepts an extra n_t kwarg; do NOT mutate params.
                 res = device_binding_probe(
                     world, ref, lattice, params, diag_dir, n_t=config_n_t
+                )
+            elif name == "winding":
+                # winding takes the expected U(1) charge m from config so its
+                # pass/fail targets winding_z ≈ m (not net winding = 0).
+                res = device_winding(
+                    world, ref, lattice, params, diag_dir, m_expected=config_m
                 )
             else:
                 res = device_fns[name](world, ref, lattice, params, diag_dir)
