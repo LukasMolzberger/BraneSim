@@ -59,12 +59,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--remote-command",
         default=(
-            "python -m branesim.run_experiment "
-            "--config orchestration/configs/branesim_ivp_smoke.json "
-            "--output-dir \"$BRANESIM_RESULTS_DIR\""
+            "python -m branesim.experiments.vortex_seed_render; "
+            "RUN=$(ls -dt \"${BRANESIM_RESULTS_DIR:-./runs}\"/vortex_seed_* | head -1); "
+            "mv \"$RUN\" \"${RUN}_aws\""
         ),
         help="Shell command executed on the EC2 instance inside the project directory. "
-             "Default is the branesim IVP smoke; pass a bvp_dirichlet config for a block solve.",
+             "Default is the single U(1)-vortex experiment (vortex_seed_render; see "
+             "orchestration/aws/RUNBOOK.md), with an _aws provenance suffix appended to "
+             "the run dir before S3 sync. Override (--remote-command) for a general block "
+             "solve: 'python -m branesim.run_experiment --config <cfg> --output-dir \"$BRANESIM_RESULTS_DIR\"'.",
     )
 
     parser.add_argument("--enable-gdrive-sync", action="store_true")

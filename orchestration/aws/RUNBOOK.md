@@ -6,9 +6,9 @@ resolution than the local 48³ pre-test.
 
 **What this job is.** Inject the Y₁¹ vortex seed → **relax it along the
 solver-iteration axis with the rotating-frame-periodic BC** → render both the
-seed and the relaxed state (3D volume + 2D slice movies) → run the full 7-device
+seed and the relaxed state (3D volume + 2D slice movies) → run the full 8-device
 diagnostic suite (energy, confinement, winding, Berry, EM `A_μ`/`F_μν`,
-per-colour SU(3), spectra) → write per-output `.md` docs. It produces
+per-colour SU(3), spectra, binding_probe) → write per-output `.md` docs. It produces
 `iter_0000/` (the seed) and `iter_0015/` (after the JFNK relaxation), each
 self-contained and fully diagnosed, under `$BRANESIM_RESULTS_DIR`.
 
@@ -30,17 +30,45 @@ JFNK working set ≈ inner_maxiter · (GB per vector)            (default inner=
 ```
 
 To run **seed-only** (render + diagnostics, no solve, a few GB RAM), set
-`BRANESIM_VORTEX_RELAX=0`.
+`BRANESIM_VORTEX_RELAX=0`. To run a fast **diagnostics-only** pass (relax +
+diagnostics, no CPU-heavy movie render — e.g. an eigensolve pre-test), set
+`BRANESIM_VORTEX_RENDER=0`. Both knobs are env vars on the **same module** — there
+is no separate driver script (keeps the experiment single-sourced).
 
 ---
 
 ## (a) Account prerequisites
 
-Identical to `RUNBOOK_breather.md` §(a) and `orchestration/aws/README.md`:
-AWS CLI authenticated; an Ubuntu 22.04 x86_64 AMI; an S3 bucket in-region; an
-IAM instance profile with `s3:GetObject/PutObject/ListBucket`; a subnet with
-outbound internet. `ffmpeg` (for mp4 renders) is installed by the user-data
-bootstrap; `scipy>=1.15` (for `sph_harm_y`) is pinned in `requirements.txt`.
+| Item | Required value / action |
+|---|---|
+| AWS CLI | Installed and authenticated (`aws sts get-caller-identity` succeeds) |
+| Region | `us-east-1` (or your preferred region; use consistently) |
+| AMI | Ubuntu 22.04 LTS x86_64, e.g. `ami-0c7217cdde317cfec` (us-east-1); pick the current canonical Ubuntu AMI for your region |
+| S3 bucket | `branesim-runs-493652700851` — create if absent; same region as instance |
+| IAM instance profile | `BraneSimEc2Profile` — must have the inline policy below |
+| Security group | Allow outbound HTTPS (443) for apt/pip/S3; no inbound required for a headless job |
+| Subnet | Any subnet with outbound internet (NAT or IGW); note `subnet-xxxxxxxx` |
+| Key pair | Optional; omit `--key-name` for headless jobs |
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+      "Resource": [
+        "arn:aws:s3:::branesim-runs-493652700851",
+        "arn:aws:s3:::branesim-runs-493652700851/*"
+      ]
+    }
+  ]
+}
+```
+
+`ffmpeg` (for mp4 renders) is installed by the user-data bootstrap; `scipy>=1.15`
+(for `sph_harm_y`) is pinned in `requirements.txt`. See `orchestration/aws/README.md`
+for the launcher mechanics and `DEPLOYMENT.md` for the memory-sizing table.
 
 ---
 
@@ -70,13 +98,30 @@ python /path/to/BraneSim/orchestration/aws/launch_branesim_job.py \
   --subnet-id subnet-xxxxxxxx \
   --security-group-id sg-xxxxxxxx \
   --iam-instance-profile BraneSimEc2Profile \
-  --s3-bucket my-branesim-bucket \
+  --s3-bucket branesim-runs-493652700851 \
   --s3-prefix vortex-runs \
   --job-name vortex-seed-64 \
   --project-archive /tmp/branesim-project.tar.gz \
   --volume-size-gb 40 \
-  --remote-command 'export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8; export BRANESIM_VORTEX_GRID=64 BRANESIM_VORTEX_NSLICES=32; python -m branesim.experiments.vortex_seed_render'
+  --remote-command 'export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8; export BRANESIM_VORTEX_GRID=64 BRANESIM_VORTEX_NSLICES=32; python -m branesim.experiments.vortex_seed_render; RUN=$(ls -dt "${BRANESIM_RESULTS_DIR:-./runs}"/vortex_seed_* | head -1); mv "$RUN" "${RUN}_aws"'
 ```
+
+### Run provenance — encode AWS vs local in the run-dir name
+
+The experiment writes its run folder as `vortex_seed_<ts>` regardless of where it
+runs, so origin is marked **by renaming the run dir**, not by changing the
+experiment code. The trailing `mv "$RUN" "${RUN}_aws"` in the remote-command above
+appends an **`_aws`** suffix to the produced run dir *before* it is synced to S3, so
+every AWS result is self-identifying:
+
+```
+vortex_seed_<ts>_aws/      ← produced on AWS (this runbook)
+vortex_seed_<ts>           ← bare name = local pre-test (or append _local to be explicit)
+```
+
+The rename is safe: each run dir is self-contained (`config.json` + `iter_*/`), and
+`run_measurements` / `fetch_results.sh` take the dir path as-is. For a **local**
+run, leave the bare name (understood as local) or append `_local` yourself.
 
 `r7i.4xlarge` (16 vCPU / 128 GB) covers the JFNK Krylov working set at 64³×32
 (~`40 × 0.28 GB` ≈ 11 GB) with ample headroom for rendering. For a **seed-only**
@@ -90,6 +135,7 @@ render (no solve) a `c7i.2xlarge` is cheaper — add `BRANESIM_VORTEX_RELAX=0`.
 | `BRANESIM_VORTEX_NSLICES` | time-loop slices (carrier resolution & period P) | `32` |
 | `BRANESIM_VORTEX_RELAX` | `1`/`0` — run the rotating-frame-periodic relaxation | `1` (ON) |
 | `BRANESIM_VORTEX_RELAX_ITERS` | JFNK outer iterations | `15` |
+| `BRANESIM_VORTEX_RENDER` | `1`/`0` — render movies+snapshot (`0` = fast diagnostics-only) | `1` (ON) |
 | `BRANESIM_RESULTS_DIR` | output root (set by user-data) | `./runs` |
 
 ### Scale options (memory = JFNK Krylov set; render = matplotlib volume)
@@ -107,19 +153,19 @@ the slice count. At 96³ the 3D voxel render dominates wall-clock.
 
 ### Step 3 — Retrieve results
 
-The launcher prints `results_s3: s3://my-branesim-bucket/vortex-runs/<job-id>/results`.
+The launcher prints `results_s3: s3://branesim-runs-493652700851/vortex-runs/<job-id>/results`.
 
 ```bash
 bash /path/to/BraneSim/orchestration/aws/fetch_results.sh \
-  s3://my-branesim-bucket/vortex-runs/<job-id>/results \
-  ./vortex-out/<job-id>
+  s3://branesim-runs-493652700851/vortex-runs/<job-id>/results \
+  ./runs/<job-id>
 ```
 
-Retrieved layout (`vortex_seed_<ts>/`):
+Retrieved layout (`vortex_seed_<ts>_aws/` — the `_aws` suffix marks AWS origin):
 - `config.json`, `manifest.json`, `README.md`
 - `iter_0000/` — `config.json`, `world.npz`, `winding_closure.json`,
   `snapshot.png`, `renders/` (volume + slice mp4s, each + `.md`),
-  `diagnostics/` (7 devices: CSV + PNG + `.md`) + `report.md`
+  `diagnostics/` (8 devices: CSV + PNG + `.md`) + `report.md`
 - `user-data.log` — full bootstrap + run stdout/stderr
 
 ---

@@ -162,4 +162,16 @@ the scalars these campaigns collect; the campaign driver is not built.
 - **Next**: (i) re-inject in the **trace (EM) direction**; (ii) add the **tumble**
   (spin) + set the **`ωT` quantization** (BVP eigenvalue); (iii) the eigen-solve
   (`solve_block`, periodic + rotating-frame-periodic BC); (iv) local `48³×64` pre-test;
-  (v) AWS production (new generic bucket + owner-run scripts).
+  (v) AWS production.
+
+## Single experimental setup (no forked drivers)
+There is **one** experiment module — `branesim/experiments/vortex_seed_render.py` —
+parameterized entirely by env vars, so the **same** code runs locally and on AWS and
+collects every result under `runs/`. Knobs: `BRANESIM_VORTEX_GRID`, `_NSLICES`,
+`_RELAX` (`0`=seed-only), `_RELAX_ITERS`, `_RENDER` (`0`=fast diagnostics-only, e.g. an
+eigensolve pre-test — replaces the old ad-hoc `_binding_eigensolve_pretest.py` fork),
+`BRANESIM_RESULTS_DIR`. AWS recipe: `orchestration/aws/RUNBOOK.md` (the single runbook);
+launcher default remote-command runs this experiment; results sync to S3 bucket
+`branesim-runs-493652700851` and are fetched back into `runs/`. Origin is marked by the
+run-dir suffix (`_aws` / `_local`). The retracted breather sweep lives in `archive/`
+(experiment + runbook); only `branesim/solver/breather.py` is kept as infrastructure.

@@ -18,7 +18,6 @@ dev = ["pytest>=7.0"]
 
 [project.scripts]
 branesim-run = "branesim.run_experiment:main"
-branesim-breather = "branesim.experiments.breather_sweep:main"
 
 [tool.setuptools.packages.find]
 include = ["branesim*"]

@@ -183,16 +183,26 @@ def device_energy(
         V_total[l] = spacelike_potential(world[l], lattice, params)
     V_excess = V_total - V_vac
 
-    # Kinetic energy: central difference for interior slices, one-sided at boundaries
+    # Kinetic energy of the EXCITATION (carrier), not the vacuum.  The prestressed
+    # periodic vacuum is an N-gon that rotates in the carrier plane every slice, so
+    # its global per-slice velocity (uniform across nodes, comps 2,3) would dominate
+    # T_kinetic.  Subtract it: build the carrier field w = world - vacuum-offset and
+    # take its velocity.  (V_total above is unaffected — the offset is a global
+    # translation that cancels in the within-slice spatial bonds.)
+    off_re, off_im = vacuum_offsets(n_slices, params.r_t)
+    w = world.copy()
+    w[:, :, CARRIER_RE] -= off_re[:, np.newaxis]
+    w[:, :, CARRIER_IM] -= off_im[:, np.newaxis]
+
     mass = params.mass(lattice.params)
     T_kinetic = np.zeros(n_slices_plus1)
     for l in range(n_slices_plus1):
         if l == 0:
-            vel = (world[1] - world[0]) / dt
+            vel = (w[1] - w[0]) / dt
         elif l == n_slices:
-            vel = (world[-1] - world[-2]) / dt
+            vel = (w[-1] - w[-2]) / dt
         else:
-            vel = (world[l + 1] - world[l - 1]) / (2.0 * dt)
+            vel = (w[l + 1] - w[l - 1]) / (2.0 * dt)
         T_kinetic[l] = 0.5 * mass * float(np.sum(vel ** 2))
 
     E_total = V_total + T_kinetic
@@ -271,12 +281,23 @@ def device_confinement(
     params: ActionParams,
     out_dir: Path,
 ) -> dict[str, Any]:
-    """D2: Confinement metrics (spread_ratio, radius_rms, confined_fraction)."""
+    """D2: Confinement metrics (spread_ratio, radius_rms, confined_fraction).
+
+    Uses ``weight_mode="strain"`` (per-node spacelike spring strain energy):
+    weighting by bond differences |disp_p - disp_q|^2 makes the metric INVARIANT
+    under the prestressed-vacuum N-gon offset (a global per-slice translation
+    cancels in the differences).  The ``"lateral"`` |disp|^2 weight would be
+    swamped by the spatially-uniform rho-sized vacuum background and report
+    spurious box-fill.
+    """
     dim = lattice.dim
     result = confinement_summary(
         world, ref, dim,
         confinement_radius_factor=0.5,
-        weight_mode="lateral",
+        weight_mode="strain",
+        lattice=lattice,
+        k_s=params.k_s,
+        alpha=params.alpha,
     )
 
     n_slices_plus1 = world.shape[0]

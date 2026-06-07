@@ -6,9 +6,9 @@ Standalone usage:
     python orchestration/aws/watch_job.py \
         --region eu-north-1 \
         --instance-id i-0abc123 \
-        --s3-bucket branesim-breather-493652700851 \
+        --s3-bucket branesim-runs-493652700851 \
         --s3-prefix branesim/jobs \
-        --job-id baryon-run-20260605-120000
+        --job-id vortex-seed-64-20260607-120000
 
 Called programmatically from launch_branesim_job.py when --watch is passed.
 

@@ -13,6 +13,7 @@ tar \
   --exclude="*.pyc" \
   --exclude="test-runs" \
   --exclude="runs" \
+  --exclude="vortex-out" \
   --exclude=".pytest_cache" \
   --exclude=".cache" \
   -czf "${OUT_PATH}" \

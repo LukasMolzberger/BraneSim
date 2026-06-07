@@ -23,3 +23,11 @@ For the current theory and program see, at the repo root:
   topological-breather baryon candidate (open boundary). Part of the retracted
   2026-06-05 nonlinear-soliton line; the breather route is closed
   (`LESSONS_LEARNED.md`, `OPEN_PROBLEMS.md` C2).
+- `breather_sweep.py` — the breather eigen-BVP **parameter-sweep** experiment
+  driver (`branesim-breather` entrypoint, removed 2026-06-07). A size/alpha sweep
+  over the retracted breather route; superseded by the single U(1)-vortex
+  experiment (`branesim/experiments/vortex_seed_render.py`,
+  `orchestration/aws/RUNBOOK.md`). Still imports the kept
+  `branesim/solver/breather.py` if ever re-run by hand.
+- `RUNBOOK_breather.md` — the stale AWS runbook for the breather sweep above.
+  Superseded by the single `orchestration/aws/RUNBOOK.md`.

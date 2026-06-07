@@ -44,28 +44,26 @@ python orchestration/aws/launch_branesim_job.py \
   --subnet-id subnet-xxxxxxxx \
   --security-group-id sg-xxxxxxxx \
   --iam-instance-profile BraneSimEc2Profile \
-  --s3-bucket my-branesim-bucket \
-  --s3-prefix baryon-runs \
+  --s3-bucket branesim-runs-493652700851 \
+  --s3-prefix vortex-runs \
   --project-archive /tmp/branesim-project.tar.gz
 ```
 
-Default remote command now runs the branesim entrypoint:
+The **default** remote command runs the single current experiment — the U(1)
+vortex (`branesim.experiments.vortex_seed_render`; see `RUNBOOK.md` for the full
+recipe, scale knobs, and `_aws` provenance suffix). Use `--remote-command` to
+override, e.g. for a general block solve via the underlying engine:
 
 ```bash
-python -m branesim.run_experiment --config orchestration/configs/branesim_ivp_smoke.json --output-dir "$BRANESIM_RESULTS_DIR"
+python -m branesim.run_experiment --config orchestration/configs/branesim_chiral_smoke.json --output-dir "$BRANESIM_RESULTS_DIR"
 ```
-
-Point `--config` at `orchestration/configs/branesim_bvp_dirichlet.json` (or your
-own) for a block solve.
-
-Use `--remote-command` to run a custom workflow if needed.
 
 ## 3) Retrieve results
 
 Use the `results_s3` URI printed by the launcher:
 
 ```bash
-orchestration/aws/fetch_results.sh s3://my-branesim-bucket/baryon-runs/<job-id>/results ./downloaded-results
+orchestration/aws/fetch_results.sh s3://branesim-runs-493652700851/vortex-runs/<job-id>/results ./runs/<job-id>
 ```
 
 ## Optional Google Drive sync

@@ -50,7 +50,7 @@ matrix-free streaming/slab storage in ARCHITECTURE.md D4.
 > cyclic time loop, well-conditioned (`κ~1e3–1e4`), which genuinely relaxes the
 > brane while preserving the carrier winding. The forward-Verlet `ivp` mode and
 > the `bvp_dirichlet` recovery mode were removed; `run_experiment` defaults to
-> `bvp_chiral`, and the vortex experiment (`orchestration/aws/RUNBOOK_vortex.md`)
+> `bvp_chiral`, and the vortex experiment (`orchestration/aws/RUNBOOK.md`)
 > drives the periodic relaxation.
 
 ---
@@ -76,25 +76,26 @@ python orchestration/aws/launch_branesim_job.py \
   --subnet-id subnet-xxxxxxxx \
   --security-group-id sg-xxxxxxxx \
   --iam-instance-profile BraneSimEc2Profile \
-  --s3-bucket my-branesim-bucket --s3-prefix block-runs \
+  --s3-bucket branesim-runs-493652700851 --s3-prefix vortex-runs \
   --project-archive /tmp/branesim-project.tar.gz \
   --volume-size-gb 200
 ```
 
-Default remote command (override with `--remote-command`):
+The default remote command runs the single current experiment, the U(1) vortex
+(`branesim.experiments.vortex_seed_render`; full recipe in
+`orchestration/aws/RUNBOOK.md`). Override with `--remote-command` to drive the
+underlying engine directly for a general block solve:
 
 ```bash
 python -m branesim.run_experiment \
-  --config orchestration/configs/branesim_ivp_smoke.json \
+  --config orchestration/configs/branesim_chiral_smoke.json \
   --output-dir "$BRANESIM_RESULTS_DIR"
 ```
-
-For a block solve, point `--config` at `branesim_bvp_dirichlet.json` (or your own).
 
 ## 4. Retrieve results
 
 ```bash
-orchestration/aws/fetch_results.sh s3://my-branesim-bucket/block-runs/<job-id>/results ./out
+orchestration/aws/fetch_results.sh s3://branesim-runs-493652700851/vortex-runs/<job-id>/results ./runs/<job-id>
 ```
 
 Outputs per run: `worldvolume.zip` (solved slices + `manifest.json` with

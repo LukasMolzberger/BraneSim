@@ -384,6 +384,7 @@ def _write_output_docs(
     state_label: str,
     kind: str,
     solver_note: str,
+    do_render: bool = True,
 ) -> None:
     """Write a Markdown explainer next to every figure, video, and diagnostic.
 
@@ -534,9 +535,17 @@ the carrier (EM charge). Where dark (|Psi|~0) the hue is meaningless.
 
 {ansatz}{tail}"""
 
+    written = 0
     for path, text in docs.items():
+        # Skip docs for render artifacts (snapshot.png + renders/*.mp4) that were
+        # not produced when BRANESIM_VORTEX_RENDER=0 (diagnostics-only mode), so a
+        # diagnostics-only run never leaves dangling .md pointers.
+        if not do_render and (Path(path).parent.name == "renders"
+                              or Path(path).name == "snapshot.md"):
+            continue
         Path(path).write_text(text)
-    print(f"  Wrote {len(docs)} per-output .md docs.")
+        written += 1
+    print(f"  Wrote {written} per-output .md docs.")
 
 
 # ---------------------------------------------------------------------------
@@ -610,6 +619,7 @@ def _emit_iteration(
     spacing: float,
     solver_report: dict | None,
     solver_note: str,
+    do_render: bool = True,
 ) -> dict:
     """Write a fully self-contained, fully diagnosed iteration folder."""
     iter_dir = run_dir / f"iter_{iter_index:04d}"
@@ -634,19 +644,23 @@ def _emit_iteration(
     print(f"  winding: {{z:{winding['winding_through_z_normal']:+.2f}, "
           f"y:{winding['winding_through_y_normal']:+.2f}, x:{winding['winding_through_x_normal']:+.2f}}}")
 
-    # renders
-    amps, phases, times = _extract_amp_phase(world, ref, grid_shape)
-    peak = max(float(np.max(a)) for a in amps)
-    print(f"  peak |Psi| = {peak:.4f}")
-    _render_world(amps, phases, times, vp, grid_shape, spacing, iter_dir, state_label)
+    # renders (skipped in diagnostics-only mode, BRANESIM_VORTEX_RENDER=0)
+    if do_render:
+        amps, phases, times = _extract_amp_phase(world, ref, grid_shape)
+        peak = max(float(np.max(a)) for a in amps)
+        print(f"  peak |Psi| = {peak:.4f}")
+        _render_world(amps, phases, times, vp, grid_shape, spacing, iter_dir, state_label)
+    else:
+        print("  Rendering SKIPPED (BRANESIM_VORTEX_RENDER=0; diagnostics-only).")
 
     # diagnostics suite (the back-up round-trip) -> diagnostics/
-    print("  Running diagnostic suite (7 devices)...")
+    print("  Running diagnostic suite (8 devices)...")
     run_measurements(iter_dir, verbose=False)
 
     # per-output docs (after diagnostics so diagnostics/ exists)
     _write_output_docs(iter_dir, vp, seed_meta, winding, grid_shape,
-                       n_slices, dt, iter_index, state_label, kind, solver_note)
+                       n_slices, dt, iter_index, state_label, kind, solver_note,
+                       do_render=do_render)
 
     return winding
 
@@ -689,6 +703,10 @@ def run() -> None:
     # genuinely moves the brane, so it runs by DEFAULT.  Disable with
     # BRANESIM_VORTEX_RELAX=0 (e.g. a seed-only render).
     run_relax = _env_bool("BRANESIM_VORTEX_RELAX", True)
+    # Rendering (volume + slice movies + snapshot) is the CPU-heavy part.  Disable
+    # with BRANESIM_VORTEX_RENDER=0 for a fast diagnostics-only run (e.g. an
+    # eigensolve pre-test) — the SAME module, no forked driver script.
+    run_render = _env_bool("BRANESIM_VORTEX_RENDER", True)
 
     ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     out_root_env = os.environ.get("BRANESIM_RESULTS_DIR") or os.environ.get("BRANESIM_VORTEX_OUTDIR")
@@ -697,7 +715,8 @@ def run() -> None:
     run_dir.mkdir(parents=True, exist_ok=True)
     print(f"Run folder: {run_dir}")
     print(f"Config: grid={grid_shape}  n_slices={n_slices}  "
-          f"relax={'ON('+str(relax_iters)+', rotating-frame-periodic)' if run_relax else 'OFF (seed-only render)'}")
+          f"relax={'ON('+str(relax_iters)+', rotating-frame-periodic)' if run_relax else 'OFF (seed-only render)'}  "
+          f"render={'ON' if run_render else 'OFF (diagnostics-only)'}")
 
     # --- Lattice and action params ---
     lattice_params = LatticeParams(
@@ -753,6 +772,7 @@ def run() -> None:
         world, ref, base_config, seed_meta, VORTEX_PARAMS, lattice,
         n_slices, DT, grid_shape, SPACING,
         solver_report=None,
+        do_render=run_render,
         solver_note=(
             "This is the freshly injected ansatz — **iteration 0** of the "
             "solver-relaxation axis. The block solver has NOT run; the carrier "
@@ -796,6 +816,7 @@ def run() -> None:
                 world_N, ref, base_config, seed_meta, VORTEX_PARAMS, lattice,
                 n_slices, DT, grid_shape, SPACING,
                 solver_report=relax_report, solver_note=note,
+                do_render=run_render,
             )
             iterations.append({"index": relax_iters, "dir": f"iter_{relax_iters:04d}",
                                "kind": "relaxation",
@@ -820,6 +841,7 @@ def run() -> None:
             "before it are transients."
         ),
         "iterations": iterations,
+        "render_enabled": run_render,
         "relax_enabled": run_relax,
         "relax_iters": relax_iters if run_relax else None,
         "relax_report": relax_report,
