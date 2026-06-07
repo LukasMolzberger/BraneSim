@@ -100,12 +100,15 @@ VORTEX_PARAMS = VortexParams(
     geometry="spherical_harmonic",
 )
 
-# Solver-axis (5th dimension) rotating-frame-periodic relaxation.
-# Well-conditioned (PeriodicBC, cond~1e3-1e4 vs Dirichlet's 1e14): the brane
-# actually moves and the carrier winding is preserved.  Default ON.
-RELAX_ITERS = 15                    # JFNK iterations for the iter_N snapshot
-RELAX_INNER_MAXITER = 40            # inner lgmres cap
-RELAX_TOL = 1e-6
+# Solver-axis (5th dimension) rotating-frame-periodic relaxation (PeriodicBC).
+# The periodic operator's conditioning is grid-dependent and can hit near-resonant
+# values (cond~3e7 at 32³/64³); the OUTER Newton then converges only if the INNER
+# lgmres has enough iterations to resolve the ill-conditioned step.  inner=40
+# under-resolved it (the 64³ AWS run stalled at res 2.2); inner=120 restores a
+# clean ~0.5x/iter geometric drop even at cond~3e7.  Default ON.
+RELAX_ITERS = 30                    # outer JFNK iterations
+RELAX_INNER_MAXITER = 120           # inner lgmres cap (KEY for ill-conditioned grids)
+RELAX_TOL = 1e-5
 
 # Render settings
 FPS = 15
