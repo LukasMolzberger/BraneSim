@@ -112,10 +112,14 @@ procedure to extract holonomy/curvature and to rule out common artifacts.
 \fbox{\begin{minipage}{0.95\linewidth}
 \textbf{Protocol}
 \begin{enumerate}
-\item \textbf{Carrier isolation / demodulation.}
-Choose a carrier frequency $\omega_0$ and isolate a narrowband sector (e.g.\ by band-pass filtering in time or by
-short-time Fourier methods).
-Work with a complex envelope representation consistent with \Cref{eq:quasi-monochromatic}.
+\item \textbf{Carrier isolation / complexification.}
+The primary route to the complex envelope is the time-quadrature construction: given the real substrate field
+$\xi$ and its time-derivative, form $\Psi\approx\xi+(i/\omega_0)\dot\xi$, where $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$
+and $\omega_0$ is the local carrier frequency (\Cref{subsec:bz-berry}; \Cref{eq:quasi-monochromatic}).
+This complexification is well-defined whenever the field is narrowband around $\omega_0$ and is the construction
+that makes the gauge base space $(x,t)$ rather than a spatial slice.
+For a propagating wavepacket, an alternative is band-pass filtering in time or short-time Fourier methods; both
+routes must produce the same complex envelope in the narrowband regime.
 
 \item \textbf{Define the instantaneous polarization object.}
 At each spacetime point (or each sample along a loop), define either
@@ -157,6 +161,10 @@ becomes non-robust (strong dependence on sampling/path or visible subspace leaka
 \end{itemize}
 \end{minipage}}
 \end{center}
+
+The same holonomy-from-overlaps machinery (Steps 3--4) applies without modification to a stationary localized
+eigenmode on a closed periodic worldtube, where the carrier frequency $\omega_0$ is fixed by the loop-closure
+condition rather than determined by demodulation; see \Cref{sec:localized} for the eigenproblem setting.
 
 \subsection{Wilczek--Zee connection (non-Abelian)}
 

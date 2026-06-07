@@ -175,23 +175,50 @@ $R(\alpha_2)/R(\alpha_1) = \big[(3-2\alpha_2)/\alpha_2\big]\big/\big[(3-2\alpha_
 equal to $0.3077$ for $(\alpha_1,\alpha_2) = (0.2,0.5)$; a deviation above $\sim 10\%$ would falsify
 the spectral-susceptibility factorization underlying it.
 
-\subsection{Why the baryon sector is the next numerical target}
+\paragraph{Companion falsifiable check for the $U(1)$/EM sector.}
+The long-range behavior of the $U(1)$ trace sector around a bound carrier vortex provides a sharp additional test of
+the electromagnetic identification: a power-law far-field tail of the effective magnetic/supercurrent field would
+indicate an unscreened, massless long-range mode consistent with electromagnetism, whereas an exponentially screened
+tail with a finite penetration depth would indicate that the condensed substrate Meissner-screens its own $U(1)$
+--- an Anderson--Higgs / massive-boson outcome --- which would \emph{falsify} the electromagnetic identification of
+the trace sector.
+This is an open, unresolved tension in the construction that the theory must pass; the far-field screening behavior
+has not yet been measured.
+
+\subsection{Two complementary numerical targets}
 \label{subsec:baryon-next-target}
 
-The cubic substrate naturally singles out three axis-associated channels.
-That makes the proton/neutron sector a particularly informative next target: a confined three-component standing-wave
-mode tests the very structure that the lattice introduces most directly.
-In contrast, an isolated electron-like ansatz can exist without decisively probing the triplet mixing sector.
+The theory contains two distinct particle sectors with different topology and therefore different numerical
+questions; neither has yet been demonstrated as a stable self-consistent solution.
+
+\paragraph{Target 1: the $U(1)$ carrier-phase vortex (electromagnetic / electron-like sector).}
+The $U(1)$ trace sector supports line vortices ($\pi_1(U(1))=\mathbb{Z}$), which appear as codimension-2
+objects --- a loop in a 3D spatial slice, a closed worldsheet in 4D.
+However, once the $SU(3)$ sector is unfrozen the full vacuum manifold is simply connected, so this vortex is
+\emph{not} topologically protected: it is a semilocal vortex, stable only as a dynamical bound state
+(in the type-I regime $\beta=(m_{\mathrm{scalar}}/m_{\mathrm{vector}})^2<1$, below the Bogomol'nyi point)
+rather than by topology alone.
+Whether the substrate admits such a bound state is therefore an open, non-trivial dynamical question.
+A pure-trace ($U(1)$) excitation must wind the symmetric $(1,1,1)$ direction of the lateral triplet; a
+single-axis vortex is only $\tfrac13$ trace and $\tfrac23$ traceless and does not constitute a clean EM object.
+
+\paragraph{Target 2: the baryon / $\pi_3$ texture sector.}
+The cubic substrate naturally singles out three axis-associated channels, and $\pi_3(SU(3))=\mathbb{Z}$ admits
+topologically stable textures --- Skyrmion-like lumps --- distinct from the vortex sector.
+That makes the proton/neutron sector a particularly informative target: a confined three-component standing-wave
+mode tests the triplet coupling structure that the lattice introduces most directly, and topological winding
+provides a non-trivial stabilization mechanism not available to the $U(1)$ vortex.
+In contrast, an isolated electron-like ansatz --- lacking topological protection --- gives less direct leverage
+on the triplet mixing sector by itself.
 
 The ansatz labels (hedgehog \eqref{eq:hedgehog}, Skyrme-twisted extension, trace admixture for proton/neutron
 distinction) are defined in \Cref{sec:soliton-labels}.
 The concrete four-candidate ansatz menu used in the simulation search is recorded in
 \texttt{paper/baryon\_simulation\_roadmap.md} (Phase~2).
-This is not yet a derivation of QCD or of nucleon phenomenology.
-It is a concrete question for simulation: does the substrate support stable, localized, color-confined triplet modes at
-all?
-If the answer is no, an important bridge in the theory fails early and clearly.
-If the answer is yes, the cubic triplet sector becomes the natural arena for sharpening the particle interpretation.
+These are concrete questions for simulation, not derivations of QCD or nucleon phenomenology.
+For each target, the first binary question is: does the substrate support a stable, localized solution at all?
+If the answer is no for either, an important bridge in the theory fails early and clearly;
+if yes, the respective sector becomes the natural arena for sharpening the particle interpretation.
 
 \subsection{Connection to Berry/Wilczek--Zee holonomy and spin}
 
