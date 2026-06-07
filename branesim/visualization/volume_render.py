@@ -520,3 +520,163 @@ def create_slice_animation(
     writer = FFMpegWriter(fps=fps, bitrate=2600)
     anim.save(str(out), writer=writer, dpi=dpi)
     plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# U(1) vs SU(3) energy-channel comparison animation
+# ---------------------------------------------------------------------------
+
+
+def create_channel_energy_animation(
+    frames_u1: List[np.ndarray],
+    frames_su3: List[np.ndarray],
+    grid_shape: Tuple[int, int, int],
+    spacing: float,
+    plane: str,
+    output_path: str,
+    u1_energy: Optional[Sequence[float]] = None,
+    su3_energy: Optional[Sequence[float]] = None,
+    times: Optional[Sequence[float]] = None,
+    fps: int = 15,
+    dpi: int = 120,
+    shared_scale: bool = True,
+    title_prefix: str = "",
+) -> None:
+    """Side-by-side U(1) vs SU(3) energy-density slice movie + integrated curves.
+
+    Three panels per frame:
+      - Left   : U(1) (trace / EM) energy density on the midplane slice (Blues).
+      - Centre : SU(3) (traceless / colour) energy density on the slice (Oranges).
+      - Right  : box-integrated U(1) and SU(3) energy vs time, with a moving
+                 time marker and the running U(1):SU(3) energy fraction.
+
+    The two density fields are the per-node squared norms of the lateral
+    displacement projected with P_U1 and P_SU3 (see
+    ``diagnostics.alpha_separability.projection_operators``).  With
+    ``shared_scale=True`` (default) both maps use one common colour normalisation
+    so the eye reads the *relative* energy content honestly — a pure-trace seed
+    shows a bright U(1) map and an empty SU(3) map.
+
+    Parameters
+    ----------
+    frames_u1, frames_su3 : list of ndarray, each (nx, ny, nz)
+        Per-time-slice U(1) and SU(3) energy-density volumes.
+    grid_shape : (nx, ny, nz)
+    spacing : float
+    plane : str
+        One of ``"xy"``, ``"xz"``, ``"yz"``.
+    output_path : str
+        Output .mp4 path.
+    u1_energy, su3_energy : sequence of float or None
+        Pre-integrated box energies per slice for the time-series panel.  If
+        None, they are computed as the per-frame sum of the density volumes.
+    times : sequence of float or None
+    fps, dpi : int
+    shared_scale : bool
+        If True, both spatial maps share one colour normalisation.
+    title_prefix : str
+    """
+    if not frames_u1 or not frames_su3:
+        raise ValueError("frames_u1 and frames_su3 must be non-empty")
+    if len(frames_u1) != len(frames_su3):
+        raise ValueError("frames_u1 and frames_su3 must have equal length")
+
+    nx, ny, nz = grid_shape
+    n_frames = len(frames_u1)
+    times_arr = list(times) if times is not None else list(range(n_frames))
+
+    def _extract_slice(vol: np.ndarray) -> np.ndarray:
+        if plane == "xy":
+            return vol[:, :, nz // 2]
+        elif plane == "xz":
+            return vol[:, ny // 2, :]
+        elif plane == "yz":
+            return vol[nx // 2, :, :]
+        raise ValueError(f"plane must be xy/xz/yz; got {plane!r}")
+
+    if plane == "xy":
+        extent = [0, spacing * nx, 0, spacing * ny]
+        xlabel, ylabel = "x", "y"
+    elif plane == "xz":
+        extent = [0, spacing * nx, 0, spacing * nz]
+        xlabel, ylabel = "x", "z"
+    else:
+        extent = [0, spacing * ny, 0, spacing * nz]
+        xlabel, ylabel = "y", "z"
+
+    # Integrated box energies for the time-series panel.
+    u1_e = (np.asarray(u1_energy, dtype=float) if u1_energy is not None
+            else np.array([float(f.sum()) for f in frames_u1]))
+    su3_e = (np.asarray(su3_energy, dtype=float) if su3_energy is not None
+             else np.array([float(f.sum()) for f in frames_su3]))
+
+    # Colour normalisation across all frames (shared so magnitudes compare).
+    vmax_u1 = max(float(np.max(_extract_slice(f))) for f in frames_u1)
+    vmax_su3 = max(float(np.max(_extract_slice(f))) for f in frames_su3)
+    if shared_scale:
+        vmax_u1 = vmax_su3 = max(vmax_u1, vmax_su3)
+    vmax_u1 = vmax_u1 or 1.0
+    vmax_su3 = vmax_su3 or 1.0
+
+    fig, (ax_u1, ax_su3, ax_ts) = plt.subplots(1, 3, figsize=(20, 6.5))
+    fig.suptitle(
+        f"{title_prefix}  —  U(1) (trace/EM) vs SU(3) (traceless/colour) energy content",
+        fontsize=11, fontweight="bold",
+    )
+
+    im_u1 = ax_u1.imshow(
+        _extract_slice(frames_u1[0]).T, origin="lower", extent=extent,
+        cmap="Blues", vmin=0.0, vmax=vmax_u1, interpolation="nearest", animated=True,
+    )
+    ax_u1.set_xlabel(xlabel); ax_u1.set_ylabel(ylabel)
+    ax_u1.set_title(f"U(1) trace energy density  ({plane} midplane)")
+    plt.colorbar(im_u1, ax=ax_u1, fraction=0.046, pad=0.04)
+
+    im_su3 = ax_su3.imshow(
+        _extract_slice(frames_su3[0]).T, origin="lower", extent=extent,
+        cmap="Oranges", vmin=0.0, vmax=vmax_su3, interpolation="nearest", animated=True,
+    )
+    ax_su3.set_xlabel(xlabel); ax_su3.set_ylabel(ylabel)
+    ax_su3.set_title(f"SU(3) traceless energy density  ({plane} midplane)")
+    plt.colorbar(im_su3, ax=ax_su3, fraction=0.046, pad=0.04)
+
+    # Time-series panel: integrated channel energies + moving marker.
+    ax_ts.plot(times_arr, u1_e, color="tab:blue", label="U(1) trace (EM)")
+    ax_ts.plot(times_arr, su3_e, color="tab:orange", label="SU(3) traceless (colour)")
+    ax_ts.set_xlabel("time"); ax_ts.set_ylabel("box-integrated channel energy")
+    ax_ts.set_title("Integrated U(1) vs SU(3) energy over the loop")
+    ax_ts.legend(loc="upper right", fontsize=9)
+    y_top = float(max(u1_e.max(), su3_e.max())) or 1.0
+    ax_ts.set_ylim(0.0, 1.08 * y_top)
+    vline = ax_ts.axvline(times_arr[0], color="0.3", lw=1.0, ls="--")
+    dot_u1, = ax_ts.plot([times_arr[0]], [u1_e[0]], "o", color="tab:blue", ms=6)
+    dot_su3, = ax_ts.plot([times_arr[0]], [su3_e[0]], "o", color="tab:orange", ms=6)
+    frac_txt = ax_ts.text(
+        0.03, 0.95, "", transform=ax_ts.transAxes, fontsize=9, va="top",
+        bbox=dict(boxstyle="round", fc="white", ec="0.7", alpha=0.85),
+    )
+
+    def _frac_label(idx: int) -> str:
+        tot = u1_e[idx] + su3_e[idx] + 1e-40
+        return (f"t = {float(times_arr[idx]):.2f}\n"
+                f"U(1): {100 * u1_e[idx] / tot:5.1f}%\n"
+                f"SU(3): {100 * su3_e[idx] / tot:5.1f}%")
+
+    frac_txt.set_text(_frac_label(0))
+
+    def _update(frame_idx: int):
+        im_u1.set_data(_extract_slice(frames_u1[frame_idx]).T)
+        im_su3.set_data(_extract_slice(frames_su3[frame_idx]).T)
+        t = times_arr[frame_idx]
+        vline.set_xdata([t, t])
+        dot_u1.set_data([t], [u1_e[frame_idx]])
+        dot_su3.set_data([t], [su3_e[frame_idx]])
+        frac_txt.set_text(_frac_label(frame_idx))
+        return im_u1, im_su3, vline, dot_u1, dot_su3, frac_txt
+
+    anim = FuncAnimation(fig, _update, frames=n_frames, interval=1000 // fps, blit=False)
+    out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    writer = FFMpegWriter(fps=fps, bitrate=2800)
+    anim.save(str(out), writer=writer, dpi=dpi)
+    plt.close(fig)

@@ -59,16 +59,20 @@ from branesim.core.conventions import ActionParams, LatticeParams
 from branesim.core.lattice import SpacelikeLattice
 from branesim.initialization.vortex_worldtube import (
     CARRIER_IM,
-    CARRIER_RE,
+    CARRIER_RE_COMPONENTS,
+    CARRIER_RE_WEIGHTS,
     VortexParams,
     inject_vortex_worldtube,
     measure_winding_closure,
+    project_carrier_re,
     vacuum_offsets,
 )
 from branesim.solver.boundary import PeriodicBC
 from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
+from branesim.diagnostics.alpha_separability import projection_operators
 from branesim.diagnostics.run_measurements import run_measurements
 from branesim.visualization.volume_render import (
+    create_channel_energy_animation,
     create_slice_animation,
     create_volume_animation,
     phase_to_rgb,
@@ -79,8 +83,14 @@ from branesim.visualization.volume_render import (
 # Experiment parameters
 # ---------------------------------------------------------------------------
 
-# Box: 48^3; spherical-harmonic seed centred in the box, donut radius r0=6a,
-# radial width 2.5a => object localized in [~16a, ~32a] with ample vacuum margin.
+# Box: 48^3 (UNCHANGED — only the seed object is resized, not the brane).  The
+# spherical-harmonic seed is centred in the box with donut radius r0=12a and
+# radial width 4a (a ~2x-larger object than the original r0=6a/w=2.5a; the donut
+# shell is ~10 cells across, far better resolved).  Object reach ~ r0+3w = 24a
+# from the centre = the 48^3 half-width, so the 1%-amplitude contour just touches
+# the periodic face: a thin but real vacuum margin (per the resize directive).
+# TIME DIRECTION IS NOT SCALED — doubling the spatial donut changes neither the
+# carrier closure (n_t) nor the time-loop length (n_slices); they stay fixed.
 GRID_SHAPE = (48, 48, 48)
 N_SLICES = 32                       # time slices = period of the carrier loop
 SPACING = 1.0                       # lattice unit
@@ -92,8 +102,8 @@ R_T = ALPHA * BETA * DT            # = 0.175
 
 VORTEX_PARAMS = VortexParams(
     A0=0.3,                         # peak strain ~0.3
-    r0=6.0,                         # radial-shell peak (donut radius) ~6a
-    w=2.5,                          # radial-shell width ~2.5a
+    r0=12.0,                        # radial-shell peak (donut radius) ~12a (2x resize)
+    w=4.0,                          # radial-shell width ~4a (shell ~10 cells across)
     l=1,                            # spherical-harmonic degree
     m=1,                            # azimuthal U(1) winding around the z-axis
     n_t=2,                          # carrier turns over the loop -> 720 deg, closes exactly
@@ -149,7 +159,7 @@ def _extract_amp_phase(
 
     for l in range(world.shape[0]):
         pos = world[l]
-        re_disp = pos[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[l]
+        re_disp = project_carrier_re(pos[:, 0:3] - ref[:, 0:3]) - off_re[l]
         im_disp = pos[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[l]
 
         amp = np.sqrt(re_disp ** 2 + im_disp ** 2).reshape(nx, ny, nz)
@@ -160,6 +170,59 @@ def _extract_amp_phase(
         times.append(float(l) * DT)
 
     return amps, phases, times
+
+
+def _extract_channel_energy(
+    world: np.ndarray,
+    ref: np.ndarray,
+    grid_shape: tuple[int, int, int],
+) -> tuple[list[np.ndarray], list[np.ndarray], np.ndarray, np.ndarray, list[float]]:
+    """Split the lateral-triplet displacement energy into U(1) and SU(3) channels.
+
+    Projects each node's lateral displacement (components 0,1,2) with P_U1 (the
+    trace / dilatational / EM direction (1,1,1)/sqrt3) and P_SU3 (its traceless
+    complement, the colour shear), and returns the per-node squared norm as an
+    energy density volume per time slice.  This is the same projection the D6
+    diagnostic (``device_color_channels``) integrates, so the box-integrated
+    curves here match ``color_channels.csv`` exactly.
+
+    Returns
+    -------
+    u1_density, su3_density : list of (nx,ny,nz) arrays
+        Per-slice channel energy-density volumes.
+    u1_energy, su3_energy : (n_slices+1,) arrays
+        Box-integrated channel energy per slice.
+    times : list of floats (physical time = slice * DT)
+    """
+    nx, ny, nz = grid_shape
+    P_U1, P_SU3 = projection_operators()  # (3,3) each
+
+    # Same vacuum-pedestal removal as D6: the prestressed periodic vacuum traces
+    # an N-gon along the trace direction; subtract it so the split reads the
+    # carrier, not the spatially-uniform vacuum background.
+    off_re, _off_im = vacuum_offsets(world.shape[0] - 1, R_T)
+    trace_w = np.asarray(CARRIER_RE_WEIGHTS)
+
+    u1_density: list[np.ndarray] = []
+    su3_density: list[np.ndarray] = []
+    u1_energy = np.zeros(world.shape[0])
+    su3_energy = np.zeros(world.shape[0])
+    times: list[float] = []
+
+    for l in range(world.shape[0]):
+        disp_lat = world[l, :, :3] - ref[:, :3]          # (N, 3)
+        disp_lat = disp_lat - off_re[l] * trace_w         # remove vacuum offset
+        d_u1 = disp_lat @ P_U1.T                           # (N, 3) trace
+        d_su3 = disp_lat @ P_SU3.T                         # (N, 3) traceless
+        e_u1 = np.sum(d_u1 ** 2, axis=1).reshape(nx, ny, nz)
+        e_su3 = np.sum(d_su3 ** 2, axis=1).reshape(nx, ny, nz)
+        u1_density.append(e_u1)
+        su3_density.append(e_su3)
+        u1_energy[l] = float(e_u1.sum())
+        su3_energy[l] = float(e_su3.sum())
+        times.append(float(l) * DT)
+
+    return u1_density, su3_density, u1_energy, su3_energy, times
 
 
 # ---------------------------------------------------------------------------
@@ -268,8 +331,14 @@ def _render_world(
     spacing: float,
     iter_dir: Path,
     state_label: str,
+    energy_channels: tuple[list[np.ndarray], list[np.ndarray], np.ndarray, np.ndarray]
+    | None = None,
 ) -> None:
-    """Snapshot + 3D volume (phase, amplitude) + 2D slice movies for a world."""
+    """Snapshot + 3D volume (phase, amplitude) + 2D slice movies for a world.
+
+    If ``energy_channels`` (u1_density, su3_density, u1_energy, su3_energy) is
+    given, also render the U(1)-vs-SU(3) energy-content videos.
+    """
     renders_dir = iter_dir / "renders"
     renders_dir.mkdir(parents=True, exist_ok=True)
 
@@ -335,6 +404,66 @@ def _render_world(
         "adapted from R. Behiel's Ginzburg-Landau vortex animations.\n",
         encoding="utf-8",
     )
+
+    # Add-on: U(1) vs SU(3) energy-content videos.  Splits the lateral-triplet
+    # displacement energy into the trace (U(1)/EM) and traceless (SU(3)/colour)
+    # channels — the same projection D6 integrates — and shows where each channel
+    # lives and how the integrated content evolves over the loop.
+    if energy_channels is not None:
+        u1_density, su3_density, u1_energy, su3_energy = energy_channels
+        print("  Rendering U(1) vs SU(3) energy comparison (slice + curves)...")
+        for plane in ("xy", "xz"):
+            create_channel_energy_animation(
+                frames_u1=u1_density, frames_su3=su3_density,
+                grid_shape=grid_shape, spacing=spacing, plane=plane,
+                output_path=str(renders_dir / f"energy_channels_{plane}.mp4"),
+                u1_energy=u1_energy, su3_energy=su3_energy, times=times,
+                fps=FPS, dpi=DPI, shared_scale=True,
+                title_prefix=f"Y_l^m | {state_label}",
+            )
+        print("  Rendering U(1) energy volume (Blues)...")
+        create_volume_animation(
+            frames_amplitude=u1_density, frames_phase=None, grid_shape=grid_shape,
+            spacing=spacing, output_path=str(renders_dir / "energy_u1_volume.mp4"),
+            times=times, cmap_name="Blues", fps=FPS, dpi=DPI,
+            density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+            title_prefix=f"U(1) trace energy | {state_label}",
+        )
+        print("  Rendering SU(3) energy volume (Oranges)...")
+        create_volume_animation(
+            frames_amplitude=su3_density, frames_phase=None, grid_shape=grid_shape,
+            spacing=spacing, output_path=str(renders_dir / "energy_su3_volume.mp4"),
+            times=times, cmap_name="Oranges", fps=FPS, dpi=DPI,
+            density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+            title_prefix=f"SU(3) traceless energy | {state_label}",
+        )
+        u1_t0, su3_t0 = float(u1_energy[0]), float(su3_energy[0])
+        tot0 = u1_t0 + su3_t0 + 1e-40
+        (renders_dir / "energy_channels.md").write_text(
+            f"# renders/energy_channels_*.mp4 + energy_{{u1,su3}}_volume.mp4 — {state_label}\n\n"
+            "**U(1) (trace / EM) vs SU(3) (traceless / colour) energy content** of the "
+            "lateral displacement triplet (components 0,1,2).\n\n"
+            "**How it is derived.** Each node's lateral displacement `(d0,d1,d2)` (with the "
+            "prestressed-vacuum N-gon offset removed along the trace direction) is projected with\n\n"
+            "- `P_U1  = (1/3)·ones(3,3)` — the trace / dilatational / EM direction `(1,1,1)/sqrt3`,\n"
+            "- `P_SU3 = I - P_U1` — its traceless complement (the colour shear).\n\n"
+            "The per-node **energy density** is `|P·disp|^2`; the box sum is the integrated "
+            "channel energy.  This is the *same* projection the D6 diagnostic integrates, so the "
+            "right-hand curves match `diagnostics/color_channels.csv`.\n\n"
+            "**The videos.**\n"
+            "- `energy_channels_xy.mp4`, `energy_channels_xz.mp4` — left: U(1) density (Blues); "
+            "centre: SU(3) density (Oranges) on a shared colour scale; right: box-integrated "
+            "U(1) and SU(3) energy over the loop with a moving time marker and the running "
+            "U(1):SU(3) split.\n"
+            "- `energy_u1_volume.mp4`, `energy_su3_volume.mp4` — 3D voxel renders of each "
+            "channel's energy density (opacity = density).\n\n"
+            "**How to read it.** The carrier is written along the pure trace direction, so the "
+            f"bare seed reads ~all U(1) (`t=0`: U(1) {100*u1_t0/tot0:.1f}%, SU(3) {100*su3_t0/tot0:.1f}%). "
+            "Any SU(3) (orange) energy that grows during relaxation is **genuinely coexcited** "
+            "colour content, not injected — that is the 'does colour coexcite?' question (E1 fix).\n\n"
+            "Visualization only; no physics is added.\n",
+            encoding="utf-8",
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -652,7 +781,13 @@ def _emit_iteration(
         amps, phases, times = _extract_amp_phase(world, ref, grid_shape)
         peak = max(float(np.max(a)) for a in amps)
         print(f"  peak |Psi| = {peak:.4f}")
-        _render_world(amps, phases, times, vp, grid_shape, spacing, iter_dir, state_label)
+        u1_density, su3_density, u1_energy, su3_energy, _ = _extract_channel_energy(
+            world, ref, grid_shape
+        )
+        _render_world(
+            amps, phases, times, vp, grid_shape, spacing, iter_dir, state_label,
+            energy_channels=(u1_density, su3_density, u1_energy, su3_energy),
+        )
     else:
         print("  Rendering SKIPPED (BRANESIM_VORTEX_RENDER=0; diagnostics-only).")
 
@@ -746,7 +881,8 @@ def run() -> None:
         "beta": BETA,
         "r_t": R_T,
         "vortex_params": VORTEX_PARAMS._asdict(),
-        "carrier_re_component": CARRIER_RE,
+        "carrier_re_components": CARRIER_RE_COMPONENTS,
+        "carrier_re_weights": list(CARRIER_RE_WEIGHTS),
         "carrier_im_component": CARRIER_IM,
         "render": {
             "fps": FPS, "dpi": DPI, "density_threshold": DENSITY_THRESHOLD,
