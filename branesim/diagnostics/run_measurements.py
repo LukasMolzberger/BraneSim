@@ -64,6 +64,12 @@ from branesim.initialization.vortex_worldtube import (
     vacuum_offsets,
 )
 from branesim.diagnostics.binding_probe import device_binding_probe
+from branesim.diagnostics.contracts import (
+    CONTRACTS,
+    build_vacuum_world,
+    build_ledger,
+    render_ledger_md,
+)
 from branesim.diagnostics._plot_helpers import _apply_style, _savefig, _phase_to_rgb
 
 
@@ -1089,6 +1095,7 @@ def _write_report(
     diag_dir: Path,
     config: dict,
     results: dict[str, dict],
+    ledger_md: str | None = None,
 ) -> Path:
     """Write diagnostics/report.md with key figures and verdicts."""
     ts = config.get("timestamp", "unknown")
@@ -1105,6 +1112,10 @@ def _write_report(
         f"---",
         f"",
     ]
+
+    # Trust ledger first — what is trustworthy on this run, read bottom-up.
+    if ledger_md:
+        lines += [ledger_md]
 
     # D1
     d1 = results.get("energy", {})
@@ -1296,6 +1307,79 @@ def _write_report(
 
 
 # ---------------------------------------------------------------------------
+# Device dispatch (shared by the real-state pass and the vacuum calibration)
+# ---------------------------------------------------------------------------
+
+_DEVICE_FNS = {
+    "energy": device_energy,
+    "confinement": device_confinement,
+    "winding": device_winding,
+    "berry": device_berry,
+    "em_fields": device_em_fields,
+    "color_channels": device_color_channels,
+    "spectra": device_spectra,
+}
+
+
+def _call_device(
+    name: str,
+    world: np.ndarray,
+    ref: np.ndarray,
+    lattice: SpacelikeLattice,
+    params: ActionParams,
+    out_dir: Path,
+    *,
+    m_expected: int | None,
+    n_t: int | None,
+) -> dict[str, Any]:
+    """Run one device, threading the two config-derived kwargs where needed.
+
+    Used identically by the real-state measurement pass and the vacuum
+    calibration pass, so a device is never exercised by two different code paths.
+    """
+    if name == "binding_probe":
+        return device_binding_probe(world, ref, lattice, params, out_dir, n_t=n_t)
+    if name == "winding":
+        # Calibration passes m_expected=None (it only inspects the raw nulls);
+        # the real pass passes the config m so the falsifier targets winding_z≈m.
+        return device_winding(world, ref, lattice, params, out_dir, m_expected=m_expected)
+    return _DEVICE_FNS[name](world, ref, lattice, params, out_dir)
+
+
+def _run_calibration(
+    world_vac: np.ndarray,
+    ref: np.ndarray,
+    lattice: SpacelikeLattice,
+    params: ActionParams,
+    n_t: int | None,
+    verbose: bool,
+) -> dict[str, dict]:
+    """Run each vacuum-fixture device on the A=0 world into a throwaway dir.
+
+    Returns device name -> metric dict (or ``{"error": ...}``).  Artifacts
+    (PNG/CSV) are written into a TemporaryDirectory and discarded — only the
+    returned metric dicts are inspected by the ledger.
+    """
+    calib: dict[str, dict] = {}
+    with tempfile.TemporaryDirectory(prefix="branesim_calib_") as tmp:
+        tmp_dir = Path(tmp)
+        for name, contract in CONTRACTS.items():
+            if contract.calib_fixture != "vacuum":
+                continue
+            try:
+                # m_expected=None for the calibration winding run (raw nulls only).
+                calib[name] = _call_device(
+                    name, world_vac, ref, lattice, params, tmp_dir,
+                    m_expected=None, n_t=n_t,
+                )
+            except Exception as exc:  # a device that can't survive A=0 fails calibration
+                if verbose:
+                    print(f"    [calib] device {name} raised on vacuum: {exc}")
+                calib[name] = {"error": str(exc)}
+    return calib
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -1367,36 +1451,17 @@ def run_measurements(
     results: dict[str, dict] = {}
     paths: dict[str, str] = {}
 
-    device_fns = {
-        "energy": device_energy,
-        "confinement": device_confinement,
-        "winding": device_winding,
-        "berry": device_berry,
-        "em_fields": device_em_fields,
-        "color_channels": device_color_channels,
-        "spectra": device_spectra,
-    }
-
     for name in devices:
-        if name not in device_fns and name != "binding_probe":
+        if name not in _DEVICE_FNS and name != "binding_probe":
             print(f"  [WARNING] Unknown device {name!r}, skipping.")
             continue
         if verbose:
             print(f"  Running device {name} ...")
         try:
-            if name == "binding_probe":
-                # binding_probe accepts an extra n_t kwarg; do NOT mutate params.
-                res = device_binding_probe(
-                    world, ref, lattice, params, diag_dir, n_t=config_n_t
-                )
-            elif name == "winding":
-                # winding takes the expected U(1) charge m from config so its
-                # pass/fail targets winding_z ≈ m (not net winding = 0).
-                res = device_winding(
-                    world, ref, lattice, params, diag_dir, m_expected=config_m
-                )
-            else:
-                res = device_fns[name](world, ref, lattice, params, diag_dir)
+            res = _call_device(
+                name, world, ref, lattice, params, diag_dir,
+                m_expected=config_m, n_t=config_n_t,
+            )
             results[name] = res
             paths[name] = str(diag_dir)
             if verbose:
@@ -1407,10 +1472,26 @@ def run_measurements(
             traceback.print_exc()
             results[name] = {"error": str(exc)}
 
+    # --- Trust ledger: calibrate every vacuum-fixture device on the A=0 state in
+    #     this same run, then assemble the layer-ordered ledger (contracts.py).
+    if verbose:
+        print("  Running vacuum calibration for the trust ledger ...")
+    world_vac = build_vacuum_world(ref, data["n_slices"], params.r_t)
+    calib_results = _run_calibration(world_vac, ref, lattice, params, config_n_t, verbose)
+
+    sr = config.get("solver_report") or {}
+    converged = sr.get("converged")
+    state = config.get("iter_label") or config.get("iter_kind") or "unknown state"
+    if converged is not None:
+        state = f"{state} (converged={converged})"
+    ctx = {"converged": bool(converged), "m": config_m, "n_t": config_n_t, "state": state}
+    ledger_rows, first_fail = build_ledger(results, calib_results, ctx)
+    ledger_md = render_ledger_md(ledger_rows, first_fail, ctx)
+
     # Write report
     if verbose:
         print("  Writing report.md ...")
-    report_path = _write_report(run_dir, diag_dir, config, results)
+    report_path = _write_report(run_dir, diag_dir, config, results, ledger_md=ledger_md)
     paths["report"] = str(report_path)
     if verbose:
         print(f"  report.md -> {report_path}")

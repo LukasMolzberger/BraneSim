@@ -17,6 +17,27 @@ convergence criterion, or a diagnostic's pass/fail logic — no new physics. A r
 can be physically sound in principle yet still produce a misleading verdict
 because the instrument is mis-wired; that class of bug lives here.
 
+## The trust ledger (single-shot-experiment disciplines, operationalized)
+
+Because parameter sweeps don't help here (too many coupled axes) and the
+human-in-the-loop is the *only* error-correction, the instrument must self-certify
+each run. `branesim/diagnostics/contracts.py` encodes three disciplines as data,
+and `run_measurements` emits a **trust ledger** at the top of every `report.md`:
+
+1. **Known-answer calibration** — each device runs on the vacuum (`A=0`) fixture
+   *in the same run* and must read null (also catches N-gon offset-subtraction bugs).
+2. **Pre-registered falsifier** — the pass criterion is a predicate living in
+   `contracts.py`, so moving a threshold to force a pass shows as a diff in the
+   contract, not buried in a measurement.
+3. **Layered, bottom-up** — devices carry an emergence-layer rank (L1 substrate →
+   L5 soliton); the ledger finds the first failing layer and marks everything
+   above it `⊘ uninterpretable`.
+
+The ledger currently reads: L1 (energy, spectra) calibrated green; **first failing
+layer = L2 `color_channels`, which auto-surfaces E1** (the ⅓-EM seed); L3/L5
+greyed out until E1/E3 land. Fixing the punch-list items below is what turns the
+ledger green from the bottom up.
+
 Statuses: `open` · `in-progress` · `resolved` · `wip-expected`. Each entry names
 the falsifier: the concrete check that would close it.
 
@@ -235,6 +256,23 @@ the E5 fix.
 passes non-numeric defaults through unformatted (e.g. `_fmt(v, ".4g")` returning
 `str(v)` when `v` is not a number), so a partial `results` dict renders "N/A"
 rather than raising.
+
+### E14. Winding is computed from rounding-noise phase on a near-null field — `open` (minor)
+
+Surfaced by the trust-ledger vacuum calibration: on the exactly-zero (`A=0`) field
+the carrier phase is `atan2(noise, noise)` (pure rounding noise), so the contour
+winding returns a meaningless small integer (`max_off_axis = 2.0` on vacuum). For
+real data the winding contour sits in the bright donut (`|Ψ| > 0`), so this does
+not affect production measurements — hence the winding contract uses
+`calib_fixture="none"` (vacuum is genuinely degenerate, phase undefined) and the
+m-seed is the calibration standard via the falsifier. Still, `measure_winding_closure`
+could guard against contour segments crossing a `|Ψ| < eps·max|Ψ|` region (return
+undefined/skip rather than integrate noise) to be robust if a contour ever clips
+the core or far field.
+
+**Falsifier / fix.** Add an amplitude guard to `measure_winding_closure`; assert
+the contour stays in `|Ψ| > eps` and flag otherwise. Low priority — no current
+measurement is affected.
 
 ---
 
