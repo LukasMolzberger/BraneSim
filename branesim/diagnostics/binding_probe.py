@@ -11,8 +11,19 @@ Probes
 P1  Sector centroids & separation (Channel-B co-location baseline).
 P2  Longitudinal stretch profile Δu_∥(ρ) (time-link binding source).
 P3  Per-slice carrier rate ω(l)   (linchpin caveat 1: uniformity check).
-P4  Trace-sector loop holonomy γ_Γ (soft-winding-lock falsifier, scalar).
-P5  Antisymmetric Kähler part Im𝒢  (Part-2 topological structure).
+    Measured from the genuine U(1) carrier 2-plane (CARRIER_RE + i·CARRIER_IM,
+    vacuum-offset-subtracted; see _carrier_plane) — an exact circle, so ω(l) is
+    uniform and ω₀-independent.  NOT the time-quadrature triplet trace ψ_s, which
+    is elliptical + offset-contaminated and gave a biased, grid-dependent ω.
+P4  Trace-direction U(1) loop holonomy γ_Γ (soft-winding-lock falsifier, scalar).
+    SETTLED: the holonomy of the trace (1,1,1)/√3 Berry connection (the charge Q),
+    NOT the kinematic carrier-2-plane winding (whose rate is P3).  Kinematically
+    2π·n_t; the soft winding-lock is the B-dependent deviation Q=κ(A)·B (needs a
+    real texture, gated on C2).  Links 0→1…(N-1)→N, no wrap double-count.
+P5  Antisymmetric Kahler part Im𝒢  (Part-2 topological structure).
+    Both P4 and P5 read ψ_s/ψ_perp from the vacuum-offset-subtracted triplet
+    (see _build_psi_triplet): the prestressed-vacuum background turn is removed so
+    the holonomy and Kahler overlap measure the soliton, not the rotating vacuum.
 
 Outputs
 -------
@@ -86,7 +97,6 @@ if str(_REPO) not in sys.path:
 from branesim.core.conventions import ActionParams
 from branesim.core.lattice import SpacelikeLattice
 from branesim.diagnostics.alpha_separability import projection_operators
-from branesim.diagnostics.confinement import _energy_weights
 from branesim.initialization.vortex_worldtube import CARRIER_RE, CARRIER_IM, vacuum_offsets
 from branesim.diagnostics._plot_helpers import _apply_style, _savefig
 
@@ -133,10 +143,26 @@ def _build_psi_triplet(
     Psi : complex ndarray, shape (T, n_nodes, 3)
     """
     n_T = world.shape[0]
+    n_slices = n_T - 1
     dt = params.dt
 
     # Lateral displacement: components 0,1,2
-    u = world[:, :, :3] - ref[np.newaxis, :, :3]  # (T, n_nodes, 3)
+    u = world[:, :, :3] - ref[np.newaxis, :, :3]  # (T, n_nodes, 3)  (a fresh array)
+
+    # Subtract the prestressed-vacuum N-gon background turn from the carrier
+    # component (CARRIER_RE) BEFORE differentiating, so the trace/traceless envelope
+    # — and hence the loop holonomy (P4) and the Kahler part (P5) — measures the
+    # SOLITON's carrier, not the rotating vacuum.  This mirrors the renderer
+    # (_extract_amp_phase) and the carrier-plane probe (_carrier_plane).  Without it
+    # the vacuum turn (a different rate, n_vac≠n_t) contaminates ψ_s: it halved the
+    # measured holonomy and biased the Kahler overlap.  Only CARRIER_RE is in the
+    # lateral triplet (0,1,2); CARRIER_IM is the timelike component (not in the
+    # triplet), so off_im does not enter here.
+    off_re, _off_im = vacuum_offsets(n_slices, params.r_t)
+    # CARRIER_RE=2 is always inside the lateral triplet (0,1,2); the guard makes that
+    # invariant explicit and is defensive against a future CARRIER_RE≥3 (timelike) value.
+    if CARRIER_RE < 3:
+        u[:, :, CARRIER_RE] = u[:, :, CARRIER_RE] - off_re[:, np.newaxis]
 
     # Time derivative (central diff interior, one-sided ends)
     udot = np.empty_like(u)
@@ -151,6 +177,36 @@ def _build_psi_triplet(
         return u.astype(complex)
 
     return u + 1j * udot / omega0   # (T, n_nodes, 3)
+
+
+def _carrier_plane(
+    world: np.ndarray,
+    ref: np.ndarray,
+    params: ActionParams,
+) -> np.ndarray:
+    """The genuine U(1) carrier 2-plane  Ψ = (u_RE − off_re) + i·(u_IM − off_im).
+
+    The carrier lives in the (CARRIER_RE, CARRIER_IM) ambient plane and rotates as a
+    true circle e^{i(ω t + m φ)} (the "i from time"; project_complex_u1_from_time), so
+    its per-link phase advance IS the carrier rate **exactly** — independent of any ω₀
+    normalisation and uniform across nodes (the azimuthal m·φ cancels in the
+    conj·next overlap).  The prestressed-vacuum N-gon background turn is subtracted
+    (vacuum_offsets), exactly as the renderer (_extract_amp_phase) does; without it the
+    measured rate is contaminated by the vacuum rotation (≈ halved).
+
+    This is the correct, robust object for the carrier-rate (P3) measurement — NOT the
+    time-quadrature triplet lift, which is elliptical when ω₀ ≠ ω (and when it lifts the
+    offset-contaminated u) and so biases the node-summed phase grid-dependently.
+
+    Returns
+    -------
+    Psi_carrier : complex ndarray, shape (T, n_nodes)
+    """
+    n_slices = world.shape[0] - 1
+    off_re, off_im = vacuum_offsets(n_slices, params.r_t)
+    re_d = world[:, :, CARRIER_RE] - ref[np.newaxis, :, CARRIER_RE] - off_re[:, np.newaxis]
+    im_d = world[:, :, CARRIER_IM] - ref[np.newaxis, :, CARRIER_IM] - off_im[:, np.newaxis]
+    return re_d + 1j * im_d   # (T, n_nodes)
 
 
 # ---------------------------------------------------------------------------
@@ -250,13 +306,25 @@ def _p2_longitudinal_stretch(
     n_T = world.shape[0]
     dim = lattice.dim
 
+    # SCOPE (PRINCIPLES.md §7.6 analysis exemption): this probe instruments the dim=3
+    # U(1) vortex experiment specifically — its radial coordinate is defined about the
+    # z-axis (VORTEX_AXIS=2), which has no meaning below dim=3.  Guard explicitly
+    # rather than silently producing a wrong ρ on a lower-dim grid.
+    if dim < 3:
+        return {
+            "rho_bins": np.array([]), "du_par_mean": np.array([]),
+            "du_par_avg": np.array([]), "rho_extremum": float("nan"),
+            "du_par_extremum": float("nan"), "du_par_scalar": float("nan"),
+            "du_par_sign": 0, "normalizer": float("nan"),
+        }
+
     # Grid centre in spatial coordinates
     centre = np.array(
         [0.5 * (g - 1) * a for g in grid_shape[:dim]], dtype=float
     )  # (dim,)
 
-    # Radial distance ρ in XY plane (axes 0,1), ignoring z
-    # (the vortex ring lives in the XY equatorial plane for the Y_1^1 seed)
+    # Radial distance ρ in the plane transverse to VORTEX_AXIS (z): axes 0,1 (XY).
+    # The vortex ring lives in the XY equatorial plane for the Y_1^1 seed (dim=3).
     xy_ref = ref[:, :2]                                         # (n_nodes, 2)
     xy_centre = centre[:2]
     rho_node = np.linalg.norm(xy_ref - xy_centre[np.newaxis, :], axis=1)  # (n_nodes,)
@@ -372,19 +440,24 @@ def _p2_longitudinal_stretch(
 # ---------------------------------------------------------------------------
 
 def _p3_carrier_rate(
-    psi_s: np.ndarray,
+    psi_carrier: np.ndarray,
     dt: float,
     n_t: int | None,
     n_slices: int,
     is_periodic: bool,
 ) -> dict[str, Any]:
-    """Per-slice FH carrier rate from the trace scalar psi_s.
+    """Per-slice FH carrier rate from the genuine U(1) carrier 2-plane.
 
-    ω(l) = arg( Σ_nodes conj(psi_s[l]) · psi_s[l+1] ) / dt
+    ω(l) = arg( Σ_nodes conj(Ψ_carrier[l]) · Ψ_carrier[l+1] ) / dt
+
+    Measures the closure-locked carrier rate from the (CARRIER_RE, CARRIER_IM)
+    plane (see :func:`_carrier_plane`) — an exact circle, so ω(l) is uniform and
+    ω₀-independent.  (Earlier this used the time-quadrature triplet trace ψ_s,
+    which is elliptical and vacuum-offset-contaminated → biased, grid-dependent ω.)
 
     Parameters
     ----------
-    psi_s   : (T, n_nodes)  complex  trace scalar
+    psi_carrier : (T, n_nodes)  complex  vacuum-offset-subtracted carrier 2-plane
     dt      : float
     n_t     : int or None   known temporal winding (from config)
     n_slices: int           number of temporal steps (T = n_slices+1)
@@ -399,21 +472,22 @@ def _p3_carrier_rate(
         omega_ref       : float or None  2π·n_t/(n_slices·dt) if n_t known
         closure_locked  : bool or None   std/mean < 0.05 if mean nonzero
     """
-    n_T = psi_s.shape[0]
+    n_T = psi_carrier.shape[0]
     n_steps = n_T - 1
 
-    # Choose which links to use
-    if is_periodic:
-        # Include the wrap-around link l=N→0
-        l_range = list(range(n_steps)) + [n_T - 1]
-        l_next = list(range(1, n_T)) + [0]
-    else:
-        l_range = list(range(n_steps))
-        l_next = list(range(1, n_T))
+    # Links 0→1 … (N-1)→N already span the FULL loop: the world includes the +1
+    # closure slice (slice N ≡ slice 0 for a periodic worldtube, an independent
+    # future slice for Dirichlet/IVP), so the link (N-1)→N is the closure.  Adding
+    # a further N→0 wrap link (the old is_periodic branch) double-counts onto the
+    # duplicate slice N≡0, injecting a spurious phase-0 link that biased ω by the
+    # factor N/(N+1) and inflated its std.  ``is_periodic`` is therefore NOT used to
+    # pick links here (kept in the signature for the summary / callers).
+    l_range = list(range(n_steps))
+    l_next = list(range(1, n_T))
 
     omega_l = np.zeros(len(l_range))
     for i, (l, lp1) in enumerate(zip(l_range, l_next)):
-        inner = np.sum(np.conj(psi_s[l]) * psi_s[lp1])
+        inner = np.sum(np.conj(psi_carrier[l]) * psi_carrier[lp1])
         amp = abs(inner)
         if amp > 1e-30:
             omega_l[i] = float(np.angle(inner)) / dt
@@ -449,37 +523,45 @@ def _p4_loop_holonomy(
     dt: float,
     is_periodic: bool,
 ) -> dict[str, Any]:
-    """Accumulate the trace-sector Berry phase around the full time loop.
+    """Trace-direction U(1) Berry holonomy around the time loop  (γ_Γ).
 
-    γ_Γ = Σ_l arg( Σ_nodes conj(psi_s[l]) · psi_s[l+1] )
+    γ_Γ = Σ_l arg( Σ_nodes conj(psi_s[l]) · psi_s[l+1] ),  links 0→1 … (N-1)→N.
 
-    Uses the same FH discrete-link accumulation as device_berry.
+    DEFINITION (settled): γ_Γ is the holonomy of the **trace** (1,1,1)/√3 U(1)
+    Berry connection — i.e. of the trace projection ψ_s of the (offset-subtracted)
+    carrier envelope.  This is the soft-winding-lock object Q (u1_su3_binding.md /
+    time_link_binding.md Part 2): kinematically γ_Γ = 2π·n_t for a pure carrier, and
+    the soft winding-lock is the B-dependent deviation Q = κ(A)·B that appears only
+    when a genuine SU(3) texture couples in (gated on a stable B≠0 texture, C2).
+
+    NOT the raw carrier-2-plane holonomy — that is the kinematic carrier winding
+    (always 2π·n_t, B-independent), whose RATE is already characterised by P3.
+
+    Links span the full loop via 0→1 … (N-1)→N (slice N is the closure copy of
+    slice 0 for a periodic worldtube, or the future end for Dirichlet); no extra
+    N→0 wrap link is added (that double-counted onto the duplicate slice N≡0 and
+    halved γ_Γ).  ``is_periodic`` is kept in the signature for callers but is not
+    used to select links here (same fix as P3).
 
     Returns
     -------
     dict with:
         gamma_accum : (T,)  accumulated phase, gamma_accum[0]=0
-        gamma_total : float  total accumulated phase
+        gamma_total : float  total accumulated phase (= γ_Γ)
     """
     n_T = psi_s.shape[0]
     n_steps = n_T - 1
 
-    if is_periodic:
-        l_range = list(range(n_steps)) + [n_T - 1]
-        l_next = list(range(1, n_T)) + [0]
-    else:
-        l_range = list(range(n_steps))
-        l_next = list(range(1, n_T))
+    l_range = list(range(n_steps))
+    l_next = list(range(1, n_T))
 
-    # For the per-slice time series we need one entry per slice (n_T values)
     # gamma_accum[l] = accumulated phase up to and including link l→l+1
     gamma_accum = np.zeros(n_T)
     for i, (l, lp1) in enumerate(zip(l_range, l_next)):
         inner = np.sum(np.conj(psi_s[l]) * psi_s[lp1])
         amp = abs(inner)
         phase_step = float(np.angle(inner)) if amp > 1e-30 else 0.0
-        idx = min(i + 1, n_T - 1)
-        gamma_accum[idx] = gamma_accum[i] + phase_step
+        gamma_accum[i + 1] = gamma_accum[i] + phase_step
 
     gamma_total = float(gamma_accum[-1])
 
@@ -490,7 +572,7 @@ def _p4_loop_holonomy(
 
 
 # ---------------------------------------------------------------------------
-# P5 — Antisymmetric Kähler part Im𝒢
+# P5 — Antisymmetric Kahler part Im𝒢
 # ---------------------------------------------------------------------------
 
 def _p5_kahler(
@@ -507,7 +589,7 @@ def _p5_kahler(
         R_kahler = mean_l |Im g(l)| / (mean_l |Re g(l)| + eps)
 
     Prediction: Im𝒢 ≠ 0 requires both J (time-quadrature) and α-split
-    (ω_tr ≠ ω_⊥).  Threshold R_kahler > ~0.1 ⇒ Kähler part present.
+    (ω_tr ≠ ω_⊥).  Threshold R_kahler > ~0.1 ⇒ Kahler part present.
 
     Returns
     -------
@@ -601,21 +683,20 @@ def device_binding_probe(
     #   2. Measure from the carrier 2-plane (CARRIER_RE + i*CARRIER_IM) via FH link
     #   3. Fall back to omega0=1.0 (documented, logged)
 
+    # The genuine carrier 2-plane (offset-subtracted, exactly circular) is the
+    # robust object for the carrier rate (P3) and for measuring ω₀ when n_t is absent.
+    Psi_carrier = _carrier_plane(world, ref, params)   # (n_T, n_nodes)
+
     if n_t is not None and n_slices > 0 and dt > 0:
         # Closure-locked rate from config
         omega0 = float(2.0 * np.pi * n_t / (n_slices * dt))
         omega0_source = "closure_locked_config"
     else:
-        # Measure from the carrier 2-plane (device_berry approach, more accurate than triplet)
-        # Carrier complex field = (u_CARRIER_RE + i*u_CARRIER_IM) using vacuum-offsets
-        off_re, off_im = vacuum_offsets(n_slices, params.r_t)
-        re_d = world[:, :, CARRIER_RE] - ref[np.newaxis, :, CARRIER_RE] - off_re[:, np.newaxis]
-        im_d = world[:, :, CARRIER_IM] - ref[np.newaxis, :, CARRIER_IM] - off_im[:, np.newaxis]
-        Psi_carrier = re_d + 1j * im_d   # (n_T, n_nodes)
+        # Measure from the carrier 2-plane (exact circle; ω₀-independent).
         # FH link phases over interior steps (avoid one-sided boundary artefact at l=0)
         phase_sum = 0.0
         count = 0
-        for l_meas in range(1, n_T - 2):
+        for l_meas in range(1, n_T - 1):
             inner_m = np.sum(np.conj(Psi_carrier[l_meas]) * Psi_carrier[l_meas + 1])
             if abs(inner_m) > 1e-30:
                 phase_sum += float(np.angle(inner_m))
@@ -654,7 +735,9 @@ def device_binding_probe(
     # ------------------------------------------------------------------
     p1 = _p1_sector_centroids(world, ref, lattice)
     p2 = _p2_longitudinal_stretch(world, ref, lattice, params)
-    p3 = _p3_carrier_rate(psi_s, dt, n_t, n_slices, is_periodic)
+    # P3 measures the carrier RATE from the exact-circular carrier 2-plane (robust,
+    # ω₀-independent); the triplet trace ψ_s is the wrong object for the rate.
+    p3 = _p3_carrier_rate(Psi_carrier, dt, n_t, n_slices, is_periodic)
     p4 = _p4_loop_holonomy(psi_s, dt, is_periodic)
     p5 = _p5_kahler(psi_s, psi_perp)
 
@@ -758,7 +841,7 @@ def device_binding_probe(
     ax.plot(times, Im_g_ts, color="tab:red", label="Im g")
     ax.axhline(0.0, color="black", linewidth=0.6)
     ax.set_xlabel("time"); ax.set_ylabel("g_sa (norm.)")
-    ax.set_title(f"(d) P5 — Kähler overlap  R_kahler={p5['R_kahler']:.3g}")
+    ax.set_title(f"(d) P5 — Kahler overlap  R_kahler={p5['R_kahler']:.3g}")
     ax.legend()
 
     # (e) Accumulated trace-sector phase → γ_Γ
