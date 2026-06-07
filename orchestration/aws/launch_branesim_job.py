@@ -36,6 +36,53 @@ def run_cmd(args: list[str], *, capture_output: bool = False) -> subprocess.Comp
         raise
 
 
+def _default_runs_dir() -> Path:
+    """Repo-root ``runs/`` directory (orchestration/aws/ -> repo root is parents[2])."""
+    return Path(__file__).resolve().parents[2] / "runs"
+
+
+def fetch_results(
+    region: str,
+    s3_bucket: str,
+    s3_prefix: str,
+    job_id: str,
+    runs_dir: Path,
+) -> list[Path]:
+    """Sync a completed job's results from S3 into ``runs_dir``.
+
+    Each experiment run-dir under ``results/`` is synced preserving its name (the
+    remote command already appends the ``_aws`` provenance suffix), and the
+    bootstrap ``user-data.log`` is copied alongside.  Returns the local paths.
+    """
+    results_uri = f"s3://{s3_bucket}/{s3_prefix}/{job_id}/results"
+    listing = run_cmd(["aws", "s3", "ls", f"{results_uri}/", "--region", region],
+                      capture_output=True)
+    inner = [ln.split()[-1].rstrip("/")
+             for ln in listing.stdout.splitlines() if ln.strip().startswith("PRE")]
+
+    runs_dir = Path(runs_dir)
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    fetched: list[Path] = []
+
+    for d in (inner or [None]):  # None => sync the flat results/ root
+        src = f"{results_uri}/{d}" if d else results_uri
+        name = d if d else f"{job_id}_aws"
+        dest = runs_dir / name
+        print(f"[fetch] {src} -> {dest}")
+        run_cmd(["aws", "s3", "sync", src, str(dest), "--region", region])
+        try:  # carry the bootstrap log (best-effort; lives at results root)
+            run_cmd(["aws", "s3", "cp", f"{results_uri}/user-data.log",
+                     str(dest / "user-data.log"), "--region", region], capture_output=True)
+        except subprocess.CalledProcessError:
+            pass
+        fetched.append(dest)
+
+    print(f"[fetch] done: {len(fetched)} run-dir(s) under {runs_dir}")
+    for d in fetched:
+        print(f"  {d}")
+    return fetched
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Launch a BraneSim job on AWS EC2.")
     parser.add_argument("--region", default="us-east-1")
@@ -79,6 +126,18 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="After launch, run watch_job.py in-process to poll S3 markers and "
              "auto-terminate if a DOA tripwire fires.",
+    )
+    parser.add_argument(
+        "--auto-fetch",
+        action="store_true",
+        help="Watch the job and, on success (job-complete), sync results into "
+             "--runs-dir/ (run-dir names preserved; remote already adds _aws). "
+             "Implies --watch; blocks until the job ends.",
+    )
+    parser.add_argument(
+        "--runs-dir",
+        default=str(_default_runs_dir()),
+        help="Destination for --auto-fetch (default: repo runs/).",
     )
 
     parser.add_argument("--spot", action="store_true", help="Launch as one-time spot instance")
@@ -209,19 +268,31 @@ def main() -> None:
     print(f"  markers_s3:      s3://{args.s3_bucket}/{args.s3_prefix}/{job_id}/markers/")
     print("Instance will self-terminate after syncing results.")
 
-    if args.watch:
-        import importlib.util, sys as _sys
+    if args.watch or args.auto_fetch:
+        import importlib.util
         watcher_path = Path(__file__).with_name("watch_job.py")
         spec = importlib.util.spec_from_file_location("watch_job", watcher_path)
         watcher_mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
         spec.loader.exec_module(watcher_mod)  # type: ignore[union-attr]
-        watcher_mod.watch(
+        rc = watcher_mod.watch(
             region=args.region,
             instance_id=instance_id,
             s3_bucket=args.s3_bucket,
             s3_prefix=args.s3_prefix,
             job_id=job_id,
         )
+        if args.auto_fetch:
+            if rc == 0:
+                fetch_results(
+                    region=args.region,
+                    s3_bucket=args.s3_bucket,
+                    s3_prefix=args.s3_prefix,
+                    job_id=job_id,
+                    runs_dir=Path(args.runs_dir),
+                )
+            else:
+                print(f"[fetch] skipped — watch returned {rc} (not a clean job-complete); "
+                      f"results (if any) remain at {s3_results_uri}")
 
 
 if __name__ == "__main__":
