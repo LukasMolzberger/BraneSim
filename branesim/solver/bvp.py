@@ -392,7 +392,16 @@ def solve_block(
             "bc_scheme": "rotating_frame_periodic",
             "residual_initial": residual_initial,
             "residual_final": residual_final,
+            # scipy's newton_krylov(iter=...) runs EXACTLY this many outer steps and
+            # does not early-stop on f_tol, so the count is opts.max_iter by
+            # construction.  The honest convergence signals are the two ratios below
+            # (E7): how far from tol we actually landed, and the true drop factor —
+            # NOT the over-optimistic "drops ~100x" provenance text.
             "iterations": opts.max_iter,
+            "residual_final_over_tol": (residual_final / opts.tol
+                                        if opts.tol > 0 else float("inf")),
+            "residual_drop_factor": (residual_initial / residual_final
+                                     if residual_final > 0 else float("inf")),
             "converged": converged,
             "condition_estimate": bc.condition_estimate(problem.lattice.params, problem.params),
             "gauge": bc.gauge,

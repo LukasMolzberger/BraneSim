@@ -55,21 +55,28 @@ These are the gaps between EXPERIMENT.md's *target object* and what the current
 seed/solve actually produces. While open, run verdicts about "the EM/electron
 U(1) vortex" are about a **different object** than the one named.
 
-### E1. The seed is NOT a pure EM/U(1) vortex — it is ⅓ EM + ⅔ color — `open`
+### E1. The seed is NOT a pure EM/U(1) vortex — it is ⅓ EM + ⅔ color — `resolved` (2026-06-07)
 
-The injector (`vortex_worldtube.py`) writes the carrier into a **single lateral
+> **Resolved.** The injector now writes Re(Ψ) along the symmetric trace
+> direction `(1,1,1)/√3` of the lateral triplet (`CARRIER_RE_COMPONENTS=(0,1,2)`,
+> `CARRIER_RE_WEIGHTS=(1,1,1)/√3`) instead of the single `CARRIER_RE=2`
+> component. `P_SU3` annihilates a pure-trace displacement, so the bare seed is
+> genuinely pure U(1)/EM: D6 now reads `u1_fraction_mean = 0.99999…`,
+> `su3_fraction_mean ≈ 1e-11` (was `0.333`), and the trust-ledger L2
+> `color_channels` contract — already written to expect a pure-EM seed — flips
+> from the first failing layer to **✓ PASS**. Every diagnostic that reads Re(Ψ)
+> now routes through `project_carrier_re` (projection onto the unit trace
+> vector), so injector and measurement share one definition; the vacuum N-gon
+> offset is likewise distributed along the trace (norm `r_t` preserved). Verified
+> by `tests/test_vortex_worldtube.py` (pure-trace + `winding_z ≈ m`) and a
+> seed-only suite run. Any SU(3) content is now genuinely *coexcited* by the
+> relaxation, not injected.
+
+The injector (`vortex_worldtube.py`) wrote the carrier into a **single lateral
 component** (`CARRIER_RE = 2`). By BACKBONE #25 and EXPERIMENT.md §"Injection
 ansatz", a single-lateral-component vortex reads **⅓ trace (U(1)/EM) + ⅔
-traceless (SU(3)/color)** under the U(3) projection. The D6 diagnostic confirms
-this exactly: `u1_fraction_mean = 0.333`. So the headline object — "the EM /
-electron-like sector" — is mislabeled; what is injected is dominantly color.
-EXPERIMENT.md "Next (i): re-inject in the trace (EM) direction" is still pending.
-
-**Falsifier / fix.** Seed the carrier in the symmetric `(1,1,1)/√3` trace
-direction (all three lateral components sharing the winding phase). D6 should
-then read `u1_fraction → 1` for the bare seed, with `su3_fraction` rising only if
-the relaxation genuinely coexcites color. Until then, the run cannot answer
-"does the EM vortex bind."
+traceless (SU(3)/color)** under the U(3) projection (`u1_fraction_mean = 0.333`),
+so the headline "EM / electron-like" object was mislabeled — dominantly color.
 
 ### E2. No tumble → spin-½ is not in the experiment at all — `open`
 
@@ -162,17 +169,25 @@ everywhere.
 production grids and replace every `1e3–1e4` claim with the measured value (and
 its grid/`n_slices` scaling).
 
-### E7. `iterations` reporting is hard-coded; provenance text is over-optimistic — `open`
+### E7. `iterations` reporting; provenance text is over-optimistic — `in-progress` (2026-06-07)
 
-`solve_block`'s PeriodicBC path reports `"iterations": opts.max_iter`
-unconditionally (`bvp.py:395`), regardless of what the solver did. The manifest
-and RUNBOOK describe the relaxation as "residual drops ~100×" — the eigensolve's
-actual drop was **44×** (78.2 → 1.78), to a residual still **6 orders of
-magnitude** above `tol`. The provenance reads like a near-success; it was a stall.
+> **Partially addressed.** `solve_block`'s PeriodicBC `solver_report` now emits
+> the two honest convergence signals — `residual_final_over_tol` and
+> `residual_drop_factor` (computed from the actual initial/final residuals) — so
+> the JSON provenance (`manifest.json`, each iter's `config.json`) carries the
+> measured drop, not a slogan. Note on the count: scipy's
+> `newton_krylov(iter=opts.max_iter)` runs *exactly* that many outer steps and
+> does **not** early-stop on `f_tol`, so `"iterations": opts.max_iter` is the
+> true count by construction (documented inline). **Still open:** the prose
+> "residual drops ~100×" in `vortex_seed_render.py`'s manifest note and the
+> RUNBOOK should be replaced with the emitted `residual_drop_factor` and state
+> `converged` prominently in `report.md`.
 
-**Falsifier / fix.** Report the true outer-iteration count and the achieved
-`residual_final / tol` ratio; replace "drops ~100×" with the measured factor and
-state `converged = False` prominently.
+`solve_block`'s PeriodicBC path reported `"iterations": opts.max_iter`
+(`bvp.py`). The manifest and RUNBOOK describe the relaxation as "residual drops
+~100×" — the eigensolve's actual drop was **44×** (78.2 → 1.78), to a residual
+still **6 orders of magnitude** above `tol`. The provenance reads like a
+near-success; it was a stall.
 
 ### E8. Berry/EM diagnostics on the seed are injector read-backs, not physics — `wip-expected`
 
@@ -241,21 +256,23 @@ capture. Either compute an empirical conditioning estimate from the Krylov
 iteration, or label this number as "linear modal estimate (not the achieved
 nonlinear conditioning)."
 
-### E13. `_write_report` crashes when run on a device subset — `open`
+### E13. `_write_report` crashes when run on a device subset — `resolved` (2026-06-07)
 
-`run_measurements(..., devices=[...])` with a subset (e.g. `["winding"]`) crashes
-in `_write_report`: absent devices leave their metrics as the default string
-`'N/A'`, which is then fed to a `:.4g`/`:.2e` format spec
-(`ValueError: Unknown format code 'g' for object of type 'str'`,
-`run_measurements.py:1116`). The full 8-device suite runs every device so this is
-invisible in production, but it blocks re-running a single device on an existing
-run folder (e.g. to re-check D3 after a fix). Pre-existing; found while verifying
-the E5 fix.
+> **Resolved.** Added a `_fmt(value, spec)` safe-format helper in
+> `run_measurements.py`: it returns `"N/A"` for `None`, passes non-numeric values
+> (bools, the `'N/A'`/`'?'` defaults) through as `str`, and applies the spec only
+> to real numbers. All 38 report-table format sites now route through it, so a
+> partial `results` dict renders "N/A" rather than raising. Verified:
+> `run_measurements(<folder>, devices=["winding"])` now completes and writes
+> `report.md` (absent devices show "N/A"), which previously crashed with
+> `ValueError: Unknown format code 'g' for object of type 'str'`.
 
-**Falsifier / fix.** Format report values through a small safe-format helper that
-passes non-numeric defaults through unformatted (e.g. `_fmt(v, ".4g")` returning
-`str(v)` when `v` is not a number), so a partial `results` dict renders "N/A"
-rather than raising.
+`run_measurements(..., devices=[...])` with a subset (e.g. `["winding"]`) crashed
+in `_write_report`: absent devices left their metrics as the default string
+(`'N/A'`/`'?'`), fed to a `:.4g`/`:.2e`/`:.3g` format spec. The full 8-device
+suite runs every device so this was invisible in production, but it blocked
+re-running a single device on an existing run folder (e.g. to re-check a device
+after a fix).
 
 ### E14. Winding is computed from rounding-noise phase on a near-null field — `open` (minor)
 

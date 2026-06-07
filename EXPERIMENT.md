@@ -159,10 +159,14 @@ the scalars these campaigns collect; the campaign driver is not built.
   per-color-channel `SU(3)`/QCD, spectra, **D8 binding_probe**) → CSV + paper-ready PNG
   + `report.md`. Shared plot helpers in `diagnostics/_plot_helpers.py`.
 - **Run folder**: `runs/<exp>_<date>_<time>/` with config, worldvolume, diagnostics, renders.
-- **Next**: (i) re-inject in the **trace (EM) direction**; (ii) add the **tumble**
-  (spin) + set the **`ωT` quantization** (BVP eigenvalue); (iii) the eigen-solve
-  (`solve_block`, periodic + rotating-frame-periodic BC); (iv) local `48³×64` pre-test;
-  (v) AWS production.
+- **DONE (2026-06-07)**: (i) re-inject in the **trace (EM) direction** — the bare
+  seed is now pure U(1)/EM (`u1_fraction → 1`; E1 resolved, all diagnostics route
+  through `project_carrier_re`). Seed object resized ×2 (`r0 6→12a`, `w 2.5→4a`,
+  the donut shell now ~10 cells across) on the unchanged 48³ brane; the time
+  direction (`n_t`, `n_slices`, `dt`) is **not** scaled.
+- **Next**: (ii) add the **tumble** (spin) + set the **`ωT` quantization** (BVP
+  eigenvalue); (iii) the eigen-solve (`solve_block`, periodic +
+  rotating-frame-periodic BC); (iv) local `48³×64` pre-test; (v) AWS production.
 
 ## Single experimental setup (no forked drivers)
 There is **one** experiment module — `branesim/experiments/vortex_seed_render.py` —

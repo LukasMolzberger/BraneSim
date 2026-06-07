@@ -58,9 +58,11 @@ from branesim.core.action import spacelike_potential
 from branesim.diagnostics.confinement import confinement_summary
 from branesim.diagnostics.alpha_separability import projection_operators
 from branesim.initialization.vortex_worldtube import (
-    CARRIER_RE,
+    CARRIER_RE_COMPONENTS,
+    CARRIER_RE_WEIGHTS,
     CARRIER_IM,
     measure_winding_closure,
+    project_carrier_re,
     vacuum_offsets,
 )
 from branesim.diagnostics.binding_probe import device_binding_probe
@@ -197,7 +199,8 @@ def device_energy(
     # translation that cancels in the within-slice spatial bonds.)
     off_re, off_im = vacuum_offsets(n_slices, params.r_t)
     w = world.copy()
-    w[:, :, CARRIER_RE] -= off_re[:, np.newaxis]
+    # Re offset lives along the trace direction (1,1,1)/sqrt(3) on comps 0,1,2.
+    w[:, :, 0:3] -= off_re[:, np.newaxis, np.newaxis] * np.asarray(CARRIER_RE_WEIGHTS)
     w[:, :, CARRIER_IM] -= off_im[:, np.newaxis]
 
     mass = params.mass(lattice.params)
@@ -513,15 +516,18 @@ def _build_complex_envelope(
 ) -> np.ndarray:
     """Build the complex carrier field Psi from the carrier 2-plane.
 
-    Complex displacement A = (R[2]-ref[2]-off_re) + i(R[3]-ref[3]-off_im), where
-    ``off_re/off_im`` are the per-slice prestressed-vacuum N-gon offsets (so the
-    rho-sized vacuum background is removed and only the physical carrier remains).
+    Complex displacement A = (Re-off_re) + i(R[3]-ref[3]-off_im), where Re is the
+    lateral displacement projected onto the unit trace direction (1,1,1)/sqrt(3)
+    (``project_carrier_re``) and ``off_re/off_im`` are the per-slice prestressed-
+    vacuum N-gon offsets (so the rho-sized vacuum background is removed and only
+    the physical carrier remains).
 
     Returns
     -------
     Psi : complex array, shape (n_slices+1, n_nodes)
     """
-    re_disp = world[:, :, CARRIER_RE] - ref[np.newaxis, :, CARRIER_RE]  # (T, N)
+    # Re(Psi) = lateral displacement projected onto the unit trace direction (E1).
+    re_disp = project_carrier_re(world[:, :, 0:3] - ref[np.newaxis, :, 0:3])  # (T, N)
     im_disp = world[:, :, CARRIER_IM] - ref[np.newaxis, :, CARRIER_IM]
     if off_re is not None:
         re_disp = re_disp - off_re[:, np.newaxis]
@@ -541,8 +547,8 @@ def device_berry(
 ) -> dict[str, Any]:
     """D4: Berry/phase envelope time series.
 
-    Builds Psi = re_disp + i*im_disp from the carrier 2-plane (CARRIER_RE,
-    CARRIER_IM).  Computes per-slice:
+    Builds Psi = re_disp + i*im_disp from the carrier 2-plane (trace-direction Re
+    via project_carrier_re, CARRIER_IM).  Computes per-slice:
       - amplitude |Psi| (node-averaged)
       - U(1) carrier phase arg(Psi) (node-averaged over bright region)
       - Berry connection A_t = Im(<Psi|d_t Psi>) (spatial average)
@@ -631,7 +637,7 @@ def device_berry(
     t_indices = [0, n_slices // 2, n_slices]
     for col, ti in enumerate(t_indices):
         pos = world[ti]
-        re_d = pos[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[ti]
+        re_d = project_carrier_re(pos[:, 0:3] - ref[:, 0:3]) - off_re[ti]
         im_d = pos[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[ti]
         amp_3d = np.sqrt(re_d ** 2 + im_d ** 2).reshape(nx, ny, nz)
         ph_3d = np.arctan2(im_d, re_d + 1e-300).reshape(nx, ny, nz)
@@ -699,7 +705,7 @@ def device_em_fields(
 
     # Build complex field at t=0 on the 3D grid
     pos0 = world[0]
-    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[0]
+    re_d = project_carrier_re(pos0[:, 0:3] - ref[:, 0:3]) - off_re[0]
     im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[0]
     Psi = (re_d + 1j * im_d).reshape(nx, ny, nz)
 
@@ -723,7 +729,7 @@ def device_em_fields(
     # Temporal: use slices 0 and 1
     if world.shape[0] > 1:
         pos1 = world[1]
-        re_d1 = pos1[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[1]
+        re_d1 = project_carrier_re(pos1[:, 0:3] - ref[:, 0:3]) - off_re[1]
         im_d1 = pos1[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[1]
         Psi1 = (re_d1 + 1j * im_d1).reshape(nx, ny, nz)
         amp3_1 = np.abs(Psi1)
@@ -829,9 +835,11 @@ def device_color_channels(
     """D6: U(1) trace + SU(3) traceless split of the lateral triplet.
 
     The lateral triplet = displacements in components 0,1,2 (the spacelike/
-    colour channels).  The vortex seed uses components 2 (CARRIER_RE) for
-    the real carrier, so components 0 and 1 are vacuum (zero displacement)
-    and component 2 carries the excitation.
+    colour channels).  The vortex seed writes the real carrier along the trace
+    direction (1,1,1)/sqrt(3) of the triplet (E1 fix), so the bare seed is a
+    PURE U(1)/EM excitation: P_SU3 annihilates it and ``u1_fraction -> 1``.
+    Any SU(3)/colour content is therefore genuinely coexcited by the relaxation,
+    not injected by construction.
 
     Projects each node's lateral displacement (d0, d1, d2) with P_U1 and
     P_SU3 from alpha_separability.projection_operators().
@@ -848,11 +856,12 @@ def device_color_channels(
 
     P_U1, P_SU3 = projection_operators()  # (3,3) each
 
-    # The prestressed-vacuum N-gon offset lives in component 2 (CARRIER_RE) of the
-    # lateral triplet; subtract it so the trace/traceless split reads the carrier,
-    # not the spatially-uniform vacuum background.  (Component 3 is timelike, not
-    # in the lateral triplet, so off_im does not enter here.)
+    # The prestressed-vacuum N-gon offset lives along the trace direction
+    # (1,1,1)/sqrt(3) of the lateral triplet; subtract it so the trace/traceless
+    # split reads the carrier, not the spatially-uniform vacuum background.
+    # (Component 3 is timelike, not in the lateral triplet, so off_im is absent.)
     off_re, _off_im = vacuum_offsets(n_slices_plus1 - 1, params.r_t)
+    _trace_w = np.asarray(CARRIER_RE_WEIGHTS)
 
     # Per-slice: compute lateral displacement (components 0,1,2) and project
     u1_energy = np.zeros(n_slices_plus1)
@@ -862,7 +871,7 @@ def device_color_channels(
 
     for l in range(n_slices_plus1):
         disp_lat = world[l, :, :3] - ref[np.newaxis, :, :3].reshape(-1, 3)  # (N, 3)
-        disp_lat[:, CARRIER_RE] -= off_re[l]  # remove vacuum offset (comp 2)
+        disp_lat -= off_re[l] * _trace_w  # remove vacuum offset (trace direction)
         d_u1 = disp_lat @ P_U1.T   # (N, 3)  — trace/dilatational component
         d_su3 = disp_lat @ P_SU3.T  # (N, 3) — shear/traceless component
 
@@ -890,6 +899,7 @@ def device_color_channels(
     nx, ny, nz = grid_shape
 
     disp_lat0 = world[0, :, :3] - ref[:, :3]  # (N, 3)
+    disp_lat0 = disp_lat0 - off_re[0] * _trace_w  # remove vacuum pedestal (trace)
     d_u1_0 = (disp_lat0 @ P_U1.T).reshape(nx, ny, nz, 3)
     d_su3_0 = (disp_lat0 @ P_SU3.T).reshape(nx, ny, nz, 3)
 
@@ -940,7 +950,7 @@ def device_color_channels(
     for comp_idx, color, label in zip(
         range(3),
         ["tab:blue", "tab:orange", "tab:green"],
-        ["comp-0 (colour x)", "comp-1 (colour y)", "comp-2 (CARRIER_RE)"],
+        ["comp-0 (trace 1/3)", "comp-1 (trace 1/3)", "comp-2 (trace 1/3)"],
     ):
         amp_comp = np.zeros(n_slices_plus1)
         for l in range(n_slices_plus1):
@@ -957,11 +967,11 @@ def device_color_channels(
         "u1_energy_t0": float(u1_energy[0]),
         "su3_energy_t0": float(su3_energy[0]),
         "note": (
-            "For the bare vortex ring seed, only component 2 (CARRIER_RE) and "
-            "component 3 (CARRIER_IM, timelike) carry displacement. "
-            "The lateral U(1) trace channel (P_U1) picks up the component-2 contribution; "
-            "SU(3) shear content is non-zero only if component-2 displacement "
-            "has nonzero projection onto the traceless directions."
+             "The bare seed writes the carrier along the trace direction "
+            "(1,1,1)/sqrt(3) of components (0,1,2) plus the timelike component 3 "
+            "(Im). P_SU3 annihilates a pure-trace displacement, so the bare seed "
+            "reads u1_fraction -> 1 and su3_fraction -> 0; any nonzero SU(3) "
+            "content is genuinely coexcited by the relaxation (E1 fix)."
         ),
         "csv": str(csv_path),
         "png": str(out_dir / "color_channels.png"),
@@ -995,7 +1005,7 @@ def device_spectra(
 
     off_re, off_im = vacuum_offsets(world.shape[0] - 1, params.r_t)
     pos0 = world[0]
-    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[0]
+    re_d = project_carrier_re(pos0[:, 0:3] - ref[:, 0:3]) - off_re[0]
     im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[0]
     Psi0 = (re_d + 1j * im_d).reshape(nx, ny, nz)
 
@@ -1090,6 +1100,23 @@ def device_spectra(
 # ---------------------------------------------------------------------------
 
 
+def _fmt(value: Any, spec: str = ".4g") -> str:
+    """Format ``value`` with ``spec`` if it is a real number, else pass it through.
+
+    Guards report rendering against absent devices: when ``run_measurements`` is
+    invoked on a device subset (e.g. ``devices=["winding"]`` to re-check one
+    device on an existing run folder), the other devices' metrics are missing and
+    default to the string ``"N/A"``.  Feeding ``"N/A"`` to a numeric format spec
+    (``:.4g`` / ``:.2e``) raised ``ValueError`` and crashed ``_write_report``
+    (E13).  Booleans pass through as-is (they are formatted as text, not numbers).
+    """
+    if value is None:
+        return "N/A"
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return str(value)
+    return format(value, spec)
+
+
 def _write_report(
     run_dir: Path,
     diag_dir: Path,
@@ -1124,10 +1151,10 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| V_vacuum | {d1.get('V_vacuum', 'N/A'):.4g} |",
-        f"| V_excess mean | {d1.get('V_excess_mean', 'N/A'):.4g} |",
-        f"| V_excess max | {d1.get('V_excess_max', 'N/A'):.4g} |",
-        f"| E_conservation max dev | {d1.get('E_conservation_max_dev', 'N/A'):.2e} |",
+        f"| V_vacuum | {_fmt(d1.get('V_vacuum'), '.4g')} |",
+        f"| V_excess mean | {_fmt(d1.get('V_excess_mean'), '.4g')} |",
+        f"| V_excess max | {_fmt(d1.get('V_excess_max'), '.4g')} |",
+        f"| E_conservation max dev | {_fmt(d1.get('E_conservation_max_dev'), '.2e')} |",
         f"| Vacuum stable | {d1.get('vacuum_stable', 'N/A')} |",
         f"| Residual norm/DOF | {d1.get('residual_norm_DOF', 'N/A')} |",
         f"",
@@ -1142,10 +1169,10 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| box_fill_radius | {d2.get('box_fill_radius', 'N/A'):.4g} |",
-        f"| spread_ratio mean | {d2.get('spread_ratio_mean', 'N/A'):.4g} |",
-        f"| confined_fraction mean | {d2.get('confined_fraction_mean', 'N/A'):.4g} |",
-        f"| radius_growth | {d2.get('radius_growth', 'N/A'):.4g} |",
+        f"| box_fill_radius | {_fmt(d2.get('box_fill_radius'), '.4g')} |",
+        f"| spread_ratio mean | {_fmt(d2.get('spread_ratio_mean'), '.4g')} |",
+        f"| confined_fraction mean | {_fmt(d2.get('confined_fraction_mean'), '.4g')} |",
+        f"| radius_growth | {_fmt(d2.get('radius_growth'), '.4g')} |",
         f"",
         f"**Verdict:** spread_ratio << 1 confirms localized ring seed. "
         f"radius_growth ~ 1 expected (seed, no dynamics evolved).",
@@ -1182,10 +1209,10 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| amp_mean (t=0) | {d4.get('amp_mean_t0', 'N/A'):.4g} |",
-        f"| amp_max (t=0) | {d4.get('amp_max_t0', 'N/A'):.4g} |",
-        f"| Berry phase accumulated | {d4.get('berry_phase_accum_final', 'N/A'):.4g} rad |",
-        f"| Berry connection <A_t> | {d4.get('berry_connection_At_mean', 'N/A'):.4g} |",
+        f"| amp_mean (t=0) | {_fmt(d4.get('amp_mean_t0'), '.4g')} |",
+        f"| amp_max (t=0) | {_fmt(d4.get('amp_max_t0'), '.4g')} |",
+        f"| Berry phase accumulated | {_fmt(d4.get('berry_phase_accum_final'), '.4g')} rad |",
+        f"| Berry connection <A_t> | {_fmt(d4.get('berry_connection_At_mean'), '.4g')} |",
         f"",
         f"![Berry plot](berry.png)",
         f"",
@@ -1198,10 +1225,10 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| max |A_x| | {d5.get('A_x_max', 'N/A'):.4g} |",
-        f"| max |A_y| | {d5.get('A_y_max', 'N/A'):.4g} |",
-        f"| max |A_z| | {d5.get('A_z_max', 'N/A'):.4g} |",
-        f"| max |B_z| midplane | {d5.get('B_z_max_midplane', 'N/A'):.4g} |",
+        f"| max |A_x| | {_fmt(d5.get('A_x_max'), '.4g')} |",
+        f"| max |A_y| | {_fmt(d5.get('A_y_max'), '.4g')} |",
+        f"| max |A_z| | {_fmt(d5.get('A_z_max'), '.4g')} |",
+        f"| max |B_z| midplane | {_fmt(d5.get('B_z_max_midplane'), '.4g')} |",
         f"",
         f"![EM fields plot](em_fields.png)",
         f"",
@@ -1214,10 +1241,10 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| U(1) energy fraction | {d6.get('u1_fraction_mean', 'N/A'):.4g} |",
-        f"| SU(3) energy fraction | {d6.get('su3_fraction_mean', 'N/A'):.4g} |",
-        f"| U(1) energy (t=0) | {d6.get('u1_energy_t0', 'N/A'):.4g} |",
-        f"| SU(3) energy (t=0) | {d6.get('su3_energy_t0', 'N/A'):.4g} |",
+        f"| U(1) energy fraction | {_fmt(d6.get('u1_fraction_mean'), '.4g')} |",
+        f"| SU(3) energy fraction | {_fmt(d6.get('su3_fraction_mean'), '.4g')} |",
+        f"| U(1) energy (t=0) | {_fmt(d6.get('u1_energy_t0'), '.4g')} |",
+        f"| SU(3) energy (t=0) | {_fmt(d6.get('su3_energy_t0'), '.4g')} |",
         f"",
         f"**Note:** {d6.get('note', '')}",
         f"",
@@ -1232,9 +1259,9 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| peak k | {d7.get('peak_k_mag', 'N/A'):.4g} rad/a |",
-        f"| peak power | {d7.get('peak_power', 'N/A'):.4g} |",
-        f"| total power | {d7.get('total_power', 'N/A'):.4g} |",
+        f"| peak k | {_fmt(d7.get('peak_k_mag'), '.4g')} rad/a |",
+        f"| peak power | {_fmt(d7.get('peak_power'), '.4g')} |",
+        f"| total power | {_fmt(d7.get('total_power'), '.4g')} |",
         f"",
         f"![Spectra plot](spectra.png)",
         f"",
@@ -1251,18 +1278,18 @@ def _write_report(
         f"",
         f"| Metric | Value |",
         f"|--------|-------|",
-        f"| sep_d mean (P1) | {d8.get('sep_d_mean', 'N/A'):.4g} lattice units |",
-        f"| sep_d max (P1) | {d8.get('sep_d_max', 'N/A'):.4g} |",
+        f"| sep_d mean (P1) | {_fmt(d8.get('sep_d_mean'), '.4g')} lattice units |",
+        f"| sep_d max (P1) | {_fmt(d8.get('sep_d_max'), '.4g')} |",
         f"| Δu_∥ sign (P2) | {_d8_sign_str} |",
-        f"| Δu_∥ extremum (P2) | {d8.get('du_par_extremum', 'N/A'):.4g} |",
-        f"| ρ of extremum (P2) | {d8.get('rho_extremum', 'N/A'):.4g} |",
-        f"| ⟨Δu_∥⟩ scalar (P2) | {d8.get('du_par_scalar', 'N/A'):.4g} |",
-        f"| ω mean (P3) | {d8.get('omega_mean', 'N/A'):.4g} rad/time_unit |",
-        f"| ω std (P3) | {d8.get('omega_std', 'N/A'):.4g} |",
+        f"| Δu_∥ extremum (P2) | {_fmt(d8.get('du_par_extremum'), '.4g')} |",
+        f"| ρ of extremum (P2) | {_fmt(d8.get('rho_extremum'), '.4g')} |",
+        f"| ⟨Δu_∥⟩ scalar (P2) | {_fmt(d8.get('du_par_scalar'), '.4g')} |",
+        f"| ω mean (P3) | {_fmt(d8.get('omega_mean'), '.4g')} rad/time_unit |",
+        f"| ω std (P3) | {_fmt(d8.get('omega_std'), '.4g')} |",
         f"| ω_ref closure-locked (P3) | {d8.get('omega_ref', 'N/A')} |",
         f"| closure-locked verdict (P3) | {_d8_cl} |",
-        f"| γ_Γ loop holonomy (P4) | {d8.get('gamma_Gamma', 'N/A'):.4g} rad |",
-        f"| R_kahler (P5) | {d8.get('R_kahler', 'N/A'):.4g} |",
+        f"| γ_Γ loop holonomy (P4) | {_fmt(d8.get('gamma_Gamma'), '.4g')} rad |",
+        f"| R_kahler (P5) | {_fmt(d8.get('R_kahler'), '.4g')} |",
         f"| Kähler part (P5) | {_d8_kahler_flag} |",
         f"",
         f"**One-line verdict:** "
@@ -1281,21 +1308,21 @@ def _write_report(
         f"",
         f"- **D1 Energy**: V_excess localized to ring; vacuum_stable={'OK' if d1.get('vacuum_stable') else 'FAIL'}. "
         f"Residual: {d1.get('residual_norm_DOF', 'N/A')} (seed; full check requires BVP solve).",
-        f"- **D2 Confinement**: spread_ratio ~ {d2.get('spread_ratio_mean', '?'):.3g}; "
-        f"confined_fraction ~ {d2.get('confined_fraction_mean', '?'):.3g}.",
+        f"- **D2 Confinement**: spread_ratio ~ {_fmt(d2.get('spread_ratio_mean', '?'), '.3g')}; "
+        f"confined_fraction ~ {_fmt(d2.get('confined_fraction_mean', '?'), '.3g')}.",
         f"- **D3 Winding**: winding_z = {d3.get('winding_z_mean', float('nan')):.3g} "
         f"(target m={_m_exp if _m_exp is not None else '?'}), "
         f"off-axis ~ {d3.get('max_off_axis_winding', float('nan')):.2g} — check {_wok_str}.",
-        f"- **D4 Berry**: carrier amplitude peak {d4.get('amp_max_t0', '?'):.3g} ≈ 0.607 × A0 (donut profile). "
+        f"- **D4 Berry**: carrier amplitude peak {_fmt(d4.get('amp_max_t0', '?'), '.3g')} ≈ 0.607 × A0 (donut profile). "
         f"Berry phase accumulated over all slices.",
         f"- **D5 EM**: Berry connection A_mu computed from phase gradient; B field shows vortex topology.",
         f"- **D6 Color**: pure U(1) trace channel for bare seed "
-        f"(U(1) frac ~ {d6.get('u1_fraction_mean', '?'):.3g}); "
+        f"(U(1) frac ~ {_fmt(d6.get('u1_fraction_mean', '?'), '.3g')}); "
         f"SU(3) content {'appears' if d6.get('su3_fraction_mean', 0) > 0.01 else 'absent'} for this seed.",
         f"- **D7 Spectra**: ring geometry imprints k-ring structure on FFT.",
-        f"- **D8 Binding Probe**: sep_d ~ {d8.get('sep_d_mean', '?'):.3g}; "
+        f"- **D8 Binding Probe**: sep_d ~ {_fmt(d8.get('sep_d_mean', '?'), '.3g')}; "
         f"Δu_∥ {_d8_sign_str}; "
-        f"γ_Γ ~ {d8.get('gamma_Gamma', '?'):.3g} rad; "
+        f"γ_Γ ~ {_fmt(d8.get('gamma_Gamma', '?'), '.3g')} rad; "
         f"Kähler {_d8_kahler_flag}.",
         f"",
         f"*Generated by `branesim.diagnostics.run_measurements`.*",

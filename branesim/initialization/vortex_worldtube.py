@@ -47,18 +47,28 @@ observer's decomposition (principles §1.4) assigns:
 
 The complex order parameter Psi populates the concrete 2-plane
 
-    CARRIER_PLANE = (2, 3)
+    CARRIER_PLANE = (trace direction of (0,1,2),  3)
 
-i.e. spatial component 2 carries Re(Psi) and timelike component 3 carries
-Im(Psi).  Rationale (unchanged from the original seed):
+i.e. Re(Psi) is written along the SYMMETRIC TRACE direction of the lateral
+triplet — all three spacelike components equally, with unit weights
+``CARRIER_RE_WEIGHTS = (1,1,1)/sqrt(3)`` on components
+``CARRIER_RE_COMPONENTS = (0,1,2)`` — and timelike component 3 carries Im(Psi).
+Rationale:
   - The "i-from-time" memory note identifies the U(1) imaginary unit with the
     time direction; component 3 is the natural Im slot.
-  - Component 2 is the third spacelike channel; components (0,1) remain at their
-    vacuum positions, so the "colour" x/y lateral channels are untouched by the
-    bare seed (the full U(3) field is then free to relax — SU(3) coexcitation is
-    measured by the per-colour diagnostic).
-  - The choice is concrete and invertible; the diagnostics layer must use the
-    same plane definition when extracting Psi.
+  - **E1 fix (2026-06-07).** Writing Re(Psi) into a *single* lateral component
+    (the old ``CARRIER_RE = 2``) is NOT a pure EM/U(1) vortex: under the U(3)
+    projection (alpha_separability.projection_operators) a single component reads
+    1/3 trace (U(1)/EM) + 2/3 traceless (SU(3)/colour), so the "EM/electron"
+    object was mislabelled (D6 read ``u1_fraction = 0.333``).  Writing Re(Psi)
+    along the trace direction (1,1,1)/sqrt(3) makes the bare seed *purely* U(1):
+    P_SU3 @ (v * (1,1,1)/sqrt(3)) = 0, so D6 reads ``u1_fraction -> 1``.  The
+    full U(3) field is then free to relax — SU(3) coexcitation, if any, is
+    measured by the per-colour diagnostic, not injected by construction.
+  - The choice is concrete and invertible: ``project_carrier_re`` recovers
+    Re(Psi) by projecting the lateral displacement back onto the unit trace
+    vector.  The diagnostics layer MUST use that same projection when extracting
+    Psi (every consumer routes through ``project_carrier_re``).
 
 ### Temporal carrier is QUANTIZED by loop closure (not a free knob)
 
@@ -97,11 +107,33 @@ from branesim.core.lattice import SpacelikeLattice
 # Carrier 2-plane definition (canonical; diagnostics must match)
 # ---------------------------------------------------------------------------
 
-#: Index of the Re(Psi) ambient component.
-CARRIER_RE: int = 2
+#: Lateral components carrying Re(Psi) — the symmetric TRACE direction of the
+#: spacelike triplet, so the bare seed is a pure U(1)/EM vortex (E1 fix).
+CARRIER_RE_COMPONENTS: tuple[int, int, int] = (0, 1, 2)
 
-#: Index of the Im(Psi) ambient component.
+#: Unit weights of the trace direction (1,1,1)/sqrt(3).  Re(Psi) is written as
+#: ``re_d * CARRIER_RE_WEIGHTS`` across CARRIER_RE_COMPONENTS, and recovered by
+#: projecting the lateral displacement back onto this unit vector.
+_INV_SQRT3: float = 1.0 / math.sqrt(3.0)
+CARRIER_RE_WEIGHTS: tuple[float, float, float] = (_INV_SQRT3, _INV_SQRT3, _INV_SQRT3)
+
+#: Index of the Im(Psi) ambient component (the timelike channel; "i from time").
 CARRIER_IM: int = 3
+
+#: Trace-direction unit vector as an array (for projection / broadcasting).
+_TRACE_WEIGHTS = np.asarray(CARRIER_RE_WEIGHTS)
+
+
+def project_carrier_re(disp_lateral: np.ndarray) -> np.ndarray:
+    """Re(Psi) from a lateral ``(..., 3)`` displacement, by projecting onto the
+    unit trace direction ``(1,1,1)/sqrt(3)``.
+
+    This is the exact inverse of the trace-direction write performed by the
+    injector: a pure-trace displacement ``v * (1,1,1)/sqrt(3)`` projects back to
+    exactly ``v``.  Every diagnostic that reads Re(Psi) MUST route through this
+    helper so the injector and the measurement layer share one definition.
+    """
+    return np.asarray(disp_lateral) @ _TRACE_WEIGHTS
 
 
 # ---------------------------------------------------------------------------
@@ -118,10 +150,14 @@ def vacuum_offsets(n_slices: int, r_t: float) -> tuple[np.ndarray, np.ndarray]:
     ``ΔR/|ΔR|`` direction term has a 1/|ΔR| Jacobian that blows up (the 64³ run
     failed this way).  The fix (derived): add a per-slice GLOBAL translation
     (the SAME offset on every node, so spatial bonds — within-slice differences —
-    are untouched) tracing a regular N-gon in the carrier (2,3) plane:
+    are untouched) tracing a regular N-gon in the carrier 2-plane (Re-direction,
+    Im-direction):
 
-        v_l = ρ ( cos(2π l/N) ê₂ + sin(2π l/N) ê₃ ),   ρ = r_t / (2 sin(π/N))
+        v_l = ρ ( cos(2π l/N) ê_Re + sin(2π l/N) ê₃ ),   ρ = r_t / (2 sin(π/N))
 
+    where ``ê_Re`` is the UNIT trace direction (1,1,1)/√3 of components (0,1,2)
+    (E1 fix) — so this ``off_re`` magnitude is distributed across comps 0,1,2 with
+    ``CARRIER_RE_WEIGHTS``, preserving ‖v_l‖ = ρ — and ê₃ is the timelike Im slot.
     The N-gon edge (chord) is 2ρ·sin(π/N) = r_t, so |ΔR_temporal| = r_t uniformly
     on every node (including the vortex core, now the most-protected point), the
     loop closes (v_N = v_0), and the configuration stays codim-0 in ℝ⁴.  This is
@@ -134,8 +170,10 @@ def vacuum_offsets(n_slices: int, r_t: float) -> tuple[np.ndarray, np.ndarray]:
     Returns
     -------
     off_re, off_im : ndarray, shape (n_slices+1,)
-        Offsets to add to the CARRIER_RE (2) and CARRIER_IM (3) components on
-        each slice l = 0..n_slices (slice N duplicates slice 0 — closure).
+        Per-slice offset magnitudes for the Re channel (distributed along the
+        trace direction (1,1,1)/sqrt(3) of components 0,1,2) and the Im channel
+        (CARRIER_IM = 3), on each slice l = 0..n_slices (slice N duplicates
+        slice 0 — closure).
     """
     l = np.arange(n_slices + 1)
     if r_t <= 0.0:
@@ -341,14 +379,19 @@ def inject_vortex_worldtube(
 
         pos = ref.copy()
         # Vacuum N-gon offset (uniform across nodes) — establishes the r_t>0
-        # prestressed timelike structure before the carrier rides on top.
-        pos[:, CARRIER_RE] += off_re[l_slice]
+        # prestressed timelike structure before the carrier rides on top.  The
+        # Re offset is distributed along the trace direction (1,1,1)/sqrt(3) so
+        # its norm stays off_re (the N-gon chord length r_t is preserved) and the
+        # vacuum background remains pure-trace (no spurious SU(3) content).
+        pos[:, 0:3] += off_re[l_slice] * _TRACE_WEIGHTS
         pos[:, CARRIER_IM] += off_im[l_slice]
 
         re_d, im_d = _sph_harm_displacement(
             coords, centre, vp.l, vp.m, vp.A0, vp.r0, vp.w, t, omega_per_slice,
         )
-        pos[:, CARRIER_RE] += re_d
+        # Re(Psi) along the trace direction -> pure U(1)/EM (E1 fix); Im(Psi) in
+        # the timelike component.
+        pos[:, 0:3] += re_d[:, np.newaxis] * _TRACE_WEIGHTS
         pos[:, CARRIER_IM] += im_d
 
         world[l_slice] = pos
@@ -356,7 +399,8 @@ def inject_vortex_worldtube(
     meta = {
         "ansatz": "u1_spherical_harmonic_vortex",
         "geometry": vp.geometry,
-        "carrier_re_component": CARRIER_RE,
+        "carrier_re_components": CARRIER_RE_COMPONENTS,
+        "carrier_re_weights": list(CARRIER_RE_WEIGHTS),
         "carrier_im_component": CARRIER_IM,
         "l": vp.l,
         "m": vp.m,
@@ -379,7 +423,8 @@ def inject_vortex_worldtube(
             f"Carrier advances n_t={vp.n_t} full turns ({360 * vp.n_t} deg) over "
             "the time loop and closes exactly at the periodic seam "
             "(omega quantized by closure, not free). "
-            "Carrier 2-plane: component 2 = Re(Psi), component 3 = Im(Psi)."
+            "Carrier 2-plane: Re(Psi) along the trace direction (1,1,1)/sqrt(3) of "
+            "components (0,1,2) -> pure U(1)/EM; component 3 = Im(Psi) (timelike)."
         ),
     }
 
@@ -435,20 +480,22 @@ def measure_winding_closure(
     grid_shape = lattice.params.grid_shape
     nx, ny, nz = grid_shape
 
-    re_field = pos[:, CARRIER_RE].reshape(nx, ny, nz)
-    im_field = pos[:, CARRIER_IM].reshape(nx, ny, nz)
-
     ref = lattice.reference_positions(pos.shape[1])
-    re_ref = ref[:, CARRIER_RE].reshape(nx, ny, nz)
-    im_ref = ref[:, CARRIER_IM].reshape(nx, ny, nz)
+
+    # Re(Psi) = projection of the lateral displacement onto the unit trace
+    # direction (E1 fix); Im(Psi) = the timelike component.
+    disp_lat = pos[:, 0:3] - ref[:, 0:3]                     # (n_nodes, 3)
+    re_node = project_carrier_re(disp_lat)                   # (n_nodes,)
+    im_node = pos[:, CARRIER_IM] - ref[:, CARRIER_IM]        # (n_nodes,)
 
     # Subtract the prestressed-vacuum N-gon offset for this slice (else the
-    # ρ-sized vacuum background swamps the carrier in the contour).
+    # ρ-sized vacuum background swamps the carrier in the contour).  The Re
+    # offset projects back to exactly off_re (the trace write preserves its norm).
     n_slices = world.shape[0] - 1
     off_re, off_im = vacuum_offsets(n_slices, r_t)
 
-    re_disp = re_field - re_ref - off_re[slice_index]
-    im_disp = im_field - im_ref - off_im[slice_index]
+    re_disp = (re_node - off_re[slice_index]).reshape(nx, ny, nz)
+    im_disp = (im_node - off_im[slice_index]).reshape(nx, ny, nz)
 
     phase = np.arctan2(im_disp, re_disp + 1e-300)  # (nx, ny, nz)
 

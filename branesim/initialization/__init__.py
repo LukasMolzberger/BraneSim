@@ -19,7 +19,9 @@ from branesim.initialization.vortex_worldtube import (
     VortexParams,
     inject_vortex_worldtube,
     measure_winding_closure,
-    CARRIER_RE,
+    project_carrier_re,
+    CARRIER_RE_COMPONENTS,
+    CARRIER_RE_WEIGHTS,
     CARRIER_IM,
 )
 
@@ -30,6 +32,8 @@ __all__ = [
     "VortexParams",
     "inject_vortex_worldtube",
     "measure_winding_closure",
-    "CARRIER_RE",
+    "project_carrier_re",
+    "CARRIER_RE_COMPONENTS",
+    "CARRIER_RE_WEIGHTS",
     "CARRIER_IM",
 ]

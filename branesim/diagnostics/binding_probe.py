@@ -11,7 +11,7 @@ Probes
 P1  Sector centroids & separation (Channel-B co-location baseline).
 P2  Longitudinal stretch profile Δu_∥(ρ) (time-link binding source).
 P3  Per-slice carrier rate ω(l)   (linchpin caveat 1: uniformity check).
-    Measured from the genuine U(1) carrier 2-plane (CARRIER_RE + i·CARRIER_IM,
+    Measured from the genuine U(1) carrier 2-plane (trace-direction Re + i·CARRIER_IM,
     vacuum-offset-subtracted; see _carrier_plane) — an exact circle, so ω(l) is
     uniform and ω₀-independent.  NOT the time-quadrature triplet trace ψ_s, which
     is elliptical + offset-contaminated and gave a biased, grid-dependent ω.
@@ -97,7 +97,12 @@ if str(_REPO) not in sys.path:
 from branesim.core.conventions import ActionParams
 from branesim.core.lattice import SpacelikeLattice
 from branesim.diagnostics.alpha_separability import projection_operators
-from branesim.initialization.vortex_worldtube import CARRIER_RE, CARRIER_IM, vacuum_offsets
+from branesim.initialization.vortex_worldtube import (
+    CARRIER_RE_WEIGHTS,
+    CARRIER_IM,
+    project_carrier_re,
+    vacuum_offsets,
+)
 from branesim.diagnostics._plot_helpers import _apply_style, _savefig
 
 
@@ -150,19 +155,16 @@ def _build_psi_triplet(
     u = world[:, :, :3] - ref[np.newaxis, :, :3]  # (T, n_nodes, 3)  (a fresh array)
 
     # Subtract the prestressed-vacuum N-gon background turn from the carrier
-    # component (CARRIER_RE) BEFORE differentiating, so the trace/traceless envelope
-    # — and hence the loop holonomy (P4) and the Kahler part (P5) — measures the
-    # SOLITON's carrier, not the rotating vacuum.  This mirrors the renderer
-    # (_extract_amp_phase) and the carrier-plane probe (_carrier_plane).  Without it
-    # the vacuum turn (a different rate, n_vac≠n_t) contaminates ψ_s: it halved the
-    # measured holonomy and biased the Kahler overlap.  Only CARRIER_RE is in the
-    # lateral triplet (0,1,2); CARRIER_IM is the timelike component (not in the
-    # triplet), so off_im does not enter here.
+    # (the trace direction (1,1,1)/sqrt(3) of comps 0,1,2) BEFORE differentiating,
+    # so the trace/traceless envelope — and hence the loop holonomy (P4) and the
+    # Kahler part (P5) — measures the SOLITON's carrier, not the rotating vacuum.
+    # This mirrors the renderer (_extract_amp_phase) and the carrier-plane probe
+    # (_carrier_plane).  Without it the vacuum turn (a different rate, n_vac≠n_t)
+    # contaminates ψ_s: it halved the measured holonomy and biased the Kahler
+    # overlap.  The whole offset is in the lateral triplet (0,1,2); CARRIER_IM is
+    # the timelike component (not in the triplet), so off_im does not enter here.
     off_re, _off_im = vacuum_offsets(n_slices, params.r_t)
-    # CARRIER_RE=2 is always inside the lateral triplet (0,1,2); the guard makes that
-    # invariant explicit and is defensive against a future CARRIER_RE≥3 (timelike) value.
-    if CARRIER_RE < 3:
-        u[:, :, CARRIER_RE] = u[:, :, CARRIER_RE] - off_re[:, np.newaxis]
+    u[:, :, 0:3] -= off_re[:, np.newaxis, np.newaxis] * np.asarray(CARRIER_RE_WEIGHTS)
 
     # Time derivative (central diff interior, one-sided ends)
     udot = np.empty_like(u)
@@ -186,7 +188,7 @@ def _carrier_plane(
 ) -> np.ndarray:
     """The genuine U(1) carrier 2-plane  Ψ = (u_RE − off_re) + i·(u_IM − off_im).
 
-    The carrier lives in the (CARRIER_RE, CARRIER_IM) ambient plane and rotates as a
+    The carrier lives in the (trace-direction Re, CARRIER_IM) ambient plane and rotates as a
     true circle e^{i(ω t + m φ)} (the "i from time"; project_complex_u1_from_time), so
     its per-link phase advance IS the carrier rate **exactly** — independent of any ω₀
     normalisation and uniform across nodes (the azimuthal m·φ cancels in the
@@ -204,7 +206,7 @@ def _carrier_plane(
     """
     n_slices = world.shape[0] - 1
     off_re, off_im = vacuum_offsets(n_slices, params.r_t)
-    re_d = world[:, :, CARRIER_RE] - ref[np.newaxis, :, CARRIER_RE] - off_re[:, np.newaxis]
+    re_d = project_carrier_re(world[:, :, 0:3] - ref[np.newaxis, :, 0:3]) - off_re[:, np.newaxis]
     im_d = world[:, :, CARRIER_IM] - ref[np.newaxis, :, CARRIER_IM] - off_im[:, np.newaxis]
     return re_d + 1j * im_d   # (T, n_nodes)
 
@@ -450,7 +452,7 @@ def _p3_carrier_rate(
 
     ω(l) = arg( Σ_nodes conj(Ψ_carrier[l]) · Ψ_carrier[l+1] ) / dt
 
-    Measures the closure-locked carrier rate from the (CARRIER_RE, CARRIER_IM)
+    Measures the closure-locked carrier rate from the (trace-direction Re, CARRIER_IM)
     plane (see :func:`_carrier_plane`) — an exact circle, so ω(l) is uniform and
     ω₀-independent.  (Earlier this used the time-quadrature triplet trace ψ_s,
     which is elliptical and vacuum-offset-contaminated → biased, grid-dependent ω.)
@@ -680,7 +682,7 @@ def device_binding_probe(
     # Priority order:
     #   1. n_t kwarg (passed by run_measurements from config; ActionParams is
     #      frozen=True so it must NOT be mutated by the caller)
-    #   2. Measure from the carrier 2-plane (CARRIER_RE + i*CARRIER_IM) via FH link
+    #   2. Measure from the carrier 2-plane (trace-Re + i*CARRIER_IM) via FH link
     #   3. Fall back to omega0=1.0 (documented, logged)
 
     # The genuine carrier 2-plane (offset-subtracted, exactly circular) is the

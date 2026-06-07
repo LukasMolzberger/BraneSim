@@ -42,7 +42,7 @@ from typing import Any, Callable
 import numpy as np
 
 from branesim.initialization.vortex_worldtube import (
-    CARRIER_RE,
+    CARRIER_RE_WEIGHTS,
     CARRIER_IM,
     vacuum_offsets,
 )
@@ -209,7 +209,10 @@ def build_vacuum_world(ref: np.ndarray, n_slices: int, r_t: float) -> np.ndarray
     n_nodes, m_ambient = ref.shape
     world = np.broadcast_to(ref, (n_slices + 1, n_nodes, m_ambient)).copy()
     off_re, off_im = vacuum_offsets(n_slices, r_t)
-    world[:, :, CARRIER_RE] += off_re[:, np.newaxis]
+    # Re offset distributed along the trace direction (1,1,1)/sqrt(3) — exactly
+    # the seed's vacuum write (E1), so devices read null after projecting back.
+    weights = np.asarray(CARRIER_RE_WEIGHTS)
+    world[:, :, 0:3] += off_re[:, np.newaxis, np.newaxis] * weights
     world[:, :, CARRIER_IM] += off_im[:, np.newaxis]
     return world
 
