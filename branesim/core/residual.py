@@ -237,3 +237,81 @@ def residual_norm(
     res = residual(world, lattice, params, mass)
     # res[0] and res[-1] are zero by construction; sum includes them harmlessly
     return float(np.sqrt(np.sum(res ** 2)))
+
+
+# ---------------------------------------------------------------------------
+# Cyclic (periodic-in-time) residual — the rotating-frame-periodic worldtube
+# ---------------------------------------------------------------------------
+
+
+def residual_periodic(
+    slices: np.ndarray,
+    lattice: SpacelikeLattice,
+    params: ActionParams,
+    mass: float,
+) -> np.ndarray:
+    """Residual at EVERY slice of a closed (cyclic) time loop.
+
+    Unlike :func:`residual`, there are no fixed boundary slices: the time axis
+    is a closed loop of period ``P`` (``slices`` holds the P independent slices
+    R^0..R^{P-1}; R^P ≡ R^0, R^{-1} ≡ R^{P-1}).  Every slice carries the
+    discrete Euler–Lagrange residual
+
+        𝓡_p^l = temporal_force_p^l(l-1, l, l+1 mod P)  −  F_spatial_p^l
+
+    with the SAME central-force temporal spring (or r_t=0 linear limit) as
+    :func:`residual` — only the time-neighbour indices wrap.
+
+    Why this is the well-conditioned ("rotating-frame-periodic") operator:
+    the periodic second-difference in time is the discrete periodic Laplacian,
+    whose spectrum is 2(1−cos 2πk/P) ≥ 0 with the only null direction at k=0
+    (global time-translation = the carrier-phase / rigid symmetries).  Its
+    condition number grows polynomially (~P²), NOT as the two-point Dirichlet
+    determinant 1/|sin Pθ| (which resonates to ~1e14).  The carrier winding is
+    a topological integer carried by the seed; it is preserved by the smooth
+    Newton flow unless the amplitude collapses to vacuum.
+
+    Parameters
+    ----------
+    slices : ndarray, shape (P, n_nodes, m_ambient)
+        The P independent slices of the closed time loop.
+    lattice, params, mass
+        As in :func:`residual`.
+
+    Returns
+    -------
+    res : ndarray, shape (P, n_nodes, m_ambient)
+        Residual at every slice (no slice is zeroed — all are interior to the
+        loop).  res[l] = 0 ∀l iff the worldtube satisfies the discrete EL
+        equations on the closed loop.
+    """
+    P = slices.shape[0]
+    dt = params.dt
+    use_spring = (params.r_t > 0.0)
+    if use_spring:
+        k_t = params.resolved_k_t(mass)
+        r_t = params.r_t
+
+    res = np.empty_like(slices)
+    for l in range(P):
+        lp = (l + 1) % P
+        lm = (l - 1) % P
+
+        if use_spring:
+            dR_plus = slices[lp] - slices[l]
+            dR_minus = slices[lm] - slices[l]
+            dist_plus = np.linalg.norm(dR_plus, axis=1, keepdims=True)
+            dist_minus = np.linalg.norm(dR_minus, axis=1, keepdims=True)
+            # Central-force spring; no eps guard (principles §3.2), matching
+            # _temporal_force_spring: the prestressed loop never has a zero bond.
+            temp_force = (
+                k_t * (dist_plus - r_t) * dR_plus / dist_plus
+                + k_t * (dist_minus - r_t) * dR_minus / dist_minus
+            )
+        else:
+            temp_force = mass * (slices[lp] - 2.0 * slices[l] + slices[lm]) / (dt * dt)
+
+        F = spacelike_force(slices[l], lattice, params)
+        res[l] = temp_force - F
+
+    return res

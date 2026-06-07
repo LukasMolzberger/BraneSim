@@ -331,7 +331,7 @@ def confinement_summary(
     Parameters
     ----------
     slices : ndarray, shape (n_slices, n_nodes, m_ambient)
-        All spacelike slices (e.g. ``world_volume.slices`` from an IVP march).
+        All spacelike slices (e.g. ``world_volume.slices`` from a block solve).
         First axis is the slice index.
     ref : ndarray, shape (n_nodes, m_ambient)
         Reference (unstressed) node positions.

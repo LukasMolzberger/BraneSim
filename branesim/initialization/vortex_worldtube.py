@@ -1,16 +1,42 @@
-"""U(1) vortex-worldtube seed injection — carrier-phase 2-plane ansatz.
+"""U(1) vortex-worldtube seed injection — spherical-harmonic carrier ansatz.
 
 Physics spec: EXPERIMENT.md §"Injection ansatz"
 Principles:   PRINCIPLES.md §2 (layer C: initialization), §3.2 (no clamps),
               §7.6 (dimension-agnostic where possible)
+Memory:       spherical harmonics are the soliton-layer (L5) *description
+              language* (project_soliton_layer_description_language); they seed
+              the substrate field, they are not a structural commitment of it.
 
 ## What this module does
 
-Translates the emergent U(1) order-parameter ansatz
+Translates the emergent U(1) order-parameter ansatz, written in the natural
+soliton-layer basis (spherical harmonics about the object centre), into a
+substrate displacement field u on the prestressed-vacuum 4D worldvolume.
 
-    Psi(x, t) = A(rho) * exp(i * [m_wind * chi + omega * t])
+    Psi(r, theta, phi, t) = A0 * Rhat(r) * Yhat_l^m(theta, phi) * exp(i*omega*t)
 
-into a substrate displacement field u on the prestressed-vacuum 4D worldvolume.
+where (r, theta, phi) are spherical coordinates about the box centre, Y_l^m is
+the (complex) spherical harmonic, Rhat is a localizing radial profile, and
+exp(i*omega*t) is the closure-locked temporal carrier.
+
+### Why spherical harmonics, not a hand-built torus (DESIGN, 2026-06-06)
+
+The previous implementation built a literal "smoke ring" torus and wound the
+phase *meridionally* around the tube cross-section.  That is wrong for a U(1)
+line vortex: going around the ring azimuthally the phase was constant, so the
+XY plan view showed no azimuthal winding.  The spherical-harmonic ansatz fixes
+this at the root.  For the canonical EM/electron seed Y_1^1:
+
+  - exp(i*phi) factor  -> the U(1) phase winds m times **azimuthally around the
+    z-axis** (the vortex axis = the "donut hole").  On the XY midplane the phase
+    advances 2*pi*m around the centre — the defining feature of a line vortex.
+  - |Y_1^1| ~ sin(theta) -> amplitude zero on the axis (theta=0,pi), peak at the
+    equator.  The energy density |Psi|^2 ~ sin^2(theta) is therefore a donut
+    around the axis WITHOUT any literal torus being constructed.  The donut
+    *emerges* from the angular harmonic.
+  - the radial profile Rhat(r) only localizes the object; it sets no winding.
+
+(l, m) are parameters.  l=1, m=1 is the canonical EM/U(1) vortex seed.
 
 ### Carrier 2-plane choice (DOCUMENTED HERE — must not change silently)
 
@@ -19,62 +45,41 @@ observer's decomposition (principles §1.4) assigns:
   - components 0,1,2 — the three spacelike / "colour" lateral channels
   - component 3       — the timelike channel
 
-Within the three spacelike channels the U(1) carrier phase corresponds to the
-EM-like trace direction.  We pick the concrete 2-plane
+The complex order parameter Psi populates the concrete 2-plane
 
     CARRIER_PLANE = (2, 3)
 
-i.e. spatial component 2 and the timelike component 3 carry Re(Psi) and
-Im(Psi) respectively.  Rationale:
-  - The "i-from-time" memory note (MEMORY.md) identifies the U(1) imaginary
-    unit with the time direction; component 3 is the natural Im slot.
-  - Component 2 is the third spacelike channel — avoiding 0 and 1 keeps the
-    "colour" x and y lateral channels at their vacuum values for this seed,
-    matching the EXPERIMENT.md instruction that "other components [are] at the
-    prestressed-vacuum value."
-  - This choice is completely concrete and invertible; the diagnostics layer
-    must use the same plane definition when extracting Psi.
+i.e. spatial component 2 carries Re(Psi) and timelike component 3 carries
+Im(Psi).  Rationale (unchanged from the original seed):
+  - The "i-from-time" memory note identifies the U(1) imaginary unit with the
+    time direction; component 3 is the natural Im slot.
+  - Component 2 is the third spacelike channel; components (0,1) remain at their
+    vacuum positions, so the "colour" x/y lateral channels are untouched by the
+    bare seed (the full U(3) field is then free to relax — SU(3) coexcitation is
+    measured by the per-colour diagnostic).
+  - The choice is concrete and invertible; the diagnostics layer must use the
+    same plane definition when extracting Psi.
 
-Components (0,1) remain at their vacuum positions throughout.
+### Temporal carrier is QUANTIZED by loop closure (not a free knob)
 
-### Vortex geometry: single vortex ring ("smoke ring")
+EXPERIMENT.md: the phase must close around the time loop, omega*T + tumble =
+2*pi*integer.  We therefore parameterize the carrier by an integer number of
+full turns ``n_t`` over the whole ``n_slices`` loop; the per-slice increment is
 
-A contractible vortex ring carries zero net winding through every periodic
-plane: the ring core (a circle of radius R_ring) pierces any plane it
-intersects *twice* with opposite winding signs, so the total is zero.  No
-antivortex partner is needed.
+    omega_per_slice = 2*pi*n_t / n_slices
 
-Ring geometry (z=z_c plane, centred in the box):
+so the worldtube is single-valued across the periodic time seam.  ``n_t=2`` is a
+clean 720 deg carrier (the spin-1/2 double-cover target).
 
-    core(psi) = (x_c + R_ring*cos(psi), y_c + R_ring*sin(psi), z_c)
+### Periodicity / closure
 
-For each lattice node x:
-  1. phi   = atan2(y - y_c, x - x_c)          — toroidal angle (around ring axis)
-  2. r_pl  = sqrt((x-x_c)^2 + (y-y_c)^2)      — radial distance in ring plane
-  3. Nearest core point: c(phi) as above
-  4. d_r   = r_pl - R_ring                     — outward meridional component
-  5. d_z   = z - z_c                           — axial meridional component
-  6. rho   = sqrt(d_r^2 + d_z^2)              — distance to ring core
-  7. chi   = atan2(d_z, d_r)                  — meridional angle around tube
-
-Phase: theta(x,t) = m_wind * chi + omega * t   (winds m times around tube)
-Amplitude: A(rho) = A0*(rho/w)*exp(-rho^2/2w^2) (zero on core, peak at rho~w)
-
-Resulting displacement:
-    u[node, CARRIER_RE] += A(rho) * cos(theta)
-    u[node, CARRIER_IM] += A(rho) * sin(theta)
-
-### Periodic consistency
-
-A contractible ring is net-zero through every plane.  Verified numerically by
-``measure_winding_closure``.  Choose R_ring << L/2 and R_ring + few*w << L/2
-so the torus sits well inside the box with vacuum margin.
-
-### Donut / tube profile
-
-    A(rho) = A0 * (rho / w) * exp(-rho^2 / (2 w^2))
-
-Zero on the ring core (rho=0), peak ~0.607*A0 at rho=w, decays beyond.
+The seed is a *localized* excitation with a vacuum margin to the box faces, so
+the field is continuous across the periodic faces (vacuum = vacuum).  The
+azimuthal winding m is the vortex charge of the object, measured through the
+central xy-plane by ``measure_winding_closure`` (expected ~m about the z-axis,
+~0 about x and y).  In the full periodic 3-torus the localized object is
+contractible (a *semilocal* vortex, EXPERIMENT.md §"What this answers": binding
+is a dynamical, not topological, condition).
 """
 
 from __future__ import annotations
@@ -83,6 +88,7 @@ import math
 from typing import NamedTuple
 
 import numpy as np
+from scipy.special import sph_harm_y
 
 from branesim.core.conventions import ActionParams
 from branesim.core.lattice import SpacelikeLattice
@@ -104,33 +110,40 @@ CARRIER_IM: int = 3
 
 
 class VortexParams(NamedTuple):
-    """Parameters for the U(1) vortex-worldtube seed.
+    """Parameters for the U(1) spherical-harmonic vortex seed.
 
     Attributes
     ----------
     A0 : float
-        Peak amplitude of the donut profile.  Dimensionless strain units;
-        EXPERIMENT.md targets ~0.3.
+        Peak amplitude of the order parameter (dimensionless strain units;
+        EXPERIMENT.md targets ~0.3).  The angular and radial profiles are each
+        normalized to unit peak, so ``A0`` is the true peak |Psi|.
+    r0 : float
+        Radial-shell peak (lattice units) — the radius at which the localizing
+        profile peaks.  Sets the object's overall size, NOT a literal core
+        circle.  Choose so r0 + a few*w < L/2 for a vacuum margin.
     w : float
-        Tube width (donut thickness) in lattice units.  Recommend w ~ 2-3*a.
-    R_ring : float
-        Ring core radius in lattice units.  The torus major radius.
-        Choose so that R_ring + a few w < L/2 for vacuum margin.
-    m_wind : int
-        Winding number (meridional winding around tube cross-section). m=1.
-    omega : float
-        Carrier angular frequency (rad per time step).  omega*dt ~ 0.5.
+        Radial-shell width (lattice units).
+    l : int
+        Spherical-harmonic degree.
+    m : int
+        Spherical-harmonic order = azimuthal U(1) winding around the z-axis.
+        l=1, m=1 is the canonical EM/U(1) vortex seed (sin(theta) donut).
+    n_t : int
+        Number of full carrier turns over the whole time loop (temporal
+        winding).  Quantized by loop closure; per-slice increment is
+        2*pi*n_t/n_slices.  n_t=2 -> 720 deg (spin-1/2 double-cover target).
     geometry : str
-        ``"vortex_ring"`` — a single closed ring (smoke ring); zero net
-        winding through every periodic plane.
+        ``"spherical_harmonic"`` — the only supported geometry.
     """
 
     A0: float = 0.3
-    w: float = 3.0
-    R_ring: float = 7.0
-    m_wind: int = 1
-    omega: float = 2.0
-    geometry: str = "vortex_ring"
+    r0: float = 6.0
+    w: float = 2.5
+    l: int = 1
+    m: int = 1
+    n_t: int = 2
+    geometry: str = "spherical_harmonic"
 
 
 # ---------------------------------------------------------------------------
@@ -138,81 +151,79 @@ class VortexParams(NamedTuple):
 # ---------------------------------------------------------------------------
 
 
-def _donut_profile(rho: np.ndarray, A0: float, w: float) -> np.ndarray:
-    """A(rho) = A0 * (rho/w) * exp(-rho^2 / (2 w^2)).
+def _radial_profile(r: np.ndarray, r0: float, w: float) -> np.ndarray:
+    """Unit-peak localizing radial shell  Rhat(r) = exp(-(r-r0)^2 / (2 w^2)).
 
-    Zero at rho=0, peak A0*exp(-1/2) ≈ 0.607*A0 at rho=w.
+    Peaks at 1 on the shell r=r0, decays with width w.  For r0>0 it is small
+    at the origin, so combined with the sin(theta) angular zero the object is a
+    localized donut with a vacuum core on the axis and at large r.
     """
-    return A0 * (rho / w) * np.exp(-(rho ** 2) / (2.0 * w ** 2))
+    return np.exp(-((r - r0) ** 2) / (2.0 * w ** 2))
 
 
-# ---------------------------------------------------------------------------
-# Vortex ring displacement field
-# ---------------------------------------------------------------------------
-
-
-def _ring_displacement(
+def _sph_harm_displacement(
     coords: np.ndarray,
-    centre_xy: np.ndarray,
-    z_c: float,
-    R_ring: float,
-    m_wind: int,
+    centre: np.ndarray,
+    l: int,
+    m: int,
     A0: float,
+    r0: float,
     w: float,
     t: float,
-    omega: float,
+    omega_per_slice: float,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Displacement field for a single vortex ring.
-
-    The ring core is a circle of radius R_ring in the z=z_c plane, centred
-    at (x_c, y_c) = centre_xy.
+    """Displacement field for the spherical-harmonic carrier seed.
 
     Parameters
     ----------
     coords : ndarray, shape (n_nodes, 3)
         (x, y, z) node positions.
-    centre_xy : ndarray, shape (2,)
-        (x_c, y_c) centre of the ring in the ring plane.
-    z_c : float
-        z-coordinate of the ring plane.
-    R_ring : float
-        Ring core radius (major radius of the torus).
-    m_wind : int
-        Meridional winding number.
-    A0, w : float
-        Donut profile parameters.
+    centre : ndarray, shape (3,)
+        (x_c, y_c, z_c) object centre (box centre).
+    l, m : int
+        Spherical-harmonic degree and order.
+    A0, r0, w : float
+        Peak amplitude, radial-shell peak, radial-shell width.
     t : float
-        Time (slice index, dimensionless).
-    omega : float
-        Carrier angular frequency.
+        Slice index (dimensionless); the carrier phase argument.
+    omega_per_slice : float
+        Closure-locked per-slice carrier increment (rad/slice).
 
     Returns
     -------
     re_disp, im_disp : ndarray, shape (n_nodes,)
-        Displacement in Re(Psi) and Im(Psi) carrier components.
+        Re(Psi) and Im(Psi) displacement on the carrier 2-plane.
     """
-    x = coords[:, 0]
-    y = coords[:, 1]
-    z = coords[:, 2]
+    dx = coords[:, 0] - centre[0]
+    dy = coords[:, 1] - centre[1]
+    dz = coords[:, 2] - centre[2]
 
-    # Step 1: toroidal angle phi and in-plane radius
-    dx = x - centre_xy[0]
-    dy = y - centre_xy[1]
-    r_pl = np.sqrt(dx ** 2 + dy ** 2)  # in-plane distance from ring axis
+    r = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+    r_safe = np.where(r < 1e-12, 1.0, r)
 
-    # Step 2: meridional components
-    d_r = r_pl - R_ring          # outward radial offset from ring core
-    d_z = z - z_c                # axial offset from ring plane
+    # Spherical angles: theta = polar/colatitude in [0, pi], phi = azimuth.
+    theta = np.arccos(np.clip(dz / r_safe, -1.0, 1.0))
+    phi = np.arctan2(dy, dx)
 
-    # Step 3: distance to ring core and meridional angle
-    rho = np.sqrt(d_r ** 2 + d_z ** 2)
-    chi = np.arctan2(d_z, d_r)  # meridional angle around tube cross-section
+    # Complex spherical harmonic Y_l^m(theta, phi) (scipy>=1.15 signature).
+    Y = sph_harm_y(l, m, theta, phi)  # complex, shape (n_nodes,)
 
-    # Step 4: amplitude and phase
-    A = _donut_profile(rho, A0, w)
-    phase = m_wind * chi + omega * t
+    # Normalize angular part to unit peak so A0 is the true peak amplitude.
+    y_max = float(np.max(np.abs(Y)))
+    if y_max < 1e-30:
+        y_max = 1.0
+    Yhat = Y / y_max
 
-    return A * np.cos(phase), A * np.sin(phase)
+    R = _radial_profile(r, r0, w)  # unit-peak radial shell
+
+    # Full complex order parameter, with the closure-locked carrier.
+    carrier = np.exp(1j * omega_per_slice * t)
+    Psi = A0 * R * Yhat * carrier
+
+    # On the axis (r=0) sin(theta) -> 0 already; force exact vacuum there.
+    Psi = np.where(r < 1e-12, 0.0 + 0.0j, Psi)
+
+    return np.real(Psi), np.imag(Psi)
 
 
 # ---------------------------------------------------------------------------
@@ -226,35 +237,22 @@ def inject_vortex_worldtube(
     vp: VortexParams,
     n_slices: int,
 ) -> tuple[np.ndarray, dict]:
-    """Build the 4D worldvolume with the U(1) vortex-ring seed injected.
+    """Build the 4D worldvolume with the U(1) spherical-harmonic seed injected.
 
     The worldvolume has shape ``(n_slices+1, n_nodes, m_ambient)`` — exactly
-    the WorldVolume.slices format used by branesim.solver.ivp.
+    the WorldVolume.slices format (branesim.solver.worldvolume).
 
     Strategy
     --------
-    1. Compute the flat-lattice reference worldvolume (vacuum = all nodes at
-       their reference positions, all slices identical).
-    2. Add the vortex-ring displacement to the carrier 2-plane (components
-       CARRIER_RE, CARRIER_IM) on each time slice, with the carrier phase
-       advancing by ``omega * l`` at slice l.
-    3. All other ambient components stay at their vacuum values.
-
-    Parameters
-    ----------
-    lattice : SpacelikeLattice
-        Spacelike lattice (dim=3 required for this seed).
-    params : ActionParams
-        Action parameters.
-    vp : VortexParams
-        Vortex geometry and physics parameters.
-    n_slices : int
-        Number of time slices N.  Worldvolume has slices 0..N.
+    1. Flat-lattice reference worldvolume (vacuum = all nodes at reference,
+       carrier components 0 on every slice).
+    2. Add the spherical-harmonic displacement to the carrier 2-plane on each
+       time slice, the carrier phase advancing by the closure-locked increment.
+    3. All other ambient components stay at vacuum.
 
     Returns
     -------
     world : ndarray, shape (n_slices+1, n_nodes, m_ambient)
-        Full worldvolume with seed injected.
     meta : dict
         Seed metadata for config.json / boundary_problem.npz.
     """
@@ -262,64 +260,71 @@ def inject_vortex_worldtube(
         raise ValueError(
             f"vortex_worldtube seed requires dim=3 spatial lattice; got {lattice.dim}"
         )
-    if vp.geometry != "vortex_ring":
+    if vp.geometry != "spherical_harmonic":
         raise NotImplementedError(
-            f"geometry={vp.geometry!r} not implemented; only 'vortex_ring' is supported"
+            f"geometry={vp.geometry!r} not implemented; "
+            "only 'spherical_harmonic' is supported"
         )
+    if abs(vp.m) > vp.l:
+        raise ValueError(f"spherical harmonic requires |m|<=l; got l={vp.l}, m={vp.m}")
 
     m_ambient = params.ambient_dim(lattice.dim)  # canonical 4
     n_nodes = lattice.n_nodes
     ref = lattice.reference_positions(m_ambient)  # (n_nodes, m_ambient)
 
-    # Box geometry
+    # Box geometry — object centred in the box.
     a = lattice.params.spacing
     grid_shape = lattice.params.grid_shape
-    centre_xy = np.array([
+    centre = np.array([
         (grid_shape[0] - 1) * a / 2.0,
         (grid_shape[1] - 1) * a / 2.0,
+        (grid_shape[2] - 1) * a / 2.0,
     ])
-    z_c = (grid_shape[2] - 1) * a / 2.0   # ring midplane = z-centre of box
 
-    # Node (x, y, z) coordinates from reference positions
     coords = ref[:, :3]  # (n_nodes, 3)
 
-    # Allocate worldvolume
+    # Carrier rate quantized by time-loop closure (rad per slice).  Physical
+    # angular frequency = omega_per_slice / dt.
+    omega_per_slice = 2.0 * math.pi * vp.n_t / n_slices
+
     world = np.empty((n_slices + 1, n_nodes, m_ambient), dtype=np.float64)
 
-    for l in range(n_slices + 1):
-        t = float(l)  # carrier phase argument = slice index (dimensionless)
+    for l_slice in range(n_slices + 1):
+        t = float(l_slice)  # carrier phase argument = slice index
 
-        # Start from vacuum reference on this slice
         pos = ref.copy()
-
-        re_d, im_d = _ring_displacement(
-            coords, centre_xy, z_c, vp.R_ring,
-            vp.m_wind, vp.A0, vp.w, t, vp.omega,
+        re_d, im_d = _sph_harm_displacement(
+            coords, centre, vp.l, vp.m, vp.A0, vp.r0, vp.w, t, omega_per_slice,
         )
-
-        # Superpose on carrier 2-plane
         pos[:, CARRIER_RE] += re_d
         pos[:, CARRIER_IM] += im_d
 
-        world[l] = pos
+        world[l_slice] = pos
 
     meta = {
-        "ansatz": "u1_vortex_worldtube",
+        "ansatz": "u1_spherical_harmonic_vortex",
         "geometry": vp.geometry,
         "carrier_re_component": CARRIER_RE,
         "carrier_im_component": CARRIER_IM,
-        "m_wind": vp.m_wind,
+        "l": vp.l,
+        "m": vp.m,
         "A0": vp.A0,
+        "r0": vp.r0,
         "w": vp.w,
-        "R_ring": vp.R_ring,
-        "omega": vp.omega,
+        "n_t": vp.n_t,
         "n_slices": n_slices,
-        "ring_centre_xy": list(centre_xy),
-        "ring_z_c": float(z_c),
+        "omega_per_slice": omega_per_slice,
+        "omega_phys": omega_per_slice / params.dt,
+        "carrier_total_turns": vp.n_t,
+        "carrier_total_deg": 360.0 * vp.n_t,
+        "centre": list(centre),
         "note": (
-            "Single vortex ring; meridional winding m=1 around tube cross-section. "
-            "Net winding = 0 across all periodic planes (contractible ring; "
-            "closure verified by measure_winding_closure). "
+            f"Spherical-harmonic U(1) vortex seed Y_{vp.l}^{vp.m}. "
+            f"Azimuthal winding m={vp.m} around the z-axis (the vortex axis); "
+            "energy density ~|Y|^2 forms a donut around that axis. "
+            f"Carrier advances n_t={vp.n_t} full turns ({360 * vp.n_t} deg) over "
+            "the time loop and closes exactly at the periodic seam "
+            "(omega quantized by closure, not free). "
             "Carrier 2-plane: component 2 = Re(Psi), component 3 = Im(Psi)."
         ),
     }
@@ -328,7 +333,7 @@ def inject_vortex_worldtube(
 
 
 # ---------------------------------------------------------------------------
-# Winding closure verifier
+# Winding measurement
 # ---------------------------------------------------------------------------
 
 
@@ -337,16 +342,21 @@ def measure_winding_closure(
     lattice: SpacelikeLattice,
     slice_index: int = 0,
 ) -> dict[str, float]:
-    """Measure the net U(1) phase winding through each pair of periodic faces.
+    """Measure the net U(1) azimuthal winding about the three central axes.
 
-    Uses the discrete plaquette method: the winding number through a plane is
-    computed as the sum of phase differences across all plaquettes in that
-    plane, divided by 2*pi.  This is gauge-invariant and exact for smooth
-    phases.
+    The winding about an axis is the discrete phase circulation
+    (1/2pi) * sum of wrapped phase increments around a square contour centred
+    on the box centre, in the plane perpendicular to that axis.  A contour
+    *enclosing* the vortex axis is required — summing vorticity over a whole
+    periodic plane always gives 0 (total winding on a 2-torus cancels), so it
+    cannot see the enclosed charge.  This is gauge-invariant and integer for a
+    smooth phase with the contour in a single-valued region.
 
-    For a vortex ring the expected result is 0.0 through every face pair
-    (the ring is contractible; it pierces any plane 0 or 2 times with
-    opposite signs).
+    For the spherical-harmonic seed Y_l^m the expected result is:
+      - winding_through_z_normal (central xy-plane)  ~  m   (azimuthal winding
+        around the z = vortex axis)
+      - winding_through_y_normal (central xz-plane)  ~  0
+      - winding_through_x_normal (central yz-plane)  ~  0
 
     Parameters
     ----------
@@ -358,17 +368,15 @@ def measure_winding_closure(
     Returns
     -------
     dict with keys ``"winding_through_z_normal"``, ``"winding_through_y_normal"``,
-    ``"winding_through_x_normal"``, each a float (should be ~0).
+    ``"winding_through_x_normal"`` (floats).
     """
     pos = world[slice_index]  # (n_nodes, m_ambient)
     grid_shape = lattice.params.grid_shape
     nx, ny, nz = grid_shape
 
-    # Extract U(1) phase at each node from the carrier 2-plane
     re_field = pos[:, CARRIER_RE].reshape(nx, ny, nz)
     im_field = pos[:, CARRIER_IM].reshape(nx, ny, nz)
 
-    # Subtract reference (vacuum has 0 on carrier components)
     ref = lattice.reference_positions(pos.shape[1])
     re_ref = ref[:, CARRIER_RE].reshape(nx, ny, nz)
     im_ref = ref[:, CARRIER_IM].reshape(nx, ny, nz)
@@ -376,33 +384,49 @@ def measure_winding_closure(
     re_disp = re_field - re_ref
     im_disp = im_field - im_ref
 
-    # Phase = atan2(Im, Re) of the complex displacement field
     phase = np.arctan2(im_disp, re_disp + 1e-300)  # (nx, ny, nz)
 
-    def _winding_through_normal(axis: int) -> float:
-        """Sum phase circulation through all plaquettes perpendicular to axis."""
+    def _wrap(d: np.ndarray | float) -> np.ndarray | float:
+        return np.mod(d + np.pi, 2 * np.pi) - np.pi
+
+    def _winding_about_axis(axis: int) -> float:
+        """Phase circulation around a square contour enclosing the central axis."""
         ax1 = (axis + 1) % 3
         ax2 = (axis + 2) % 3
+        centre_idx = (nx, ny, nz)[axis] // 2
+        c1 = (nx, ny, nz)[ax1] // 2
+        c2 = (nx, ny, nz)[ax2] // 2
+        h = min((nx, ny, nz)[ax1], (nx, ny, nz)[ax2]) // 4  # contour half-width
 
-        def _diff_along(arr: np.ndarray, a: int) -> np.ndarray:
-            return np.roll(arr, -1, axis=a) - arr
+        # Extract the central plane perpendicular to `axis`, as (ax1, ax2).
+        sl = [slice(None), slice(None), slice(None)]
+        sl[axis] = centre_idx
+        plane = phase[tuple(sl)]
+        if ax1 > ax2:
+            plane = plane.T  # now indexed [ax1, ax2]
 
-        dphi1 = _diff_along(phase, ax1)
-        dphi2 = _diff_along(phase, ax2)
+        # Walk the square contour [c1-h, c1+h] x [c2-h, c2+h] counter-clockwise.
+        i0, i1 = c1 - h, c1 + h
+        j0, j1 = c2 - h, c2 + h
+        path = []
+        for i in range(i0, i1):
+            path.append((i, j0))
+        for j in range(j0, j1):
+            path.append((i1, j))
+        for i in range(i1, i0, -1):
+            path.append((i, j1))
+        for j in range(j1, j0, -1):
+            path.append((i0, j))
 
-        d1_fwd = np.mod(dphi1 + np.pi, 2 * np.pi) - np.pi
-        d2_fwd = np.mod(dphi2 + np.pi, 2 * np.pi) - np.pi
-
-        # Mixed discrete curl
-        curl = (np.roll(d1_fwd, -1, axis=ax2) - d1_fwd
-                - np.roll(d2_fwd, -1, axis=ax1) + d2_fwd)
-        curl_wrapped = np.mod(curl + np.pi, 2 * np.pi) - np.pi
-
-        total = float(np.sum(curl_wrapped)) / (2.0 * np.pi)
-        return total
+        total = 0.0
+        for k in range(len(path)):
+            a = plane[path[k]]
+            b = plane[path[(k + 1) % len(path)]]
+            total += float(_wrap(b - a))
+        return total / (2.0 * np.pi)
 
     return {
-        "winding_through_z_normal": _winding_through_normal(2),  # xy-plane
-        "winding_through_y_normal": _winding_through_normal(1),  # xz-plane
-        "winding_through_x_normal": _winding_through_normal(0),  # yz-plane
+        "winding_through_z_normal": _winding_about_axis(2),  # about z (xy contour)
+        "winding_through_y_normal": _winding_about_axis(1),  # about y (xz contour)
+        "winding_through_x_normal": _winding_about_axis(0),  # about x (yz contour)
     }

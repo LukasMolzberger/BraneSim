@@ -15,9 +15,9 @@ Algorithm
 2. Define the residual function F(x) = R(l=1..N-1) given boundary slices
    l=0 and l=N (fixed by the BoundaryCondition object).
 3. Solve F(x) = 0 using scipy.optimize.newton_krylov (JFNK).
-   - Warm-start: if warm_start=True, run a forward IVP march to get a good
-     initial guess for the interior.  The march from l=0 fills slices
-     l=1..N-1 deterministically; this is the recommended warm-start (D1).
+   - Initial guess: pass an ``initial_world`` (the injected ansatz seed) for the
+     best warm start; otherwise a march-free linear interpolation between the
+     boundary slices (opts.warm_start) or a flat-reference zero guess.
 4. Unpack the solution into a WorldVolume.
 
 Boundary conditions are applied via the BoundaryCondition objects from
@@ -38,14 +38,16 @@ from scipy.optimize import newton_krylov, NoConvergence
 from branesim.core.conventions import ActionParams, LatticeParams
 from branesim.core.lattice import SpacelikeLattice
 from branesim.core.residual import residual as compute_residual
+from branesim.core.residual import residual_periodic as _residual_periodic
 from branesim.solver.boundary import (
     DirichletBC,
     ChiralBC,
+    PeriodicBC,
     apply_dirichlet,
     apply_chiral,
     dirichlet_condition_estimate,
 )
-from branesim.solver.ivp import IVPProblem, WorldVolume, march
+from branesim.solver.worldvolume import WorldVolume
 from branesim.core.residual import residual_norm as _residual_norm
 
 
@@ -86,7 +88,7 @@ class BoundaryProblem:
     lattice: SpacelikeLattice
     params: ActionParams
     mass: float
-    boundary_condition: DirichletBC | ChiralBC
+    boundary_condition: DirichletBC | ChiralBC | PeriodicBC
 
     @property
     def n_nodes(self) -> int:
@@ -116,8 +118,10 @@ class SolveOpts:
     max_iter : int
         Maximum Newton-Krylov iterations (default 200).
     warm_start : bool
-        If True, use a forward IVP march as the initial guess (D1 default).
-        If False, use the flat reference lattice (zero initial guess).
+        Only consulted when no explicit ``initial_world`` is passed to
+        ``solve_block``.  If True, the initial guess is a march-free linear
+        interpolation between the boundary slices; if False, the flat
+        reference lattice (zero interior guess).
     inner_maxiter : int
         Maximum inner Krylov (GMRES) iterations (default 300).
     method : str
@@ -211,58 +215,42 @@ def _make_residual_fn(
 
 
 # ---------------------------------------------------------------------------
-# Warm-start: forward IVP march from l=0 and l=1
+# Initial guess for the interior (march-free)
 # ---------------------------------------------------------------------------
 
 
-def _ivp_warm_start(
-    problem: BoundaryProblem,
-) -> np.ndarray:
-    """Run a forward Verlet march from l=0 to get an initial interior guess.
+def _interp_guess(problem: BoundaryProblem) -> np.ndarray:
+    """Linear-interpolation initial guess between the two boundary slices.
 
-    Uses bc.R0 as R^0 and a "zero-velocity" R^1 (i.e. R^1 = R^0 + dt*0 = R^0
-    perturbed only by the force step).  This is the D1-recommended warm start.
+    A march-free, r_t-agnostic warm start: interpolate each interior slice
+    linearly between R^0 and R^N.  The JFNK solve then enforces the true
+    r_t-aware residual on top of this guess, so the guess need not satisfy the
+    equations itself — it only has to be smooth and respect the endpoints.
 
-    For Dirichlet BC: the march gives a good initial guess when the future
-    slice is not resonant.  For Chiral BC: the march from R0 gives the purely
-    forward-propagating interior, which is exactly the chiral BC solution in
-    the linear regime.
+    (Replaces the old forward-Verlet warm start, which raised for r_t>0 and
+    coupled the block solver to the deleted IVP march.  When a full seed
+    world-volume is available — e.g. the injected ansatz — pass it directly as
+    ``initial_world`` to ``solve_block`` instead; it is a far better guess.)
 
     Returns the full world-volume (N+1, n_nodes, m_ambient).
     """
     bc = problem.boundary_condition
-    params = problem.params
-    N = params.n_slices
+    if not isinstance(bc, DirichletBC):
+        raise TypeError(
+            "_interp_guess requires a DirichletBC (it needs both endpoints R0, RN); "
+            f"got {type(bc).__name__}.  ChiralBC takes the fast-path in solve_block "
+            "and never reaches the interior warm start."
+        )
+    N = problem.params.n_slices
+    R0 = bc.R0
+    RN = bc.RN
+    n_nodes, m_ambient = R0.shape
 
-    R0 = bc.R0.copy()
-    # R1 = R0 displaced by one Verlet step from rest (zero initial velocity)
-    # This amounts to R1 = R0 + (dt^2/m)*F(R0) / 2 (half-step kinetic init).
-    # For the warm start the exact choice of R1 is not critical; using R1=R0
-    # gives a stationary-start IVP which is close to any smooth solution.
-    R1 = R0.copy()
-
-    # The warm start is only an initial guess for the interior; use the explicit
-    # r_t=0 Verlet march (which is what ``march`` implements).  For an r_t>0
-    # problem the JFNK solve then enforces the true r_t-aware residual on top of
-    # this guess, so the guess need not itself satisfy the r_t>0 equations —
-    # and ``march`` would raise if handed r_t>0.
-    ivp_problem = IVPProblem(
-        lattice=problem.lattice,
-        params=ActionParams(
-            k_s=params.k_s,
-            alpha=params.alpha,
-            rho=params.rho,
-            dt=params.dt,
-            n_slices=N,
-            m_ambient=params.m_ambient,
-            r_t=0.0,
-        ),
-        mass=problem.mass,
-        R0=R0,
-        R1=R1,
-    )
-    wv = march(ivp_problem)
-    return wv.slices  # (N+1, n_nodes, m_ambient)
+    world = np.empty((N + 1, n_nodes, m_ambient), dtype=np.float64)
+    for l in range(N + 1):
+        f = l / N if N > 0 else 0.0
+        world[l] = (1.0 - f) * R0 + f * RN
+    return world
 
 
 # ---------------------------------------------------------------------------
@@ -273,6 +261,8 @@ def _ivp_warm_start(
 def solve_block(
     problem: BoundaryProblem,
     opts: SolveOpts | None = None,
+    *,
+    initial_world: np.ndarray | None = None,
 ) -> WorldVolume:
     """Root-find R = 0 over interior slices (JFNK).
 
@@ -285,6 +275,12 @@ def solve_block(
         Lattice, params, mass, and boundary condition (Dirichlet or Chiral).
     opts : SolveOpts, optional
         Solver options.  Defaults to SolveOpts().
+    initial_world : ndarray, shape (N+1, n_nodes, m_ambient), optional
+        Full world-volume to use as the JFNK initial guess — typically the
+        injected ansatz seed.  This is the preferred warm start: the seed is a
+        far better guess than any march/interpolation.  If omitted, falls back
+        to ``opts.warm_start`` (linear interpolation between the boundary
+        slices) or a flat-reference zero guess.
 
     Returns
     -------
@@ -333,6 +329,84 @@ def solve_block(
         )
 
     # =========================================================================
+    # Rotating-frame-periodic path: closed (cyclic) time loop, all P slices free.
+    # Well-conditioned (periodic operator, no two-point Dirichlet resonance);
+    # JFNK from the wound seed preserves the carrier winding.
+    # =========================================================================
+    if isinstance(bc, PeriodicBC):
+        if initial_world is None:
+            raise ValueError(
+                "PeriodicBC requires initial_world (the wound seed): the carrier "
+                "winding is topological and must be supplied as the initial guess."
+            )
+        P = problem.n_slices  # period = n_slices (slices 0..P-1; R^P ≡ R^0)
+        n_nodes = problem.n_nodes
+        m_ambient = problem.m_ambient
+        if initial_world.shape[0] < P:
+            raise ValueError(
+                f"initial_world has {initial_world.shape[0]} slices; need >= {P}"
+            )
+        S0 = initial_world[:P].astype(np.float64).copy()  # (P, n_nodes, m)
+        shape = (P, n_nodes, m_ambient)
+
+        anchor = bc.gauge == "anchor"
+        anchor_ref = bc.R0[bc.gauge_node].copy() if anchor else None
+
+        def F_periodic(x: np.ndarray) -> np.ndarray:
+            slices = x.reshape(shape)
+            if anchor:
+                # Pin one node on slice 0 (removes the 4 ambient translations);
+                # overwrite its positions and zero its residual rows.
+                slices = slices.copy()
+                slices[0, bc.gauge_node] = anchor_ref
+            res = _residual_periodic(slices, problem.lattice, problem.params, problem.mass)
+            if anchor:
+                res[0, bc.gauge_node] = 0.0
+            return res.ravel()
+
+        x0 = S0.ravel()
+        residual_initial = float(np.linalg.norm(F_periodic(x0)))
+
+        converged = False
+        residual_final = residual_initial
+        x_solution = x0.copy()
+        try:
+            x_solution = newton_krylov(
+                F_periodic, x0, method=opts.method, verbose=opts.verbose,
+                f_tol=opts.tol, iter=opts.max_iter, inner_maxiter=opts.inner_maxiter,
+            )
+            residual_final = float(np.linalg.norm(F_periodic(x_solution)))
+            converged = residual_final <= opts.tol
+        except NoConvergence as exc:
+            x_solution = exc.args[0] if exc.args else x0
+            residual_final = float(np.linalg.norm(F_periodic(x_solution)))
+            converged = False
+
+        elapsed = time.perf_counter() - t0
+        Sf = x_solution.reshape(shape)
+        world_out = np.empty((P + 1, n_nodes, m_ambient), dtype=np.float64)
+        world_out[:P] = Sf
+        world_out[P] = Sf[0]  # wrap: R^P ≡ R^0
+        solver_report = {
+            "mode": "bvp",
+            "bc_scheme": "rotating_frame_periodic",
+            "residual_initial": residual_initial,
+            "residual_final": residual_final,
+            "iterations": opts.max_iter,
+            "converged": converged,
+            "condition_estimate": bc.condition_estimate(problem.lattice.params, problem.params),
+            "gauge": bc.gauge,
+            "walltime_s": elapsed,
+            "objective": OBJECTIVE,
+        }
+        return WorldVolume(
+            slices=world_out,
+            params=problem.params,
+            lattice_params=problem.lattice.params,
+            solver_report=solver_report,
+        )
+
+    # =========================================================================
     # Standard path: DirichletBC — JFNK root-find over interior slices.
     # =========================================================================
     N = problem.n_slices
@@ -344,14 +418,20 @@ def solve_block(
     world_template = np.zeros((N + 1, n_nodes, m_ambient), dtype=np.float64)
     world_template[0] = problem.R0
 
-    # --- Warm start ---
-    if opts.warm_start:
-        world_init = _ivp_warm_start(problem)
+    # --- Initial guess for the interior ---
+    if initial_world is not None:
+        if initial_world.shape != (N + 1, n_nodes, m_ambient):
+            raise ValueError(
+                f"initial_world shape {initial_world.shape} != "
+                f"expected {(N + 1, n_nodes, m_ambient)}"
+            )
+        world_init = initial_world
+    elif opts.warm_start:
+        world_init = _interp_guess(problem)  # march-free linear interpolation
     else:
         world_init = world_template.copy()
 
-    # The warm-start world-volume (world_init) provides the initial guess for
-    # the interior degrees of freedom.
+    # The initial-guess world-volume provides the starting interior DOFs.
     x0 = _pack(world_init[1:N])
 
     # --- Build the residual function ---

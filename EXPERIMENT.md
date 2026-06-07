@@ -81,7 +81,11 @@ figures). Devices — recover/adapt the legacy implementations from commit `c0f1
   spatial-FFT energy/mode spectrum (radiation tail).
 - **Gauge layer:** Berry connection (`Ψ=u+iv/ω₀`) + phase-RGB videos; EM
   `A_μ=i⟨u|∂_μu⟩`, `F_μν → E,B` quiver/streamlines; **per-color-channel `SU(3)`/QCD
-  breakdown** (does color coexcite/stabilize?).
+  breakdown** (does color coexcite/stabilize?). **Screening length / photon-mass check
+  (OPEN_PROBLEMS D5):** fit the `B`/supercurrent radial tail — a power-law (`λ→∞`,
+  unscreened) tail confirms a *massless* long-range EM photon; exponential screening
+  (finite penetration depth `λ`) would mean the substrate Meissner-screened its own
+  `U(1)` (a `W/Z`-like, not EM, object) and **falsifies the EM identification**.
 - **Confinement & topology:** `spread_ratio`/`radius_rms`/leakage; winding via the
   **real signed-solid-angle degree** (never the hard-coded `F_inner=π` estimator).
 - **Volume render:** opacity = excess-energy density, hue = `U(1)` phase (multi-color).

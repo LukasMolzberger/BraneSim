@@ -2,6 +2,7 @@
 \label{sec:geophase}
 
 \subsection{Per-wavepacket band isolation and polarization transport}
+\label{subsec:per-wavepacket-isolation}
 
 The complex-envelope description is applied per band-isolated excitation.
 Each wavepacket is treated as narrowband around its own local carrier angular frequency $\omega_0$,
@@ -202,14 +203,8 @@ The carrier-triplet gauge group is closest to $U(1)^3$.
 The $(1-\alpha)|\Delta u|^2$ geometric-stiffness term dominates and contributes equal stiffness to all components on
 every bond. $D(k)\propto I$ becomes proportional to the identity at every $k$, and the three lateral channels are fully
 degenerate. The transported subspace is genuinely 3-dimensional and the appropriate adiabatic-transport object is a
-Wilczek--Zee connection $\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}, decomposable into a trace
-$U(1)$ part and a traceless $SU(3)$ part,
-\begin{equation}
-  \mathcal{A}_\mu
-  = \frac{1}{3}\,\mathrm{tr}(\mathcal{A}_\mu)\,I_3
-  + \sum_{a=1}^{8} A^a_\mu\,T^a,
-\end{equation}
-where $T^a$ are $SU(3)$ generators.
+Wilczek--Zee connection $\mathcal{A}_\mu\in\mathfrak{u}(3)$ as in \Cref{eq:wz-connection}, decomposable
+into a $U(1)$ trace part and a traceless $SU(3)$ part (\Cref{eq:u3-decomp}).
 At the project's default operating point $\alpha=0.2$ the lattice sits close to this degenerate limit.
 
 \paragraph{What the microscopic anisotropy actually provides.}
@@ -235,15 +230,21 @@ to the triplet sector.
 \label{subsec:bz-berry}
 
 \paragraph{Where the gauge structure lives.}
-The emergent gauge structure of this model is \emph{not} Brillouin-zone band topology. The
-substrate field is real, so the band eigenbundle of $D(\mathbf{k})$ is trivial and its
-momentum-space Berry/Wilczek--Zee curvature vanishes identically (proved and numerically
-verified in the caveat below). The physical gauge connection instead lives over
-\emph{physical spacetime} $(x,t)$: it is the holonomy of the complex carrier envelope
-$\Psi\in\C^3$ (\Cref{subsec:axis-triplet}), transported around loops in real space and time,
-with the $U(1)$ trace read as the electromagnetic sector. Bloch's theorem and the Brillouin
-zone enter only to supply the \emph{carrier band} and the narrowband isolation of a wavepacket
-about its carrier $\mathbf{k}_0$; they are not the base space of the gauge connection.
+The emergent gauge structure of this model is \emph{not} Brillouin-zone band topology.
+The dynamical matrix $D(\mathbf{k})$ is the Hessian of a real-valued spring energy, hence
+real and symmetric for every $\mathbf{k}$; real symmetric matrices admit real eigenvectors,
+and a real eigenvector bundle over a simply-connected region of the Brillouin zone is
+topologically trivial --- every plaquette holonomy reduces to the identity and every continuous
+Berry/Wilczek--Zee curvature vanishes identically.
+(We have verified this numerically across a full $\alpha$ sweep and over the entire
+$(k_x,k_y)$ plane; the holonomy is identity to machine precision at every plaquette and every
+$\alpha$.)
+The physical gauge connection instead lives over \emph{physical spacetime} $(x,t)$: it is the
+holonomy of the complex carrier envelope $\Psi\in\C^3$ (\Cref{subsec:axis-triplet}), transported
+around loops in real space and time, with the $U(1)$ trace read as the electromagnetic sector.
+Bloch's theorem and the Brillouin zone enter only to supply the \emph{carrier band} and the
+narrowband isolation of a wavepacket about its carrier $\mathbf{k}_0$; they are not the base
+space of the gauge connection.
 
 The reason the base space is $(x,t)$ and not a spatial slice is that the complex structure
 itself originates in the \emph{timelike} direction: the $U(1)$ phase is the rotation of the
@@ -254,10 +255,10 @@ i.e.\ the time-evolution generator $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$). A si
 slice is a real snapshot and carries no phase; the $U(1)$ exists only across the time extent of
 the worldtube --- equivalently, two adjacent time slices are the minimum data that fix it.
 
-The link-variable construction below is accordingly a \emph{template diagnostic} --- it returns
+The link-variable construction below is accordingly a \emph{template diagnostic} that returns
 nonzero curvature only once an intrinsically complex effective operator is supplied (the
-envelope's $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$), and exactly zero on the bare real
-$D(\mathbf{k})$.
+envelope's $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$); applied to the bare real $D(\mathbf{k})$
+alone it yields identically zero and does not separate $U(1)^3$ from $U(3)$.
 
 For a lattice substrate, Berry curvature can be computed directly on the discretized Brillouin zone using
 link variables and plaquettes, closely analogous to lattice-QCD Berry-curvature constructions
@@ -279,21 +280,6 @@ In the non-Abelian case one uses overlap matrices between frames and projects to
 plaquette structure to obtain a discretized non-Abelian curvature.
 This is a natural diagnostic bridge between the lattice-substrate hypothesis and QCD-motivated non-Abelian geometry.
 
-\paragraph{Caveat: the construction is identity-by-construction on the real $D(k)$ eigenframe.}
-The dynamical matrix $D(\mathbf{k})$ of the substrate is the Hessian of a real-valued spring energy, hence real and
-symmetric for every $\mathbf{k}$. Real symmetric matrices admit real eigenvectors, and a real eigenvector bundle over a
-simply-connected region of the Brillouin zone is topologically trivial: every plaquette holonomy reduces to the identity
-and every continuous Berry curvature vanishes identically.
-The link-variable construction above therefore yields zero curvature when applied to the eigenframe of the bare $D(k)$,
-independent of $\alpha$ and the lattice details. (We have verified this numerically across a full $\alpha$ sweep and over
-the entire $(k_x,k_y)$ plane; the holonomy is identity to machine precision at every plaquette and every $\alpha$.)
-The meaningful Berry/WZ object in this project is not the bundle of real $D(k)$ eigenvectors but the
-\emph{per-wavepacket complex envelope} $\Psi\in\C^3$ of \Cref{subsec:axis-triplet} together with its slow effective
-Hamiltonian, whose eigenstates can carry genuine complex phase structure inherited from the rotating-wave reduction
-$i\partial_t\Psi = H_{\mathrm{eff}}\Psi$.
-Section~\ref{subsec:bz-berry} should therefore be read as a \emph{template diagnostic} that applies once the complex
-envelope dynamics provides an intrinsically complex effective operator; applied to the lab-frame $D(k)$ alone it does
-not separate $U(1)^3$ from $U(3)$.
 \subsection{\texorpdfstring{Spinorial holonomy and the $4\pi$ aspect}{Spinorial holonomy and the 4pi aspect}}
 
 For $n=2$ (a two-level polarization subspace), holonomy lives naturally in a double cover of $SO(3)$.

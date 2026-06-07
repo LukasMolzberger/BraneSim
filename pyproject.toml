@@ -9,7 +9,7 @@ description = "BraneSim — 4D block/retrocausal brane solver (block-solver rewr
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.24.0",
-    "scipy>=1.10.0",
+    "scipy>=1.15.0",
 ]
 
 [project.optional-dependencies]

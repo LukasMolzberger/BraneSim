@@ -1,12 +1,12 @@
-"""Acceptance tests for branesim increment 1.
+"""Acceptance tests for branesim core physics.
 
-Covers all six acceptance criteria from the task specification:
+Covers the analytic / solver-independent acceptance criteria:
 
-  1. Residual <=> Verlet: IVP world-volume has ||R|| ~ 0 at interior nodes.
-  2. Dispersion regression: c_L = 1 +/- 5%, c_T/c_L = sqrt(1-alpha) +/- 5%.
+  2. Dispersion regression: c_L = 1 +/- 5%, c_T/c_L = sqrt(1-alpha) +/- 5%
+     (closed-form D(k); the march-propagation measurements were removed with
+     the IVP solver, 2026-06-06 — the analytic conventions remain the check).
   3. D(k) diagonal / closed form: eigenvalues match analytic formula.
   4. Flat prestressed lattice: zero net force on periodic flat lattice.
-  5. Dimension-agnostic smoke: d=1 and d=2 march completes; residual ~ 0.
   6. Saddle guard: S is a saddle along the kinetic direction.
 
 Physics targets (alpha=0.2, dimensionless k_s=a=rho=1):
@@ -29,8 +29,6 @@ from branesim.core.conventions import (
 )
 from branesim.core.lattice import SpacelikeLattice
 from branesim.core.action import spacelike_force, spacelike_potential, action
-from branesim.core.residual import residual, residual_norm
-from branesim.solver.ivp import IVPProblem, march
 
 
 # ---------------------------------------------------------------------------
@@ -116,183 +114,20 @@ class TestFlatLatticeZeroForce:
 
 
 # ---------------------------------------------------------------------------
-# Test 1: Residual <=> Verlet identity
-# ---------------------------------------------------------------------------
-
-class TestResidualVerletIdentity:
-    """Acceptance criterion 1: IVP march produces interior residual ~ 0."""
-
-    def _run_march_and_check_residual(self, lattice, params, m_ambient):
-        mass = 1.0
-        R0 = flat_positions(lattice, m_ambient)
-        # Small perturbation to excite dynamics
-        R1 = R0.copy()
-        R1[:, 0] += 1e-3 * np.sin(
-            2.0 * np.pi * lattice.multi_indices[:, 0] / lattice.params.grid_shape[0]
-        )
-
-        problem = IVPProblem(
-            lattice=lattice, params=params, mass=mass, R0=R0, R1=R1,
-        )
-        wv = march(problem)
-
-        res = residual(wv.slices, lattice, params, mass)
-        interior_res = res[1:-1]
-        return float(np.max(np.abs(interior_res)))
-
-    def test_d3_residual_near_zero(self):
-        lattice = make_lattice((8, 8, 8), periodic=True)
-        params = make_params(n_slices=10, dt=0.05)
-        max_res = self._run_march_and_check_residual(lattice, params, m_ambient=4)
-        assert max_res < ATOL_RESIDUAL, (
-            f"d=3 IVP residual: max = {max_res:.3e}, expected < {ATOL_RESIDUAL}"
-        )
-
-    def test_d2_residual_near_zero(self):
-        lattice = make_lattice((8, 8), periodic=True)
-        params = make_params(n_slices=10, dt=0.05)
-        max_res = self._run_march_and_check_residual(lattice, params, m_ambient=3)
-        assert max_res < ATOL_RESIDUAL, (
-            f"d=2 IVP residual: max = {max_res:.3e}, expected < {ATOL_RESIDUAL}"
-        )
-
-    def test_d1_residual_near_zero(self):
-        lattice = make_lattice((16,), periodic=True)
-        params = make_params(n_slices=10, dt=0.05)
-        max_res = self._run_march_and_check_residual(lattice, params, m_ambient=2)
-        assert max_res < ATOL_RESIDUAL, (
-            f"d=1 IVP residual: max = {max_res:.3e}, expected < {ATOL_RESIDUAL}"
-        )
-
-
-# ---------------------------------------------------------------------------
-# Test 2: Dispersion regression -- plane-wave c_L and c_T
+# Test 2: Dispersion regression -- analytic c_L and c_T/c_L from closed-form D(k)
 # ---------------------------------------------------------------------------
 
 class TestDispersionRegression:
     """Acceptance criterion 2: c_L = 1 +/- 5%, c_T/c_L = sqrt(1-alpha) +/- 5%.
 
-    Method: seed a PURE LATTICE MODE (k = 2*pi*n_mode/N * e_x, integer n_mode)
-    so the cosine-projection amplitude is exactly constant in the linear limit.
-    The 3-point recurrence then gives cos(theta) = cos(omega*dt) with high
-    precision (< 0.1% error), and omega = arccos(cos_theta)/dt.
-
-    We use n_mode=2 on a 16^3 lattice: ka = 2*pi*2/16 = pi/4 = 0.7854,
-    which gives a period of ~82 steps at dt=0.1 (several periods measurable
-    in a short march).
-
-    The measured speed is compared against the analytic discrete formula
-    omega = sqrt(D_eig(k)) and c = omega/k.
-    The ratio c_T/c_L is compared against the continuum sqrt(1-alpha) target.
+    These are analytic (closed-form D(k)) regressions of the continuum wave
+    speeds — Level-1 of the emergence hierarchy.  (The march-propagation
+    measurements that previously fed these checks were removed with the IVP
+    solver, 2026-06-06; the closed-form conventions remain the regression.)
     """
 
-    N_GRID = 16       # grid size per axis
-    N_MODE = 2        # mode number: ka = 2*pi*n_mode/N_GRID
-    EPS = 1e-3
-    DT = 0.1
-
-    @property
-    def grid_shape(self):
-        return (self.N_GRID, self.N_GRID, self.N_GRID)
-
-    @property
-    def ka(self):
-        return 2.0 * math.pi * self.N_MODE / self.N_GRID
-
-    def _measure_c(self, polarization_axis: int) -> float:
-        """Seed an exact lattice mode, march, measure phase speed via 3-point recurrence."""
-        lattice = make_lattice(self.grid_shape, periodic=True)
-        mass = 1.0
-        m_ambient = 4
-        k_phys = self.ka
-
-        eig = d_of_k_eigenvalues(np.array([k_phys, 0.0, 0.0]), ALPHA)
-        # sqrt domain guard (not a physics threshold): eigenvalue is analytically >= 0;
-        # the max(., 0) protects against floating-point rounding below zero.
-        omega_pol = math.sqrt(max(eig[polarization_axis], 0.0))
-
-        # Exact discrete theta
-        # arccos domain guard (not a physics threshold): argument is analytically in
-        # [-1, 1]; the clamp protects against floating-point rounding outside that range.
-        theta = math.acos(
-            max(-1.0, min(1.0, 1.0 - self.DT ** 2 / 2.0 * eig[polarization_axis]))
-        )
-        # Run 6 full periods for robust median
-        n_slices = 6 * int(2 * math.pi / theta) + 10
-
-        params = ActionParams(
-            k_s=1.0, alpha=ALPHA, rho=1.0, dt=self.DT, n_slices=n_slices, r_t=0.0,
-        )
-
-        R_ref = flat_positions(lattice, m_ambient)
-        mi = lattice.multi_indices
-        # Exact lattice mode phase: 2*pi*n_mode * x_idx / N_GRID
-        x_idx = mi[:, 0].astype(float)
-        phase = k_phys * x_idx  # = 2*pi * n_mode * x_idx / N_GRID (exact)
-
-        u = np.zeros_like(R_ref)
-        u[:, polarization_axis] = self.EPS * np.cos(phase)
-        R0 = R_ref + u
-
-        u1 = np.zeros_like(R_ref)
-        u1[:, polarization_axis] = self.EPS * np.cos(phase) * math.cos(omega_pol * self.DT)
-        R1 = R_ref + u1
-
-        problem = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-        wv = march(problem)
-
-        # Modal amplitude: project onto cos(k.x) at the polarization component
-        # For an exact lattice mode, norm_cos2 = 0.5 exactly.
-        norm_cos2 = float(np.mean(np.cos(phase) ** 2))
-        amplitudes = np.empty(n_slices + 1)
-        for l in range(n_slices + 1):
-            disp = wv.slices[l, :, polarization_axis] - R_ref[:, polarization_axis]
-            amplitudes[l] = float(np.mean(disp * np.cos(phase))) / norm_cos2
-
-        # 3-point recurrence: cos(theta) = (A[l+1] + A[l-1]) / (2*A[l])
-        # Only use samples where |A[l]| > 1% of initial amplitude (avoid near-zero)
-        cos_theta_vals = []
-        for l in range(1, n_slices):
-            a_l = amplitudes[l]
-            if abs(a_l) > self.EPS * 0.01:
-                cos_theta_vals.append(
-                    (amplitudes[l + 1] + amplitudes[l - 1]) / (2.0 * a_l)
-                )
-
-        cos_theta = float(np.median(cos_theta_vals))
-        # arccos domain guard (not a physics threshold): see comment on `theta` above.
-        cos_theta = max(-1.0, min(1.0, cos_theta))
-        omega_meas = math.acos(cos_theta) / self.DT
-        return omega_meas / k_phys
-
-    def test_c_longitudinal(self):
-        """c_L from the march matches the analytic discrete speed within 1%.
-
-        Measures at ka=pi/4 (n_mode=2 on N=16 grid) — the discrete finite-
-        wavelength speed.  The companion test_c_longitudinal_continuum_limit
-        covers the ka->0 continuum limit regression (c_L->1).  The two-test
-        structure is intentional: this test probes the integrator at a
-        physically meaningful wavelength; the continuum test pins the
-        closed-form conventions to the physics target independently of the march.
-        """
-        c_L_meas = self._measure_c(polarization_axis=0)
-        k_phys = self.ka
-        eig = d_of_k_eigenvalues(np.array([k_phys, 0.0, 0.0]), ALPHA)
-        c_L_analytic = math.sqrt(eig[0]) / k_phys
-        assert abs(c_L_meas - c_L_analytic) / c_L_analytic < DISPERSION_TOL, (
-            f"c_L = {c_L_meas:.4f}, analytic = {c_L_analytic:.4f}, "
-            f"error = {abs(c_L_meas - c_L_analytic)/c_L_analytic*100:.1f}%"
-        )
-
     def test_c_longitudinal_continuum_limit(self):
-        """At small ka=0.1, closed-form D(k) gives c_L within 1% of 1.0.
-
-        This is a purely analytic check (no march needed); it verifies the
-        closed-form conventions match the regression target c_L=1 (ka->0 limit).
-        The companion test_c_longitudinal measures the discrete speed at ka=pi/4
-        by running an actual march — the two-test structure separates the
-        continuum-limit regression from the finite-wavelength integrator check.
-        """
+        """At small ka=0.1, closed-form D(k) gives c_L within 5% of 1.0 (ka->0)."""
         k_phys = 0.1
         eig = d_of_k_eigenvalues(np.array([k_phys, 0.0, 0.0]), ALPHA)
         c_L_discrete = math.sqrt(eig[0]) / k_phys
@@ -301,10 +136,16 @@ class TestDispersionRegression:
             f"D(k) c_L at ka=0.1: {c_L_discrete:.4f} vs target {c_L_target:.4f}"
         )
 
-    def test_c_transverse_ratio(self):
-        """c_T/c_L ratio from the march matches sqrt(1-alpha) within 5%."""
-        c_L = self._measure_c(polarization_axis=0)
-        c_T = self._measure_c(polarization_axis=1)
+    def test_c_transverse_ratio_continuum_limit(self):
+        """At small ka, closed-form D(k) gives c_T/c_L = sqrt(1-alpha) within 5%.
+
+        Longitudinal e_x-polarized vs transverse e_y-polarized eigenvalues of
+        D(k e_x) give the wave speeds; their ratio -> sqrt(1-alpha) as ka->0.
+        """
+        k_phys = 0.1
+        eig = d_of_k_eigenvalues(np.array([k_phys, 0.0, 0.0]), ALPHA)
+        c_L = math.sqrt(eig[0]) / k_phys   # longitudinal (along k)
+        c_T = math.sqrt(eig[1]) / k_phys   # transverse (perp to k)
         ratio_meas = c_T / c_L
         ratio_target = speed_ratio(ALPHA)  # sqrt(0.8) = 0.8944
         assert abs(ratio_meas - ratio_target) / ratio_target < DISPERSION_TOL, (
@@ -338,48 +179,6 @@ class TestDynamicalMatrix:
                 eig, expected, rtol=1e-12, err_msg=f"D(k) mismatch at k={k}"
             )
 
-    def test_eigenframe_cartesian(self):
-        """A pure Cartesian-polarized wave stays in its polarization direction."""
-        grid_shape = (16, 16, 16)
-        lattice = make_lattice(grid_shape, periodic=True)
-        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=20, r_t=0.0)
-        mass = 1.0
-        m_ambient = 4
-
-        R_ref = flat_positions(lattice, m_ambient)
-        mi = lattice.multi_indices
-        k_phys = 0.5
-        x_idx = mi[:, 0].astype(float)
-        phase = k_phys * x_idx
-
-        eig = d_of_k_eigenvalues(np.array([k_phys, 0.0, 0.0]), ALPHA)
-
-        for pol_axis in range(3):
-            # sqrt domain guard (not a physics threshold): eigenvalue is analytically
-            # >= 0; max(., 0) protects against floating-point rounding below zero.
-            omega_pol = math.sqrt(max(eig[pol_axis], 0.0))
-            u = np.zeros_like(R_ref)
-            u[:, pol_axis] = 1e-3 * np.cos(phase)
-            R0 = R_ref + u
-            u1 = np.zeros_like(R_ref)
-            u1[:, pol_axis] = 1e-3 * np.cos(phase) * math.cos(omega_pol * 0.05)
-            R1 = R_ref + u1
-
-            problem = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-            wv = march(problem)
-
-            # Cross-polarization power should be < 1% of seed amplitude
-            for l in range(1, params.n_slices + 1):
-                disp = wv.slices[l] - R_ref
-                for ax in range(3):
-                    if ax == pol_axis:
-                        continue
-                    cross_rms = float(np.sqrt(np.mean(disp[:, ax] ** 2)))
-                    assert cross_rms < 1e-5, (
-                        f"pol={pol_axis}, l={l}, cross-axis={ax}: "
-                        f"cross_rms={cross_rms:.3e} (D(k) not diagonal?)"
-                    )
-
     def test_longitudinal_speed_from_dofk(self):
         """D(k) longitudinal eigenvalue / k^2 matches continuum c_L^2."""
         for ka in [0.05, 0.1, 0.2]:
@@ -391,43 +190,6 @@ class TestDynamicalMatrix:
             assert abs(eig[0] - c2_L_exact * ka ** 2) < 1e-12, (
                 f"D_L(k) at ka={ka}: eig={eig[0]:.10f}, expected={c2_L_exact*ka**2:.10f}"
             )
-
-
-# ---------------------------------------------------------------------------
-# Test 5: Dimension-agnostic smoke test
-# ---------------------------------------------------------------------------
-
-class TestDimensionAgnosticSmoke:
-    """Acceptance criterion 5: d=1 and d=2 march completes; residual ~ 0."""
-
-    @pytest.mark.parametrize("dim,grid_shape,m_ambient", [
-        (1, (16,), 2),
-        (2, (8, 8), 3),
-        (3, (6, 6, 6), 4),
-    ])
-    def test_march_and_residual(self, dim, grid_shape, m_ambient):
-        lattice = make_lattice(grid_shape, periodic=True)
-        params = make_params(n_slices=8, dt=0.05)
-        mass = 1.0
-
-        R0 = flat_positions(lattice, m_ambient)
-        R1 = R0.copy()
-        R1[:, 0] += 1e-3 * np.sin(
-            2.0 * np.pi * lattice.multi_indices[:, 0] / grid_shape[0]
-        )
-
-        problem = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-        wv = march(problem)
-
-        assert wv.slices.shape == (params.n_slices + 1, lattice.n_nodes, m_ambient), (
-            f"d={dim}: wrong world-volume shape {wv.slices.shape}"
-        )
-
-        res_norm_val = residual_norm(wv.slices, lattice, params, mass)
-        # Scale tolerance by sqrt(n_nodes) since residual_norm sums over all nodes
-        assert res_norm_val < ATOL_RESIDUAL * math.sqrt(lattice.n_nodes), (
-            f"d={dim}: residual norm = {res_norm_val:.3e}"
-        )
 
 
 # ---------------------------------------------------------------------------
@@ -690,18 +452,18 @@ class TestIOContracts:
 
         lattice = make_lattice((4, 4, 4), periodic=True)
         params = make_params(n_slices=3, dt=0.1)
-        mass = 1.0
         R0 = flat_positions(lattice, m_ambient=4)
-        R1 = R0.copy()
-        R1[:, 0] += 1e-3
 
-        problem = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-        wv = march(problem)
+        # Synthetic world-volume (the IO roundtrip needs an array, not dynamics):
+        # stack R0 with a small per-slice perturbation.
+        slices = np.stack([R0] * (params.n_slices + 1))
+        for l in range(1, params.n_slices + 1):
+            slices[l, :, 0] += 1e-3 * l
 
         path = tmp_path / "wv.zip"
-        with WorldVolumeWriter(path, {"mode": "ivp"}) as writer:
+        with WorldVolumeWriter(path, {"mode": "synthetic"}) as writer:
             for l in range(params.n_slices + 1):
-                writer.write_slice(l, l * params.dt, wv.slices[l])
+                writer.write_slice(l, l * params.dt, slices[l])
             writer.write_npy("aux/ref_positions.npy", R0)
 
         manifest = load_manifest(path)
@@ -807,53 +569,4 @@ class TestForceEnergyConsistency:
             f"(node={worst[0]}, comp={worst[1]}, "
             f"F_analytic={worst[2]:.6g}, F_fd={worst[3]:.6g}), "
             f"rel_err={max_rel_err:.3e}, eps={self.EPS:.0e}"
-        )
-
-
-# ---------------------------------------------------------------------------
-# Energy conservation smoke (IVP Verlet is symplectic)
-# ---------------------------------------------------------------------------
-
-class TestEnergyConservation:
-    """Symplecticity: IVP energy drift bounded over short runs.
-
-    Verlet is a symplectic integrator, so energy should have small bounded
-    oscillations rather than secular drift.  At small amplitude (linear
-    regime) the drift should be O(dt^2) per step.
-    """
-
-    def test_energy_drift_small(self):
-        lattice = make_lattice((8, 8, 8), periodic=True)
-        params = ActionParams(k_s=1.0, alpha=ALPHA, rho=1.0, dt=0.05, n_slices=100, r_t=0.0)
-        mass = 1.0
-        m_ambient = 4
-
-        R_ref = flat_positions(lattice, m_ambient)
-        mi = lattice.multi_indices
-        eps = 1e-2
-        phase = 0.5 * mi[:, 0]  # ka=0.5
-
-        R0 = R_ref.copy()
-        R0[:, 0] += eps * np.cos(phase)
-        omega0 = math.sqrt(d_of_k_eigenvalues(np.array([0.5, 0.0, 0.0]), ALPHA)[0])
-        R1 = R_ref.copy()
-        R1[:, 0] += eps * np.cos(phase) * math.cos(omega0 * params.dt)
-
-        problem = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-        wv = march(problem)
-
-        # Total energy using central differences for velocity (Stormer-Verlet)
-        n = params.n_slices + 1
-        energies = np.empty(n - 2)
-        for l in range(1, n - 1):
-            vel = (wv.slices[l + 1] - wv.slices[l - 1]) / (2.0 * params.dt)
-            T = 0.5 * mass * np.sum(vel ** 2)
-            V = spacelike_potential(wv.slices[l], lattice, params)
-            energies[l - 1] = T + V
-
-        E_mean = float(np.mean(np.abs(energies)))
-        drift = float((np.max(energies) - np.min(energies)) / E_mean)
-        # Verlet: drift is bounded (no secular growth), typically < 1% for dt=0.05
-        assert drift < 0.01, (
-            f"Energy drift = {drift*100:.3f}% (expected < 1% for Verlet at dt=0.05)"
         )

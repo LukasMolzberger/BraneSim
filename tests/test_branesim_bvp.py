@@ -30,7 +30,6 @@ import pytest
 from branesim.core.conventions import ActionParams, LatticeParams, d_of_k_eigenvalues
 from branesim.core.lattice import SpacelikeLattice
 from branesim.core.residual import residual_norm
-from branesim.solver.ivp import IVPProblem, march
 from branesim.solver.boundary import (
     ChiralBC,
     DirichletBC,
@@ -348,16 +347,20 @@ class TestRealityAndOldBugGuard:
 
 
 # ---------------------------------------------------------------------------
-# Test 4: Dirichlet-recovers-march at non-resonant N (keep existing validation)
+# Test 4: Dirichlet BVP recovers a known analytic eigenmode (march-free)
 # ---------------------------------------------------------------------------
 
-class TestDirichletRecoversMarch:
-    """BVP-Dirichlet at non-resonant N recovers the IVP march to ~ 1e-12."""
+class TestDirichletRecoversEigenmode:
+    """Dirichlet JFNK at non-resonant N recovers the analytic eigenmode.
 
-    def test_d3_bvp_dirichlet_recovers_march(self):
-        """Dirichlet BVP at non-resonant N matches IVP march interiors to 1e-12."""
+    March-free replacement for the old recover-the-march test: the boundary
+    slices and ground truth come from the closed-form eigenmode
+    (``_eigenmode_slices``), so no IVP march is involved.  Also exercises the
+    ``initial_world`` seed-guess path of solve_block.
+    """
+
+    def test_d3_dirichlet_recovers_eigenmode(self):
         lattice = _make_lattice((8, 8, 8))
-        dim = 3
         m = 4
         kvec = 2.0 * math.pi * np.array([1.0, 0.0, 0.0]) / (8.0 * SPACING)
         eig = d_of_k_eigenvalues(kvec, ALPHA, K_S, RHO, SPACING)
@@ -365,23 +368,42 @@ class TestDirichletRecoversMarch:
         N = _nonresonant_N(theta_k, N_default=15)
 
         params = _make_action_params(N, m_ambient=m)
-        world_true, R0, R1, _ = _eigenmode_slices(lattice, params, [1, 0, 0], 0)
+        world_true, _, _, _ = _eigenmode_slices(lattice, params, [1, 0, 0], 0)
         mass = 1.0
 
-        # Ground-truth IVP march
-        ivp_prob = IVPProblem(lattice=lattice, params=params, mass=mass, R0=R0, R1=R1)
-        gt = march(ivp_prob)
-
-        # Dirichlet BVP using the march endpoints
-        bc = DirichletBC(R0=gt.slices[0].copy(), RN=gt.slices[N].copy())
+        # Dirichlet BC from the analytic eigenmode endpoints (no march).
+        bc = DirichletBC(R0=world_true[0].copy(), RN=world_true[N].copy())
         opts = SolveOpts(tol=1e-12, warm_start=True, verbose=False)
         wv = solve_block(BoundaryProblem(lattice, params, mass, bc), opts)
 
-        # Interior slices should match the march
-        max_err = float(np.abs(wv.slices[1:N] - gt.slices[1:N]).max())
+        max_err = float(np.abs(wv.slices[1:N] - world_true[1:N]).max())
         assert max_err < 1e-10, (
-            f"Dirichlet BVP at non-resonant N={N}: "
-            f"max interior error vs march = {max_err:.3e}, expected < 1e-10"
+            f"Dirichlet BVP at non-resonant N={N}: max interior error vs "
+            f"analytic eigenmode = {max_err:.3e}, expected < 1e-10"
+        )
+
+    def test_d3_dirichlet_with_seed_initial_world(self):
+        """Passing the eigenmode as initial_world also converges to it."""
+        lattice = _make_lattice((8, 8, 8))
+        m = 4
+        kvec = 2.0 * math.pi * np.array([1.0, 0.0, 0.0]) / (8.0 * SPACING)
+        eig = d_of_k_eigenvalues(kvec, ALPHA, K_S, RHO, SPACING)
+        theta_k = math.acos(max(-1.0, min(1.0, 1.0 - 0.5 * DT * DT * float(eig[0]))))
+        N = _nonresonant_N(theta_k, N_default=15)
+
+        params = _make_action_params(N, m_ambient=m)
+        world_true, _, _, _ = _eigenmode_slices(lattice, params, [1, 0, 0], 0)
+        mass = 1.0
+
+        bc = DirichletBC(R0=world_true[0].copy(), RN=world_true[N].copy())
+        opts = SolveOpts(tol=1e-12, verbose=False)
+        wv = solve_block(
+            BoundaryProblem(lattice, params, mass, bc), opts,
+            initial_world=world_true.copy(),
+        )
+        max_err = float(np.abs(wv.slices[1:N] - world_true[1:N]).max())
+        assert max_err < 1e-10, (
+            f"Dirichlet BVP (seed initial_world) max interior error = {max_err:.3e}"
         )
 
 
@@ -477,26 +499,13 @@ class TestChiralResidualNearZero:
 # ---------------------------------------------------------------------------
 
 class TestRtGuard:
-    """march() and apply_chiral() are the r_t=0 linear/Verlet limit only.
+    """apply_chiral() is the r_t=0 linear/Verlet limit only.
 
     For r_t>0 the temporal central-force spring makes the forward step implicit,
-    so the explicit stencil does NOT solve the discrete EL equations.  These
-    paths must raise loudly rather than silently produce a non-stationary
+    so the explicit stencil does NOT solve the discrete EL equations.  This
+    path must raise loudly rather than silently produce a non-stationary
     world-volume scored as 'converged' (ARCHITECTURE.md §1.4 / A4).
     """
-
-    def test_march_rejects_r_t_positive(self):
-        lattice = _make_lattice((6, 6, 6))
-        m = lattice.params.dim + 1
-        params = ActionParams(
-            k_s=K_S, alpha=ALPHA, rho=RHO, dt=DT, n_slices=8,
-            m_ambient=m, r_t=0.175,
-        )
-        mass = RHO * SPACING ** lattice.params.dim
-        ref = lattice.reference_positions(m)
-        with pytest.raises(NotImplementedError):
-            march(IVPProblem(lattice=lattice, params=params, mass=mass,
-                             R0=ref.copy(), R1=ref.copy()))
 
     def test_chiral_solve_rejects_r_t_positive(self):
         lattice = _make_lattice((6, 6, 6))
@@ -512,3 +521,79 @@ class TestRtGuard:
         # (rather than report converged=True on a non-stationary march).
         with pytest.raises(NotImplementedError):
             solve_block(BoundaryProblem(lattice, params, mass, bc))
+
+
+# ---------------------------------------------------------------------------
+# Test: rotating-frame-periodic BC (closed cyclic time loop) is well-conditioned
+# and actually moves the brane (contrast with the frozen Dirichlet two-time).
+# ---------------------------------------------------------------------------
+
+class TestRotatingFramePeriodic:
+    """PeriodicBC: closed cyclic time loop, all slices free.
+
+    The point: the periodic temporal operator is well-conditioned (grows
+    polynomially in P, no two-point resonance), so JFNK from a wound seed
+    genuinely relaxes the worldtube — unlike the Dirichlet two-time BVP whose
+    κ~1/sin Pθ → 1e14 freezes the solve.
+    """
+
+    def _carrier_seed(self, lattice, N, m, eps=0.05, w=1.5):
+        """A localized rotating-carrier seed (NOT a solution): a Gaussian bump in
+        the (comp 2, comp 3) carrier plane whose phase advances once over the loop."""
+        ref = lattice.reference_positions(m)
+        mi = lattice.multi_indices.astype(float)
+        centre = (np.array(lattice.params.grid_shape, dtype=float) - 1.0) / 2.0
+        d = np.linalg.norm(mi - centre, axis=1)
+        amp = eps * np.exp(-(d / w) ** 2)
+        slices = np.repeat(ref[None, :, :], N, axis=0).copy()
+        for l in range(N):
+            th = 2.0 * np.pi * l / N
+            slices[l, :, 2] += amp * np.cos(th)
+            slices[l, :, 3] += amp * np.sin(th)
+        world = np.concatenate([slices, slices[:1]], axis=0)  # (N+1, n, m), wrap
+        return world
+
+    def test_periodic_better_conditioned_than_dirichlet(self):
+        from branesim.solver.boundary import PeriodicBC, dirichlet_condition_estimate
+        lattice = _make_lattice((6, 6, 6))
+        # An N near a Dirichlet resonance to make the contrast unambiguous.
+        N = 12
+        ap = _make_action_params(N, m_ambient=4)
+        per = PeriodicBC(R0=lattice.reference_positions(4)).condition_estimate(lattice.params, ap)
+        dirich = dirichlet_condition_estimate(lattice.params, ap)
+        assert np.isfinite(per)
+        assert per < dirich, f"periodic cond {per:.2e} should beat Dirichlet {dirich:.2e}"
+
+    def test_periodic_solve_moves_and_reduces_residual(self):
+        from branesim.solver.boundary import PeriodicBC
+        lattice = _make_lattice((6, 6, 6))
+        N, m = 8, 4
+        ap = _make_action_params(N, m_ambient=m)   # r_t=0 linear (division-free)
+        mass = RHO * SPACING ** lattice.params.dim
+        seed = self._carrier_seed(lattice, N, m)
+
+        bc = PeriodicBC(R0=seed[0].copy())
+        opts = SolveOpts(tol=1e-10, max_iter=8, inner_maxiter=30, verbose=False)
+        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts, initial_world=seed)
+        rep = wv.solver_report
+
+        assert rep["bc_scheme"] == "rotating_frame_periodic"
+        # The brane moves toward a solution: residual drops substantially.
+        assert rep["residual_final"] < 0.5 * rep["residual_initial"], (
+            f"periodic solve did not reduce residual: "
+            f"{rep['residual_initial']:.3e} -> {rep['residual_final']:.3e}"
+        )
+        # The worldtube actually moved (not frozen like Dirichlet).
+        moved = float(np.max(np.abs(wv.slices[:N] - seed[:N])))
+        assert moved > 1e-6, f"brane did not move (max|ΔR|={moved:.2e})"
+        # The loop closes exactly: R^N == R^0.
+        assert float(np.max(np.abs(wv.slices[N] - wv.slices[0]))) < 1e-12
+
+    def test_periodic_requires_initial_world(self):
+        from branesim.solver.boundary import PeriodicBC
+        lattice = _make_lattice((4, 4, 4))
+        ap = _make_action_params(6, m_ambient=4)
+        mass = RHO * SPACING ** lattice.params.dim
+        bc = PeriodicBC(R0=lattice.reference_positions(4))
+        with pytest.raises(ValueError):
+            solve_block(BoundaryProblem(lattice, ap, mass, bc))  # no initial_world

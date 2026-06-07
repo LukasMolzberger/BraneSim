@@ -460,6 +460,40 @@ the **trace `(1,1,1)`** lateral direction — a single-component seed is only `�
 (object, injection ansatz, one parameter set, measurement suite, scale ladder).
 Owner: physics-derivation (ansatz/closure) + the build.
 
+### D5. Massive-vs-massless: the substrate must not Meissner-screen its own `U(1)` photon — `open` (2026-06-06)
+**Statement.** Standard Abelian-Higgs / Ginzburg–Landau is unambiguous: a *condensed*
+medium with a spontaneously fixed order-parameter amplitude `|Ψ|>0` **gives its `U(1)`
+gauge boson a mass** (Anderson–Higgs), `m_γ ∝ |Ψ|`, so the gauge field is **short-range /
+Meissner-screened** with penetration depth `λ`. But the active `U(1)` carrier-phase vortex
+(D4, `EXPERIMENT.md`) is meant to model the **electron/EM**, whose photon is **massless and
+long-range** (Coulomb). A naïvely condensed prestressed substrate therefore risks producing
+the *opposite* regime — a screened, massive, short-range gauge boson (a `W/Z`-like object,
+not the photon). The Meissner screening that GL hands you "for free" is exactly wrong for the
+electron's long-range field.
+**Why it matters.** This is load-bearing for the experiment being built now. If the
+in-substrate vortex screens its own emergent gauge field, the object is not EM-like, and the
+`F_μν → E,B` gauge-layer measurement would show exponential (not `1/r`) fall-off. It is the
+condensed-matter shadow of the masslessness requirement already noted abstractly in **D3(ii)**
+(`no m²A²`; the `U(1)` must be an exact flat direction) — D5 names the concrete mechanism that
+would *violate* it and the regime that controls it.
+**Candidate approach / resolution sketch.** (i) **Unbroken-combination route** (electroweak
+analogy): the physical `U(1)_em` is the *surviving, unbroken* generator; the substrate may
+break some `U(3)` directions while the trace-`U(1)_em` stays massless. (ii) **Not-a-condensate
+route** (preferred, consistent with `[[project_complex_u1_from_time]]`): the carrier phase is a
+*rotation along the timelike worldtube axis*, not a thermodynamic condensate amplitude that
+Higgses the field — i.e. the substrate is **not in the broken phase** for the trace-`U(1)`, and
+the vortex is a **semilocal** excitation on a simply-connected vacuum (the `β<1` regime of
+D4(i), Vachaspati–Achucarro), where the gauge field is only *partially* Higgsed. Semilocal
+vortices live precisely in the window where masslessness can survive. **Decisive diagnostic
+(cheap, add to the active run):** extract the emergent gauge-boson screening length from the
+`F_μν`/supercurrent profile (penetration depth `λ` vs core `ξ`) — long-range/unscreened
+(`λ → ∞`, power-law `B`/current tail) confirms massless EM; exponential screening falsifies the
+EM identification and flags a `W/Z`-class object instead. **Do not import `e* = 2e`** (Cooper
+pairing) — the carrier is single-charge.
+**Status.** open. Owner: physics-derivation (which `U(1)` survives massless) + the active
+build (screening-length diagnostic). Tightens D3(ii); shares the semilocal-binding regime with
+D4(i). Surfaced from R. Behiel's *Superconductivity and the Higgs Field* (Anderson–Higgs).
+
 ---
 
 ## E. Pointers to scoped non-claims (tracked elsewhere)

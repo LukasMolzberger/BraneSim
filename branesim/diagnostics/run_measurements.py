@@ -119,12 +119,18 @@ def _load_run(run_dir: Path) -> dict[str, Any]:
         n_slices   : int
     """
     config_path = run_dir / "config.json"
-    world_path = run_dir / "seed_world.npz"
+    # Accept either a solved/iterated world (world.npz) or the bare seed
+    # (seed_world.npz); prefer world.npz when both are present.
+    world_path = run_dir / "world.npz"
+    if not world_path.exists():
+        world_path = run_dir / "seed_world.npz"
 
     if not config_path.exists():
         raise FileNotFoundError(f"config.json not found in {run_dir}")
     if not world_path.exists():
-        raise FileNotFoundError(f"seed_world.npz not found in {run_dir}")
+        raise FileNotFoundError(
+            f"neither world.npz nor seed_world.npz found in {run_dir}"
+        )
 
     config = json.loads(config_path.read_text())
     grid_shape = tuple(int(v) for v in config["grid_shape"])

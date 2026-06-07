@@ -1,7 +1,0 @@
-{
-  "_comment": "branesim BVP smoke: JFNK block-solve with Dirichlet two-time BCs (derived from an IVP march). Validated to recover the march. NOTE: Dirichlet is ill-conditioned at resonant N; the chiral BC (well-posed, two-past-slice) is implemented for r_t=0 — see ARCHITECTURE.md D2.",
-  "lattice": {"grid_shape": [12, 12, 12], "spacing": 1.0, "periodic_axes": [true, true, true]},
-  "action":  {"k_s": 1.0, "alpha": 0.2, "rho": 1.0, "dt": 0.1, "n_slices": 16, "m_ambient": 4, "r_t": 0.0},
-  "seed":    {"kind": "plane_wave", "amplitude": 1e-3, "k_index": [1, 0, 0], "polarization": [0, 1, 0, 0]},
-  "solver":  {"mode": "bvp_dirichlet", "tol": 1e-9, "max_iter": 100, "warm_start": true}
-}

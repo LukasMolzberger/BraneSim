@@ -42,12 +42,16 @@ Instance families (memory-optimized, x86, numpy-friendly):
 Reduce memory by: smaller `N` (spatial), fewer `n_slices`, or (future) the
 matrix-free streaming/slab storage in ARCHITECTURE.md D4.
 
-> Practical note: today's deployable BVP path is **Dirichlet**, which is
-> ill-conditioned (`κ≈1e14`) and makes JFNK slow (minutes even for tiny grids).
-> The well-posed **chiral** BC (`κ=1`, two-past-slice) is implemented and fast in
-> the linear regime; for `r_t>0` the chiral march still needs an `r_t`-aware step
-> (ARCHITECTURE.md D2). For now, `mode="ivp"` is the cheap smoke and
-> `bvp_dirichlet` is a correctness check, not a performance target.
+> Practical note (BVP paths, 2026-06-06): the **Dirichlet** two-time BVP is
+> ill-conditioned (`κ≈1e14`, resonant) and freezes JFNK — kept only as a negative
+> control. The **chiral** Cauchy BC (`κ=1`, two-past-slice) is the fast well-posed
+> path in the `r_t=0` linear regime. For the prestressed `r_t>0` worldtube (e.g.
+> the U(1) vortex) use the **rotating-frame-periodic** BC (`PeriodicBC`): a closed
+> cyclic time loop, well-conditioned (`κ~1e3–1e4`), which genuinely relaxes the
+> brane while preserving the carrier winding. The forward-Verlet `ivp` mode and
+> the `bvp_dirichlet` recovery mode were removed; `run_experiment` defaults to
+> `bvp_chiral`, and the vortex experiment (`orchestration/aws/RUNBOOK_vortex.md`)
+> drives the periodic relaxation.
 
 ---
 

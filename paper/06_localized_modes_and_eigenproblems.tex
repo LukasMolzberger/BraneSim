@@ -13,17 +13,9 @@ so that invariants depend only on $r=|x|$.
 
 Linearize the equations of motion \eqref{eq:eom} about $\vecX_0$ by writing
 $\vecX(x,t)=\vecX_0(x)+\bm{\eta}(x,t)$ with small perturbation $\bm{\eta}$.
-Because the dynamics derives from an action \eqref{eq:action}, the linearized operator arises from the second
-variation of the action and is therefore self-adjoint with respect to the inner product induced by the kinetic energy,
-schematically
-\begin{equation}
-  \langle \bm{\eta},\bm{\zeta}\rangle
-  :=\int_{\Omega} \rho_m\,\bm{\eta}(x)\cdot \bm{\zeta}(x)\,\dd^3x,
-  \label{eq:inner-product}
-\end{equation}
-together with the boundary/regularity conditions appropriate to the chosen domain.
-Orthogonality and completeness of eigenmodes are therefore not added by hand; they are standard properties of a
-self-adjoint eigenproblem.
+Because the dynamics derives from the action \eqref{eq:action}, the linearized operator is
+the second variation of $S$ and is therefore self-adjoint with respect to the $\rho_m$-weighted
+$L^2$ inner product on $\Omega$; orthogonality and completeness of eigenmodes follow as standard consequences.
 
 \subsection{Angular structure: scalar and vector spherical harmonics}
 \label{sec:angular-structure}
@@ -184,21 +176,16 @@ equal to $0.3077$ for $(\alpha_1,\alpha_2) = (0.2,0.5)$; a deviation above $\sim
 the spectral-susceptibility factorization underlying it.
 
 \subsection{Why the baryon sector is the next numerical target}
+\label{subsec:baryon-next-target}
 
 The cubic substrate naturally singles out three axis-associated channels.
 That makes the proton/neutron sector a particularly informative next target: a confined three-component standing-wave
 mode tests the very structure that the lattice introduces most directly.
 In contrast, an isolated electron-like ansatz can exist without decisively probing the triplet mixing sector.
 
-The working hypothesis is therefore that a baryon-like seed should be built in the vector spherical harmonic
-basis introduced in \Cref{sec:soliton-labels}, with the canonical candidate being the hedgehog
-$\xi^i = f(r)\,\hat{x}^i$ ($J = 0$, $L = 1$) and its Skyrme-twisted topological extension into the
-$X^4$ embedding direction.
-Confinement arises from geometric self-guidance via the geometric quartic (lattice-exact coefficient
-$\propto k_s\alpha/a$; see \Cref{sec:continuum-model}), and the proton-versus-neutron
-distinction enters as a $J=0$ trace admixture on top of the hedgehog.
-The concrete ansatz menu used in the simulation search --- hedgehog, Skyrme-twisted hedgehog, hedgehog with
-trace admixture, and axis-triplet as negative control --- is recorded in
+The ansatz labels (hedgehog \eqref{eq:hedgehog}, Skyrme-twisted extension, trace admixture for proton/neutron
+distinction) are defined in \Cref{sec:soliton-labels}.
+The concrete four-candidate ansatz menu used in the simulation search is recorded in
 \texttt{paper/baryon\_simulation\_roadmap.md} (Phase~2).
 This is not yet a derivation of QCD or of nucleon phenomenology.
 It is a concrete question for simulation: does the substrate support stable, localized, color-confined triplet modes at

@@ -102,6 +102,68 @@ class DirichletBC:
 
 
 @dataclass
+class PeriodicBC:
+    """Rotating-frame-periodic BC — a closed (cyclic) time loop, no fixed slices.
+
+    The worldtube is periodic over the loop: R^P ≡ R^0.  ALL P = n_slices slices
+    are unknowns; none is pinned (pinning a whole slice would re-create the
+    Dirichlet two-time resonance, κ~1/sin Pθ → 1e14).  The carrier winding n_t
+    is a topological integer carried by the seed (the JFNK initial guess) and
+    preserved by the smooth Newton flow unless the amplitude collapses.
+
+    "Rotating frame": the carrier phase advances 2π·n_t over the loop, so the
+    physical field is periodic up to a global U(1) carrier rotation — which, for
+    integer n_t, is the identity, hence the lab-frame cyclic condition R^P ≡ R^0.
+    The carrier phase / rigid ambient symmetries (E(4) + the carrier SO(2)) are a
+    low-dimensional null space of the linearization; lgmres tolerates it from a
+    seed start, and an optional point anchor (``gauge="anchor"``) pins one node's
+    slice-0 position to remove the translational part.
+
+    Attributes
+    ----------
+    R0 : ndarray, shape (n_nodes, m_ambient)
+        Slice-0 of the seed — used for shape, and (if ``gauge="anchor"``) as the
+        pinned-anchor reference.  The full initial guess is passed to
+        ``solve_block`` via ``initial_world``.
+    gauge : {"none", "anchor"}
+        ``"none"`` (default): rely on lgmres tolerating the symmetry null space
+        from the seed start.  ``"anchor"``: additionally pin node ``gauge_node``
+        on slice 0 to its R0 value (removes the 4 ambient translations).
+    gauge_node : int
+        Node index to anchor when ``gauge="anchor"``.
+    """
+
+    R0: np.ndarray
+    gauge: Literal["none", "anchor"] = "none"
+    gauge_node: int = 0
+
+    def condition_estimate(
+        self,
+        lattice_params: LatticeParams,
+        action_params: ActionParams,
+    ) -> float:
+        """Periodic-operator condition estimate (contrast with Dirichlet's 1/sin Pθ).
+
+        The closed-loop linear operator at temporal harmonic j and spatial mode
+        k has eigenvalue ``|ω²(k) − ω_t,j²|`` with the temporal harmonic
+        ``ω_t,j² = (2/dt²)(1 − cos 2πj/P)``.  The condition number is
+        max/min over the NONZERO eigenvalues — large only at a genuine
+        standing-wave resonance ω(k) = ω_t,j, NOT at every Dirichlet node, so it
+        grows polynomially in P rather than diverging as 1/sin Pθ.
+        """
+        P = action_params.n_slices
+        dt = action_params.dt
+        omega2 = _omega2_for_all_modes(lattice_params, action_params)   # (n_modes,)
+        j = np.arange(P)
+        omega_t2 = (2.0 / (dt * dt)) * (1.0 - np.cos(2.0 * np.pi * j / P))  # (P,)
+        eig = np.abs(omega2[:, None] - omega_t2[None, :]).ravel()
+        nonzero = eig[eig > 1e-12]
+        if nonzero.size == 0:
+            return 1.0
+        return float(np.max(nonzero) / np.min(nonzero))
+
+
+@dataclass
 class ChiralBC:
     """Chiral Cauchy BC — two adjacent past slices, marched forward (verdict a).
 
@@ -167,6 +229,29 @@ class ChiralBC:
 # ---------------------------------------------------------------------------
 # Internal helpers: θ(k) for all Fourier modes of a periodic grid
 # ---------------------------------------------------------------------------
+
+
+def _omega2_for_all_modes(
+    lattice_params: LatticeParams,
+    action_params: ActionParams,
+) -> np.ndarray:
+    """ω²(k) = D_α(k) for every (polarization axis α, Fourier wavevector k).
+
+    Same mode enumeration as :func:`_theta_for_all_modes`, but returns the raw
+    squared eigenfrequencies (no arccos), as needed by the periodic-operator
+    condition estimate.  Shape (n_nodes * dim,).
+    """
+    grid_shape = lattice_params.grid_shape
+    a = lattice_params.spacing
+    ranges = [np.arange(n) for n in grid_shape]
+    grids = np.meshgrid(*ranges, indexing="ij")
+    multi = np.stack([g.ravel() for g in grids], axis=1)
+    k_grid = 2.0 * np.pi * multi / (np.array(grid_shape) * a)
+    out = []
+    for idx in range(len(k_grid)):
+        out.append(d_of_k_eigenvalues(k_grid[idx], action_params.alpha,
+                                      action_params.k_s, action_params.rho, a))
+    return np.concatenate(out)
 
 
 def _theta_for_all_modes(

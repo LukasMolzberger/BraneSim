@@ -1,11 +1,11 @@
 ---
-description: Run a BraneSim solver experiment (init+solve → worldvolume) from a JSON config. Defaults to orchestration/configs/branesim_ivp_smoke.json.
+description: Run a BraneSim solver experiment (init+solve → worldvolume) from a JSON config. Defaults to orchestration/configs/branesim_chiral_smoke.json.
 ---
 
 Run a BraneSim experiment via the package entry point `branesim.run_experiment`
 (initialization + solve, writing `worldvolume.zip` + `summary.json`).
 
-If `$ARGUMENTS` is empty, use `orchestration/configs/branesim_ivp_smoke.json`.
+If `$ARGUMENTS` is empty, use `orchestration/configs/branesim_chiral_smoke.json`.
 Otherwise, treat `$ARGUMENTS` as the path to a JSON config.
 
 Execute:

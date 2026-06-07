@@ -23,7 +23,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
-from matplotlib.colors import hsv_to_rgb
+from matplotlib.collections import LineCollection
+from matplotlib.colors import hsv_to_rgb, to_rgba
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "matplotlib"))
@@ -63,6 +64,70 @@ def phase_to_rgb(phase: np.ndarray) -> np.ndarray:
     sat = np.ones_like(hue)
     val = np.ones_like(hue)
     return hsv_to_rgb(np.stack([hue, sat, val], axis=-1))
+
+
+# ---------------------------------------------------------------------------
+# Optional 2-D overlays (add-ons; off by default, used by create_slice_animation)
+#
+# Idiom borrowed from R. Behiel's GL-vortex animations (Vortex.py / PsiThetaPsi.py):
+#   - short line "dashes" oriented by the local U(1) phase make the winding and the
+#     core defect legible where flat hue alone is ambiguous (and they fade out in the
+#     dark |Psi|->0 region, where the hue is meaningless);
+#   - dots advected along the supercurrent j ~ |Psi|^2 grad(theta) visualise the
+#     swirl around the vortex core.
+# Pure visualization, no physics logic (principles §2.1).
+# ---------------------------------------------------------------------------
+
+
+def _inplane_current(phase_slice: np.ndarray, amp_slice: np.ndarray,
+                     spacing: float) -> Tuple[np.ndarray, np.ndarray]:
+    """Branch-cut-safe in-plane supercurrent j = Im(conj(Psi) grad Psi) = |Psi|^2 grad(theta).
+
+    Reconstructs Psi = amp * exp(i*phase) so the gradient never crosses the phase
+    branch cut.  Returns (j0, j1), components along the two slice axes.
+    """
+    psi = amp_slice * np.exp(1j * phase_slice)
+    g0 = np.gradient(psi, spacing, axis=0)
+    g1 = np.gradient(psi, spacing, axis=1)
+    j0 = np.imag(np.conj(psi) * g0)
+    j1 = np.imag(np.conj(psi) * g1)
+    return j0, j1
+
+
+def _phase_dash_segments(
+    phase_slice: np.ndarray,
+    amp_slice: np.ndarray,
+    spacing: float,
+    stride: int,
+    length_frac: float,
+    amp_max: float,
+    amp_threshold: float,
+    base_rgba: Tuple[float, float, float, float],
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Build LineCollection segments + per-segment RGBA for the phase-dash overlay.
+
+    Each sampled grid point gets a short segment centred on the cell, oriented along
+    the local phase direction (cos theta, sin theta).  Segment opacity tracks the
+    normalised amplitude (faded/hidden where |Psi| is small).
+    """
+    n0, n1 = phase_slice.shape
+    seg_len = length_frac * stride * spacing
+    ii = np.arange(0, n0, stride)
+    jj = np.arange(0, n1, stride)
+    I, J = np.meshgrid(ii, jj, indexing="ij")
+    xc = (I + 0.5) * spacing
+    yc = (J + 0.5) * spacing
+    th = phase_slice[I, J]
+    dx = 0.5 * seg_len * np.cos(th)
+    dy = 0.5 * seg_len * np.sin(th)
+    p0 = np.stack([xc - dx, yc - dy], axis=-1)
+    p1 = np.stack([xc + dx, yc + dy], axis=-1)
+    segs = np.stack([p0, p1], axis=-2).reshape(-1, 2, 2)
+
+    amp_norm = np.clip(amp_slice[I, J].ravel() / max(amp_max, 1e-30), 0.0, 1.0)
+    rgba = np.tile(np.asarray(base_rgba, dtype=float), (segs.shape[0], 1))
+    rgba[:, 3] = np.where(amp_norm >= amp_threshold, base_rgba[3] * amp_norm, 0.0)
+    return segs, rgba
 
 
 # ---------------------------------------------------------------------------
@@ -247,6 +312,20 @@ def create_slice_animation(
     fps: int = 20,
     dpi: int = 120,
     title_prefix: str = "",
+    phase_dashes: bool = False,
+    dash_stride: int = 3,
+    dash_length_frac: float = 0.85,
+    dash_amp_threshold: float = 0.12,
+    dash_color: str = "k",
+    dash_alpha: float = 0.55,
+    dash_linewidth: float = 0.9,
+    flow_dots: bool = False,
+    n_flow_dots: int = 350,
+    flow_speed: float = 1.5,
+    dot_lifetime_frames: int = 16,
+    dot_color: str = "w",
+    dot_size: float = 5.0,
+    flow_seed: int = 0,
 ) -> None:
     """Render a 2-D midplane slice animation.
 
@@ -259,6 +338,23 @@ def create_slice_animation(
     plane : str
         One of ``"xy"``, ``"xz"``, ``"yz"``.
     output_path : str
+
+    Optional overlays (add-ons; all default off, base render unchanged)
+    -------------------------------------------------------------------
+    phase_dashes : bool
+        Overlay short line segments oriented by the local U(1) phase (requires
+        ``frames_phase``).  Opacity tracks amplitude so dashes fade where |Psi|→0.
+    dash_stride, dash_length_frac, dash_amp_threshold, dash_color, dash_alpha,
+    dash_linewidth :
+        Dash sampling stride, length (fraction of stride·spacing), relative-amplitude
+        cut below which a dash is hidden, colour, base opacity, line width.
+    flow_dots : bool
+        Overlay dots advected along the supercurrent j ~ |Psi|² ∇θ (requires
+        ``frames_phase``), spawned with density ∝ amplitude and aged out — the
+        swirl around the vortex core.
+    n_flow_dots, flow_speed, dot_lifetime_frames, dot_color, dot_size, flow_seed :
+        Target live-dot count, advection speed (cells/frame scale), dot lifetime in
+        frames, colour, marker size, and the RNG seed (reproducible spawning).
     """
     if not frames_field:
         raise ValueError("frames_field must be non-empty")
@@ -328,6 +424,28 @@ def create_slice_animation(
         fontsize=9,
     )
 
+    # --- optional overlays (add-ons; require phase, base render untouched) ---
+    overlay_dashes = phase_dashes and use_phase
+    overlay_dots = flow_dots and use_phase
+    ext_x, ext_y = extent[1], extent[3]
+    dash_lc = None
+    if overlay_dashes:
+        base_rgba = to_rgba(dash_color, dash_alpha)
+        segs0, seg_rgba0 = _phase_dash_segments(
+            slice0_ph, np.abs(slice0_amp), spacing, dash_stride,
+            dash_length_frac, amp_max, dash_amp_threshold, base_rgba,
+        )
+        dash_lc = LineCollection(segs0, colors=seg_rgba0,
+                                 linewidths=dash_linewidth, zorder=5)
+        ax.add_collection(dash_lc)
+    dot_scat = None
+    dot_rgb = to_rgba(dot_color)[:3]
+    dot_state = {"pos": np.zeros((0, 2)), "age": np.zeros((0,), dtype=int)}
+    rng = np.random.default_rng(flow_seed)
+    if overlay_dots:
+        dot_scat = ax.scatter([], [], s=dot_size, facecolors="none",
+                              edgecolors="none", zorder=8)
+
     def _update(frame_idx: int):
         sl_amp = _extract_slice(frames_field[frame_idx])
         if use_phase:
@@ -342,7 +460,59 @@ def create_slice_animation(
             f"{title_prefix}  {plane}-slice  "
             f"t={float(times_arr[frame_idx]):.2f}  [{colour_label}]"
         )
-        return im, title
+        artists = [im, title]
+
+        if overlay_dashes:
+            segs, seg_rgba = _phase_dash_segments(
+                sl_ph, np.abs(sl_amp), spacing, dash_stride,
+                dash_length_frac, amp_max, dash_amp_threshold,
+                to_rgba(dash_color, dash_alpha),
+            )
+            dash_lc.set_segments(segs)
+            dash_lc.set_color(seg_rgba)
+            artists.append(dash_lc)
+
+        if overlay_dots:
+            pos, age = dot_state["pos"], dot_state["age"]
+            if pos.shape[0]:
+                j0, j1 = _inplane_current(sl_ph, np.abs(sl_amp), spacing)
+                ix = np.clip((pos[:, 0] / spacing).astype(int), 0, sl_ph.shape[0] - 1)
+                iy = np.clip((pos[:, 1] / spacing).astype(int), 0, sl_ph.shape[1] - 1)
+                vx, vy = j0[ix, iy], j1[ix, iy]
+                mag = np.hypot(vx, vy) + 1e-30
+                pos = pos.copy()
+                pos[:, 0] += flow_speed * spacing * vx / mag
+                pos[:, 1] += flow_speed * spacing * vy / mag
+                age = age + 1
+            alive = (
+                (age < dot_lifetime_frames)
+                & (pos[:, 0] >= 0) & (pos[:, 0] <= ext_x)
+                & (pos[:, 1] >= 0) & (pos[:, 1] <= ext_y)
+            )
+            pos, age = pos[alive], age[alive]
+            n_spawn = max(0, n_flow_dots - pos.shape[0])
+            if n_spawn:
+                w = np.clip(np.abs(sl_amp) / amp_max, 0, 1).ravel()
+                tot = w.sum()
+                if tot > 0:
+                    idx = rng.choice(w.size, size=n_spawn, p=w / tot)
+                    n1 = sl_amp.shape[1]
+                    sx = (idx // n1 + rng.random(n_spawn)) * spacing
+                    sy = (idx % n1 + rng.random(n_spawn)) * spacing
+                    pos = np.concatenate([pos, np.stack([sx, sy], axis=-1)], axis=0)
+                    age = np.concatenate([age, np.zeros(n_spawn, dtype=int)])
+            dot_state["pos"], dot_state["age"] = pos, age
+            if pos.shape[0]:
+                fade = np.sin(np.pi * age / max(dot_lifetime_frames, 1)) ** 2
+                rgba_d = np.tile(np.append(dot_rgb, 1.0), (pos.shape[0], 1))
+                rgba_d[:, 3] = fade
+                dot_scat.set_offsets(pos)
+                dot_scat.set_facecolors(rgba_d)
+            else:
+                dot_scat.set_offsets(np.empty((0, 2)))
+            artists.append(dot_scat)
+
+        return tuple(artists)
 
     anim = FuncAnimation(fig, _update, frames=n_frames, interval=1000 // fps, blit=False)
     out = Path(output_path)

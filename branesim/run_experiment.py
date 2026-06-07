@@ -5,13 +5,12 @@ runs a block-solve (or the IVP special case), and writes a world-volume zip plus
 a summary JSON to an output directory. This is the unit the AWS launcher runs
 remotely (see orchestration/aws/ and DEPLOYMENT.md).
 
-Status: runs the VALIDATED paths only —
-  - mode="ivp"           : forward Verlet march (rest start), validated.
-  - mode="bvp_dirichlet" : JFNK block-solve with Dirichlet two-time BCs derived
-                           from an IVP march; validated to recover the march.
+Status: runs the VALIDATED march-free path —
   - mode="bvp_chiral"    : Chiral Cauchy BC march from two past slices (R0, R1).
                            Well-posed for all N; κ bounded and N-independent.
-                           Verdict (a) implemented 2026-05-30.
+                           Verdict (a) implemented 2026-05-30.  (The forward
+                           IVP march and the march-recovery Dirichlet mode were
+                           removed with the IVP solver, 2026-06-06.)
 
 Config schema (JSON)::
 
@@ -22,7 +21,7 @@ Config schema (JSON)::
                   "n_slices": 64, "m_ambient": 4, "r_t": 0.0},
       "seed":    {"kind": "plane_wave", "amplitude": 1e-3,
                   "k_index": [1,0,0], "polarization": [0,1,0,0], "rng_seed": 0},
-      "solver":  {"mode": "ivp", "tol": 1e-9, "max_iter": 100, "warm_start": true}
+      "solver":  {"mode": "bvp_chiral", "tol": 1e-9, "max_iter": 100}
     }
 
 Usage::
@@ -43,9 +42,8 @@ import numpy as np
 from branesim.core.lattice import SpacelikeLattice
 from branesim.core.conventions import LatticeParams, ActionParams
 from branesim.core.residual import residual_norm
-from branesim.solver.ivp import IVPProblem, march
-from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
-from branesim.solver.boundary import DirichletBC, ChiralBC
+from branesim.solver.bvp import BoundaryProblem, solve_block
+from branesim.solver.boundary import ChiralBC
 from branesim.io.contracts import WorldVolumeWriter
 
 
@@ -122,7 +120,7 @@ def run(config: dict, output_dir: Path) -> dict:
     lcfg = config["lattice"]
     acfg = config["action"]
     scfg = config.get("seed", {"kind": "flat"})
-    solver_cfg = config.get("solver", {"mode": "ivp"})
+    solver_cfg = config.get("solver", {"mode": "bvp_chiral"})
 
     lp = LatticeParams(
         grid_shape=tuple(int(v) for v in lcfg["grid_shape"]),
@@ -152,28 +150,10 @@ def run(config: dict, output_dir: Path) -> dict:
           f"(={(N+1)*lattice.n_nodes*m*8/1e9:.3f} GB/vector x ~30)")
 
     R0 = _build_seed(scfg, lattice, m)
-    mode = solver_cfg.get("mode", "ivp")
+    mode = solver_cfg.get("mode", "bvp_chiral")
     t0 = time.perf_counter()
 
-    if mode == "ivp":
-        prob = IVPProblem(lattice=lattice, params=ap, mass=mass, R0=R0, R1=R0.copy())
-        wv = march(prob)
-        report = {"mode": "ivp"}
-
-    elif mode == "bvp_dirichlet":
-        # Ground-truth march supplies the two-time Dirichlet data (l=0, l=N).
-        gt = march(IVPProblem(lattice=lattice, params=ap, mass=mass, R0=R0, R1=R0.copy()))
-        bc = DirichletBC(R0=gt.slices[0].copy(), RN=gt.slices[N].copy())
-        opts = SolveOpts(
-            tol=float(solver_cfg.get("tol", 1e-9)),
-            max_iter=int(solver_cfg.get("max_iter", 100)),
-            warm_start=bool(solver_cfg.get("warm_start", True)),
-        )
-        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts)
-        report = dict(wv.solver_report)
-        report["recovery_max_abs_vs_march"] = float(np.abs(wv.slices[1:N] - gt.slices[1:N]).max())
-
-    elif mode == "bvp_chiral":
+    if mode == "bvp_chiral":
         # Chiral Cauchy BC: build R1 from a one-step IVP march from R0.
         # For a plane-wave seed this gives the exact second eigenmode slice;
         # for other seeds it gives the stationary-start first step (zero vel).

@@ -9,19 +9,12 @@ This section makes precise the sense in which Lorentz kinematics emerge as a kin
 
 Linearizing \Cref{eq:eom} about a homogeneous background yields a multi-branch wave system.
 For isotropic elastic media, one expects (at long wavelengths) transverse and longitudinal branches.
-From the quadratic term $W_2$ of the central-force spring's continuum expansion
-(\Cref{subsec:constitutive-law}), the characteristic speeds at long wavelengths are
-\begin{equation}
-  c_T^2 = \frac{\mu(\alpha)}{\rho_m} = \frac{(1-\alpha)\,k_s a^2}{m},
-  \qquad
-  c_L^2 = \frac{\lambda+2\mu}{\rho_m} = \frac{k_s a^2}{m},
-  \label{eq:cl-ct}
-\end{equation}
-derived from the acoustic tensor \eqref{eq:acoustic-tensor} on the 6-neighbor stencil.
-These coincide with the closed-form dispersion of the discrete action \eqref{eq:discrete-4d-action}
-(\Cref{eq:cone-speeds}), confirming that the spring and its $W_2$ continuum limit are
-self-consistent across all levels of description.
-More generally, for each polarization branch $b$ one has the long-wavelength dispersion
+The characteristic speeds $c_L^2 = k_s a^2/m$ and $c_T^2 = (1-\alpha)\,k_s a^2/m$ are derived
+in \Cref{sec:continuum-model} from two independent starting points --- the closed-form dispersion
+of the discrete action (\Cref{eq:cone-speeds}) and the acoustic-tensor eigenvalues of the $W_2$
+continuum limit (\Cref{eq:wave-speeds-derived}) --- and their agreement there is a self-consistency
+check across levels of description.
+For each polarization branch $b$ one has the long-wavelength dispersion
 \begin{equation}
   \omega_b^2(\veck)\;\approx\; c_b^2\,|\veck|^2 \quad \text{for } |\veck|\to 0,
   \label{eq:linear-dispersion}
@@ -29,30 +22,21 @@ More generally, for each polarization branch $b$ one has the long-wavelength dis
 which defines an effective wave cone for that branch.
 
 In regimes where a single branch dominates transport and dispersion is negligible,
-the wave equation is approximately invariant under Lorentz transformations built from the corresponding
-speed $c_b$. In particular, for the dominant branch (denote its speed by $c$) one obtains the familiar
-kinematic relations for boosted frames,
-\begin{align}
-t' &= \gamma\left(t-\frac{vx}{c^2}\right),&
-x' &= \gamma(x-vt),&
-\gamma &= (1-v^2/c^2)^{-1/2},
-\label{eq:lorentz}
-\end{align}
+the wave equation is approximately invariant under the standard Lorentz group at speed $c$,
+with boost parameter
+\begin{equation}
+  \gamma = \bigl(1-v^2/c^2\bigr)^{-1/2},
+  \label{eq:lorentz}
+\end{equation}
 as an effective symmetry of the linear propagation sector, not as a microscopic postulate.
 
 \paragraph{Dual-observer reading: the only Lorentz observer is the internal one.}
 On the 6-neighbor axial-only lattice (\Cref{subsec:lattice-substrate}) the long-wavelength wave speed
-is direction-dependent at the lab-frame level — for example $c_L([100])/c_L([111])\approx 1.075$
+is direction-dependent at the lab-frame level --- for example $c_L([100])/c_L([111])\approx 1.075$
 at the default operating point $\alpha=0.2$.
-Lab observers can resolve this anisotropy and would not see Lorentz invariance.
 The relativistic effective description \eqref{eq:lorentz} is therefore not a statement about the lab frame; it is a
-conjecture about \emph{internal} observers — solitons whose rods, clocks, and signal cones are themselves
-substrate-emergent and direction-dependent in the same way the wave speed is.
-The product of a direction-dependent rod length and a direction-dependent clock rate is conjectured to give a
-direction-independent ``internal speed of light'', which is what enters \eqref{eq:lorentz} for an internal observer.
-This load-bearing assumption is laid out in \texttt{BACKBONE.md} \#8 and \#19 and must be verified empirically;
-the operational test is whether two solitons in different orientations report the same effective metric
-(Sprint~3 in \texttt{paper/validation\_roadmap.md}).
+conjecture about \emph{internal} observers, whose rods, clocks, and signal cones are substrate-emergent and renormalize
+with the same direction-dependent speed (see \Cref{para:dual-observer} for the full mechanism).
 Without observer universality the emergent Lorentz statement collapses to ``a particular branch
 propagates with one speed along each direction'' and is not a symmetry of physics for any actual observer.
 
