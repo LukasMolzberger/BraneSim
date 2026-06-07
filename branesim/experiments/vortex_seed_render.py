@@ -63,6 +63,7 @@ from branesim.initialization.vortex_worldtube import (
     VortexParams,
     inject_vortex_worldtube,
     measure_winding_closure,
+    vacuum_offsets,
 )
 from branesim.solver.boundary import PeriodicBC
 from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
@@ -139,10 +140,14 @@ def _extract_amp_phase(
     phases = []
     times = []
 
+    # Subtract the prestressed-vacuum N-gon offset so renders show the carrier
+    # (donut + winding), not the rho-sized uniform vacuum background.
+    off_re, off_im = vacuum_offsets(world.shape[0] - 1, R_T)
+
     for l in range(world.shape[0]):
         pos = world[l]
-        re_disp = pos[:, CARRIER_RE] - ref[:, CARRIER_RE]
-        im_disp = pos[:, CARRIER_IM] - ref[:, CARRIER_IM]
+        re_disp = pos[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[l]
+        im_disp = pos[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[l]
 
         amp = np.sqrt(re_disp ** 2 + im_disp ** 2).reshape(nx, ny, nz)
         ph = np.arctan2(im_disp, re_disp + 1e-300).reshape(nx, ny, nz)
@@ -619,7 +624,7 @@ def _emit_iteration(
     np.savez_compressed(str(iter_dir / "world.npz"), world=world.astype(np.float32))
 
     # winding
-    winding = measure_winding_closure(world, lattice, slice_index=0)
+    winding = measure_winding_closure(world, lattice, slice_index=0, r_t=R_T)
     (iter_dir / "winding_closure.json").write_text(json.dumps({
         "slice_index": 0, "windings": winding, "m_expected": vp.m,
         "winding_ok": (abs(winding["winding_through_z_normal"] - vp.m) < 0.1

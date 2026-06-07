@@ -47,7 +47,6 @@ os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "matplot
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.colors import hsv_to_rgb
 
 _REPO = Path(__file__).resolve().parents[2]
 if str(_REPO) not in sys.path:
@@ -62,41 +61,10 @@ from branesim.initialization.vortex_worldtube import (
     CARRIER_RE,
     CARRIER_IM,
     measure_winding_closure,
+    vacuum_offsets,
 )
-
-
-# ---------------------------------------------------------------------------
-# Plot style helpers
-# ---------------------------------------------------------------------------
-
-_STYLE = {
-    "figure.dpi": 120,
-    "font.size": 11,
-    "axes.titlesize": 12,
-    "axes.labelsize": 11,
-    "legend.fontsize": 9,
-    "lines.linewidth": 1.6,
-}
-
-
-def _apply_style() -> None:
-    matplotlib.rcParams.update(_STYLE)
-
-
-def _savefig(fig: "plt.Figure", path: Path) -> None:
-    # Only call tight_layout when constrained_layout is NOT active (avoids warning).
-    if not fig.get_constrained_layout():
-        fig.tight_layout()
-    fig.savefig(str(path), dpi=120, bbox_inches="tight")
-    plt.close(fig)
-
-
-def _phase_to_rgb(phase: np.ndarray) -> np.ndarray:
-    """Map phase in (-pi, pi) -> HSV hue -> RGB. Shape (...) -> (..., 3)."""
-    hue = np.mod((phase + np.pi) / (2.0 * np.pi), 1.0)
-    sat = np.ones_like(hue)
-    val = np.ones_like(hue)
-    return hsv_to_rgb(np.stack([hue, sat, val], axis=-1))
+from branesim.diagnostics.binding_probe import device_binding_probe
+from branesim.diagnostics._plot_helpers import _apply_style, _savefig, _phase_to_rgb
 
 
 # ---------------------------------------------------------------------------
@@ -370,10 +338,12 @@ def device_confinement(
 def _winding_per_slice(
     world: np.ndarray,
     lattice: SpacelikeLattice,
+    r_t: float = 0.0,
 ) -> dict[str, np.ndarray]:
     """Compute winding number through each pair of periodic faces per time slice.
 
     Uses the same discrete plaquette method as measure_winding_closure().
+    ``r_t`` is forwarded so the prestressed-vacuum offset is subtracted.
     Returns dict of three arrays shaped (n_slices+1,).
     """
     n_slices_plus1 = world.shape[0]
@@ -382,7 +352,7 @@ def _winding_per_slice(
     wx = np.zeros(n_slices_plus1)
 
     for l in range(n_slices_plus1):
-        w = measure_winding_closure(world, lattice, slice_index=l)
+        w = measure_winding_closure(world, lattice, slice_index=l, r_t=r_t)
         wz[l] = w["winding_through_z_normal"]
         wy[l] = w["winding_through_y_normal"]
         wx[l] = w["winding_through_x_normal"]
@@ -408,7 +378,7 @@ def device_winding(
     dt = params.dt
     times = np.arange(n_slices_plus1) * dt
 
-    windings = _winding_per_slice(world, lattice)
+    windings = _winding_per_slice(world, lattice, r_t=params.r_t)
 
     csv_path = out_dir / "winding.csv"
     rows = np.column_stack([times, windings["z"], windings["y"], windings["x"]])
@@ -463,21 +433,24 @@ def _build_complex_envelope(
     world: np.ndarray,
     ref: np.ndarray,
     omega0: float,
+    off_re: np.ndarray | None = None,
+    off_im: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Build complex envelope Psi = u + (i/omega0)*v from carrier 2-plane.
+    """Build the complex carrier field Psi from the carrier 2-plane.
 
-    u = Re(displacement on CARRIER_RE/IM plane), magnitude field
-    v = time-derivative of u (central difference)
-    Psi = sqrt(omega0)*u + i*v/sqrt(omega0)   [dimensionless energy normalization]
+    Complex displacement A = (R[2]-ref[2]-off_re) + i(R[3]-ref[3]-off_im), where
+    ``off_re/off_im`` are the per-slice prestressed-vacuum N-gon offsets (so the
+    rho-sized vacuum background is removed and only the physical carrier remains).
 
     Returns
     -------
     Psi : complex array, shape (n_slices+1, n_nodes)
     """
-    n_slices_plus1 = world.shape[0]
-    # Complex displacement from the carrier 2-plane
     re_disp = world[:, :, CARRIER_RE] - ref[np.newaxis, :, CARRIER_RE]  # (T, N)
     im_disp = world[:, :, CARRIER_IM] - ref[np.newaxis, :, CARRIER_IM]
+    if off_re is not None:
+        re_disp = re_disp - off_re[:, np.newaxis]
+        im_disp = im_disp - off_im[:, np.newaxis]
 
     # Complex amplitude: A = re + i*im
     A = re_disp + 1j * im_disp  # (T, N)
@@ -507,7 +480,9 @@ def device_berry(
     dt = params.dt
     times = np.arange(n_slices_plus1) * dt
 
-    Psi = _build_complex_envelope(world, ref, params.alpha)  # (T, N) complex
+    # Prestressed-vacuum N-gon offsets to subtract (else the rho background swamps).
+    off_re, off_im = vacuum_offsets(n_slices, params.r_t)
+    Psi = _build_complex_envelope(world, ref, params.alpha, off_re, off_im)  # (T, N) complex
 
     amp = np.abs(Psi)  # (T, N)
     amp_mean = np.mean(amp, axis=1)  # (T,)
@@ -581,8 +556,8 @@ def device_berry(
     t_indices = [0, n_slices // 2, n_slices]
     for col, ti in enumerate(t_indices):
         pos = world[ti]
-        re_d = pos[:, CARRIER_RE] - ref[:, CARRIER_RE]
-        im_d = pos[:, CARRIER_IM] - ref[:, CARRIER_IM]
+        re_d = pos[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[ti]
+        im_d = pos[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[ti]
         amp_3d = np.sqrt(re_d ** 2 + im_d ** 2).reshape(nx, ny, nz)
         ph_3d = np.arctan2(im_d, re_d + 1e-300).reshape(nx, ny, nz)
 
@@ -644,10 +619,13 @@ def device_em_fields(
     nx, ny, nz = grid_shape
     a = params.dt  # spatial spacing same as lattice.params.spacing
 
+    # Prestressed-vacuum N-gon offsets (subtract to recover the physical carrier).
+    off_re, off_im = vacuum_offsets(world.shape[0] - 1, params.r_t)
+
     # Build complex field at t=0 on the 3D grid
     pos0 = world[0]
-    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE]
-    im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM]
+    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[0]
+    im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[0]
     Psi = (re_d + 1j * im_d).reshape(nx, ny, nz)
 
     # Normalize node-wise: psi_hat = Psi / |Psi| (or 0 where |Psi| < eps)
@@ -670,8 +648,8 @@ def device_em_fields(
     # Temporal: use slices 0 and 1
     if world.shape[0] > 1:
         pos1 = world[1]
-        re_d1 = pos1[:, CARRIER_RE] - ref[:, CARRIER_RE]
-        im_d1 = pos1[:, CARRIER_IM] - ref[:, CARRIER_IM]
+        re_d1 = pos1[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[1]
+        im_d1 = pos1[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[1]
         Psi1 = (re_d1 + 1j * im_d1).reshape(nx, ny, nz)
         amp3_1 = np.abs(Psi1)
         psi_hat1 = np.where(amp3_1 > eps, Psi1 / (amp3_1 + 1e-300), 0.0 + 0.0j)
@@ -795,6 +773,12 @@ def device_color_channels(
 
     P_U1, P_SU3 = projection_operators()  # (3,3) each
 
+    # The prestressed-vacuum N-gon offset lives in component 2 (CARRIER_RE) of the
+    # lateral triplet; subtract it so the trace/traceless split reads the carrier,
+    # not the spatially-uniform vacuum background.  (Component 3 is timelike, not
+    # in the lateral triplet, so off_im does not enter here.)
+    off_re, _off_im = vacuum_offsets(n_slices_plus1 - 1, params.r_t)
+
     # Per-slice: compute lateral displacement (components 0,1,2) and project
     u1_energy = np.zeros(n_slices_plus1)
     su3_energy = np.zeros(n_slices_plus1)
@@ -803,6 +787,7 @@ def device_color_channels(
 
     for l in range(n_slices_plus1):
         disp_lat = world[l, :, :3] - ref[np.newaxis, :, :3].reshape(-1, 3)  # (N, 3)
+        disp_lat[:, CARRIER_RE] -= off_re[l]  # remove vacuum offset (comp 2)
         d_u1 = disp_lat @ P_U1.T   # (N, 3)  — trace/dilatational component
         d_su3 = disp_lat @ P_SU3.T  # (N, 3) — shear/traceless component
 
@@ -933,9 +918,10 @@ def device_spectra(
     nx, ny, nz = grid_shape
     a = lattice.params.spacing
 
+    off_re, off_im = vacuum_offsets(world.shape[0] - 1, params.r_t)
     pos0 = world[0]
-    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE]
-    im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM]
+    re_d = pos0[:, CARRIER_RE] - ref[:, CARRIER_RE] - off_re[0]
+    im_d = pos0[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[0]
     Psi0 = (re_d + 1j * im_d).reshape(nx, ny, nz)
 
     # 3D FFT
@@ -1167,6 +1153,43 @@ def _write_report(
         f"",
         f"![Spectra plot](spectra.png)",
         f"",
+    ]
+
+    # D8
+    d8 = results.get("binding_probe", {})
+    _d8_cl = d8.get("closure_locked")
+    _d8_sign = d8.get("du_par_sign", 0)
+    _d8_sign_str = {-1: "NEGATIVE (binding-consistent)", 0: "ZERO / undefined", 1: "POSITIVE (repulsive)"}.get(_d8_sign, "?")
+    _d8_kahler_flag = "PRESENT (R > 0.1)" if (d8.get("R_kahler", 0.0) or 0.0) > 0.1 else "absent (R < 0.1)"
+    lines += [
+        f"## D8 — U(1)↔SU(3) Binding Probe",
+        f"",
+        f"| Metric | Value |",
+        f"|--------|-------|",
+        f"| sep_d mean (P1) | {d8.get('sep_d_mean', 'N/A'):.4g} lattice units |",
+        f"| sep_d max (P1) | {d8.get('sep_d_max', 'N/A'):.4g} |",
+        f"| Δu_∥ sign (P2) | {_d8_sign_str} |",
+        f"| Δu_∥ extremum (P2) | {d8.get('du_par_extremum', 'N/A'):.4g} |",
+        f"| ρ of extremum (P2) | {d8.get('rho_extremum', 'N/A'):.4g} |",
+        f"| ⟨Δu_∥⟩ scalar (P2) | {d8.get('du_par_scalar', 'N/A'):.4g} |",
+        f"| ω mean (P3) | {d8.get('omega_mean', 'N/A'):.4g} rad/time_unit |",
+        f"| ω std (P3) | {d8.get('omega_std', 'N/A'):.4g} |",
+        f"| ω_ref closure-locked (P3) | {d8.get('omega_ref', 'N/A')} |",
+        f"| closure-locked verdict (P3) | {_d8_cl} |",
+        f"| γ_Γ loop holonomy (P4) | {d8.get('gamma_Gamma', 'N/A'):.4g} rad |",
+        f"| R_kahler (P5) | {d8.get('R_kahler', 'N/A'):.4g} |",
+        f"| Kähler part (P5) | {_d8_kahler_flag} |",
+        f"",
+        f"**One-line verdict:** "
+        f"sep_d={d8.get('sep_d_mean', float('nan')):.3g} (U(1)/SU(3) co-located if < 1); "
+        f"Δu_∥ {_d8_sign_str}; "
+        f"ω {'closure-locked' if _d8_cl else ('NOT locked' if _d8_cl is False else 'untested')}; "
+        f"γ_Γ={d8.get('gamma_Gamma', float('nan')):.3g} rad "
+        f"(expected ≈ 2π·n_t={round(d8.get('gamma_Gamma', 0)/(2*3.14159), 1) if d8.get('gamma_Gamma') else '?'} turns); "
+        f"Kähler R={d8.get('R_kahler', float('nan')):.3g} — {_d8_kahler_flag}.",
+        f"",
+        f"![Binding probe plot](binding_probe.png)",
+        f"",
         f"---",
         f"",
         f"## Verdict Summary",
@@ -1184,6 +1207,10 @@ def _write_report(
         f"(U(1) frac ~ {d6.get('u1_fraction_mean', '?'):.3g}); "
         f"SU(3) content {'appears' if d6.get('su3_fraction_mean', 0) > 0.01 else 'absent'} for this seed.",
         f"- **D7 Spectra**: ring geometry imprints k-ring structure on FFT.",
+        f"- **D8 Binding Probe**: sep_d ~ {d8.get('sep_d_mean', '?'):.3g}; "
+        f"Δu_∥ {_d8_sign_str}; "
+        f"γ_Γ ~ {d8.get('gamma_Gamma', '?'):.3g} rad; "
+        f"Kähler {_d8_kahler_flag}.",
         f"",
         f"*Generated by `branesim.diagnostics.run_measurements`.*",
     ]
@@ -1240,8 +1267,19 @@ def run_measurements(
         print(f"  world shape: {world.shape}  dtype: {world.dtype}")
         print(f"  alpha={data['alpha']}  grid={data['grid_shape']}")
 
+    # Extract n_t from config for device_binding_probe.
+    # ActionParams is frozen=True — do NOT mutate it.  Instead pass n_t as a
+    # kwarg directly to device_binding_probe via the special-case dispatch below.
+    vp = config.get("vortex_params", {})
+    config_n_t: int | None = None
+    if "n_t" in vp:
+        try:
+            config_n_t = int(vp["n_t"])
+        except (TypeError, ValueError):
+            pass
+
     all_devices = ["energy", "confinement", "winding", "berry",
-                   "em_fields", "color_channels", "spectra"]
+                   "em_fields", "color_channels", "spectra", "binding_probe"]
     if devices is None:
         devices = all_devices
 
@@ -1259,13 +1297,19 @@ def run_measurements(
     }
 
     for name in devices:
-        if name not in device_fns:
+        if name not in device_fns and name != "binding_probe":
             print(f"  [WARNING] Unknown device {name!r}, skipping.")
             continue
         if verbose:
             print(f"  Running device {name} ...")
         try:
-            res = device_fns[name](world, ref, lattice, params, diag_dir)
+            if name == "binding_probe":
+                # binding_probe accepts an extra n_t kwarg; do NOT mutate params.
+                res = device_binding_probe(
+                    world, ref, lattice, params, diag_dir, n_t=config_n_t
+                )
+            else:
+                res = device_fns[name](world, ref, lattice, params, diag_dir)
             results[name] = res
             paths[name] = str(diag_dir)
             if verbose:

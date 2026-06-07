@@ -69,3 +69,6 @@ paper/build/
 
 # Per-run experiment outputs (heavy mp4/npz); regenerated from code.
 runs/
+
+# Fetched AWS results (heavy mp4/npz); pulled from S3, not source.
+vortex-out/

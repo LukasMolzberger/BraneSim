@@ -104,15 +104,60 @@ production `96³×128`.
    non-Abelian/semilocal-vortex core moduli (BACKBONE #25; OPEN_PROBLEMS D4)?
 3. The **geometric (carrier) phase** and the **spin-½ `ℤ₂`** holonomy, measured directly.
 
+## Extension — the U(1)↔SU(3) binding probe (OPEN_PROBLEMS D6)
+Why a proton does not split into a color core + a free positive charge. EM/charge =
+trace `(1,1,1)/√3` phase, color = internal orientation, of the **one** `Ψ∈ℂ³` lump.
+The probe measures whether the trace (charge) content stays co-located with the
+traceless (color) content. Derivation + falsifiers:
+`paper/derivations/{u1_su3_binding,time_link_binding}.md`.
+
+**BUILT (2026-06-07): device D8 `binding_probe`** (`branesim/diagnostics/binding_probe.py`,
+registered in `run_measurements.py`; audit-clean; CSV+PNG+report stanza). Read-only,
+single-worldvolume. Five probes (P1 sector centroids+separation `d(l)`; P2 longitudinal
+stretch `Δu_∥(ρ)` sign+profile; P3 per-slice carrier rate `ω(l)` vs closure-locked; P4
+trace-sector loop holonomy `γ_Γ`; P5 antisymmetric Kähler ratio `R_kähler=|Im𝒢|/|Re𝒢|`).
+Pre-tested on the seed (`runs/vortex_seed_2026-06-06_190350/`): **all signals correctly
+null** — `sep_d~1e-14`, `Δu_∥~0`, `R_kähler~1e-18`, `γ_Γ=−12.565≈−2π·n_t`, interior
+`ω≈ω_ref`. The seed is static; the binding signals (`Δu_∥<0`, coexcited SU(3), nonzero
+`R_kähler`) appear **only on a converged PeriodicBC worldtube** — so the device is ready
+and the next step is the eigen-solve, then re-run D8.
+
+- **Sub-probe 1 — co-location baseline (single `α=0.7` set).** On the relaxed
+  eigenstate, compute the energy-weighted **sector centroids** `c_tr`, `c_⊥` and their
+  separation `d(t)` over the worldtube. Stays co-located ⇒ binding; drifts apart ⇒ no.
+- **Sub-probe 2 — forced-separation force law (Channel B; needs authorized `α`-ladder
+  `{0.2,0.5,0.7,0.8}`).** Rigidly displace the two sector profiles by `d` in the seed,
+  re-relax with the shift constrained (diagnostic energy scan, no back-reaction), read
+  `E(d)`, finite-difference `F(d)=−dE/dd`. **Predict `F(d)∝α`** (ratios `α/0.5`),
+  linear-in-`d` for `d≪w`, peak near `d≈√2w`. ⚠ Watch for the **cubic** vortex-core
+  term (`F∝αΔu_∥`) dominating the quartic.
+- **Sub-probe 3 — charge-strip (Channel C.2 GW, single `α`).** Add a pure-gauge trace
+  phase gradient, re-relax. `Q_{U(1)}−Q_matter` snaps back to a quantized `c₁B` ⇒
+  **topological** binding (a confining EM–color flux tube on forced separation);
+  continuous drift ⇒ **energetic-only**. (Gated on a stable `B≠0` texture, C2.)
+- **Sub-probe 4 — triality lock (Channel C.1, dynamics-free).** Three seeds — `B=3`
+  color-singlet, single color-triplet (`t=1`), octet (`t=0`) — measure `Q_{U(1)} mod 1`
+  via the trace holonomy. Predict singlet/octet → `0`, triplet → `±⅓`. Deviation of
+  singlet/octet from integer **falsifies that the field is genuinely `U(3)`**.
+
+**Read-only (built in D8) vs multi-solve (needs authorization):** D8 computes, per
+worldvolume, the *per-run* quantities — sector separation `d`, `Δu_∥(ρ)`, `ω(l)`, `γ_Γ`,
+`R_kähler`. The discriminating *falsifiers* are multi-solve campaigns (each effectively a
+sweep, so owner-authorized): the force-law `F(d)∝α` (constrained re-relaxation over `d`
+and the α-ladder), `Δu_∥∝ω²` (closure-index `n` ladder), `γ_Γ∝B¹` at fixed amplitude
+(texture-winding ladder), and the triality `Q mod 1` over three seeds. D8 emits exactly
+the scalars these campaigns collect; the campaign driver is not built.
+
 ## Build status (2026-06-06)
 - **Injection layer** (`branesim/initialization/vortex_worldtube.py`): single vortex
   **ring** (smoke-ring core, donut/torus energy), periodic-clamp-consistent
   (contractible → net winding machine-zero). Renders as one torus.
 - **Renderers** (`branesim/visualization/volume_render.py`, recovered from `c0f1aaa7`):
   multi-color volume movie (opacity = energy, hue = `U(1)` phase) + 2D slice movies.
-- **Measurement suite** (`branesim/diagnostics/run_measurements.py`): 7 devices
+- **Measurement suite** (`branesim/diagnostics/run_measurements.py`): 8 devices
   (energy/consistency, confinement, winding, Berry/phase, EM `A_μ`/`F_μν`,
-  per-color-channel `SU(3)`/QCD, spectra) → CSV + paper-ready PNG + `report.md`.
+  per-color-channel `SU(3)`/QCD, spectra, **D8 binding_probe**) → CSV + paper-ready PNG
+  + `report.md`. Shared plot helpers in `diagnostics/_plot_helpers.py`.
 - **Run folder**: `runs/<exp>_<date>_<time>/` with config, worldvolume, diagnostics, renders.
 - **Next**: (i) re-inject in the **trace (EM) direction**; (ii) add the **tumble**
   (spin) + set the **`ωT` quantization** (BVP eigenvalue); (iii) the eigen-solve

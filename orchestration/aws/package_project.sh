@@ -12,6 +12,8 @@ tar \
   --exclude="__pycache__" \
   --exclude="*.pyc" \
   --exclude="test-runs" \
+  --exclude="runs" \
+  --exclude=".pytest_cache" \
   --exclude=".cache" \
   -czf "${OUT_PATH}" \
   .

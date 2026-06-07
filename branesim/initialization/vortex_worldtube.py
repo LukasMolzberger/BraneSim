@@ -105,6 +105,48 @@ CARRIER_IM: int = 3
 
 
 # ---------------------------------------------------------------------------
+# Prestressed periodic-vacuum offset (derived 2026-06-07; physics-derivation)
+# ---------------------------------------------------------------------------
+
+
+def vacuum_offsets(n_slices: int, r_t: float) -> tuple[np.ndarray, np.ndarray]:
+    """Per-slice carrier-plane offsets of the prestressed closed-loop vacuum.
+
+    The r_t>0 temporal central-force spring wants every consecutive pair of
+    slices separated by its rest length r_t.  A naive seed (all slices = same
+    reference) leaves the temporal bond = 0 in vacuum, so the spring's
+    ``ΔR/|ΔR|`` direction term has a 1/|ΔR| Jacobian that blows up (the 64³ run
+    failed this way).  The fix (derived): add a per-slice GLOBAL translation
+    (the SAME offset on every node, so spatial bonds — within-slice differences —
+    are untouched) tracing a regular N-gon in the carrier (2,3) plane:
+
+        v_l = ρ ( cos(2π l/N) ê₂ + sin(2π l/N) ê₃ ),   ρ = r_t / (2 sin(π/N))
+
+    The N-gon edge (chord) is 2ρ·sin(π/N) = r_t, so |ΔR_temporal| = r_t uniformly
+    on every node (including the vortex core, now the most-protected point), the
+    loop closes (v_N = v_0), and the configuration stays codim-0 in ℝ⁴.  This is
+    an n_vac=1 background turn in the carrier plane; the carrier (winding n_t)
+    rides on top.  Diagnostics must subtract this offset to read the true carrier.
+
+    For r_t <= 0 (the linear/Verlet limit, which has no 1/|ΔR| term) the offset
+    is zero — no temporal stretch is needed.
+
+    Returns
+    -------
+    off_re, off_im : ndarray, shape (n_slices+1,)
+        Offsets to add to the CARRIER_RE (2) and CARRIER_IM (3) components on
+        each slice l = 0..n_slices (slice N duplicates slice 0 — closure).
+    """
+    l = np.arange(n_slices + 1)
+    if r_t <= 0.0:
+        z = np.zeros(n_slices + 1)
+        return z, z
+    rho = r_t / (2.0 * math.sin(math.pi / n_slices))
+    ang = 2.0 * math.pi * l / n_slices
+    return rho * np.cos(ang), rho * np.sin(ang)
+
+
+# ---------------------------------------------------------------------------
 # Public parameter dataclass
 # ---------------------------------------------------------------------------
 
@@ -287,12 +329,22 @@ def inject_vortex_worldtube(
     # angular frequency = omega_per_slice / dt.
     omega_per_slice = 2.0 * math.pi * vp.n_t / n_slices
 
+    # Prestressed periodic-vacuum offset: a per-slice global N-gon translation in
+    # the carrier plane so every temporal bond = r_t (no 1/|ΔR| singularity).
+    off_re, off_im = vacuum_offsets(n_slices, params.r_t)
+    rho = (params.r_t / (2.0 * math.sin(math.pi / n_slices))) if params.r_t > 0 else 0.0
+
     world = np.empty((n_slices + 1, n_nodes, m_ambient), dtype=np.float64)
 
     for l_slice in range(n_slices + 1):
         t = float(l_slice)  # carrier phase argument = slice index
 
         pos = ref.copy()
+        # Vacuum N-gon offset (uniform across nodes) — establishes the r_t>0
+        # prestressed timelike structure before the carrier rides on top.
+        pos[:, CARRIER_RE] += off_re[l_slice]
+        pos[:, CARRIER_IM] += off_im[l_slice]
+
         re_d, im_d = _sph_harm_displacement(
             coords, centre, vp.l, vp.m, vp.A0, vp.r0, vp.w, t, omega_per_slice,
         )
@@ -317,6 +369,8 @@ def inject_vortex_worldtube(
         "omega_phys": omega_per_slice / params.dt,
         "carrier_total_turns": vp.n_t,
         "carrier_total_deg": 360.0 * vp.n_t,
+        "vacuum_ngon_rho": rho,
+        "r_t": params.r_t,
         "centre": list(centre),
         "note": (
             f"Spherical-harmonic U(1) vortex seed Y_{vp.l}^{vp.m}. "
@@ -341,8 +395,15 @@ def measure_winding_closure(
     world: np.ndarray,
     lattice: SpacelikeLattice,
     slice_index: int = 0,
+    r_t: float = 0.0,
 ) -> dict[str, float]:
     """Measure the net U(1) azimuthal winding about the three central axes.
+
+    ``r_t`` (the temporal rest length, > 0 for the prestressed substrate) must
+    be passed so the per-slice prestressed-vacuum N-gon offset is subtracted
+    before reading the phase — otherwise the vacuum background (ρ ≈ r_t/(2 sin
+    π/N), which exceeds the carrier amplitude) swamps the contour and the winding
+    reads 0 instead of m.  ``r_t=0`` (default) subtracts nothing (linear limit).
 
     The winding about an axis is the discrete phase circulation
     (1/2pi) * sum of wrapped phase increments around a square contour centred
@@ -381,8 +442,13 @@ def measure_winding_closure(
     re_ref = ref[:, CARRIER_RE].reshape(nx, ny, nz)
     im_ref = ref[:, CARRIER_IM].reshape(nx, ny, nz)
 
-    re_disp = re_field - re_ref
-    im_disp = im_field - im_ref
+    # Subtract the prestressed-vacuum N-gon offset for this slice (else the
+    # ρ-sized vacuum background swamps the carrier in the contour).
+    n_slices = world.shape[0] - 1
+    off_re, off_im = vacuum_offsets(n_slices, r_t)
+
+    re_disp = re_field - re_ref - off_re[slice_index]
+    im_disp = im_field - im_ref - off_im[slice_index]
 
     phase = np.arctan2(im_disp, re_disp + 1e-300)  # (nx, ny, nz)
 

@@ -111,6 +111,14 @@ objects with physical particles, are targets of the numerical program rather tha
 the present paper.
 (Open investigations under \texttt{OPEN\_PROBLEMS.md} D4 and \texttt{EXPERIMENT.md}.)
 
+\paragraph{Interaction of the two sectors.}
+% Internal derivation note: paper/derivations/u1_su3_binding.md
+The decomposition in \Cref{eq:u3-decomp} is additive at the Lie-algebra level, but the two sectors are not dynamically independent.
+At quadratic (linear) order the envelope gradient energy is block-diagonal in trace/traceless components, so the sectors decouple exactly; any coupling is necessarily nonlinear.
+A group-theoretic tie is however exact and dynamics-free: because the field is $U(3)=\bigl(U(1)\times SU(3)\bigr)/\mathbb{Z}_3$ --- the center $\mathbb{Z}_3\subset SU(3)$ identified with the cube-roots of unity in $U(1)$ --- single-valuedness forces the trace charge $q$ and the $SU(3)$ triality $t\in\{0,1,2\}$ to satisfy $q\equiv -t\pmod{3}$, the standard representation-theory relation for $U(N)=\bigl(U(1)\times SU(N)\bigr)/\mathbb{Z}_N$ \citep{GeorgiGlashow1974,BaezHuerta2010GUTAlgebra}; hence a color triplet carries fractional ($\tfrac{1}{3}$-integer) trace charge while a color singlet carries integer charge, and charge fractionality is locked to color representation without reference to dynamics.
+At the model-specific level, the central-force anharmonicity --- the Euclidean-norm term, exactly $\propto\alpha$ (see \Cref{subsec:constitutive-law,eq:W4}) --- couples the sectors at quartic order through a vertex $\propto\alpha|\Psi_{\mathrm{tr}}|^2|\Psi_\perp|^2$, which vanishes identically as $\alpha\to 0$; the prestress parameter that splits the two sectors' spectral scales is therefore also the parameter that couples them energetically.
+Whether this coupling dynamically co-locates the charge with the color core --- so that a charged baryon binds rather than fragmenting --- is a target of the numerical program (\texttt{OPEN\_PROBLEMS.md} D6 / \texttt{EXPERIMENT.md}), not a conclusion of the present paper.
+
 Geometric phases are universal in wave systems \citep{Pancharatnam1956,Berry1984,WilczekZee1984,Bliokh2015SpinOrbit,Cisowski2022}.
 What is specific here is the identification of the physically relevant gauge structure with the
 connection induced by adiabatic transport of a band-isolated wavepacket's eigenbundle on the substrate.

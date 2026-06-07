@@ -157,6 +157,12 @@ long-wavelength light-cone **isotropic** (this is the `c²`-tuning of A3, now *c
 by `α` rather than free); (ii) it reproduces the correct **Newtonian limit** in the
 contraction channel. If either fails, `α_t` must be freed from `α` again. Owner:
 contraction-channel + physics-derivation.
+**New test (2026-06-07, from D6).** The time-link binding derivation
+(`paper/derivations/time_link_binding.md`) gives a *third* check: the same `r_t` that
+sources gravitational time dilation (#22) also sources EM↔color binding (D6 Part 1), so
+**binding strength and gravity strength must co-vary in `α`** (`∂ln κ_bind/∂ln α =
+∂ln c_grav/∂ln α + 1`). If a simulation can tune binding independently of gravity,
+`α_t=α` is falsified. Strengthens (ii). See D6.
 
 ---
 
@@ -493,6 +499,94 @@ pairing) — the carrier is single-charge.
 **Status.** open. Owner: physics-derivation (which `U(1)` survives massless) + the active
 build (screening-length diagnostic). Tightens D3(ii); shares the semilocal-binding regime with
 D4(i). Surfaced from R. Behiel's *Superconductivity and the Higgs Field* (Anderson–Higgs).
+
+### D6. U(1)↔SU(3) binding: what stops the proton splitting into a color core + a free charge? — `in-progress` (2026-06-07)
+**Statement.** EM/charge is the trace (`(1,1,1)/√3`) phase and color is the internal
+orientation of **one** `U(3)` triplet envelope `Ψ∈ℂ³`. If the sectors decoupled, a
+proton would split into a localized `SU(3)` core and a free positive `U(1)` charge
+that wanders off. They must interact; the *nature* of that interaction is the
+question. **At quadratic (linear) order they are exactly decoupled** (block-diagonal
+gradient energy; D2), so any binding is **nonlinear and must vanish as `α→0`**.
+**Why it matters.** A bound charged baryon is required for the whole particle picture
+(BACKBONE #25) and is the physical glue between the EM (D3/D4) and color (C2/#24)
+sectors. Without it the `U(1)`-vortex / `SU(3)`-texture split (D4) would predict
+unbound fragments.
+**Three channels (derivation: `paper/derivations/u1_su3_binding.md`, 2026-06-07).**
+- **B — energetic cross-vertex (DERIVED; net REPULSIVE, 2026-06-07).** The norm term
+  generates a quartic vertex `V=(k_s α/4a²)ξ_s²|ξ_⊥|²` (envelope `g|Ψ_tr|²|Ψ_⊥|²`,
+  `g=Θk_sα/a²`), exactly `∝α` — **the splitting parameter is also the coupling
+  parameter.** The cubic-vs-quartic sign is now resolved: the true cubic is the
+  *separable* `+(k_sα/2a²)Δu_∥(ξ_s²+|ξ_⊥|²)` (the earlier `Δu_∥ξ_s|ξ_⊥|²` was
+  dimensionally wrong); slaving `Δu_∥*=−(α/2a²)|Δu_⊥|²<0` gives an attractive but
+  `O(αε²)`-**subdominant** correction, so `g_net=(k_sα/4a²)[1−αε²]>0`: **the
+  geometric-only channel is overlap-repulsive.** Binding survives *only* if `Δu_∥` is
+  **externally sourced (negative) by the timelike-link prestress `r_t`** (see Next).
+  Falsifier: sign+α-power of `F(d)` (`+α¹` repulsive = quartic; `+α²` restoring =
+  cubic-dominated binding).
+- **C.1 — ℤ₃ triality lock (ESTABLISHED, dynamics-free).** `U(3)=(U(1)×SU(3))/ℤ₃`
+  forces `q≡−t (mod 3)`: a color triplet carries fractional (`⅓`) trace charge, a
+  color singlet integer charge. Binds charge *fractionality mod 1* to color
+  independent of dynamics — *given* the field is truly `U(3)`. This is the firmest
+  binding result and doubles as a test of the `U(3)` declaration itself.
+- **C.2 — Goldstone–Wilczek current (CONDITIONAL-NO, 2026-06-07).** `J^μ_{U(1)}=c₁B^μ`
+  would lock *integer* charge to baryon winding (forced separation → confining
+  EM–color flux tube). Verdict: the "i from time" **genuinely escapes** BACKBONE #16
+  (nonzero `(x,t)` U(1) curvature, the required `ε^{μνρσ}` factorizes time×spatial-
+  winding), but the **modulus-only norm vertex sources the P-even color *energy*
+  `|Ψ_⊥|²`, not the P-odd *winding* `Im tr(LLL)`** — so **no GW term; charge tracks
+  color energy continuously (`∝α`), not `B`; binding is energetic-only.** The single
+  flip-to-YES condition: a nonzero **antisymmetric (Kähler) part of the quartic fibre
+  metric `𝒢_ij`** (= the open D2 gap), sourced by the time-quadrature. Falsifier
+  (P-GW-2): amplitude-rescale `Ψ_⊥→λΨ_⊥` at fixed `B` — no-GW gives `γ_Γ∝λ²`, GW gives
+  flat/quantized.
+**Falsifiers (the binding probe, `EXPERIMENT.md`).** (i) sector-centroid co-location
+baseline; (ii) forced-separation `F(d)` — **sign + α-power** (`+α¹` repulsive =
+quartic dominance, the derived expectation; `+α²` restoring = cubic-dominated binding
+from an externally-sourced `Δu_∥`); needs an authorized 4-point `α`-ladder
+`{0.2,0.5,0.7,0.8}`; (iii) amplitude-rescale holonomy `γ_Γ∝λ²` ⇒ energetic vs
+topological (C.2); (iv) `Q mod 1` of singlet/triplet/octet seeds (C.1). Reuses
+`confinement.py` (sector centroids via `P_tr=ê_sê_s†`) and `berry_holonomy.py`
+(`Q_{U(1)}`, winding `B`), plus a `Δu_∥(ρ)` longitudinal-stretch readout.
+- **TIME-LINK BINDING (DERIVED 2026-06-07, VERDICT CONDITIONAL-YES;
+  `paper/derivations/time_link_binding.md`).** The two negative spatial channels are
+  **both flipped by the single `r_t`**: (Part 1, energetic, DERIVED) with `ω` fixed
+  externally by worldtube closure, the time-link norm term sources a definite-negative
+  compression `Δu_∥^ext=−(mα/4k_sb²)(ωA)²<0` co-located with the lump → cubic vertex
+  flips → `g_net=(k_sα/4a²)[1−χ]`, **binding iff `χ=2α(ω/ω_*)²(A_0/a)²>1`** (reachable
+  at α≈0.5–0.8); (Part 2, topological, RESOLVED) the contraction lands on the
+  **winding** `tr(L^3)`, not the energy `|Ψ_⊥|²` (P-odd `f` can only wedge into
+  `f∧tr(L^3)`, the WZW descent) → `Q=κ(A)·B` — a **soft winding-lock**: charge tracks
+  baryon number but with `κ(A)∝A_tr A_⊥` *amplitude-graded*, not a quantized integer,
+  and only in the soliton sector (zero in the linear spectrum via `g([111])=0`).
+  **Unification:** the same `r_t` sources gravity (#22), so **binding ↔ gravity co-vary
+  in α, not independently tunable** — a new test of A4a.
+**Status.** in-progress — **time-link binding is CONDITIONAL-YES** (energetic leg
+derived & reachable; topological leg conditional-maybe). **Linchpin VERIFIED in code
+(2026-06-07):** the `PeriodicBC`/`solve_block` path relaxes node positions only — `ω` is
+not a DOF; `ω̄=2π n_t/(P dt)` is pinned by fixed `P`, `dt`, and the topological winding
+`n_t` ("closure-locked carrier"). The time-link `r_t>0` force is present in
+`residual_periodic`, so the binding source is physically in the solver. Counterexample
+correctly avoided: `solver/breather.py` co-relaxes `ω` as an eigenvalue (would break the
+linchpin) — the experiment uses `PeriodicBC`, not the breather. Two refinements: (a)
+only the *period-averaged* `ω` is pinned, measure per-slice `ω(l)` on the converged
+worldtube; (b) since `ω` is imposed, the *amplitude self-selects* to it — the decisive
+test is `Δu_∥∝ω²` across the *converged family* of closure indices `n` (dividing out the
+measured `A`), not at fixed `A_0`. C.1 triality remains the dynamics-free positive (binds
+fractionality, not co-location). **Part 2 contraction now CLOSED** (2026-06-07): charge contracts onto the
+winding `tr(L^3)` → soft winding-lock `Q=κ(A)·B`, `κ(A)∝A_tr A_⊥` (not quantized),
+soliton-sector-only. Decisive falsifier: `γ_Γ∝B¹` at fixed amplitude (energy-only is
+flat in `B`). **Build (2026-06-07):** the read-only probe is implemented — device D8
+`binding_probe` (`branesim/diagnostics/binding_probe.py`, in the suite; audit-clean),
+measuring per-worldvolume `d`/`Δu_∥(ρ)`/`ω(l)`/`γ_Γ`/`R_kähler`. Pre-tested on the seed:
+all signals correctly null (static seed; binding appears only post-solve). The
+discriminating falsifiers are owner-authorized multi-solve campaigns (D8 emits their
+scalars; driver not built). **Remaining open:** (i) the soliton coherence-pinning (that
+the hedgehog fixes `Δφ₀(x)` so `∮Im𝒢dt` doesn't self-cancel) — asserted from the texture
+form, must be computed on a converged state; (ii) a stable `B≠0` texture to compute it on
+(C2/D4 — the hard gate; the entire topological leg is vacuous without it). Owners: the active build
+(binding-probe diagnostics: `Δu_∥(ρ)` vs `ω`, force law, `γ_Γ` vs `B`/`λ`, `Im𝒢`) +
+soliton-hunter (stable texture). See `[[project_u3_topology_scale]]`,
+`[[project_temporal_link_4d_spring]]`, `paper/derivations/{u1_su3_binding,time_link_binding}.md`.
 
 ---
 
