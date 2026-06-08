@@ -813,10 +813,16 @@ def _relax(
     to a bound worldtube or radiates toward vacuum is the physics question the
     diagnostics then answer.
     """
-    bc = PeriodicBC(R0=world[0].copy())
+    # gauge="anchor": pin node 0 (a box-corner vacuum node) on slice 0 to remove the
+    # 4 ambient translational zero modes — they made J singular and let the brane
+    # drift instead of converging (the 96³ run's residual floor + winding wander).
+    bc = PeriodicBC(R0=world[0].copy(), gauge="anchor")
     opts = SolveOpts(
         tol=RELAX_TOL, max_iter=n_iters,
         inner_maxiter=RELAX_INNER_MAXITER, verbose=True,
+        # Residual-plateau early-stop: bail once ‖R‖ improves <1% over 3 outer steps
+        # (the unpreconditioned solve floors ~iter 8); avoids the wasted tail.
+        plateau_patience=3, plateau_rtol=0.01,
     )
     wv = solve_block(
         BoundaryProblem(lattice, action_params, mass, bc), opts,

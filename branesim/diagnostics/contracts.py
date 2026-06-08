@@ -152,8 +152,13 @@ CONTRACTS: dict[str, DeviceContract] = {
         calib_desc="A=0 → U(1) and SU(3) channel energies ≡ 0",
         calib_check=lambda r: (_num(r, "u1_energy_t0", 1.0) < NULL_TOL
                                and _num(r, "su3_energy_t0", 1.0) < NULL_TOL),
-        falsifier_desc="pure-EM seed → U(1) fraction ≈ 1 (single-component ⅓ is NOT pure EM, E1)",
-        falsifier=lambda r, c: _num(r, "u1_fraction_mean") > U1_PURE_FRAC,
+        falsifier_desc=("pure-EM SEED → U(1) fraction ≈ 1 (single-component ⅓ is NOT "
+                        "pure EM, E1); on relaxed states SU(3) coexcitation is expected, "
+                        "so the check is seed-scoped (untested elsewhere)"),
+        # Seed-scoped: assert u1≈1 only on the bare seed.  On a relaxed/coexcited state
+        # u1<1 is the desired physics (SU(3) turns on), not a failure → return None.
+        falsifier=lambda r, c: (_num(r, "u1_fraction_mean") > U1_PURE_FRAC
+                                if c.get("iter_kind") == "seed" else None),
     ),
     # ---- Layer 3: Berry connection / emergent EM ----
     "berry": DeviceContract(

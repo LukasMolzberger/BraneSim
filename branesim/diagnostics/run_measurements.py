@@ -1688,7 +1688,8 @@ def run_measurements(
     state = config.get("iter_label") or config.get("iter_kind") or "unknown state"
     if converged is not None:
         state = f"{state} (converged={converged})"
-    ctx = {"converged": bool(converged), "m": config_m, "n_t": config_n_t, "state": state}
+    ctx = {"converged": bool(converged), "m": config_m, "n_t": config_n_t,
+           "state": state, "iter_kind": config.get("iter_kind")}
     ledger_rows, first_fail = build_ledger(results, calib_results, ctx)
     ledger_md = render_ledger_md(ledger_rows, first_fail, ctx)
 

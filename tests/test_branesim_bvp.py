@@ -597,3 +597,62 @@ class TestRotatingFramePeriodic:
         bc = PeriodicBC(R0=lattice.reference_positions(4))
         with pytest.raises(ValueError):
             solve_block(BoundaryProblem(lattice, ap, mass, bc))  # no initial_world
+
+    def test_periodic_report_per_dof_and_default_no_early_stop(self):
+        """solver_report exposes residual_per_dof; default plateau_patience=0
+        does NOT early-stop (runs the full max_iter) — existing-caller invariant."""
+        from branesim.solver.boundary import PeriodicBC
+        lattice = _make_lattice((6, 6, 6))
+        N, m = 8, 4
+        ap = _make_action_params(N, m_ambient=m)
+        mass = RHO * SPACING ** lattice.params.dim
+        seed = self._carrier_seed(lattice, N, m)
+        bc = PeriodicBC(R0=seed[0].copy())
+        opts = SolveOpts(tol=1e-10, max_iter=5, inner_maxiter=30, verbose=False)
+        rep = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts,
+                          initial_world=seed).solver_report
+        n_dof = (N) * lattice.n_nodes * m
+        assert rep["early_stopped_plateau"] is False
+        assert abs(rep["residual_per_dof"] - rep["residual_final"] / math.sqrt(n_dof)) < 1e-9
+
+    def test_periodic_plateau_early_stop_is_convergence_control_only(self):
+        """plateau_patience>0 stops the ROOT-FIND early once ‖R‖ flattens — it must
+        change only WHEN we stop, never the physics: the returned state's residual
+        is consistent with the iterate, and iterations <= max_iter."""
+        from branesim.solver.boundary import PeriodicBC
+        lattice = _make_lattice((6, 6, 6))
+        N, m = 8, 4
+        ap = _make_action_params(N, m_ambient=m)
+        mass = RHO * SPACING ** lattice.params.dim
+        seed = self._carrier_seed(lattice, N, m)
+        bc = PeriodicBC(R0=seed[0].copy())
+        # Aggressive plateau threshold so it triggers well before max_iter on this
+        # tiny problem; large max_iter so any stop is the plateau, not the cap.
+        opts = SolveOpts(tol=1e-14, max_iter=40, inner_maxiter=30, verbose=False,
+                         plateau_patience=2, plateau_rtol=0.5)
+        rep = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts,
+                          initial_world=seed).solver_report
+        assert rep["iterations"] <= opts.max_iter
+        assert rep["early_stopped_plateau"] is True
+        # Still a valid (sub-tol) relaxation, honestly flagged not-converged.
+        assert rep["residual_final"] < rep["residual_initial"]
+        assert rep["converged"] is False
+
+    def test_periodic_gauge_anchor_pins_node(self):
+        """gauge='anchor' removes the translational zero modes by pinning one node
+        on slice 0 to its R0 value (a gauge fix, not a dynamics clamp): that node
+        stays put, and the solve still reduces the residual."""
+        from branesim.solver.boundary import PeriodicBC
+        lattice = _make_lattice((6, 6, 6))
+        N, m = 8, 4
+        ap = _make_action_params(N, m_ambient=m)
+        mass = RHO * SPACING ** lattice.params.dim
+        seed = self._carrier_seed(lattice, N, m)
+        bc = PeriodicBC(R0=seed[0].copy(), gauge="anchor", gauge_node=0)
+        opts = SolveOpts(tol=1e-10, max_iter=8, inner_maxiter=30, verbose=False)
+        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts, initial_world=seed)
+        rep = wv.solver_report
+        assert rep["gauge"] == "anchor"
+        # The anchored node on slice 0 is held at its R0 value.
+        assert float(np.max(np.abs(wv.slices[0, 0] - seed[0, 0]))) < 1e-9
+        assert rep["residual_final"] < rep["residual_initial"]

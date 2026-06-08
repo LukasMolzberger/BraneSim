@@ -129,6 +129,16 @@ class SolveOpts:
         Default 'lgmres'.
     verbose : bool
         Print convergence progress.
+    plateau_patience : int
+        Residual-plateau early-stop (PeriodicBC path): if ``>0``, stop the outer
+        Newton iteration when the global ‖R‖ has improved by less than
+        ``plateau_rtol`` (relative) over the last ``plateau_patience`` iterations.
+        At cond~1e7 the unpreconditioned solve floors after the well-conditioned
+        modes are removed (the 96³ run plateaued by iter ~8 yet ran to 30); this
+        stops the wasted tail.  ``0`` disables (run exactly ``max_iter``).
+    plateau_rtol : float
+        Relative-improvement threshold for the plateau detector (default 0.01 =
+        stop once <1% total ‖R‖ improvement over ``plateau_patience`` steps).
     """
 
     tol: float = 1e-8
@@ -137,6 +147,8 @@ class SolveOpts:
     inner_maxiter: int = 300
     method: str = "lgmres"
     verbose: bool = False
+    plateau_patience: int = 0
+    plateau_rtol: float = 0.01
 
 
 # ---------------------------------------------------------------------------
@@ -366,6 +378,36 @@ def solve_block(
 
         x0 = S0.ravel()
         residual_initial = float(np.linalg.norm(F_periodic(x0)))
+        n_dof = int(x0.size)
+
+        # Residual-plateau early-stop (opt-in via opts.plateau_patience > 0).  The
+        # callback tracks ‖F‖ per outer Newton step and the latest iterate; once the
+        # last `patience` steps improved ‖F‖ by < `plateau_rtol` (relative), it
+        # raises `_Plateau` to stop — newton_krylov(iter=...) otherwise always runs
+        # the full count even after the residual floors (the 96³ tail-waste).
+        #
+        # PRINCIPLES §3.2 scope: this is a CONVERGENCE-CONTROL criterion on the
+        # ROOT-FINDER — the same class as the existing f_tol / max_iter stops — NOT a
+        # forbidden "collapse rule in the integrator".  It changes only WHEN the
+        # Newton iteration stops, never the residual operator (_residual_periodic) or
+        # the substrate forces/energy; the returned state is simply a less-converged
+        # approximation of the same fixed point, honestly reported converged=False.
+        class _Plateau(Exception):
+            pass
+
+        resid_hist: list[float] = []
+        cb_state: dict[str, object] = {"x": x0.copy(), "stopped": False}
+
+        def _callback(x: np.ndarray, f: np.ndarray) -> None:
+            cb_state["x"] = x.copy()
+            r = float(np.linalg.norm(f))
+            resid_hist.append(r)
+            p = opts.plateau_patience
+            if p and len(resid_hist) > p:
+                r0, r1 = resid_hist[-(p + 1)], resid_hist[-1]
+                if (r0 - r1) / max(r0, 1e-300) < opts.plateau_rtol:
+                    cb_state["stopped"] = True
+                    raise _Plateau()
 
         converged = False
         residual_final = residual_initial
@@ -374,13 +416,24 @@ def solve_block(
             x_solution = newton_krylov(
                 F_periodic, x0, method=opts.method, verbose=opts.verbose,
                 f_tol=opts.tol, iter=opts.max_iter, inner_maxiter=opts.inner_maxiter,
+                callback=_callback,
             )
             residual_final = float(np.linalg.norm(F_periodic(x_solution)))
             converged = residual_final <= opts.tol
+        except _Plateau:
+            x_solution = np.asarray(cb_state["x"])
+            residual_final = float(np.linalg.norm(F_periodic(x_solution)))
+            converged = False
         except NoConvergence as exc:
             x_solution = exc.args[0] if exc.args else x0
             residual_final = float(np.linalg.norm(F_periodic(x_solution)))
             converged = False
+
+        # Per-DOF (RMS) residual — the scale-invariant, grid-comparable figure.
+        # The global ‖R‖ grows with √DOF, so an absolute global tol is unreachable
+        # at 113M DOF (96³×32×4); ‖R‖/√DOF is the honest "how relaxed per node" number.
+        residual_per_dof = residual_final / (n_dof ** 0.5) if n_dof else residual_final
+        outer_iters = len(resid_hist)
 
         elapsed = time.perf_counter() - t0
         Sf = x_solution.reshape(shape)
@@ -392,16 +445,17 @@ def solve_block(
             "bc_scheme": "rotating_frame_periodic",
             "residual_initial": residual_initial,
             "residual_final": residual_final,
-            # scipy's newton_krylov(iter=...) runs EXACTLY this many outer steps and
-            # does not early-stop on f_tol, so the count is opts.max_iter by
-            # construction.  The honest convergence signals are the two ratios below
-            # (E7): how far from tol we actually landed, and the true drop factor —
-            # NOT the over-optimistic "drops ~100x" provenance text.
-            "iterations": opts.max_iter,
+            # True outer-iteration count from the callback (may be < max_iter when the
+            # plateau early-stop fired).  The honest convergence signals are the ratios
+            # below (E7): per-DOF RMS residual (grid-comparable), how far from tol, the
+            # drop factor, and whether the plateau detector stopped it early.
+            "iterations": outer_iters or opts.max_iter,
+            "residual_per_dof": residual_per_dof,
             "residual_final_over_tol": (residual_final / opts.tol
                                         if opts.tol > 0 else float("inf")),
             "residual_drop_factor": (residual_initial / residual_final
                                      if residual_final > 0 else float("inf")),
+            "early_stopped_plateau": bool(cb_state["stopped"]),
             "converged": converged,
             "condition_estimate": bc.condition_estimate(problem.lattice.params, problem.params),
             "gauge": bc.gauge,
