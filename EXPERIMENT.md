@@ -159,11 +159,16 @@ the scalars these campaigns collect; the campaign driver is not built.
   per-color-channel `SU(3)`/QCD, spectra, **D8 binding_probe**) → CSV + paper-ready PNG
   + `report.md`. Shared plot helpers in `diagnostics/_plot_helpers.py`.
 - **Run folder**: `runs/<exp>_<date>_<time>/` with config, worldvolume, diagnostics, renders.
-- **DONE (2026-06-07)**: (i) re-inject in the **trace (EM) direction** — the bare
-  seed is now pure U(1)/EM (`u1_fraction → 1`; E1 resolved, all diagnostics route
-  through `project_carrier_re`). Seed object resized ×2 (`r0 6→12a`, `w 2.5→4a`,
-  the donut shell now ~10 cells across) on the unchanged 48³ brane; the time
-  direction (`n_t`, `n_slices`, `dt`) is **not** scaled.
+- **DONE (2026-06-07/08)**: (i) re-inject in the **trace (EM) direction** — the
+  bare seed is now pure U(1)/EM (`u1_fraction → 1`; E1 resolved, all diagnostics
+  route through `project_carrier_re`). Seed size is now **grid-relative** —
+  `r0 = ½·half_width`, `w = half_width/6`, so the donut **fills the box** (reach
+  `r0+3w ≈ half-width`, ~1% at the face) at *any* grid (48³→r0≈12; 96³→r0≈24)
+  rather than wasting compute on vacuum. **Spatial scaling only** — `m`, `n_t`,
+  `ω=2π·n_t/n_slices`, the loop closure, and the N-gon offset depend on
+  `(m,n_t,n_slices,r_t)` and **not** on `r0/w`, so phases stay matched
+  (`winding_z=m` exactly, any size). 3D volume movies off by default; live S3
+  progress log + `progress.json` (E15/E16 resolved).
 - **Next**: (ii) add the **tumble** (spin) + set the **`ωT` quantization** (BVP
   eigenvalue); (iii) the eigen-solve (`solve_block`, periodic +
   rotating-frame-periodic BC); (iv) local `48³×64` pre-test; (v) AWS production.

@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import tempfile
 import time
 from datetime import datetime
@@ -80,17 +81,69 @@ from branesim.visualization.volume_render import (
 
 
 # ---------------------------------------------------------------------------
+# Live progress logging (E16; see EXPERIMENT_OPEN_PROBLEMS.md)
+#
+# The 2026-06-07 96³ AWS run hung for ~15 h with a blind log: Python line-buffers
+# stdout to a pipe, so none of the per-render / per-iteration prints reached
+# cloud-init-output.log until the (never-reached) end.  Fix: (1) run unbuffered
+# so every print is live (``_ensure_unbuffered``), (2) timestamp the milestones
+# (``_log``), and (3) write a ``progress.json`` heartbeat so a run is observable
+# without SSH/SSM (the launcher syncs it to S3 periodically).
+# ---------------------------------------------------------------------------
+
+_PROGRESS_PATH: Path | None = None  # set by run(); _heartbeat no-ops until then
+_T_START: float = 0.0
+
+
+def _ensure_unbuffered() -> None:
+    """Make stdout/stderr line-buffered so prints reach the log in real time."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(line_buffering=True)  # type: ignore[union-attr]
+        except (AttributeError, ValueError):
+            pass
+
+
+def _log(msg: str) -> None:
+    """Timestamped, flushed progress line (visible live in the AWS log)."""
+    print(f"[{datetime.now():%H:%M:%S}] {msg}", flush=True)
+
+
+def _heartbeat(stage: str, **extra) -> None:
+    """Atomically write ``progress.json`` (stage + elapsed) — no-op until run()
+    sets the target.  Lets ``how far are we?`` be answered from S3 mid-run."""
+    if _PROGRESS_PATH is None:
+        return
+    rec = {
+        "stage": stage,
+        "ts": datetime.now().isoformat(timespec="seconds"),
+        "elapsed_s": round(time.perf_counter() - _T_START, 1),
+        **extra,
+    }
+    try:
+        tmp = _PROGRESS_PATH.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(rec, indent=2))
+        tmp.replace(_PROGRESS_PATH)
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Experiment parameters
 # ---------------------------------------------------------------------------
 
-# Box: 48^3 (UNCHANGED — only the seed object is resized, not the brane).  The
-# spherical-harmonic seed is centred in the box with donut radius r0=12a and
-# radial width 4a (a ~2x-larger object than the original r0=6a/w=2.5a; the donut
-# shell is ~10 cells across, far better resolved).  Object reach ~ r0+3w = 24a
-# from the centre = the 48^3 half-width, so the 1%-amplitude contour just touches
-# the periodic face: a thin but real vacuum margin (per the resize directive).
-# TIME DIRECTION IS NOT SCALED — doubling the spatial donut changes neither the
-# carrier closure (n_t) nor the time-loop length (n_slices); they stay fixed.
+# Seed size is GRID-RELATIVE (computed in run(), not fixed here): the donut is
+# tied to the box half-width so the object fills the box (reach r0+3w ≈ half-width,
+# ~1% at the face) at ANY grid — a fixed r0/w sized for 48³ would leave the object
+# tiny in a 96³ box and waste compute on vacuum.  The r0/w below are only the 48³
+# fallback; run() overrides them (env BRANESIM_VORTEX_R0 / _W to force a value).
+#
+# TIME DIMENSION IS INVARIANT UNDER THIS SPATIAL SCALING — only the radial
+# amplitude envelope R(ρ) depends on r0/w; the phase m·φ + ω·t, the carrier rate
+# ω = 2π·n_t/n_slices, the loop closure (ω·T = 2π·n_t), and the prestressed N-gon
+# offset ρ = r_t/(2 sin(π/N)) all depend on (m, n_t, n_slices, r_t) ONLY, never on
+# r0/w.  So phases stay matched / single-valued at any seed size (winding_z = m
+# exactly, independent of r0/w).
 GRID_SHAPE = (48, 48, 48)
 N_SLICES = 32                       # time slices = period of the carrier loop
 SPACING = 1.0                       # lattice unit
@@ -102,8 +155,8 @@ R_T = ALPHA * BETA * DT            # = 0.175
 
 VORTEX_PARAMS = VortexParams(
     A0=0.3,                         # peak strain ~0.3
-    r0=12.0,                        # radial-shell peak (donut radius) ~12a (2x resize)
-    w=4.0,                          # radial-shell width ~4a (shell ~10 cells across)
+    r0=12.0,                        # 48³ fallback only — run() sets r0 = 0.5·half_width
+    w=4.0,                          # 48³ fallback only — run() sets w  = half_width/6
     l=1,                            # spherical-harmonic degree
     m=1,                            # azimuthal U(1) winding around the z-axis
     n_t=2,                          # carrier turns over the loop -> 720 deg, closes exactly
@@ -333,14 +386,23 @@ def _render_world(
     state_label: str,
     energy_channels: tuple[list[np.ndarray], list[np.ndarray], np.ndarray, np.ndarray]
     | None = None,
+    volume_render: bool = False,
 ) -> None:
-    """Snapshot + 3D volume (phase, amplitude) + 2D slice movies for a world.
+    """Snapshot + 2D slice movies (+ optional 3D volume movies) for a world.
+
+    The 2D slice movies (phase + supercurrent overlay) and the 2D energy-channel
+    comparison are the workhorse artifacts and always render.  The 3D voxel
+    VOLUME movies are nice-to-have but slow (and the 2026-06-07 hang site), so
+    they are only produced when ``volume_render=True``
+    (``BRANESIM_VORTEX_VOLUME_RENDER=1``).
 
     If ``energy_channels`` (u1_density, su3_density, u1_energy, su3_energy) is
-    given, also render the U(1)-vs-SU(3) energy-content videos.
+    given, also render the U(1)-vs-SU(3) energy-content videos (2D always; the
+    3D energy volumes only when ``volume_render``).
     """
     renders_dir = iter_dir / "renders"
     renders_dir.mkdir(parents=True, exist_ok=True)
+    _heartbeat("render", state=state_label, task="snapshot")
 
     _save_snapshot(
         amps[0], phases[0], grid_shape, spacing,
@@ -348,22 +410,30 @@ def _render_world(
         str(iter_dir / "snapshot.png"), state_label=state_label,
     )
 
-    print("  Rendering volume (phase->RGB)...")
-    create_volume_animation(
-        frames_amplitude=amps, frames_phase=phases, grid_shape=grid_shape,
-        spacing=spacing, output_path=str(renders_dir / "volume_phase.mp4"),
-        times=times, fps=FPS, dpi=DPI, density_threshold=DENSITY_THRESHOLD,
-        alpha_scale=ALPHA_SCALE, gamma=GAMMA,
-        title_prefix=f"U(1) Y_l^m | {state_label}",
-    )
-    print("  Rendering volume (amplitude, inferno)...")
-    create_volume_animation(
-        frames_amplitude=amps, frames_phase=None, grid_shape=grid_shape,
-        spacing=spacing, output_path=str(renders_dir / "volume_amp.mp4"),
-        times=times, cmap_name="inferno", fps=FPS, dpi=DPI,
-        density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
-        title_prefix=f"U(1) Y_l^m | amplitude | {state_label}",
-    )
+    def _timed_render(task: str, fn) -> None:
+        """Run a render task with a timestamped START/END log + heartbeat (E16),
+        so a stalled render is visible (and timed) in the live AWS log."""
+        _log(f"render START  {task}")
+        _heartbeat("render", state=state_label, task=task)
+        t = time.perf_counter()
+        fn()
+        _log(f"render END    {task}  ({time.perf_counter() - t:.1f}s)")
+
+    if volume_render:
+        _timed_render("volume_phase", lambda: create_volume_animation(
+            frames_amplitude=amps, frames_phase=phases, grid_shape=grid_shape,
+            spacing=spacing, output_path=str(renders_dir / "volume_phase.mp4"),
+            times=times, fps=FPS, dpi=DPI, density_threshold=DENSITY_THRESHOLD,
+            alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+            title_prefix=f"U(1) Y_l^m | {state_label}",
+        ))
+        _timed_render("volume_amp", lambda: create_volume_animation(
+            frames_amplitude=amps, frames_phase=None, grid_shape=grid_shape,
+            spacing=spacing, output_path=str(renders_dir / "volume_amp.mp4"),
+            times=times, cmap_name="inferno", fps=FPS, dpi=DPI,
+            density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+            title_prefix=f"U(1) Y_l^m | amplitude | {state_label}",
+        ))
     for plane in ("xy", "xz", "yz"):
         print(f"  Rendering slice {plane} (phase->RGB)...")
         create_slice_animation(
@@ -421,22 +491,24 @@ def _render_world(
                 fps=FPS, dpi=DPI, shared_scale=True,
                 title_prefix=f"Y_l^m | {state_label}",
             )
-        print("  Rendering U(1) energy volume (Blues)...")
-        create_volume_animation(
-            frames_amplitude=u1_density, frames_phase=None, grid_shape=grid_shape,
-            spacing=spacing, output_path=str(renders_dir / "energy_u1_volume.mp4"),
-            times=times, cmap_name="Blues", fps=FPS, dpi=DPI,
-            density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
-            title_prefix=f"U(1) trace energy | {state_label}",
-        )
-        print("  Rendering SU(3) energy volume (Oranges)...")
-        create_volume_animation(
-            frames_amplitude=su3_density, frames_phase=None, grid_shape=grid_shape,
-            spacing=spacing, output_path=str(renders_dir / "energy_su3_volume.mp4"),
-            times=times, cmap_name="Oranges", fps=FPS, dpi=DPI,
-            density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
-            title_prefix=f"SU(3) traceless energy | {state_label}",
-        )
+        if volume_render:
+            _timed_render("energy_u1_volume", lambda: create_volume_animation(
+                frames_amplitude=u1_density, frames_phase=None, grid_shape=grid_shape,
+                spacing=spacing, output_path=str(renders_dir / "energy_u1_volume.mp4"),
+                times=times, cmap_name="Blues", fps=FPS, dpi=DPI,
+                density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+                title_prefix=f"U(1) trace energy | {state_label}",
+            ))
+            # NOTE: for a pure-U(1) seed the SU(3) channel is ~1e-11 -> create_volume_animation
+            # detects the degenerate field and writes a 1-frame "skipped" placeholder in
+            # ~0.5s (E15) instead of hanging ~11h in voxels()/autoscale_view.
+            _timed_render("energy_su3_volume", lambda: create_volume_animation(
+                frames_amplitude=su3_density, frames_phase=None, grid_shape=grid_shape,
+                spacing=spacing, output_path=str(renders_dir / "energy_su3_volume.mp4"),
+                times=times, cmap_name="Oranges", fps=FPS, dpi=DPI,
+                density_threshold=DENSITY_THRESHOLD, alpha_scale=ALPHA_SCALE, gamma=GAMMA,
+                title_prefix=f"SU(3) traceless energy | {state_label}",
+            ))
         u1_t0, su3_t0 = float(u1_energy[0]), float(su3_energy[0])
         tot0 = u1_t0 + su3_t0 + 1e-40
         (renders_dir / "energy_channels.md").write_text(
@@ -669,11 +741,15 @@ the carrier (EM charge). Where dark (|Psi|~0) the hue is meaningless.
 
     written = 0
     for path, text in docs.items():
-        # Skip docs for render artifacts (snapshot.png + renders/*.mp4) that were
-        # not produced when BRANESIM_VORTEX_RENDER=0 (diagnostics-only mode), so a
-        # diagnostics-only run never leaves dangling .md pointers.
-        if not do_render and (Path(path).parent.name == "renders"
-                              or Path(path).name == "snapshot.md"):
+        # Never leave a .md pointing at a render artifact that wasn't produced —
+        # diagnostics-only (BRANESIM_VORTEX_RENDER=0) OR volume movies disabled
+        # (BRANESIM_VORTEX_VOLUME_RENDER=0).  Skip a renders/*.md if its sibling
+        # .mp4 is absent, and snapshot.md if snapshot.png is absent.
+        p = Path(path)
+        if p.parent.name == "renders" and p.suffix == ".md" \
+                and not p.with_suffix(".mp4").exists():
+            continue
+        if p.name == "snapshot.md" and not (p.parent / "snapshot.png").exists():
             continue
         Path(path).write_text(text)
         written += 1
@@ -752,11 +828,13 @@ def _emit_iteration(
     solver_report: dict | None,
     solver_note: str,
     do_render: bool = True,
+    do_volume: bool = False,
 ) -> dict:
     """Write a fully self-contained, fully diagnosed iteration folder."""
     iter_dir = run_dir / f"iter_{iter_index:04d}"
     iter_dir.mkdir(parents=True, exist_ok=True)
-    print(f"\n--- {iter_dir.name}: {state_label} ---")
+    _log(f"--- {iter_dir.name}: {state_label} ---")
+    _heartbeat(f"iter_{iter_index:04d}_start", kind=kind, label=state_label)
 
     # config.json (so run_measurements works standalone on this folder)
     (iter_dir / "config.json").write_text(
@@ -787,9 +865,10 @@ def _emit_iteration(
         _render_world(
             amps, phases, times, vp, grid_shape, spacing, iter_dir, state_label,
             energy_channels=(u1_density, su3_density, u1_energy, su3_energy),
+            volume_render=do_volume,
         )
     else:
-        print("  Rendering SKIPPED (BRANESIM_VORTEX_RENDER=0; diagnostics-only).")
+        _log("  Rendering SKIPPED (BRANESIM_VORTEX_RENDER=0; diagnostics-only).")
 
     # diagnostics suite (the back-up round-trip) -> diagnostics/
     print("  Running diagnostic suite (8 devices)...")
@@ -813,6 +892,11 @@ def _env_int(name: str, default: int) -> int:
     return int(v) if v not in (None, "") else default
 
 
+def _env_float(name: str, default: float) -> float:
+    v = os.environ.get(name)
+    return float(v) if v not in (None, "") else default
+
+
 def _env_grid(name: str, default: tuple[int, int, int]) -> tuple[int, int, int]:
     v = os.environ.get(name)
     if v in (None, ""):
@@ -833,6 +917,10 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 def run() -> None:
+    global _PROGRESS_PATH, _T_START
+    _ensure_unbuffered()  # E16: live AWS log (no more buffered-stdout blackout)
+    _T_START = time.perf_counter()
+
     # --- Runtime config (env-overridable so the SAME module scales local->AWS) ---
     grid_shape = _env_grid("BRANESIM_VORTEX_GRID", GRID_SHAPE)
     n_slices = _env_int("BRANESIM_VORTEX_NSLICES", N_SLICES)
@@ -845,16 +933,24 @@ def run() -> None:
     # with BRANESIM_VORTEX_RENDER=0 for a fast diagnostics-only run (e.g. an
     # eigensolve pre-test) — the SAME module, no forked driver script.
     run_render = _env_bool("BRANESIM_VORTEX_RENDER", True)
+    # The 3D voxel VOLUME movies are nice-to-have but the slowest artifact (and the
+    # 2026-06-07 hang site).  Default OFF — the 2D slice + energy-channel movies are
+    # the workhorse.  Re-enable with BRANESIM_VORTEX_VOLUME_RENDER=1 (coarsened &
+    # near-zero-guarded by E15, so safe).
+    run_volume = _env_bool("BRANESIM_VORTEX_VOLUME_RENDER", False)
 
     ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     out_root_env = os.environ.get("BRANESIM_RESULTS_DIR") or os.environ.get("BRANESIM_VORTEX_OUTDIR")
     out_root = Path(out_root_env) if out_root_env else (Path(__file__).parents[2] / "runs")
     run_dir = out_root / f"vortex_seed_{ts}"
     run_dir.mkdir(parents=True, exist_ok=True)
-    print(f"Run folder: {run_dir}")
-    print(f"Config: grid={grid_shape}  n_slices={n_slices}  "
-          f"relax={'ON('+str(relax_iters)+', rotating-frame-periodic)' if run_relax else 'OFF (seed-only render)'}  "
-          f"render={'ON' if run_render else 'OFF (diagnostics-only)'}")
+    _PROGRESS_PATH = run_dir / "progress.json"  # E16: heartbeat target (synced to S3)
+    _log(f"Run folder: {run_dir}")
+    _log(f"Config: grid={grid_shape}  n_slices={n_slices}  "
+         f"relax={'ON('+str(relax_iters)+', rotating-frame-periodic)' if run_relax else 'OFF (seed-only render)'}  "
+         f"render={'ON' if run_render else 'OFF (diagnostics-only)'}")
+    _heartbeat("start", grid=list(grid_shape), n_slices=n_slices,
+               relax=run_relax, render=run_render)
 
     # --- Lattice and action params ---
     lattice_params = LatticeParams(
@@ -868,6 +964,20 @@ def run() -> None:
     mass = action_params.rho * SPACING ** lattice.dim
     ref = lattice.reference_positions(4)
 
+    # --- Seed size scales WITH the box (not a fixed lattice value) ------------
+    # A fixed r0/w sized for 48³ leaves the object tiny in a 96³ box — most of the
+    # simulated volume is then vacuum (wasted compute).  Tie the donut to the box
+    # half-width so it fills the box (with a thin margin) at ANY grid: reach
+    # = r0 + 3w ≈ half-width (≈1% amplitude at the periodic face).  This reproduces
+    # the approved 48³ sizing (r0≈12, w≈4) and scales it to 96³ (r0≈24, w≈8).
+    half_width = (min(grid_shape) - 1) * SPACING / 2.0
+    r0 = _env_float("BRANESIM_VORTEX_R0", 0.50 * half_width)
+    w = _env_float("BRANESIM_VORTEX_W", half_width / 6.0)
+    vortex_params = VORTEX_PARAMS._replace(r0=r0, w=w)
+    _log(f"Seed (grid-relative): r0={r0:.2f}a  w={w:.2f}a  "
+         f"reach≈{r0 + 3 * w:.1f}a  box half-width={half_width:.1f}a  "
+         f"(fills box, ~1% at face)")
+
     # --- Base config shared by every iteration folder ---
     base_config = {
         "experiment": "vortex_seed_render",
@@ -880,7 +990,7 @@ def run() -> None:
         "dt": DT,
         "beta": BETA,
         "r_t": R_T,
-        "vortex_params": VORTEX_PARAMS._asdict(),
+        "vortex_params": vortex_params._asdict(),
         "carrier_re_components": CARRIER_RE_COMPONENTS,
         "carrier_re_weights": list(CARRIER_RE_WEIGHTS),
         "carrier_im_component": CARRIER_IM,
@@ -898,20 +1008,21 @@ def run() -> None:
     (run_dir / "config.json").write_text(json.dumps(base_config, indent=2))
 
     # --- Injection (the 4D seed worldvolume) ---
-    print("Injecting spherical-harmonic vortex seed...")
+    _log("Injecting spherical-harmonic vortex seed...")
+    _heartbeat("injecting")
     t0 = time.perf_counter()
-    world, seed_meta = inject_vortex_worldtube(lattice, action_params, VORTEX_PARAMS, n_slices)
-    print(f"  Injection done in {time.perf_counter()-t0:.2f}s  world.shape={world.shape}")
+    world, seed_meta = inject_vortex_worldtube(lattice, action_params, vortex_params, n_slices)
+    _log(f"  Injection done in {time.perf_counter()-t0:.2f}s  world.shape={world.shape}")
 
     iterations = []
 
     # --- iter 0: the freshly injected seed (solver untouched) ---
     _emit_iteration(
         run_dir, 0, "iter 0 — initial seed (solver untouched)", "seed",
-        world, ref, base_config, seed_meta, VORTEX_PARAMS, lattice,
+        world, ref, base_config, seed_meta, vortex_params, lattice,
         n_slices, DT, grid_shape, SPACING,
         solver_report=None,
-        do_render=run_render,
+        do_render=run_render, do_volume=run_volume,
         solver_note=(
             "This is the freshly injected ansatz — **iteration 0** of the "
             "solver-relaxation axis. The block solver has NOT run; the carrier "
@@ -926,15 +1037,20 @@ def run() -> None:
     relax_report = None
     relax_error = None
     if run_relax:
-        print(f"\nRotating-frame-periodic relaxation: {relax_iters} JFNK iterations "
-              "from the seed (well-conditioned PeriodicBC)...")
+        _log(f"Rotating-frame-periodic relaxation: {relax_iters} JFNK iterations "
+             "from the seed (well-conditioned PeriodicBC)...")
+        _heartbeat("relaxation_start", relax_iters=relax_iters)
         t0 = time.perf_counter()
         try:
             world_N, relax_report = _relax(world, lattice, action_params, mass, relax_iters)
-            print(f"  relaxation done in {time.perf_counter()-t0:.1f}s  "
-                  f"res_init={relax_report.get('residual_initial')}  "
-                  f"res_final={relax_report.get('residual_final')}  "
-                  f"cond={relax_report.get('condition_estimate')}")
+            _log(f"  relaxation done in {time.perf_counter()-t0:.1f}s  "
+                 f"res_init={relax_report.get('residual_initial')}  "
+                 f"res_final={relax_report.get('residual_final')}  "
+                 f"cond={relax_report.get('condition_estimate')}")
+            _heartbeat("relaxation_done",
+                       residual_final=relax_report.get("residual_final"),
+                       residual_final_over_tol=relax_report.get("residual_final_over_tol"),
+                       converged=relax_report.get("converged"))
             moved = float(np.max(np.abs(world_N[:n_slices] - world[:n_slices])))
             note = (
                 f"**Iteration {relax_iters}** of a rotating-frame-periodic JFNK "
@@ -952,10 +1068,10 @@ def run() -> None:
                 run_dir, relax_iters,
                 f"iter {relax_iters} — after {relax_iters} rotating-frame-periodic JFNK steps",
                 "relaxation",
-                world_N, ref, base_config, seed_meta, VORTEX_PARAMS, lattice,
+                world_N, ref, base_config, seed_meta, vortex_params, lattice,
                 n_slices, DT, grid_shape, SPACING,
                 solver_report=relax_report, solver_note=note,
-                do_render=run_render,
+                do_render=run_render, do_volume=run_volume,
             )
             iterations.append({"index": relax_iters, "dir": f"iter_{relax_iters:04d}",
                                "kind": "relaxation",
@@ -1021,12 +1137,14 @@ See `manifest.json` for the iteration ladder and the solver-axis note.
 """
     )
 
-    print("\n=== DONE ===")
-    print(f"Run folder : {run_dir}")
+    _heartbeat("done", iterations=[it["dir"] for it in iterations],
+               relax_error=relax_error)
+    _log("=== DONE ===")
+    _log(f"Run folder : {run_dir}")
     for it in iterations:
-        print(f"  {it['dir']}  ({it['kind']}: {it['label']})")
+        _log(f"  {it['dir']}  ({it['kind']}: {it['label']})")
     if relax_error:
-        print(f"  relaxation probe FAILED: {relax_error}")
+        _log(f"  relaxation probe FAILED: {relax_error}")
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ WORKDIR="/opt/brane-job"
 RESULTS_DIR="${WORKDIR}/results"
 LOG_DIR="${WORKDIR}/logs"
 MARKERS_S3="s3://${S3_BUCKET}/${S3_PREFIX}/${JOB_ID}/markers"
+PROGRESS_S3="s3://${S3_BUCKET}/${S3_PREFIX}/${JOB_ID}/progress"
 mkdir -p "${RESULTS_DIR}" "${LOG_DIR}"
 
 exec > >(tee "${LOG_DIR}/user-data.log") 2>&1
@@ -56,9 +57,37 @@ sync_results() {
   fi
 }
 
+# ---------------------------------------------------------------------------
+# Live progress (E16): push the (now unbuffered) log + any progress.json to S3
+# every 60 s while the job runs, and emit a STALL warning if nothing under
+# RESULTS_DIR has changed for a long time — so a hung render is visible in S3
+# without SSH/SSM (the 2026-06-07 96³ run was blind for ~15 h).
+# ---------------------------------------------------------------------------
+PROGRESS_PID=""
+progress_sync_loop() {
+  local stall_limit=1800 last_change=0 newest
+  while true; do
+    sleep 60
+    aws s3 cp "${LOG_DIR}/user-data.log" "${PROGRESS_S3}/user-data.log" \
+      --quiet >/dev/null 2>&1 || true
+    find "${RESULTS_DIR}" -name progress.json -exec \
+      aws s3 cp {} "${PROGRESS_S3}/progress.json" --quiet \; >/dev/null 2>&1 || true
+    # Stall watchdog: newest mtime under RESULTS_DIR vs now.
+    newest=$(find "${RESULTS_DIR}" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -1)
+    newest=${newest%.*}
+    if [[ -n "${newest}" ]]; then
+      local age=$(( $(date -u +%s) - newest ))
+      if (( age > stall_limit )); then
+        echo "[progress][WARN] no new output for ${age}s (> ${stall_limit}s) — possible stall"
+      fi
+    fi
+  done
+}
+
 cleanup_and_exit() {
   local code=$1
   echo "[cleanup] Exit code: ${code}"
+  [[ -n "${PROGRESS_PID}" ]] && kill "${PROGRESS_PID}" >/dev/null 2>&1 || true
   sync_results
   if [[ "${code}" == "0" ]]; then
     put_marker "job-complete"
@@ -112,9 +141,15 @@ pip install -e .
 put_marker "bootstrap-pip-ok"
 
 export BRANESIM_RESULTS_DIR="${RESULTS_DIR}"
+# E16: unbuffered Python so every print reaches the (tee'd, S3-synced) log live.
+export PYTHONUNBUFFERED=1
 
 # Decode remote command to a file (avoids variable-capture quoting issues).
 decode_remote_command
+
+# Start the live progress sync loop (background; killed in cleanup).
+progress_sync_loop &
+PROGRESS_PID=$!
 
 # ---------------------------------------------------------------------------
 # TRIPWIRE 3: run-started — emitted immediately before the remote command.

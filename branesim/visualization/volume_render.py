@@ -187,6 +187,24 @@ def _frame_to_rgba(
 # ---------------------------------------------------------------------------
 
 
+def _write_placeholder_animation(
+    output_path: str, fps: int, dpi: int, text: str
+) -> None:
+    """Write a valid 1-frame mp4 carrying ``text`` (E15 skip placeholder).
+
+    Used when a volume render is skipped (degenerate field), so downstream
+    consumers and ``.md`` pointers still find an mp4 rather than a dangling path.
+    """
+    fig = plt.figure(figsize=(10, 8))
+    fig.text(0.5, 0.5, text, ha="center", va="center", fontsize=12, wrap=True)
+    out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    writer = FFMpegWriter(fps=fps, bitrate=600)
+    with writer.saving(fig, str(out), dpi):
+        writer.grab_frame()
+    plt.close(fig)
+
+
 def create_volume_animation(
     frames_amplitude: List[np.ndarray],
     frames_phase: Optional[List[np.ndarray]],
@@ -202,8 +220,22 @@ def create_volume_animation(
     alpha_scale: float = 1.0,
     gamma: float = 0.7,
     title_prefix: str = "",
+    min_signal: float = 1e-9,
+    max_voxels_per_axis: int = 48,
 ) -> None:
     """Render a 3-D voxel animation from amplitude (and optional phase) frames.
+
+    Robustness guards (E15; see EXPERIMENT_OPEN_PROBLEMS.md)
+    -------------------------------------------------------
+    ``min_signal`` : if the global ``max|field|`` is below this absolute floor the
+        field carries no signal (e.g. the SU(3) channel of a *pure* U(1) seed,
+        ~1e-11).  Relative normalization would then amplify numerical noise until
+        the voxel mask fills, and matplotlib ``voxels()`` / ``autoscale_view``
+        becomes pathological — this is the bug that hung a 96³ run for ~11 h.
+        Such fields are rendered as a 1-frame "skipped" placeholder instead.
+    ``max_voxels_per_axis`` : ``voxels()`` is O(voxels); a 96³ frame is intractable
+        (~8–9 min EACH at best).  If any grid axis exceeds this, the field is
+        coarsened by an integer stride before rendering so the work stays bounded.
 
     Parameters
     ----------
@@ -233,8 +265,27 @@ def create_volume_animation(
     n_frames = len(frames_amplitude)
     times_arr = list(times) if times is not None else list(range(n_frames))
 
-    # Global amplitude max for consistent normalisation across frames
+    # Global amplitude max for consistent normalisation across frames.
     amp_max = max(float(np.max(np.abs(f))) for f in frames_amplitude)
+
+    # --- E15 guard 1: degenerate near-zero field -> skip (placeholder frame) ---
+    if amp_max < min_signal:
+        _write_placeholder_animation(
+            output_path, fps, dpi,
+            f"{title_prefix}\n\nvolume render skipped\nmax|field| = {amp_max:.2e}"
+            f"  <  min_signal = {min_signal:.0e}\n(field is numerically zero)",
+        )
+        return
+
+    # --- E15 guard 2: cap voxel count (voxels() is O(voxels); 96^3 intractable) ---
+    stride = max(1, int(np.ceil(max(grid_shape) / max_voxels_per_axis)))
+    if stride > 1:
+        frames_amplitude = [f[::stride, ::stride, ::stride] for f in frames_amplitude]
+        if frames_phase is not None:
+            frames_phase = [p[::stride, ::stride, ::stride] for p in frames_phase]
+        nx, ny, nz = frames_amplitude[0].shape
+        spacing = spacing * stride  # keep physical extent correct after coarsening
+
     if amp_max < 1e-30:
         amp_max = 1.0
 

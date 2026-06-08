@@ -293,6 +293,73 @@ measurement is affected.
 
 ---
 
+## Group IV — AWS run forensics (from the 2026-06-07 96³ hang)
+
+Full write-up: `runs/forensic_vortex-seed-96/FORENSIC_REPORT.md` (py-spy stack,
+file timeline, salvaged seed). Disk backup: snapshot `snap-0cbdc88dd300ea046`.
+
+### E15. 3D `voxels()` volume render hangs on a near-zero channel — `resolved` (2026-06-08)
+
+> **Resolved.** `create_volume_animation` now (a) **skips** a degenerate field
+> (`max|field| < min_signal`, default 1e-9) — writing a 1-frame placeholder mp4
+> in ~0.1–0.5 s instead of hanging — and (b) **coarsens** by an integer stride so
+> no axis exceeds `max_voxels_per_axis` (default 48), bounding `voxels()` cost at
+> any grid (96³→48³). Verified: the SU(3)-≈0 seed channel renders a placeholder in
+> 0.1 s (was >11 h); a real 96³ field coarsens and renders in seconds. Belt-and-
+> suspenders: the 3D volume movies are now **off by default**
+> (`BRANESIM_VORTEX_VOLUME_RENDER=0`) — the 2D slice + energy-channel movies are
+> the workhorse — so the hang site is not even on the default path.
+
+
+
+The 96³ AWS run (`vortex-seed-96-20260607-134550`) hung ~14h45m **in the seed's
+`energy_su3_volume.mp4` render**, never reaching the solver. py-spy:
+`volume_render._update → mplot3d voxels → autoscale_view`, 100% one core. Root
+cause: the **E1 fix makes the bare seed's SU(3) channel ≈1e-11 (pure U(1))**, and
+`create_volume_animation` does not handle a degenerate near-zero field —
+`voxels()`/`autoscale_view` becomes pathological (normal 3D volumes took ~8–9 min;
+this one ran >11h with no frame). Interaction bug: E1 (SU(3)≈0) × the SU(3) energy
+volume video added in `652a451`.
+
+**Falsifier / fix.** In `volume_render.create_volume_animation`/`_update`: if
+`max(|field|) < eps` or the density-thresholded voxel set is empty/≈full, **skip
+the volume render** (placeholder frame + `.md` note) instead of calling
+`voxels()`. Also cap/coarsen voxel count for large grids (`voxels()` is
+O(voxels), intractable at 96³). Re-run must verify the SU(3)-≈0 seed renders (or
+cleanly skips) in seconds.
+
+### E16. AWS log is blind in real time (buffered stdout); no progress heartbeat — `resolved` (2026-06-08)
+
+> **Resolved.** (a) The experiment forces line-buffered stdout (`_ensure_unbuffered`)
+> and the launcher exports `PYTHONUNBUFFERED=1`, so every print is live. (b)
+> Timestamped milestones via `_log` (`[HH:MM:SS] …`) including per-volume-render
+> `render START/END <task> (Xs)` and per-relaxation residuals. (c) A `progress.json`
+> heartbeat (`_heartbeat`: stage + elapsed + residuals) is written to the run dir;
+> the user-data `progress_sync_loop` pushes it **and** the live log to
+> `s3://…/<job>/progress/` every 60 s, with a stall warning if no new output for
+> 30 min. So "how far are we?" is answerable from S3 mid-run without SSH/SSM.
+> (Watchdog currently *alerts* in the log rather than auto-terminating — a hung
+> render is now also impossible by default since volume movies are off, E15.)
+
+
+
+`cloud-init-output.log` carried only pip/bootstrap; **none** of the experiment's
+`print()`s — Python line-buffers stdout to a pipe, so all progress sat in-process
+(fd1 → `pipe`) and never flushed. Combined with the launcher tripwire only
+covering bootstrap markers (then "waits forever"), the hang was invisible without
+SSM/py-spy. This is the "detailed log for the future" gap.
+
+**Falsifier / fix.** (a) Run unbuffered (`PYTHONUNBUFFERED=1` / `python -u` /
+`sys.stdout.reconfigure(line_buffering=True)`). (b) Add timestamped per-task log
+lines: `render START/END <name> (<s>)` and per relaxation outer-iter
+`iter k: residual=…`. (c) Write a `progress.json` heartbeat to
+`$BRANESIM_RESULTS_DIR`, synced to S3 periodically, so progress is visible
+without SSM. (d) Launcher: no-progress watchdog (no new file in N min ⇒
+alert/terminate). Verified when a future run's S3 log shows live solver/render
+progress.
+
+---
+
 *Generated from an audit of `vortex_seed_render.py`, `vortex_worldtube.py`,
 `run_measurements.py`, `bvp.py`/`boundary.py`, the AWS runbook, and the
 `runs/` artifacts (seed `vortex_seed_2026-06-07_091740`, eigensolve
