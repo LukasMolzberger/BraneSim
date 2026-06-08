@@ -148,10 +148,16 @@ GRID_SHAPE = (48, 48, 48)
 N_SLICES = 32                       # time slices = period of the carrier loop
 SPACING = 1.0                       # lattice unit
 
-ALPHA = 0.7
+# alpha=0.8 (was 0.7): larger prestress -> MORE SU(3) coexcitation
+# (rho_SU3 ∝ alpha/(3-2alpha): 0.8/(3-1.6)=0.571 vs 0.7-> 0.438, ~30% more shear
+# content) so the U(1)/SU(3) interaction is more visible, and the shear/size split
+# (c_T/c_L=sqrt(1-alpha)=0.447) stays comfortably resolvable on 96^3.  NOTE: r_t is
+# tied to alpha (r_t=alpha*beta*dt), so it rises 0.175 -> 0.2 (stronger time-link
+# binding); decouple here if we ever want to vary the split independently of binding.
+ALPHA = 0.8
 DT = 0.25
 BETA = 1.0
-R_T = ALPHA * BETA * DT            # = 0.175
+R_T = ALPHA * BETA * DT            # = 0.2
 
 VORTEX_PARAMS = VortexParams(
     A0=0.3,                         # peak strain ~0.3
@@ -169,7 +175,13 @@ VORTEX_PARAMS = VortexParams(
 # lgmres has enough iterations to resolve the ill-conditioned step.  inner=40
 # under-resolved it (the 64³ AWS run stalled at res 2.2); inner=120 restores a
 # clean ~0.5x/iter geometric drop even at cond~3e7.  Default ON.
-RELAX_ITERS = 30                    # outer JFNK iterations
+# RELAX_ITERS 30 -> 12: the 96³ run showed ‖R‖ plateaus by outer-iter ~8 (the
+# unpreconditioned lgmres exhausts the well-conditioned modes; the stiff vortex-core
+# subspace at cond~4.4e7 is unreachable in inner=120 cycles), so iters >~10 were
+# wasted compute.  12 captures the plateau with margin.  (A true residual-plateau
+# early-stop + a preconditioner are the next solver-convergence work — see the
+# convergence analysis; deferred pending the gauge/preconditioner change.)
+RELAX_ITERS = 12                    # outer JFNK iterations (plateaus by ~8)
 RELAX_INNER_MAXITER = 120           # inner lgmres cap (KEY for ill-conditioned grids)
 RELAX_TOL = 1e-5
 
@@ -481,14 +493,18 @@ def _render_world(
     # lives and how the integrated content evolves over the loop.
     if energy_channels is not None:
         u1_density, su3_density, u1_energy, su3_energy = energy_channels
-        print("  Rendering U(1) vs SU(3) energy comparison (slice + curves)...")
+        _log("render: energy_channels (U(1) vs SU(3), per-channel contrast)")
         for plane in ("xy", "xz"):
             create_channel_energy_animation(
                 frames_u1=u1_density, frames_su3=su3_density,
                 grid_shape=grid_shape, spacing=spacing, plane=plane,
                 output_path=str(renders_dir / f"energy_channels_{plane}.mp4"),
                 u1_energy=u1_energy, su3_energy=su3_energy, times=times,
-                fps=FPS, dpi=DPI, shared_scale=True,
+                fps=FPS, dpi=DPI,
+                # Per-channel autoscale + gamma=0.5 so the faint SU(3) channel
+                # (~few % of U(1)) is actually visible; the honest magnitude ratio
+                # is preserved in the integrated-energy panel (right).
+                shared_scale=False, gamma=0.5,
                 title_prefix=f"Y_l^m | {state_label}",
             )
         if volume_render:
@@ -573,6 +589,10 @@ _DEVICE_DOCS = {
         "Spatial-FFT energy/mode spectrum of the excess field (radiation tail).",
         "3D FFT of the carrier displacement per slice, radially binned in |k|.",
         "Power concentrated at low |k| = a smooth localized object; a growing high-|k| tail = radiation/lattice noise."),
+    "ring_azimuth": ("ring_azimuth.png",
+        "Azimuthal Fourier decomposition of |Psi| around the donut ring (z-midplane) + core-centroid drift.",
+        "Average |Psi| into azimuthal bins over a radial band at the donut radius r_peak; rfft(A(phi)) -> harmonic power P_m; report Σ_{m>=1}P_m/ΣP, the m=1 dipole fraction, and the energy-weighted core-centroid offset, per slice.",
+        "Symmetric Y_1^1 ring -> all power in m=0 (asymmetry ~ 0). Nonzero m=1 (dipole) power and a growing centroid offset quantify the 'one side brighter / other dimmer' deformation seen under relaxation."),
 }
 
 
@@ -871,7 +891,7 @@ def _emit_iteration(
         _log("  Rendering SKIPPED (BRANESIM_VORTEX_RENDER=0; diagnostics-only).")
 
     # diagnostics suite (the back-up round-trip) -> diagnostics/
-    print("  Running diagnostic suite (8 devices)...")
+    _log("  Running diagnostic suite (9 devices)...")
     run_measurements(iter_dir, verbose=False)
 
     # per-output docs (after diagnostics so diagnostics/ exists)

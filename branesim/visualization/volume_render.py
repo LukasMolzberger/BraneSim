@@ -24,7 +24,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 from matplotlib.collections import LineCollection
-from matplotlib.colors import hsv_to_rgb, to_rgba
+from matplotlib.colors import hsv_to_rgb, to_rgba, PowerNorm
 
 os.environ.setdefault("MPLBACKEND", "Agg")
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "matplotlib"))
@@ -591,6 +591,7 @@ def create_channel_energy_animation(
     fps: int = 15,
     dpi: int = 120,
     shared_scale: bool = True,
+    gamma: float = 1.0,
     title_prefix: str = "",
 ) -> None:
     """Side-by-side U(1) vs SU(3) energy-density slice movie + integrated curves.
@@ -624,7 +625,13 @@ def create_channel_energy_animation(
     times : sequence of float or None
     fps, dpi : int
     shared_scale : bool
-        If True, both spatial maps share one colour normalisation.
+        If True, both spatial maps share one colour normalisation (honest relative
+        magnitude — but a 3%-of-U(1) SU(3) channel renders ~black).  If False, each
+        map autoscales to its OWN max, so faint SU(3) structure is visible; the
+        honest magnitude ratio is then carried by the integrated-energy panel.
+    gamma : float
+        Power-law display stretch (``PowerNorm``).  ``gamma<1`` brightens low
+        densities → more contrast for faint structure.  ``1.0`` = linear.
     title_prefix : str
     """
     if not frames_u1 or not frames_su3:
@@ -669,6 +676,10 @@ def create_channel_energy_animation(
     vmax_u1 = vmax_u1 or 1.0
     vmax_su3 = vmax_su3 or 1.0
 
+    def _norm(vmax: float):
+        """PowerNorm contrast stretch (gamma<1 brightens faint structure)."""
+        return PowerNorm(gamma=gamma, vmin=0.0, vmax=vmax)
+
     fig, (ax_u1, ax_su3, ax_ts) = plt.subplots(1, 3, figsize=(20, 6.5))
     fig.suptitle(
         f"{title_prefix}  —  U(1) (trace/EM) vs SU(3) (traceless/colour) energy content",
@@ -677,7 +688,7 @@ def create_channel_energy_animation(
 
     im_u1 = ax_u1.imshow(
         _extract_slice(frames_u1[0]).T, origin="lower", extent=extent,
-        cmap="Blues", vmin=0.0, vmax=vmax_u1, interpolation="nearest", animated=True,
+        cmap="Blues", norm=_norm(vmax_u1), interpolation="nearest", animated=True,
     )
     ax_u1.set_xlabel(xlabel); ax_u1.set_ylabel(ylabel)
     ax_u1.set_title(f"U(1) trace energy density  ({plane} midplane)")
@@ -685,7 +696,7 @@ def create_channel_energy_animation(
 
     im_su3 = ax_su3.imshow(
         _extract_slice(frames_su3[0]).T, origin="lower", extent=extent,
-        cmap="Oranges", vmin=0.0, vmax=vmax_su3, interpolation="nearest", animated=True,
+        cmap="Oranges", norm=_norm(vmax_su3), interpolation="nearest", animated=True,
     )
     ax_su3.set_xlabel(xlabel); ax_su3.set_ylabel(ylabel)
     ax_su3.set_title(f"SU(3) traceless energy density  ({plane} midplane)")

@@ -1267,6 +1267,27 @@ def _write_report(
         f"",
     ]
 
+    # D9 — ring azimuthal asymmetry
+    d9 = results.get("ring_azimuth", {})
+    lines += [
+        f"## D9 — Ring Azimuthal Asymmetry",
+        f"",
+        f"| Metric | Value |",
+        f"|--------|-------|",
+        f"| asymmetry mean (Σ_m≥1 P_m / ΣP) | {_fmt(d9.get('asymmetry_mean'), '.4g')} |",
+        f"| asymmetry max | {_fmt(d9.get('asymmetry_max'), '.4g')} |",
+        f"| m=1 dipole fraction mean | {_fmt(d9.get('m1_dipole_frac_mean'), '.4g')} |",
+        f"| core centroid offset mean | {_fmt(d9.get('centroid_offset_mean'), '.4g')} a |",
+        f"| ring radius r_peak mean | {_fmt(d9.get('r_peak_mean'), '.4g')} a |",
+        f"",
+        f"**Verdict:** symmetric ring → asymmetry ≈ 0 (all power in m=0). Nonzero "
+        f"m≥1 power / centroid offset = the donut deformed (one side brighter) — a "
+        f"progress tracker of the relaxation, not a pass/fail.",
+        f"",
+        f"![Ring azimuth plot](ring_azimuth.png)",
+        f"",
+    ]
+
     # D8
     d8 = results.get("binding_probe", {})
     _d8_cl = d8.get("closure_locked")
@@ -1334,6 +1355,160 @@ def _write_report(
 
 
 # ---------------------------------------------------------------------------
+# D9: Ring azimuthal-asymmetry (Fourier decomposition of |Psi| around the ring)
+# ---------------------------------------------------------------------------
+
+
+def device_ring_azimuth(
+    world: np.ndarray,
+    ref: np.ndarray,
+    lattice: SpacelikeLattice,
+    params: ActionParams,
+    out_dir: Path,
+) -> dict[str, Any]:
+    """D9: azimuthal Fourier decomposition of |Psi| around the donut ring.
+
+    For the bare ``Y_1^1`` seed, ``|Psi| ~ |sin(theta) e^{i phi}| = sin(theta)`` is
+    **azimuthally uniform** in the z-midplane (all power in m=0).  When the
+    relaxation deforms the ring — the "one side brighter / other side dimmer"
+    effect — the broken symmetry shows up as **m>=1 azimuthal harmonics** (m=1 =
+    the dipole / off-axis core drift, m=2 = ellipticity, …).
+
+    Per time slice, in the z-midplane:
+      1. find the donut radius ``r_peak`` (peak of the azimuthally-averaged radial
+         profile of |Psi|),
+      2. average |Psi| into azimuthal bins over a radial band around ``r_peak`` →
+         ``A(phi)``,
+      3. ``rfft(A(phi))`` → harmonic power ``P_m``; report fractions ``P_m/Σ P``,
+         the asymmetry ``Σ_{m>=1} P_m / Σ_{m>=0} P_m``, and the energy-weighted
+         core-centroid offset from the box axis.
+
+    A symmetric ring reads ``asymmetry ≈ 0`` and ``centroid_offset ≈ 0``; growth of
+    either over the loop / across relaxation iterations quantifies the deformation.
+    Read-only; no pass/fail (it is a progress tracker, not a contract).
+    """
+    nx, ny, nz = lattice.params.grid_shape
+    n_T = world.shape[0]
+    times = np.arange(n_T) * params.dt
+    off_re, off_im = vacuum_offsets(n_T - 1, params.r_t)
+
+    cx, cy = (nx - 1) / 2.0, (ny - 1) / 2.0
+    zc = nz // 2
+    xs = np.arange(nx)[:, None].astype(float)
+    ys = np.arange(ny)[None, :].astype(float)
+    rr = np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2)         # (nx, ny)
+    phi = np.arctan2(ys - cy, xs - cx)                    # (nx, ny)
+    n_bins = 64
+    bin_idx = (np.floor((phi + np.pi) / (2 * np.pi) * n_bins).astype(int) % n_bins).ravel()
+    r_int = rr.astype(int).ravel()
+    rmax = int(rr.max())
+    M = 5  # report harmonics m = 0..4
+
+    def _amp_zmid(l: int) -> np.ndarray:
+        pos = world[l]
+        re = (project_carrier_re(pos[:, 0:3] - ref[:, 0:3]) - off_re[l]).reshape(nx, ny, nz)
+        im = (pos[:, CARRIER_IM] - ref[:, CARRIER_IM] - off_im[l]).reshape(nx, ny, nz)
+        return np.sqrt(re[:, :, zc] ** 2 + im[:, :, zc] ** 2)  # (nx, ny)
+
+    asym = np.zeros(n_T)
+    centroid = np.zeros(n_T)
+    pm_frac = np.zeros((n_T, M))
+    r_peaks = np.zeros(n_T)
+    A_phi_0 = np.zeros(n_bins)
+
+    for l in range(n_T):
+        amp = _amp_zmid(l)
+        flat = amp.ravel()
+        # radial profile -> donut radius
+        rsum = np.bincount(r_int, weights=flat, minlength=rmax + 1)
+        rcnt = np.maximum(np.bincount(r_int, minlength=rmax + 1), 1)
+        prof = rsum / rcnt
+        r_peak = float(np.argmax(prof))
+        r_peaks[l] = r_peak
+        band = max(2.0, 0.3 * max(r_peak, 1.0))
+        sel = np.abs(rr.ravel() - r_peak) <= band
+        # azimuthal average A(phi) over the radial band
+        bcnt = np.maximum(np.bincount(bin_idx[sel], minlength=n_bins), 1)
+        bsum = np.bincount(bin_idx[sel], weights=flat[sel], minlength=n_bins)
+        A = bsum / bcnt
+        F = np.fft.rfft(A)
+        P = np.abs(F) ** 2
+        Ptot = float(P.sum()) + 1e-40
+        pm_frac[l, : min(M, len(P))] = P[: min(M, len(P))] / Ptot
+        asym[l] = float(P[1:].sum() / Ptot)
+        # energy-weighted core centroid over the band
+        w = (amp ** 2) * (np.abs(rr - r_peak) <= band)
+        wsum = float(w.sum()) + 1e-40
+        cxw = float((w * xs).sum() / wsum)
+        cyw = float((w * ys).sum() / wsum)
+        centroid[l] = float(np.hypot(cxw - cx, cyw - cy))
+        if l == 0:
+            A_phi_0 = A.copy()
+
+    # CSV
+    csv_path = out_dir / "ring_azimuth.csv"
+    rows = np.column_stack([times, asym, centroid, r_peaks, pm_frac])
+    np.savetxt(
+        str(csv_path), rows, delimiter=",",
+        header="time,asymmetry_m>=1,centroid_offset,r_peak,"
+               + ",".join(f"P{m}_frac" for m in range(M)),
+        comments="",
+    )
+
+    # PNG
+    _apply_style()
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle("D9 — Ring azimuthal asymmetry  (Fourier decomposition of |Psi| around the donut)",
+                 fontweight="bold")
+
+    amp0 = _amp_zmid(0)
+    ax = axes[0, 0]
+    im = ax.imshow(amp0.T, origin="lower", extent=[0, nx, 0, ny], aspect="equal", cmap="inferno")
+    th = np.linspace(0, 2 * np.pi, 200)
+    ax.plot(cx + r_peaks[0] * np.cos(th), cy + r_peaks[0] * np.sin(th), "c--", lw=1.0,
+            label=f"ring r={r_peaks[0]:.1f}")
+    ax.plot([cx], [cy], "c+", ms=10)
+    plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    ax.set_title("|Psi| z-midplane (slice 0) + sampling ring"); ax.legend(fontsize=8)
+
+    ax = axes[0, 1]
+    phis = np.linspace(-np.pi, np.pi, n_bins, endpoint=False)
+    ax.plot(phis, A_phi_0, color="tab:purple")
+    ax.set_xlabel("azimuth phi [rad]"); ax.set_ylabel("|Psi|(phi) on ring (slice 0)")
+    ax.set_title(f"Azimuthal amplitude profile  (asym={asym[0]:.3f})")
+
+    ax = axes[1, 0]
+    ax.bar(range(M), pm_frac[0], color="tab:purple")
+    ax.set_xlabel("azimuthal harmonic m"); ax.set_ylabel("power fraction P_m / ΣP (slice 0)")
+    ax.set_title("Harmonic spectrum (m=1 = dipole / uneven ring)")
+
+    ax = axes[1, 1]
+    ax.plot(times, asym, label="asymmetry (Σ_{m≥1} P_m / ΣP)", color="tab:red")
+    ax.plot(times, pm_frac[:, 1], label="m=1 (dipole) fraction", color="tab:orange", ls="--")
+    ax.plot(times, centroid, label="core centroid offset [a]", color="tab:green", ls=":")
+    ax.set_xlabel("time"); ax.legend(fontsize=8); ax.set_title("Asymmetry & core drift over the loop")
+
+    _savefig(fig, out_dir / "ring_azimuth.png")
+
+    return {
+        "asymmetry_mean": float(np.mean(asym)),
+        "asymmetry_max": float(np.max(asym)),
+        "m1_dipole_frac_mean": float(np.mean(pm_frac[:, 1])),
+        "centroid_offset_mean": float(np.mean(centroid)),
+        "centroid_offset_max": float(np.max(centroid)),
+        "r_peak_mean": float(np.mean(r_peaks)),
+        "note": (
+            "Azimuthal Fourier decomposition of |Psi| on the donut ring (z-midplane). "
+            "Symmetric Y_1^1 seed -> asymmetry ~ 0 (all power in m=0); m>=1 power and "
+            "a nonzero core-centroid offset quantify ring deformation (the 'one side "
+            "brighter' effect) under relaxation. Progress tracker, no pass/fail."
+        ),
+        "csv": str(csv_path),
+        "png": str(out_dir / "ring_azimuth.png"),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Device dispatch (shared by the real-state pass and the vacuum calibration)
 # ---------------------------------------------------------------------------
 
@@ -1345,6 +1520,7 @@ _DEVICE_FNS = {
     "em_fields": device_em_fields,
     "color_channels": device_color_channels,
     "spectra": device_spectra,
+    "ring_azimuth": device_ring_azimuth,
 }
 
 
@@ -1471,7 +1647,8 @@ def run_measurements(
             pass
 
     all_devices = ["energy", "confinement", "winding", "berry",
-                   "em_fields", "color_channels", "spectra", "binding_probe"]
+                   "em_fields", "color_channels", "spectra", "ring_azimuth",
+                   "binding_probe"]
     if devices is None:
         devices = all_devices
 
