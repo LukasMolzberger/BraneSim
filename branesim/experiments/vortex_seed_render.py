@@ -820,8 +820,13 @@ def _relax(
     opts = SolveOpts(
         tol=RELAX_TOL, max_iter=n_iters,
         inner_maxiter=RELAX_INNER_MAXITER, verbose=True,
-        # Residual-plateau early-stop: bail once ‖R‖ improves <1% over 3 outer steps
-        # (the unpreconditioned solve floors ~iter 8); avoids the wasted tail.
+        # FFT preconditioner (M⁻¹≈|J_lin|⁻¹) to break the cond~4.4e7 wall that floored
+        # the 96³ solve at ‖R‖~1.5.  Opt-in + isolated (solver/preconditioner.py) so
+        # it reverts cleanly; set "none" to disable.
+        preconditioner="fft_linear", precond_floor=1e-2,
+        # Residual-plateau early-stop: bail once ‖R‖ improves <1% over 3 outer steps;
+        # avoids the wasted tail (with the preconditioner the plateau should move much
+        # lower before it triggers).
         plateau_patience=3, plateau_rtol=0.01,
     )
     wv = solve_block(
