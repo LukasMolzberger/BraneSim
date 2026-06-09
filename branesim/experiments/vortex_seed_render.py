@@ -148,16 +148,14 @@ GRID_SHAPE = (48, 48, 48)
 N_SLICES = 32                       # time slices = period of the carrier loop
 SPACING = 1.0                       # lattice unit
 
-# alpha=0.8 (was 0.7): larger prestress -> MORE SU(3) coexcitation
-# (rho_SU3 ∝ alpha/(3-2alpha): 0.8/(3-1.6)=0.571 vs 0.7-> 0.438, ~30% more shear
-# content) so the U(1)/SU(3) interaction is more visible, and the shear/size split
-# (c_T/c_L=sqrt(1-alpha)=0.447) stays comfortably resolvable on 96^3.  NOTE: r_t is
-# tied to alpha (r_t=alpha*beta*dt), so it rises 0.175 -> 0.2 (stronger time-link
-# binding); decouple here if we ever want to vary the split independently of binding.
-ALPHA = 0.8
+# alpha=0.7 (reverted from the 0.8 trial): the canonical prestress.  alpha sets the
+# U(1)/SU(3) split — ρ_SU3 ∝ alpha/(3-2alpha), size split c_T/c_L=sqrt(1-alpha) — and
+# the geometric nonlinearity ∝ alpha, so 0.8 is a stiffer/harder solve; 0.7 is the
+# established soliton sweet-spot point.  r_t tracks alpha (r_t=alpha*beta*dt=0.175).
+ALPHA = 0.7
 DT = 0.25
 BETA = 1.0
-R_T = ALPHA * BETA * DT            # = 0.2
+R_T = ALPHA * BETA * DT            # = 0.175
 
 VORTEX_PARAMS = VortexParams(
     A0=0.3,                         # peak strain ~0.3
@@ -177,10 +175,11 @@ VORTEX_PARAMS = VortexParams(
 # clean ~0.5x/iter geometric drop even at cond~3e7.  Default ON.
 # RELAX_ITERS 30 -> 12: the 96³ run showed ‖R‖ plateaus by outer-iter ~8 (the
 # unpreconditioned lgmres exhausts the well-conditioned modes; the stiff vortex-core
-# subspace at cond~4.4e7 is unreachable in inner=120 cycles), so iters >~10 were
-# wasted compute.  12 captures the plateau with margin.  (A true residual-plateau
-# early-stop + a preconditioner are the next solver-convergence work — see the
-# convergence analysis; deferred pending the gauge/preconditioner change.)
+# subspace is unreachable in inner=120 cycles), so iters >~10 were wasted compute.
+# 12 captures the plateau with margin; the residual-plateau early-stop (in _relax)
+# typically bails sooner.  (An FFT preconditioner was tried — branch `precond-fft`,
+# reverted on main: it sped the linear modes but plateaued HIGHER because the floor
+# is set by the nonlinear vortex core a frozen-vacuum precond can't touch.)
 RELAX_ITERS = 12                    # outer JFNK iterations (plateaus by ~8)
 RELAX_INNER_MAXITER = 120           # inner lgmres cap (KEY for ill-conditioned grids)
 RELAX_TOL = 1e-5
