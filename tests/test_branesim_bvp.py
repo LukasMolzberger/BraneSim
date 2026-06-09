@@ -638,37 +638,6 @@ class TestRotatingFramePeriodic:
         assert rep["residual_final"] < rep["residual_initial"]
         assert rep["converged"] is False
 
-    def test_fft_preconditioner_default_off_and_validates(self):
-        """The FFT preconditioner is opt-in (default 'none' unchanged) and, when on,
-        inverts the linear operator: in the linear regime it reaches a strictly lower
-        residual than unpreconditioned at the SAME small outer-iter budget."""
-        from branesim.solver.boundary import PeriodicBC
-        lattice = _make_lattice((10, 10, 10))
-        N, m = 8, 4
-        ap = _make_action_params(N, m_ambient=m)   # r_t=0 linear regime
-        mass = RHO * SPACING ** lattice.params.dim
-        seed = self._carrier_seed(lattice, N, m, eps=0.01)
-
-        res = {}
-        for pc in ("none", "fft_linear"):
-            bc = PeriodicBC(R0=seed[0].copy())
-            opts = SolveOpts(tol=1e-14, max_iter=2, inner_maxiter=120,
-                             verbose=False, preconditioner=pc)
-            rep = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts,
-                              initial_world=seed).solver_report
-            res[pc] = rep["residual_final"]
-            assert rep["preconditioner"] == pc
-
-        # Same 2 outer iterations: the preconditioned solve gets strictly closer.
-        assert res["fft_linear"] < res["none"], (res["fft_linear"], res["none"])
-
-        # Unknown preconditioner is rejected (fail-loud, not silent).
-        bc = PeriodicBC(R0=seed[0].copy())
-        with pytest.raises(ValueError):
-            solve_block(BoundaryProblem(lattice, ap, mass, bc),
-                        SolveOpts(max_iter=1, preconditioner="bogus"),
-                        initial_world=seed)
-
     def test_periodic_gauge_anchor_pins_node(self):
         """gauge='anchor' removes the translational zero modes by pinning one node
         on slice 0 to its R0 value (a gauge fix, not a dynamics clamp): that node

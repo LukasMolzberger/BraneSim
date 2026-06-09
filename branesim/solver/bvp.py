@@ -129,15 +129,6 @@ class SolveOpts:
         Default 'lgmres'.
     verbose : bool
         Print convergence progress.
-    preconditioner : str
-        Inner-Krylov preconditioner for the PeriodicBC path.  ``"none"`` (default)
-        = unpreconditioned (unchanged behaviour).  ``"fft_linear"`` = the
-        frozen-vacuum FFT preconditioner (``solver/preconditioner.py``) that
-        applies ``M⁻¹ ≈ |J_linear|⁻¹`` via spatial+temporal FFTs to tame the
-        cond~1e7 wall.  Opt-in + isolated so it reverts cleanly (see that module).
-    precond_floor : float
-        ε/max|λ| floor for the FFT preconditioner (caps amplification of the
-        near-null/resonant subspace).  Default 1e-2.
     plateau_patience : int
         Residual-plateau early-stop (PeriodicBC path): if ``>0``, stop the outer
         Newton iteration when the global ‖R‖ has improved by less than
@@ -156,8 +147,6 @@ class SolveOpts:
     inner_maxiter: int = 300
     method: str = "lgmres"
     verbose: bool = False
-    preconditioner: str = "none"
-    precond_floor: float = 1e-2
     plateau_patience: int = 0
     plateau_rtol: float = 0.01
 
@@ -318,15 +307,6 @@ def solve_block(
     bc = problem.boundary_condition
     t0 = time.perf_counter()
 
-    # Fail loud (§7.4): the FFT preconditioner is built only for the PeriodicBC
-    # JFNK path; silently ignoring it on the Chiral/Dirichlet paths would mislead.
-    if opts.preconditioner != "none" and not isinstance(bc, PeriodicBC):
-        raise NotImplementedError(
-            f"preconditioner={opts.preconditioner!r} is only implemented for the "
-            "PeriodicBC path; got "
-            f"{type(bc).__name__}. Use preconditioner='none' for this BC."
-        )
-
     # =========================================================================
     # Fast-path: ChiralBC — the solution IS the Verlet march from (R0, R1).
     # No JFNK needed; Cauchy data is well-posed (κ bounded, N-independent).
@@ -429,18 +409,6 @@ def solve_block(
                     cb_state["stopped"] = True
                     raise _Plateau()
 
-        # Optional FFT preconditioner (opt-in; "none" => unchanged).  M⁻¹ ≈ |J_lin|⁻¹
-        # applied via FFTs (solver/preconditioner.py) to break the cond~1e7 wall.
-        inner_M = None
-        if opts.preconditioner == "fft_linear":
-            from branesim.solver.preconditioner import build_fft_preconditioner
-            inner_M = build_fft_preconditioner(
-                problem.lattice.params, problem.params, P, m_ambient,
-                precond_floor=opts.precond_floor,
-            )
-        elif opts.preconditioner != "none":
-            raise ValueError(f"unknown preconditioner {opts.preconditioner!r}")
-
         converged = False
         residual_final = residual_initial
         x_solution = x0.copy()
@@ -448,7 +416,7 @@ def solve_block(
             x_solution = newton_krylov(
                 F_periodic, x0, method=opts.method, verbose=opts.verbose,
                 f_tol=opts.tol, iter=opts.max_iter, inner_maxiter=opts.inner_maxiter,
-                inner_M=inner_M, callback=_callback,
+                callback=_callback,
             )
             residual_final = float(np.linalg.norm(F_periodic(x_solution)))
             converged = residual_final <= opts.tol
@@ -488,7 +456,6 @@ def solve_block(
             "residual_drop_factor": (residual_initial / residual_final
                                      if residual_final > 0 else float("inf")),
             "early_stopped_plateau": bool(cb_state["stopped"]),
-            "preconditioner": opts.preconditioner,
             "converged": converged,
             "condition_estimate": bc.condition_estimate(problem.lattice.params, problem.params),
             "gauge": bc.gauge,
