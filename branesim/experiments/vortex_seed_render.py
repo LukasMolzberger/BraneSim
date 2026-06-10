@@ -42,6 +42,7 @@ it binds or radiates is what the diagnostics then report.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import sys
@@ -830,6 +831,86 @@ def _relax(
     return wv.slices, dict(wv.solver_report)
 
 
+def _reanchor_vacuum_offset(
+    world: np.ndarray, r_t_old: float, r_t_new: float, n_slices: int,
+) -> np.ndarray:
+    """Re-base a worldvolume's prestressed N-gon vacuum offset from ``r_t_old`` to
+    ``r_t_new``, preserving the carrier displacement.
+
+    The offset is a per-slice GLOBAL translation in the carrier 2-plane (the trace
+    direction on comps 0,1,2 and the timelike comp), so shifting it leaves all
+    within-slice (spatial) structure — the vortex itself — untouched.  Used to
+    warm-start a continuation step at a new r_t from the previous converged state.
+    """
+    off_re_o, off_im_o = vacuum_offsets(n_slices, r_t_old)
+    off_re_n, off_im_n = vacuum_offsets(n_slices, r_t_new)
+    wts = np.asarray(CARRIER_RE_WEIGHTS)
+    w = world.copy()
+    w[:, :, 0:3] += (off_re_n - off_re_o)[:, None, None] * wts
+    w[:, :, CARRIER_IM] += (off_im_n - off_im_o)[:, None]
+    return w
+
+
+def _relax_continuation(
+    lattice: SpacelikeLattice,
+    base_action_params: ActionParams,
+    mass: float,
+    n_slices: int,
+    vp,
+    alpha_schedule: list[float],
+    iters_per_step: int,
+) -> tuple[np.ndarray, dict]:
+    """α-homotopy continuation to a converged worldtube (time-symmetric, no damping).
+
+    The cold JFNK floors because it cold-starts against the stiff vortex core from a
+    far seed (res_init~556).  Continuation instead solves a sequence of problems from
+    near-linear (small α → mild geometric nonlinearity, and small r_t=α·β·dt) up to
+    the target α, **warm-starting each solve from the previous converged state**
+    (re-anchored for the new r_t offset).  Every solve is then a SMALL perturbation
+    of a nearby solution, keeping JFNK in the fast-convergence basin.
+
+    This is purely a sequence of time-symmetric BVP root-finds with a deforming
+    physical parameter — it adds NO damping and does not break T-symmetry
+    (feedback_time_symmetry_no_damping).
+    """
+    beta, dt = base_action_params.beta, base_action_params.dt
+    prev, r_t_prev = None, None
+    steps: list[dict] = []
+    for i, alpha in enumerate(alpha_schedule):
+        r_t = alpha * beta * dt
+        ap = dataclasses.replace(base_action_params, alpha=alpha, r_t=r_t)
+        if prev is None:
+            init, _ = inject_vortex_worldtube(lattice, ap, vp, n_slices)  # fresh small-α seed
+        else:
+            init = _reanchor_vacuum_offset(prev, r_t_prev, r_t, n_slices)
+        bc = PeriodicBC(R0=init[0].copy(), gauge="anchor")
+        opts = SolveOpts(
+            tol=RELAX_TOL, max_iter=iters_per_step,
+            inner_maxiter=RELAX_INNER_MAXITER, verbose=True,
+            plateau_patience=3, plateau_rtol=0.01,
+        )
+        wv = solve_block(BoundaryProblem(lattice, ap, mass, bc), opts, initial_world=init)
+        rep = dict(wv.solver_report)
+        _log(f"continuation {i+1}/{len(alpha_schedule)}: α={alpha:.3f} r_t={r_t:.4f} "
+             f"res {rep['residual_initial']:.3e}->{rep['residual_final']:.3e} "
+             f"per_dof={rep.get('residual_per_dof'):.3e} iters={rep['iterations']} "
+             f"early_stop={rep.get('early_stopped_plateau')}")
+        _heartbeat(f"continuation_alpha_{alpha:.3f}",
+                   residual_final=rep.get("residual_final"),
+                   residual_per_dof=rep.get("residual_per_dof"),
+                   converged=rep.get("converged"))
+        steps.append({"alpha": alpha, "r_t": r_t, **{k: rep.get(k) for k in (
+            "residual_initial", "residual_final", "residual_per_dof",
+            "iterations", "early_stopped_plateau", "converged")}})
+        prev, r_t_prev = wv.slices, r_t
+
+    final = dict(wv.solver_report)
+    final["mode"] = "alpha_continuation"
+    final["continuation_schedule"] = list(alpha_schedule)
+    final["continuation_steps"] = steps
+    return prev, final
+
+
 # ---------------------------------------------------------------------------
 # Emit one iteration folder: config, world, winding, renders, docs, diagnostics
 # ---------------------------------------------------------------------------
@@ -963,6 +1044,17 @@ def run() -> None:
     # the workhorse.  Re-enable with BRANESIM_VORTEX_VOLUME_RENDER=1 (coarsened &
     # near-zero-guarded by E15, so safe).
     run_volume = _env_bool("BRANESIM_VORTEX_VOLUME_RENDER", False)
+    # α-homotopy continuation: solve from near-linear (small α) up to the target α,
+    # warm-starting each step, to reach a CONVERGED worldtube (the cold single-shot
+    # JFNK floors against the stiff core).  Time-symmetric, no damping.  Default OFF
+    # (single-shot _relax).  Schedule overridable via BRANESIM_VORTEX_CONT_ALPHAS
+    # (comma list ending at ALPHA); default = 5-step linspace(0.2, ALPHA).
+    run_continuation = _env_bool("BRANESIM_VORTEX_CONTINUATION", False)
+    _cont_env = os.environ.get("BRANESIM_VORTEX_CONT_ALPHAS")
+    if _cont_env:
+        alpha_schedule = [float(x) for x in _cont_env.split(",")]
+    else:
+        alpha_schedule = [round(0.2 + (ALPHA - 0.2) * k / 4, 3) for k in range(5)]
 
     ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
     out_root_env = os.environ.get("BRANESIM_RESULTS_DIR") or os.environ.get("BRANESIM_VORTEX_OUTDIR")
@@ -1062,12 +1154,23 @@ def run() -> None:
     relax_report = None
     relax_error = None
     if run_relax:
-        _log(f"Rotating-frame-periodic relaxation: {relax_iters} JFNK iterations "
-             "from the seed (well-conditioned PeriodicBC)...")
-        _heartbeat("relaxation_start", relax_iters=relax_iters)
+        if run_continuation:
+            _log(f"α-homotopy continuation to a converged worldtube: schedule "
+                 f"{alpha_schedule} ({relax_iters} iters/step, warm-started)...")
+        else:
+            _log(f"Rotating-frame-periodic relaxation: {relax_iters} JFNK iterations "
+                 "from the seed (well-conditioned PeriodicBC)...")
+        _heartbeat("relaxation_start", relax_iters=relax_iters,
+                   continuation=run_continuation,
+                   schedule=alpha_schedule if run_continuation else None)
         t0 = time.perf_counter()
         try:
-            world_N, relax_report = _relax(world, lattice, action_params, mass, relax_iters)
+            if run_continuation:
+                world_N, relax_report = _relax_continuation(
+                    lattice, action_params, mass, n_slices, vortex_params,
+                    alpha_schedule, relax_iters)
+            else:
+                world_N, relax_report = _relax(world, lattice, action_params, mass, relax_iters)
             _log(f"  relaxation done in {time.perf_counter()-t0:.1f}s  "
                  f"res_init={relax_report.get('residual_initial')}  "
                  f"res_final={relax_report.get('residual_final')}  "
