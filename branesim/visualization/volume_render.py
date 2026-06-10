@@ -742,3 +742,124 @@ def create_channel_energy_animation(
     writer = FFMpegWriter(fps=fps, bitrate=2800)
     anim.save(str(out), writer=writer, dpi=dpi)
     plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Berry / emergent-EM animation: B-flux threading the axis + running Berry phase
+# ---------------------------------------------------------------------------
+
+
+def create_berry_em_animation(
+    frames_amp: List[np.ndarray],
+    frames_phase: List[np.ndarray],
+    grid_shape: Tuple[int, int, int],
+    spacing: float,
+    output_path: str,
+    times: Optional[Sequence[float]] = None,
+    n_t: Optional[int] = None,
+    fps: int = 15,
+    dpi: int = 120,
+    title_prefix: str = "",
+    quiver_stride: int = 4,
+) -> None:
+    """Animate the emergent-EM / Berry fields of the carrier over the time loop.
+
+    Two panels per frame:
+      - Left: the magnetic flux ``B_z`` threading the vortex axis on the xy-midplane
+        (``B_z = ∂_x A_y − ∂_y A_x`` of the U(1) Berry connection
+        ``A_i = Im(ψ̂* ∂_i ψ̂)``, ``ψ̂ = Ψ/|Ψ|``), with the in-plane connection as a
+        quiver — the "B field threads the donut hole" picture.
+      - Right: the running **accumulated Berry phase** ∮A_t over the loop (the
+        geometric/EM-charge channel), with a moving marker and the ``2π·n_t``
+        closure target if ``n_t`` is given.
+
+    Same Berry-connection math the D4/D5 diagnostics use; this is its *visualization*.
+
+    CAVEAT (read with the trust ledger): on a seed or a NON-converged state the
+    connection is a faithful picture of the field but a read-back of the
+    prescribed/transient carrier (E8) — only on a CONVERGED solution does it depict
+    emergent EM with a quantized (``2π·n_t``) loop phase.
+    """
+    if not frames_amp:
+        raise ValueError("frames_amp must be non-empty")
+    nx, ny, nz = grid_shape
+    n_frames = len(frames_amp)
+    times_arr = list(times) if times is not None else list(range(n_frames))
+    zc = nz // 2
+
+    def _mid(vol: np.ndarray) -> np.ndarray:
+        return vol[:, :, zc]
+
+    def _connection_and_Bz(amp2d: np.ndarray, ph2d: np.ndarray):
+        """In-plane Berry connection (A_x,A_y) and out-of-plane B_z on a 2D slice."""
+        psi = amp2d * np.exp(1j * ph2d)
+        amax = float(np.max(np.abs(psi))) or 1.0
+        eps = 1e-3 * amax
+        psihat = np.where(np.abs(psi) > eps, psi / (np.abs(psi) + 1e-300), 0.0 + 0.0j)
+        gx = np.gradient(psihat, spacing, axis=0)
+        gy = np.gradient(psihat, spacing, axis=1)
+        A_x = np.imag(np.conj(psihat) * gx)
+        A_y = np.imag(np.conj(psihat) * gy)
+        B_z = np.gradient(A_y, spacing, axis=0) - np.gradient(A_x, spacing, axis=1)
+        return A_x, A_y, B_z
+
+    # Per-slice B_z + connection (precompute), and the accumulated Berry phase.
+    Bz_frames, Ax_frames, Ay_frames = [], [], []
+    dphase = np.zeros(n_frames)
+    for l in range(n_frames):
+        amp2d = _mid(frames_amp[l]); ph2d = _mid(frames_phase[l])
+        A_x, A_y, B_z = _connection_and_Bz(amp2d, ph2d)
+        Bz_frames.append(B_z); Ax_frames.append(A_x); Ay_frames.append(A_y)
+        # amplitude-weighted wrapped temporal phase advance -> accumulated Berry phase
+        if l > 0:
+            d = _mid(frames_phase[l]) - _mid(frames_phase[l - 1])
+            d = np.mod(d + np.pi, 2 * np.pi) - np.pi
+            w = _mid(frames_amp[l]) ** 2
+            dphase[l] = float(np.sum(w * d) / (np.sum(w) + 1e-300))
+    berry_accum = np.cumsum(dphase)
+
+    bz_max = max(float(np.max(np.abs(b))) for b in Bz_frames) or 1.0
+    extent = [0, nx * spacing, 0, ny * spacing]
+    xs = np.arange(0, nx, quiver_stride) * spacing
+    ys = np.arange(0, ny, quiver_stride) * spacing
+    QX, QY = np.meshgrid(xs, ys, indexing="ij")
+
+    _apply_style() if "_apply_style" in globals() else None
+    fig, (ax_b, ax_p) = plt.subplots(1, 2, figsize=(15, 6.5))
+    fig.suptitle(f"{title_prefix}  —  emergent EM: B-flux on axis + accumulated Berry phase",
+                 fontsize=11, fontweight="bold")
+
+    im = ax_b.imshow(Bz_frames[0].T, origin="lower", extent=extent, cmap="RdBu_r",
+                     vmin=-bz_max, vmax=bz_max, interpolation="nearest", animated=True)
+    plt.colorbar(im, ax=ax_b, fraction=0.046, pad=0.04, label="B_z (flux ∥ axis)")
+    qv = ax_b.quiver(QX, QY, Ax_frames[0][::quiver_stride, ::quiver_stride],
+                     Ay_frames[0][::quiver_stride, ::quiver_stride],
+                     color="k", alpha=0.5, scale=None)
+    ax_b.set_xlabel("x"); ax_b.set_ylabel("y")
+    ax_b.set_title("B_z threading the vortex axis (xy-midplane) + Berry connection A")
+
+    ax_p.plot(times_arr, berry_accum, color="tab:purple", label="∮A_t accumulated")
+    if n_t is not None:
+        for s in (+1, -1):
+            ax_p.axhline(s * 2 * np.pi * n_t, color="0.6", ls="--", lw=0.9)
+        ax_p.text(0.02, 0.95, f"closure target ±2π·n_t = ±{2*np.pi*n_t:.2f}",
+                  transform=ax_p.transAxes, fontsize=8, va="top")
+    marker, = ax_p.plot([times_arr[0]], [berry_accum[0]], "o", color="tab:purple", ms=7)
+    ax_p.set_xlabel("time"); ax_p.set_ylabel("accumulated Berry phase [rad]")
+    ax_p.set_title("Accumulated carrier (Berry) phase over the loop")
+    ax_p.legend(loc="lower left", fontsize=9)
+
+    def _update(i: int):
+        im.set_data(Bz_frames[i].T)
+        qv.set_UVC(Ax_frames[i][::quiver_stride, ::quiver_stride],
+                   Ay_frames[i][::quiver_stride, ::quiver_stride])
+        marker.set_data([times_arr[i]], [berry_accum[i]])
+        ax_b.set_title(f"B_z + Berry connection  (t={float(times_arr[i]):.2f})")
+        return im, qv, marker
+
+    anim = FuncAnimation(fig, _update, frames=n_frames, interval=1000 // fps, blit=False)
+    out = Path(output_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    writer = FFMpegWriter(fps=fps, bitrate=2800)
+    anim.save(str(out), writer=writer, dpi=dpi)
+    plt.close(fig)

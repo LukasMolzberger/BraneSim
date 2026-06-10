@@ -74,6 +74,7 @@ from branesim.solver.bvp import BoundaryProblem, SolveOpts, solve_block
 from branesim.diagnostics.alpha_separability import projection_operators
 from branesim.diagnostics.run_measurements import run_measurements
 from branesim.visualization.volume_render import (
+    create_berry_em_animation,
     create_channel_energy_animation,
     create_slice_animation,
     create_volume_animation,
@@ -484,6 +485,31 @@ def _render_world(
         "**swirl** around the vortex axis.\n\n"
         "Visualization only; no physics is added (identical injected field). Overlay idiom "
         "adapted from R. Behiel's Ginzburg-Landau vortex animations.\n",
+        encoding="utf-8",
+    )
+
+    # Add-on: emergent-EM / Berry video — B-flux threading the axis + the running
+    # accumulated Berry (carrier) phase over the loop.  Same connection math as the
+    # D4/D5 diagnostics; visualization only.
+    _timed_render("berry_em", lambda: create_berry_em_animation(
+        frames_amp=amps, frames_phase=phases, grid_shape=grid_shape, spacing=spacing,
+        output_path=str(renders_dir / "berry_em.mp4"),
+        times=times, n_t=vp.n_t, fps=FPS, dpi=DPI,
+        title_prefix=f"U(1) Y_l^m | {state_label}",
+    ))
+    (renders_dir / "berry_em.md").write_text(
+        f"# renders/berry_em.mp4 — {state_label}\n\n"
+        "Emergent-EM / Berry visualization over the loop. **Left:** the magnetic flux "
+        "`B_z` threading the vortex axis on the xy-midplane (`B_z = ∂_x A_y − ∂_y A_x` of "
+        "the U(1) Berry connection `A_i = Im(ψ̂* ∂_i ψ̂)`), with the in-plane connection "
+        "as a quiver — the 'B threads the donut hole' picture. **Right:** the running "
+        "accumulated Berry phase `∮A_t` (the geometric / EM-charge channel), with the "
+        "`±2π·n_t` closure target.\n\n"
+        "Same connection math as the D4/D5 diagnostics — this is its visualization.\n\n"
+        "**CAVEAT (trust ledger):** on a seed or a NON-converged state the connection is "
+        "a faithful picture of the field but a read-back of the prescribed/transient "
+        "carrier (E8); only on a CONVERGED solution does it depict *emergent* EM with a "
+        "*quantized* (2π·n_t) loop phase. Read alongside `diagnostics/report.md`'s ledger.\n",
         encoding="utf-8",
     )
 
