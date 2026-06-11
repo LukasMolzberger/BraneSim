@@ -43,6 +43,7 @@ it binds or radiates is what the diagnostics then report.
 from __future__ import annotations
 
 import dataclasses
+import gc
 import json
 import os
 import sys
@@ -928,9 +929,16 @@ def _relax_continuation(
         steps.append({"alpha": alpha, "r_t": r_t, **{k: rep.get(k) for k in (
             "residual_initial", "residual_final", "residual_per_dof",
             "iterations", "early_stopped_plateau", "converged")}})
-        prev, r_t_prev = wv.slices, r_t
+        # Carry only the new warm-start (a fresh copy); free this step's solve
+        # working set + the JFNK Krylov internals before the next step allocates.
+        # Without this the per-step working sets accumulate and OOM by ~step 4
+        # (the 112³ run died here, 2026-06-10).
+        prev, r_t_prev = wv.slices.copy(), r_t
+        last_report = dict(wv.solver_report)
+        del wv, init, bc, opts, rep
+        gc.collect()
 
-    final = dict(wv.solver_report)
+    final = dict(last_report)
     final["mode"] = "alpha_continuation"
     final["continuation_schedule"] = list(alpha_schedule)
     final["continuation_steps"] = steps

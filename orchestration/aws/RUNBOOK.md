@@ -103,7 +103,7 @@ python /path/to/BraneSim/orchestration/aws/launch_branesim_job.py \
   --job-name vortex-seed-64 \
   --project-archive /tmp/branesim-project.tar.gz \
   --volume-size-gb 40 \
-  --remote-command 'export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8; export BRANESIM_VORTEX_GRID=64 BRANESIM_VORTEX_NSLICES=32; python -m branesim.experiments.vortex_seed_render; RUN=$(ls -dt "${BRANESIM_RESULTS_DIR:-./runs}"/vortex_seed_* | head -1); mv "$RUN" "${RUN}_aws"'
+  --remote-command 'export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8; export BRANESIM_VORTEX_GRID=64 BRANESIM_VORTEX_NSLICES=32; python -m branesim.experiments.vortex_seed_render && { RUN=$(ls -dt "${BRANESIM_RESULTS_DIR:-./runs}"/vortex_seed_* | head -1); mv "$RUN" "${RUN}_aws"; }'
 ```
 
 ### Run provenance — encode AWS vs local in the run-dir name
