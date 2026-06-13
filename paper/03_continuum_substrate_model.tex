@@ -97,7 +97,7 @@ load-bearing mechanism by which Lorentz-like kinematics emerge for internal obse
 anisotropy.
 The decisive empirical test is whether two solitons in different orientations report the same effective metric;
 this is the central numerical objective of \Cref{sec:emergent-relativity} and is operationalised in the validation
-roadmap (Sprint~3).
+roadmap.
 
 \paragraph{Brillouin zone and geometric-phase diagnostics.}
 The lattice spacing $a$ defines a Brillouin zone $k_i\in[-\pi/a,\pi/a]$.
@@ -219,7 +219,7 @@ the exact slice-restricted potential (\Cref{eq:slice-potential}) is
         \Bigl(\bigl|R_{p+\delta} - R_p\bigr| - \alpha a\Bigr)^2.
   \label{eq:spring-potential-exact}
 \end{equation}
-This is the energy the simulation kernel \texttt{branesim/core/action.py} computes exactly.
+This is the energy the simulation kernel computes exactly.
 It is \emph{frame-indifferent}: it depends only on the Euclidean link length $|R_{p+\delta}-R_p|$,
 not on rigid motions of the ambient.
 The induced-metric line element $|\Delta R|^2 = |\partial_i\vecX\,\dd x^i|^2$ is the discrete
@@ -245,8 +245,7 @@ Consequently, \emph{all anharmonic physics vanishes as $\alpha\to 0$} (backbone~
 
 \paragraph{Continuum expansion: $W = W_2 + W_4 + \cdots$}
 In the long-wavelength regime ($a|k|\ll 1$, $|\nabla u|\ll 1$) the exact spring energy coarse-grains
-to a gradient expansion $W = W_2 + W_4 + \cdots$ derived in
-\texttt{paper/derivations/spring\_constitutive\_continuum\_limit.md}.
+to a gradient expansion $W = W_2 + W_4 + \cdots$.
 
 \smallskip
 \noindent\textbf{Leading term $W_2$ (linear elasticity).}
@@ -265,7 +264,7 @@ The Christoffel matrix along $k=k\hat{e}_1$ is diagonal, giving
   c_T^2 = (1-\alpha)\,\frac{k_s a^2}{m},
   \label{eq:wave-speeds-derived}
 \end{equation}
-in exact agreement with the lattice closed-form dispersion of \texttt{branesim/core/conventions.py}
+in exact agreement with the lattice closed-form dispersion
 (cross-checked at every $\alpha$).
 The effective Lam\'e parameters on the 6-neighbor stencil are
 \begin{equation}
