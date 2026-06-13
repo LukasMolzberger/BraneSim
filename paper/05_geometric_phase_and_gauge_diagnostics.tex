@@ -234,17 +234,18 @@ in a homogeneous medium with an extractable Wilson loop and Zitterbewegung-like 
 The present claim is the analogous statement for the mechanical polarization eigenbundle of the cubic brane, extended
 to the triplet sector.
 
-\Cref{fig:color-channels} shows the numerical apparatus that performs this decomposition on the seeded lateral triplet.
+\Cref{fig:color-channels} shows diagnostic D6 applied to the relaxed state, recording the channel decomposition on a non-converged transient.
 
 \begin{figure}[tbp]
   \centering
-  \includegraphics[width=\textwidth]{diagrams/exp_color_channels}
-  \caption{$U(1)$-trace / $SU(3)$-traceless channel decomposition of a seeded lateral triplet (diagnostic D6 of the numerical apparatus).
-  \textit{Top row, left:} per-channel lateral energy over time; for the pure-trace $Y_1^1$ seed the $U(1)$ trace channel carries essentially all energy.
-  \textit{Top row, centre:} channel-energy fraction ($U(1) + SU(3) = 1$, conserved); the $U(1)$ fraction reads ${\approx}1$, confirming the seed is correctly constructed as a pure-trace object.
+  \includegraphics[width=\textwidth]{diagrams/exp_relaxed_color_channels}
+  \caption{$U(1)$-trace / $SU(3)$-traceless channel decomposition (diagnostic D6) of the \emph{relaxed} state (same 12-step rotating-frame-periodic JFNK run as \Cref{fig:seed-snapshot}; residual per DOF $\approx 1.9\times10^{-4}$).
+  \textit{Top row, left:} per-channel lateral energy over time.
+  \textit{Top row, centre:} channel-energy fraction ($U(1) + SU(3) = 1$); the $SU(3)$ traceless channel is weakly excited at ${\approx}0.2\%$ of the total energy.
   \textit{Top row, right:} per-channel displacement amplitude over time.
-  \textit{Bottom row:} XY midplane amplitude maps of the $U(1)$ trace channel (left, donut ring) and the $SU(3)$ traceless channel (centre, consistent with near-zero amplitude for a pure-trace seed); per-lateral-component displacement as a function of time (right).
-  This figure validates the decomposition diagnostic for a pure-trace seed; it does \emph{not} claim that a dynamical simulation produces a mixed or bound $U(1)$--$SU(3)$ state (a question left open by \Cref{sec:scope}).}
+  \textit{Bottom row:} XY midplane amplitude maps of the $U(1)$ trace channel (left) and the $SU(3)$ traceless channel (centre); per-lateral-component displacement as a function of time (right).
+  Apparatus validation: on the pure-trace seed (iteration~0) the same diagnostic reads $U(1)$-fraction $\approx 1$, confirming the decomposition is correct.
+  The weak $SU(3)$ excitation (${\approx}0.2\%$) on the relaxed transient is reported as a diagnostic reading only; it is \emph{not} a demonstrated dynamical $U(1)\to SU(3)$ coexcitation or binding, which would require a converged eigenstate and controlled numerical verification (\Cref{sec:scope}, non-claims).}
   \label{fig:color-channels}
 \end{figure}
 

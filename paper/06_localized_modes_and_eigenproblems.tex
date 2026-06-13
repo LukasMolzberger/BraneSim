@@ -191,17 +191,20 @@ rather than by topology alone.
 Whether the substrate admits such a bound state is therefore an open, non-trivial dynamical question.
 A pure-trace ($U(1)$) excitation must wind the symmetric $(1,1,1)$ direction of the lateral triplet; a
 single-axis vortex is only $\tfrac13$ trace and $\tfrac23$ traceless and does not constitute a clean EM object.
-\Cref{fig:seed-snapshot} illustrates the VSH construction protocol for such a seed on the $112^3$ lattice.
+\Cref{fig:seed-snapshot} shows the outcome of a preliminary rotating-frame-periodic JFNK relaxation of that seed, illustrating the semilocal-modulus drift characteristic of a $U(1)$ vortex inside a dynamical $SU(3)$ sector.
 
 \begin{figure}[tbp]
   \centering
-  \includegraphics[width=\textwidth]{diagrams/exp_seed_snapshot}
-  \caption{Constructed $Y_1^1$ $U(1)$-trace vortex candidate seed on the $112^3$ lattice (solver-untouched initial condition, iteration~0).
+  \includegraphics[width=\textwidth]{diagrams/exp_relaxed_snapshot}
+  \caption{The same constructed $Y_1^1$ $U(1)$-trace vortex candidate on the $112^3$ lattice after 12 rotating-frame-periodic JFNK relaxation steps (the ``5th-axis'' relaxation); this is \emph{not} a converged eigenstate --- residual per degree of freedom $\approx 1.9\times10^{-4}$.
   \textit{Left:} XZ midplane, carrier phase encoded as RGB (ring cross-section --- two lobes, $\pi$ out of phase).
-  \textit{Centre:} XY midplane plan view, carrier phase as RGB (azimuthal $m{=}1$ winding visible as a full colour cycle around the ring).
-  \textit{Right:} XZ midplane amplitude; the $\sin\theta$ envelope of the $Y_1^1$ harmonic produces the donut cross-section with a dark axis.
-  This panel illustrates the VSH construction protocol (\Cref{sec:angular-structure}): the seed is a programmatic ansatz, not a demonstrated stable solution.
-  Which objects the substrate dynamics actually stabilizes remains open (\Cref{sec:scope}, non-claims; \texttt{OPEN\_PROBLEMS.md} D4).}
+  \textit{Centre:} XY midplane plan view, carrier phase as RGB (azimuthal winding pattern after relaxation).
+  \textit{Right:} XZ midplane amplitude; the core has drifted $\approx 19$ lattice units off the symmetry axis and the ring amplitude has become azimuthally asymmetric (fraction of $m\geq1$ azimuthal power $\approx 0.19$).
+  Additionally, the winding measured about the box axis reads $-2$ rather than the seeded $+1$.
+  These are the hallmarks of \emph{translational and size-modulus drift characteristic of a semilocal vortex}
+  \citep{VachaspatiAchucarro1991Semilocal,AchucarroVachaspati2000,Eto2021OrientationalModuli}: with the $SU(3)$ sector left dynamical, the $U(1)$ vortex is not topologically protected and possesses orientational moduli that drive it off center.
+  This is a non-converged transient; whether the substrate admits a stabilized localized branch requires branch-selection machinery not yet in place (future work).
+  No claim is made of a particle, emergent electromagnetism, or a stable soliton (\Cref{sec:scope}, non-claims; \texttt{OPEN\_PROBLEMS.md} D4).}
   \label{fig:seed-snapshot}
 \end{figure}
 
