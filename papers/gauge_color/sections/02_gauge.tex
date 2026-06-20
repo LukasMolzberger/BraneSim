@@ -175,13 +175,59 @@ A single spacelike slice is a real snapshot and carries no phase; two adjacent t
 minimum data that fix the $U(1)$.
 
 \subsection{Spinorial holonomy and the $4\pi$ aspect}
+\label{subsec:spinorial-holonomy}
 
 For an $n=2$ subspace (a two-level polarization bundle), holonomy lives in a double cover of $SO(3)$.
 A closed loop in physical space that induces a $2\pi$ rotation of an internal polarization frame can
 therefore produce a sign change of the transported state, while a $4\pi$ loop returns it to itself.
 This spinorial $4\pi$ aspect is attributed to Berry/Wilczek--Zee holonomy of the internal
 polarization bundle.
-Its connection to physical spin-$\tfrac12$ phenomenology is part of the matter bridge (Paper~IV).
+Connecting it to physical spin-$\tfrac12$ phenomenology is an open problem taken up at the
+soliton/matter level (Paper~IV): we expect spin-$\tfrac12$ to arise as a $\mathbb{Z}_2$ holonomy
+of a localized mode ($\pi_1(SO(3))=\mathbb{Z}_2$) rather than from the linear envelope.
+
+\subsection{Gauge--matter split: the Dirac envelope and charge as a conversion factor}
+\label{subsec:dirac-envelope}
+
+\paragraph{Dimensionful potential and the conversion factor $\eta$.}
+The connection $a_\mu$ of \eqref{eq:berry-connection} and the curvature entering the effective action
+\eqref{eq:Seff} are dimensionless geometric objects read off the polarization eigenbundle.
+For comparison with electromagnetic conventions one introduces a dimensionful potential
+\begin{equation}
+  A^{\mathrm{eff}}_\mu \;:=\; \eta\,a_\mu,
+  \qquad
+  F^{\mathrm{eff}}_{\mu\nu}
+  = \partial_\mu A^{\mathrm{eff}}_\nu - \partial_\nu A^{\mathrm{eff}}_\mu
+  = \eta\,f_{\mu\nu},
+  \label{eq:eta-conversion}
+\end{equation}
+and analogously in the non-Abelian sector.
+The conversion factor $\eta$ fixes units and would have to be determined by matching to experiment;
+it is \emph{not} introduced as a fundamental coupling in the microscopic substrate equations.
+
+\paragraph{Reinterpreting the Dirac field.}
+The standard Dirac field $\psi$ bundles particle labels and gauge coupling into a single object.
+In the present theory that mixture is reinterpreted as two pieces with distinct origins:
+\begin{itemize}
+  \item the \emph{particle sector} is a localized solitonic mode with additional internal structure
+  (topology/geometry and its associated labels), the subject of the matter bridge (Paper~IV);
+  \item the \emph{phase/gauge sector} is the Berry/Wilczek--Zee connection induced by adiabatic
+  transport of the band-isolated wavepacket's retained polarization subspace (its local
+  eigenbundle), \eqref{eq:berry-connection} and \eqref{eq:wz-connection}.
+\end{itemize}
+An effective Dirac-type envelope equation is then understood as a compact coupling of these two
+sectors rather than as a fundamental field.
+
+\paragraph{Charge as a normalization, not a fundamental coupling.}
+In this reading a ``charge''-like coupling parameter is not introduced as a fundamental constant of a
+new field; it appears as the conversion factor $\eta$ of \eqref{eq:eta-conversion} between the
+normalization conventions of the envelope field and the geometric connection extracted from the
+substrate.
+That a single parameter can set the relative normalization between Abelian and non-Abelian gauge
+sectors is itself familiar---e.g.\ the Abelian kinetic-mixing parameter
+\citep{Holdom1986KineticMixing,Fabbrichesi2021DarkPhoton} and the single charge-embedding parameter
+that fixes the Abelian-to-non-Abelian coupling ratio in extended gauge groups
+\citep{Hati2017LeftRight3331}.
 
 \subsection{Gauge bridge open problems}
 \label{subsec:gauge-open}

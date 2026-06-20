@@ -160,8 +160,9 @@ gravitational coupling are not independently tunable.
 
 ## 6. Relevant files
 
-- `paper/03_continuum_substrate_model.tex` — §gravity-channel, §constitutive-law, cone-speeds
-- `paper/04_emergent_relativity.tex` — analogue-metric interval (Step 5)
-- `paper/derivations/substrate/geometric_nonlinearity_alpha_scaling.md` — α source-coupling scaling
-- `paper/derivations/mass/time_link_binding.md` — Part 3, binding↔gravity single-dial co-variation
+- `papers/lorentz_gravity/sections/03_gravity.tex` — §gravity-channel (the gravity bridge)
+- `papers/core/sections/03_substrate_model.tex` — §constitutive-law, cone-speeds
+- `papers/lorentz_gravity/sections/02_lorentz.tex` — analogue-metric interval (Step 5)
+- `papers/core/derivations/geometric_nonlinearity_alpha_scaling.md` — α source-coupling scaling
+- `papers/matter_mass/derivations/mass/time_link_binding.md` — Part 3, binding↔gravity single-dial co-variation
 - `branesim/diagnostics/binding_probe.py` — extend or add `diagnostics/contraction_field.py`
