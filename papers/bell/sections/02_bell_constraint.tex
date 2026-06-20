@@ -36,29 +36,66 @@ The substrate of Paper~I satisfies (D) and (L) by construction:
 \end{itemize}
 Therefore (MI) must be relaxed.
 
-\subsection{Why superdeterminism is ruled out by the substrate ontology}
+\subsection{Why superdeterminism is the wrong way to relax (MI)}
+\label{subsec:no-superdeterminism}
 
 One way to relax (MI) is superdeterminism: the hidden state $\lambda$ is correlated with
 detector settings $a$, $b$ through a common past boundary condition, so $P(\lambda|a,b)\neq
 P(\lambda)$ even without any causal influence between $\lambda$ and the measurement choices.
 
-Superdeterminism is logically consistent but is closed off by the substrate's own ontology for
-two reasons:
+A first instinct is to rule this out by appeal to forward locality: a nearest-neighbor elastic
+medium evolving a Cauchy slice forward has no way to pre-arrange $\lambda$ to anticipate a future
+knob setting.
+We do \emph{not} use this argument, and the reader should note why: it is inconsistent with the
+substrate ontology we actually adopt.
+The brane action is time-symmetric and the physical configuration is the stationary point of a
+local action over the \emph{entire} 4D world-volume, fixed by boundary data on past \emph{and}
+future endcaps (\Cref{sec:worldtube}); it is not a forward-evolved initial-value problem.
+An argument that assumes forward evolution would presuppose exactly the causal structure that
+retrocausality discards.
+The distinction between superdeterminism and retrocausality must therefore be drawn at the level
+of \emph{global, all-at-once} dynamics, where both live.
 
-\paragraph{No coordination mechanism.}
-The substrate is a local elastic medium with nearest-neighbor dynamics.
-It has no mechanism to produce microscopic initial correlations between the degrees of freedom
-that will later constitute detector orientations (macroscopic, made by experimenters) and the
-hidden-variable state of an entangled pair prepared at an earlier time and place.
-Such coordination would require either a non-local coupling (violating (L)) or an elaborate
-fine-tuning of the initial state that is itself unexplained by the substrate dynamics.
+\paragraph{The discriminator is mechanism versus fine-tuning, not global determination.}
+It is tempting to think that fixing the whole 4D block at once is already superdeterministic.
+It is not. ``All-at-once'' global determination is shared by Hamilton's principle, the classical
+electromagnetic action, general relativity, and the Wheeler--Feynman absorber theory --- none of
+which is regarded as a conspiracy.
+What makes superdeterminism conspiratorial is not that the history is fixed globally, but
+\emph{how} the correlation $P(\lambda|a,b)\neq P(\lambda)$ is produced:
+\begin{itemize}
+  \item \textbf{Superdeterminism} sources the correlation from \emph{special, lawless initial
+  data}: a finely arranged configuration on the past boundary, different for every experiment,
+  not derived from any dynamical principle, with the setting effectively slaved to the same data
+  rather than freely chosen.
+  \item \textbf{Retrocausality / all-at-once} sources it from a \emph{uniform local law}: the
+  same minimal action functional couples the freely chosen future boundary data to the emission
+  state along the worldtube, via local Euler--Lagrange equations.
+\end{itemize}
+A stationary point of a minimal \emph{local} action is the opposite of a fine-tuned state: it is
+the generic, law-selected configuration for whatever boundary data are posed, and the setting
+$a$ remains a free boundary input that may be varied at will, with the block re-solving under the
+same fixed action.
+The substrate's correlation therefore lives in the \emph{law}, not in tuned past data.
+This is precisely the ``all-at-once'' (Lagrangian-schema) reading of quantum mechanics developed
+by Wharton and collaborators \citep{Wharton2015NotAComputer,WhartonArgaman2020} and the atemporal
+notion of lawhood analyzed by Adlam \citep{Adlam2018SpookyTemporal}, both of which dissolve the
+superdeterminism charge for global-constraint theories on exactly these grounds.
+Superdeterminism, by contrast, hides unexplained correlations in an unobservable initial state
+\citep{Hossenfelder2020Superdeterminism} and so undoes the substrate programme's aim of deriving
+structure from minimal commitments.
 
-\paragraph{Explanatory circularity.}
-Superdeterminism explains observed correlations by positing correlations in initial conditions.
-The initial conditions are not derived from the substrate dynamics; they are assumed.
-The substrate hypothesis is precisely an attempt to \emph{derive} structure from minimal
-commitments; invoking superdeterminism undoes this programme by hiding the correlations in an
-unobservable past \citep{Hossenfelder2020Superdeterminism}.
+\paragraph{The one residual fine-tuning, named honestly.}
+The substrate ontology does retain one genuine tuning: the cosmological boundary data --- the
+low-entropy ``past hypothesis'' / Big-Bang-vertex condition that fixes a single direction as time
+throughout the brane (\Cref{sec:worldtube}).
+This is real, but it is the \emph{universal} initial-condition problem of all of physics, not the
+Bell-specific conspiracy.
+Superdeterminism requires $\lambda$ to be pre-correlated with each \emph{future detector setting}
+in the past data; the all-at-once block does not --- the $\lambda$--$a$ correlation is supplied
+by the future boundary through the law.
+The substrate thus inherits the ordinary past-hypothesis puzzle while declining the Bell
+conspiracy.
 
 \subsection{Retrocausality as the unique remaining option}
 
@@ -85,8 +122,9 @@ In the specific context of a locally-interacting 4D brane lattice, the options a
   \item Give up (D): not available (the substrate is deterministic by construction).
   \item Give up (L) via a nonlocal hidden-variable mechanism: not available without adding
   superluminal influence channels beyond the spring-lattice dynamics.
-  \item Give up (MI) via superdeterminism: ruled out by the substrate's lack of a coordination
-  mechanism, as above.
+  \item Give up (MI) via superdeterminism: rejected because it sources the correlation from
+  fine-tuned, lawless initial data with non-free settings, rather than from the substrate's
+  uniform local action (\Cref{subsec:no-superdeterminism}).
   \item Give up (MI) via retrocausality: available; requires only the 4D worldtube structure
   already present in the substrate ontology.
 \end{enumerate}
