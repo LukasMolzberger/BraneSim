@@ -1,6 +1,30 @@
 \section{Matter bridge: solitons as self-adjoint eigenproblems}
 \label{sec:matter}
 
+\subsection{Spherical material coordinates (coordinate change only)}
+\label{subsec:spherical-material-coords}
+
+Localized particle-like states are organized most naturally in a spherical chart on the
+intrinsic brane domain. We record the relevant coordinate change here, before linearizing.
+
+\paragraph{Important: this is only a coordinate change.}
+All dynamical statements remain those of the coordinate-free formulation
+$\vecX:\Omega\times\R\to\R^4$ with induced metric $g_{ij}=\partial_i\vecX\cdot\partial_j\vecX$.
+We introduce spherical coordinates on the \emph{intrinsic/material} domain as a convenient chart for localized
+excitations; this does \emph{not} constrain the embedding $\vecX$.
+
+Let $(r,\theta,\varphi)$ be the standard spherical chart on (a subset of) $\R^3$, with Jacobian
+$J(r,\theta,\varphi)=r^2\sin\theta$.
+Writing the intrinsic coordinate as $q^a\in\{r,\theta,\varphi\}$ and denoting derivatives in this chart by $\partial_a$,
+the equations of motion (\Cref{eq:eom} of Paper~I) become
+\begin{equation}
+  \rho_m\,\partial_{tt}X^A
+  =\frac{1}{J(q)}\,\partial_a\!\Big(J(q)\,P_A^{\;a}\Big),
+  \qquad A=1,\dots,4,
+  \label{eq:eom-spherical}
+\end{equation}
+which is exactly the Cartesian divergence form (\Cref{eq:eom} of Paper~I) written with the standard Jacobian factor.
+
 \subsection{Linearization about symmetric backgrounds}
 \label{subsec:linearization}
 
