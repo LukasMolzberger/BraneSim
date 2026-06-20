@@ -105,62 +105,8 @@ therefore how well an Abelian gauge description can apply.
 
 The Berry/Wilczek--Zee connection is meaningful only when it is tied to a specific eigenbundle (or transported
 subspace) and when the reported observables are gauge-invariant.
-For numerical experiments on the lattice substrate, the following protocol provides a concrete, reproducible
-procedure to extract holonomy/curvature and to rule out common artifacts.
-
-\begin{center}
-\fbox{\begin{minipage}{0.95\linewidth}
-\textbf{Protocol}
-\begin{enumerate}
-\item \textbf{Carrier isolation / complexification.}
-The primary route to the complex envelope is the time-quadrature construction: given the real substrate field
-$\xi$ and its time-derivative, form $\Psi\approx\xi+(i/\omega_0)\dot\xi$, where $i\partial_t\Psi=H_{\mathrm{eff}}\Psi$
-and $\omega_0$ is the local carrier frequency (\Cref{subsec:bz-berry}; \Cref{eq:quasi-monochromatic}).
-This complexification is well-defined whenever the field is narrowband around $\omega_0$ and is the construction
-that makes the gauge base space $(x,t)$ rather than a spatial slice.
-For a propagating wavepacket, an alternative is band-pass filtering in time or short-time Fourier methods; both
-routes must produce the same complex envelope in the narrowband regime.
-
-\item \textbf{Define the instantaneous polarization object.}
-At each spacetime point (or each sample along a loop), define either
-(i) a normalized rank-1 state $\lvert u(x)\rangle$ for an isolated band, or
-(ii) an $n$-dimensional subspace projector $P(x)$ (or an orthonormal frame $\mathbf{E}(x)$) for a near-degenerate
-sector.
-The definition should be tied to the \emph{local linearized carrier problem} about the slowly varying background at $x$
-(cf.\ \Cref{subsec:berry-of}).
-
-\item \textbf{Measure the adiabaticity/gap indicators.}
-Estimate a local band gap $\Delta\omega_{\mathrm{gap}}(x)$ (separation to the nearest competing band) and a mode-leakage
-proxy along the transport path (e.g.\ growth of energy outside the chosen band/subspace).
-Use these to empirically validate the adiabatic criterion \Cref{eq:adiabatic-condition}.
-
-\item \textbf{Holonomy from overlaps (gauge-invariant).}
-For a discretized loop $\Gamma: x_0\!\to x_1\!\to\cdots\to x_m=x_0$:
-\begin{itemize}
-\item \emph{Abelian (rank-1):} define links
-$U_k=\frac{\langle u(x_k)\,|\,u(x_{k+1})\rangle}{|\langle u(x_k)\,|\,u(x_{k+1})\rangle|}\in U(1)$ and report the loop phase
-$\gamma_\Gamma=\arg\!\big(\prod_{k=0}^{m-1}U_k\big)$.
-\item \emph{Non-Abelian (rank-$n$):} define overlap matrices $M_k=\mathbf{E}(x_k)^\dagger\mathbf{E}(x_{k+1})$ and extract their
-unitary part (e.g.\ by polar decomposition) as $U_k\in U(n)$.
-Report the holonomy matrix $U_\Gamma=\prod_{k=0}^{m-1}U_k$ and gauge-invariant summaries such as
-$\mathrm{spec}(U_\Gamma)$ and $\mathrm{tr}(U_\Gamma)$.
-\end{itemize}
-
-\item \textbf{Curvature by small loops / plaquettes.}
-Approximate curvature by evaluating holonomy around small loops and dividing by enclosed area (real-space),
-or use the link-variable Brillouin-zone construction in \Cref{subsec:bz-berry} (momentum-space).
-\end{enumerate}
-
-\textbf{Artifact controls (required for credibility).}
-\begin{itemize}
-\item \textbf{Gauge randomization test:} apply arbitrary local phase choices (rank-1) or local $U(n)$ frame rotations (rank-$n$) and
-confirm that reported invariants (e.g.\ $\gamma_\Gamma$, $\mathrm{spec}(U_\Gamma)$) do not change.
-\item \textbf{Resolution/convergence:} verify stability of invariants under refinement of $\Delta t$, lattice spacing, and loop sampling density.
-\item \textbf{Adiabatic breakdown demonstration:} intentionally violate \Cref{eq:adiabatic-condition} and show that the extracted holonomy
-becomes non-robust (strong dependence on sampling/path or visible subspace leakage), distinguishing geometry from beating.
-\end{itemize}
-\end{minipage}}
-\end{center}
+The gauge-invariant diagnostic for numerical experiments is holonomy computed from overlap products along discretized loops: for the Abelian case, $\gamma_\Gamma = \arg\!\big(\prod_k \langle u(x_k)|u(x_{k+1})\rangle/|\cdots|\big)$; for the non-Abelian case, the holonomy matrix $U_\Gamma = \prod_k U_k$ where each $U_k$ is the unitary part of the overlap matrix $\mathbf{E}(x_k)^\dagger\mathbf{E}(x_{k+1})$.
+Gauge invariance of all reported invariants must be verified by applying arbitrary local frame rotations and confirming that $\mathrm{spec}(U_\Gamma)$ and $\gamma_\Gamma$ are unchanged.
 
 The same holonomy-from-overlaps machinery (Steps 3--4) applies without modification to a stationary localized
 eigenmode on a closed periodic worldtube, where the carrier frequency $\omega_0$ is fixed by the loop-closure
@@ -233,18 +179,14 @@ in a homogeneous medium with an extractable Wilson loop and Zitterbewegung-like 
 The present claim is the analogous statement for the mechanical polarization eigenbundle of the cubic brane, extended
 to the triplet sector.
 
-\Cref{fig:color-channels} shows diagnostic D6 applied to the relaxed state, recording the channel decomposition on a non-converged transient.
+The $U(1)$-trace / $SU(3)$-traceless channel decomposition (diagnostic D6) applied to the same preliminary run is shown in \Cref{fig:color-channels}.
 
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{diagrams/exp_relaxed_color_channels}
-  \caption{$U(1)$-trace / $SU(3)$-traceless channel decomposition (diagnostic D6) of the \emph{relaxed} state (same 12-step rotating-frame-periodic JFNK run as \Cref{fig:seed-snapshot}; residual per DOF $\approx 1.9\times10^{-4}$).
-  \textit{Top row, left:} per-channel lateral energy over time.
-  \textit{Top row, centre:} channel-energy fraction ($U(1) + SU(3) = 1$); the $SU(3)$ traceless channel is weakly excited at ${\approx}0.2\%$ of the total energy.
-  \textit{Top row, right:} per-channel displacement amplitude over time.
-  \textit{Bottom row:} XY midplane amplitude maps of the $U(1)$ trace channel (left) and the $SU(3)$ traceless channel (centre); per-lateral-component displacement as a function of time (right).
-  Apparatus validation: on the pure-trace seed (iteration~0) the same diagnostic reads $U(1)$-fraction $\approx 1$, confirming the decomposition is correct.
-  The weak $SU(3)$ excitation (${\approx}0.2\%$) on the relaxed transient is reported as a diagnostic reading only; it is \emph{not} a demonstrated dynamical $U(1)\to SU(3)$ coexcitation or binding, which would require a converged eigenstate and controlled numerical verification (\Cref{sec:scope}, non-claims).}
+  \caption{$U(1)$-trace / $SU(3)$-traceless channel decomposition (diagnostic D6) of a non-converged rotating-frame-periodic JFNK transient (residual per DOF $\approx 1.9\times10^{-4}$).
+  The $SU(3)$ traceless channel carries ${\approx}0.2\%$ of the total energy.
+  This is a diagnostic reading on a preliminary run, not a demonstrated dynamical coexcitation or binding; a converged eigenstate has not been obtained.}
   \label{fig:color-channels}
 \end{figure}
 

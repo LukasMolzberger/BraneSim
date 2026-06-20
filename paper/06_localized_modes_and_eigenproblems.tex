@@ -182,29 +182,21 @@ The theory contains two distinct particle sectors with different topology and th
 questions; neither has yet been demonstrated as a stable self-consistent solution.
 
 \paragraph{Target 1: the $U(1)$ carrier-phase vortex (electromagnetic / electron-like sector).}
-The $U(1)$ trace sector supports line vortices ($\pi_1(U(1))=\mathbb{Z}$), which appear as codimension-2
-objects --- a loop in a 3D spatial slice, a closed worldsheet in 4D.
-However, once the $SU(3)$ sector is unfrozen the full vacuum manifold is simply connected, so this vortex is
-\emph{not} topologically protected: it is a semilocal vortex, stable only as a dynamical bound state
-(in the type-I regime $\beta=(m_{\mathrm{scalar}}/m_{\mathrm{vector}})^2<1$, below the Bogomol'nyi point)
-rather than by topology alone.
-Whether the substrate admits such a bound state is therefore an open, non-trivial dynamical question.
-A pure-trace ($U(1)$) excitation must wind the symmetric $(1,1,1)$ direction of the lateral triplet; a
-single-axis vortex is only $\tfrac13$ trace and $\tfrac23$ traceless and does not constitute a clean EM object.
-\Cref{fig:seed-snapshot} shows the outcome of a preliminary rotating-frame-periodic JFNK relaxation of that seed, illustrating the semilocal-modulus drift characteristic of a $U(1)$ vortex inside a dynamical $SU(3)$ sector.
+The $U(1)$ trace sector supports line vortices ($\pi_1(U(1))=\mathbb{Z}$), appearing as codimension-2 objects in 3D.
+However, once the $SU(3)$ sector is unfrozen the vacuum manifold is simply connected, so this vortex is
+\emph{not} topologically protected: it is a semilocal vortex \citep{VachaspatiAchucarro1991Semilocal,AchucarroVachaspati2000}, stable only as a dynamical bound state rather than by topology.
+A preliminary rotating-frame-periodic JFNK relaxation of a $Y_1^1$ pure-trace vortex seed on a $112^3$ lattice did not converge: the core drifted $\approx 19$ lattice units off the symmetry axis, the ring amplitude became azimuthally asymmetric, and the measured winding changed sign relative to the seed (\Cref{fig:seed-snapshot}).
+This is the expected signature of semilocal orientational moduli \citep{Eto2021OrientationalModuli}: with a dynamical $SU(3)$ sector, the $U(1)$ vortex is free to drift.
+A converged eigenstate has not been obtained; branch-selection machinery for stabilizing the semilocal vortex remains future work.
 
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{diagrams/exp_relaxed_snapshot}
-  \caption{The same constructed $Y_1^1$ $U(1)$-trace vortex candidate on the $112^3$ lattice after 12 rotating-frame-periodic JFNK relaxation steps (the ``5th-axis'' relaxation); this is \emph{not} a converged eigenstate --- residual per degree of freedom $\approx 1.9\times10^{-4}$.
-  \textit{Left:} XZ midplane, carrier phase encoded as RGB (ring cross-section --- two lobes, $\pi$ out of phase).
-  \textit{Centre:} XY midplane plan view, carrier phase as RGB (azimuthal winding pattern after relaxation).
-  \textit{Right:} XZ midplane amplitude; the core has drifted $\approx 19$ lattice units off the symmetry axis and the ring amplitude has become azimuthally asymmetric (fraction of $m\geq1$ azimuthal power $\approx 0.19$).
-  Additionally, the winding measured about the box axis reads $-2$ rather than the seeded $+1$.
-  These are the hallmarks of \emph{translational and size-modulus drift characteristic of a semilocal vortex}
-  \citep{VachaspatiAchucarro1991Semilocal,AchucarroVachaspati2000,Eto2021OrientationalModuli}: with the $SU(3)$ sector left dynamical, the $U(1)$ vortex is not topologically protected and possesses orientational moduli that drive it off center.
-  This is a non-converged transient; whether the substrate admits a stabilized localized branch requires branch-selection machinery not yet in place (future work).
-  No claim is made of a particle, emergent electromagnetism, or a stable soliton (\Cref{sec:scope}, non-claims).}
+  \caption{Preliminary $U(1)$-trace vortex candidate after 12 rotating-frame-periodic JFNK relaxation steps on a $112^3$ lattice (residual per DOF $\approx 1.9\times10^{-4}$; not a converged eigenstate).
+  \textit{Left:} XZ midplane, carrier phase as RGB.
+  \textit{Centre:} XY midplane plan view.
+  \textit{Right:} XZ midplane amplitude, showing core drift and azimuthal asymmetry characteristic of semilocal-vortex orientational moduli.
+  No claim is made of a stable soliton or emergent electromagnetism.}
   \label{fig:seed-snapshot}
 \end{figure}
 
