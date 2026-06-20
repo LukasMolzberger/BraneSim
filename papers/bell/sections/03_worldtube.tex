@@ -1,0 +1,129 @@
+\section{The retrocausal worldtube interpretation}
+\label{sec:worldtube}
+
+\subsection{Time-symmetry of the substrate action}
+
+The brane action of Paper~I (\Cref{eq:action}) is time-symmetric.
+Its Lorentzian sign structure selects a \emph{kind} of direction --- timelike vs spacelike ---
+but the action is invariant under reversal of the timelike coordinate, $t\mapsto -t$.
+Neither the kinetic term nor the elastic potential distinguishes past from future.
+This means the substrate has no intrinsic arrow of time: both forward-in-time and
+backward-in-time solutions to \Cref{eq:eom} of Paper~I are equally valid.
+
+\subsection{Causality from soliton chirality}
+\label{subsec:soliton-chirality}
+
+If the substrate has no intrinsic arrow of time, where does the empirical arrow of time come from?
+
+In the retrocausal worldtube reading, the arrow of time is a property of \emph{solitons}, not of
+the substrate.
+A soliton solution to the substrate equations of motion (\Cref{eq:eom} of Paper~I) may propagate
+forward or backward along the brane's timelike axis.
+The choice of direction is the \emph{chirality} of the soliton: a topological/dynamical property
+of the solution analogous to the handedness of a Skyrme texture.
+\begin{itemize}
+  \item \textbf{Matter solitons} are forward-propagating worldtubes: their chirality selects
+  the future direction as the direction of propagation.
+  \item \textbf{Antimatter solitons} are backward-propagating worldtubes: their chirality selects
+  the past direction.
+\end{itemize}
+This realizes the Feynman--Stueckelberg interpretation of antiparticles as time-reversed particles
+\citep{Stueckelberg1941,Feynman1949ApproachQED} at the level of substrate soliton solutions,
+rather than as an interpretive remark attached to a Lorentz-invariant field theory after the
+fact.
+
+\paragraph{Cosmological asymmetry.}
+The empirical excess of matter over antimatter is, on this reading, a \emph{geometric
+initial-condition asymmetry}: matter and antimatter solitons emerge from the Big Bang vertex
+propagating in opposite time directions along the brane's selected timelike axis, and our
+observable universe is the forward-propagating branch.
+This differs structurally from Sakharov-condition baryogenesis \citep{Sakharov1967CPviolation},
+which requires the same time direction to host both matter and antimatter with a small dynamical
+asymmetry favouring matter.
+Here, the asymmetry is not dynamical but geometric: the two branches simply do not share the same
+observable volume.
+
+\subsection{Entanglement as V-branching worldtubes}
+\label{subsec:v-branching}
+
+An entangled pair of solitons, on the present reading, is \emph{one} branching 4D world-volume
+whose worldtube splits at a V-vertex in the shared past.
+
+\paragraph{Mechanism.}
+Each branch of the world-volume propagates forward to a measurement event.
+The boundary condition imposed by a measurement on one branch is not transmitted
+\emph{sideways} through space to the other branch (which would be a spacelike influence,
+violating (L)).
+Instead, it propagates \emph{backward} along the branch's own worldtube to the V-vertex in the
+shared past, and from there \emph{forward} along the other branch to the distant measurement.
+The V-vertex is the mediator; no spacelike signal is required.
+
+\paragraph{Locality along each worldline.}
+The correlation is:
+\begin{itemize}
+  \item \emph{local along each worldline}: no influence crosses a spacelike boundary at any
+  step of the propagation.
+  \item \emph{deterministic given the full 4D configuration}: the correlation is fixed by the
+  worldtube geometry and the V-vertex boundary condition.
+  \item \emph{Bell-inequality-violating}: the joint measurement context --- both settings $a$ and
+  $b$ --- affects the past of both branches via the V-vertex, so the standard factorizability
+  assumption of Bell's derivation fails.
+\end{itemize}
+The 4D world-volume picture promotes ``spooky action at a distance'' to ``ordinary continuity of
+one extended elastic object.''
+
+\paragraph{No preferred foliation required.}
+Unlike Bohmian mechanics, this picture does not require a preferred spacelike foliation.
+The correlation propagates along the worldtube in a covariant, 4D-in-4D sense.
+The effective Lorentz symmetry of Paper~II constrains which foliations are observationally
+available to inside observers, but the worldtube itself is a 4D geometric object prior to any
+foliation choice.
+
+\subsection{Implications for the simulation program}
+
+The retrocausal worldtube reading reshapes how the simulation program of Papers~II--IV should
+interpret its own results.
+
+\paragraph{Eigenstates as worldtubes.}
+A converged periodic-BC eigenstate (Paper~IV \Cref{subsec:periodic-bc}) is not a static snapshot;
+it is a closed 4D worldtube on which the substrate field satisfies the time-symmetric equations of
+motion with a periodic closure condition.
+The carrier frequency $\omega_0$ fixed by the closure condition $\omega T = 2\pi n$ is the
+timelike winding number of the worldtube, not a clock reading.
+
+\paragraph{Entanglement test.}
+The V-branching picture makes a concrete simulation prediction: two solitons initialized with
+correlated phases at a common point in spacetime should maintain those correlations over
+spacelike separation in a way that --- when the full 4D worldtube is inspected --- is traceable
+to continuity through the V-vertex, not to any spacelike link.
+A simulation that finds correlation without spacelike signal is consistent with the retrocausal
+reading; one that requires adding a nonlocal coupling is not.
+
+\paragraph{Matter vs antimatter.}
+Two soliton solutions with opposite chirality (forward vs backward propagating) should appear as
+particle--antiparticle pairs: identical mass and spin, opposite quantum numbers, and opposite
+time orientation of the closed worldtube.
+A simulation that finds such paired solutions would directly confirm the soliton-chirality
+mechanism.
+
+\subsection{Open problems}
+\label{subsec:bell-open}
+
+\begin{enumerate}
+  \item \textbf{Explicit chirality classification.}
+  Define the soliton chirality quantum number precisely in terms of the topological winding
+  (Paper~IV \Cref{eq:soliton-labels}) and the time orientation of the worldtube closure condition.
+  Show that two solutions related by $t\mapsto -t$ carry opposite chirality.
+
+  \item \textbf{V-vertex simulation.}
+  Simulate two solitons initialized at a common point with opposite time orientations; verify that
+  the subsequent 4D world-volumes share a V-vertex and exhibit correlated behavior at their
+  respective measurement endpoints without any spacelike signal.
+
+  \item \textbf{Born-rule recovery.}
+  Identify the substrate mechanism that produces apparent Born-rule statistics from the
+  deterministic worldtube dynamics.
+  The candidate mechanism (Paper~IV \Cref{subsec:mass-picture}): Fourier-localization constraints
+  on wavepacket overlaps combined with nonlinear exchange events at the V-vertex.
+  A quantitative model is not yet available.
+\end{enumerate}

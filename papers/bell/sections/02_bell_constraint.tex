@@ -1,0 +1,116 @@
+\section{The Bell constraint and the uniqueness argument}
+\label{sec:bell-constraint}
+
+\subsection{Bell's theorem and its assumptions}
+
+Bell's theorem rules out theories that are simultaneously:
+\begin{enumerate}
+  \item[(D)] \emph{Deterministic}: hidden variables $\lambda$ fully fix outcomes given the
+  measurement settings $a$, $b$.
+  \item[(L)] \emph{Local}: the outcome at one wing depends only on the local setting and $\lambda$,
+  not on the setting at the distant wing.
+  \item[(MI)] \emph{Measurement-independent}: the joint distribution of hidden variables and
+  detector settings factorizes, $P(\lambda,a,b)=P(\lambda)P(a,b)$, so the hidden state is
+  statistically independent of the measurement choices.
+\end{enumerate}
+Any theory satisfying all three reproduces only correlations bounded by the Bell inequalities
+\citep{Bell1964,CHSH1969}.
+The experimental violation of Bell inequalities --- now with all standard loopholes closed
+\citep{Hensen2015,Giustina2015,Shalm2015} --- therefore implies that at least one of (D), (L),
+(MI) must be given up by any classical-substrate completion.
+
+\subsection{Which assumption the substrate can give up}
+
+The substrate of Paper~I satisfies (D) and (L) by construction:
+\begin{itemize}
+  \item \textbf{(D) is non-negotiable.} The equations of motion (\Cref{eq:eom} of Paper~I) are
+  second-order hyperbolic PDEs with deterministic initial-value evolution.
+  Any probabilistic appearance at the macroscopic level must be emergent (Paper~IV
+  \Cref{subsec:mass-picture}), not fundamental.
+  Giving up (D) would discard the substrate hypothesis itself.
+
+  \item \textbf{(L) is non-negotiable.} The substrate forces are nearest-neighbor spring contacts.
+  Information propagates at finite speed ($c_T$ or $c_L$, Paper~I \Cref{eq:wave-speeds-derived}).
+  Giving up (L) would require adding a new superluminal interaction channel to the substrate ---
+  an entirely different model.
+\end{itemize}
+Therefore (MI) must be relaxed.
+
+\subsection{Why superdeterminism is ruled out by the substrate ontology}
+
+One way to relax (MI) is superdeterminism: the hidden state $\lambda$ is correlated with
+detector settings $a$, $b$ through a common past boundary condition, so $P(\lambda|a,b)\neq
+P(\lambda)$ even without any causal influence between $\lambda$ and the measurement choices.
+
+Superdeterminism is logically consistent but is closed off by the substrate's own ontology for
+two reasons:
+
+\paragraph{No coordination mechanism.}
+The substrate is a local elastic medium with nearest-neighbor dynamics.
+It has no mechanism to produce microscopic initial correlations between the degrees of freedom
+that will later constitute detector orientations (macroscopic, made by experimenters) and the
+hidden-variable state of an entangled pair prepared at an earlier time and place.
+Such coordination would require either a non-local coupling (violating (L)) or an elaborate
+fine-tuning of the initial state that is itself unexplained by the substrate dynamics.
+
+\paragraph{Explanatory circularity.}
+Superdeterminism explains observed correlations by positing correlations in initial conditions.
+The initial conditions are not derived from the substrate dynamics; they are assumed.
+The substrate hypothesis is precisely an attempt to \emph{derive} structure from minimal
+commitments; invoking superdeterminism undoes this programme by hiding the correlations in an
+unobservable past \citep{Hossenfelder2020Superdeterminism}.
+
+\subsection{Retrocausality as the unique remaining option}
+
+The only remaining way to relax (MI) without adding a coordination mechanism is to allow the
+future measurement context to influence the past state of the particle along its worldtube.
+This is the \emph{retrocausal} option:
+\begin{quote}
+  $P(\lambda | a, b) \neq P(\lambda)$ because the future boundary condition set by
+  measurement $a$ back-propagates along the worldtube to the emission event, correlating
+  $\lambda$ with $a$ without any spacelike influence.
+\end{quote}
+This requires only what the 4D brane action already provides: a 4D world-volume in which future
+boundary conditions are as natural as past ones (\Cref{sec:interfaces}).
+
+\paragraph{Counter to the objection that retrocausality is not uniquely forced.}
+A common objection is that retrocausality is not the \emph{only} option: one could add explicit
+nonlocal hidden variables (e.g.\ pilot-wave / Bohmian mechanics) that respect (D) and (MI) while
+giving up the \emph{local} sense of (L).
+This is correct in the abstract, but Bohmian nonlocality requires a preferred foliation and a
+nonlocal guidance equation --- structures that conflict with the substrate's local elastic
+ontology.
+In the specific context of a locally-interacting 4D brane lattice, the options are:
+\begin{enumerate}
+  \item Give up (D): not available (the substrate is deterministic by construction).
+  \item Give up (L) via a nonlocal hidden-variable mechanism: not available without adding
+  superluminal influence channels beyond the spring-lattice dynamics.
+  \item Give up (MI) via superdeterminism: ruled out by the substrate's lack of a coordination
+  mechanism, as above.
+  \item Give up (MI) via retrocausality: available; requires only the 4D worldtube structure
+  already present in the substrate ontology.
+\end{enumerate}
+Under the specific commitments of this substrate --- deterministic, locally-interacting, 4D
+brane --- retrocausality is therefore the unique consistent completion.
+This is a stronger claim than the general statement that retrocausality is \emph{a} consistent
+option; it is the claim that it is the \emph{only} option the substrate's own dynamics supports.
+
+\subsection{Relation to existing retrocausal interpretations}
+
+The retrocausal worldtube reading places itself in the same interpretive family as:
+\begin{itemize}
+  \item the two-state-vector formalism of Aharonov and collaborators
+  \citep{AharonovBergmannLebowitz1964,Aharonov2008TSVF}, which assigns both a forward-propagating
+  and a backward-propagating state to each quantum system;
+  \item Cramer's transactional interpretation \citep{Cramer1986TI}, in which a transaction is
+  completed by a retarded offer wave and an advanced confirmation wave;
+  \item the retrocausal models of Price and Wharton \citep{PriceWharton2015Retrocausality}, which
+  systematically develop the ontological consequences of time-symmetric dynamics;
+  \item Sutherland's time-symmetric Bohmian model \citep{Sutherland2017}, which grounds
+  retrocausality in a concrete pilot-wave picture.
+\end{itemize}
+The present theory differs from all of these in one structural respect: the retrocausal
+propagation is not imposed as an interpretive rule on top of a forward-causal dynamics.
+It is \emph{built into the substrate action}, which is time-symmetric by construction.
+The retrocausal interpretation is therefore not an add-on; it is the direct reading of what the
+brane action says.

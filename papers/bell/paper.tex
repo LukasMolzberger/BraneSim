@@ -1,0 +1,106 @@
+\documentclass[symmetry,article,submit,pdftex,oneauthor]{Definitions/mdpi}
+
+%=================================================================
+% MDPI internal commands — do not modify
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2026}
+\copyrightyear{2026}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+
+%=================================================================
+% Restore bold run-in style for \paragraph (MDPI class strips it)
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titlespacing{\paragraph}{0pt}{6pt}{6pt}
+
+%=================================================================
+% Additional packages not included in mdpi.cls
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{xr}
+\externaldocument{../core/paper}
+\externaldocument{../matter_mass/paper}
+
+%=================================================================
+% Notation helpers (not loaded by mdpi.cls)
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{\mathbb{T}}
+\providecommand{\dd}{\mathrm{d}}
+\providecommand{\ii}{\mathrm{i}}
+\providecommand{\e}{\mathrm{e}}
+\newcommand{\qq}{\quad}
+\newcommand{\veck}{\mathbf{k}}
+\newcommand{\vecX}{\mathbf{X}}
+\newcommand{\vecu}{\mathbf{u}}
+\newcommand{\vecv}{\mathbf{v}}
+\newcommand{\vecY}{\mathbf{Y}}
+\newcommand{\Lag}{\mathcal{L}}
+
+%=================================================================
+% Title, author, affiliation
+\Title{The Bell Boundary Condition: Retrocausal Worldtube Interpretation of a Deterministic Brane-Lattice Substrate (Paper~V)}
+
+\Author{Lukas Molzberger}
+
+\AuthorNames{Lukas Molzberger}
+
+\address{Independent researcher; lukas.molzberger@gmx.de}
+
+\corres{Correspondence: lukas.molzberger@gmx.de}
+
+%=================================================================
+% Abstract and keywords
+\abstract{Bell's theorem rules out theories that are simultaneously deterministic (D), local (L), and measurement-independent (MI). The deterministic brane-lattice substrate of Paper~I satisfies (D) by construction and (L) by its nearest-neighbor spring dynamics; (MI) must therefore be relaxed. We argue that, within the specific ontology of this substrate, the retrocausal loophole is not merely \emph{a} consistent option but the \emph{unique} consistent completion: superdeterminism is ruled out because the local elastic medium has no mechanism to coordinate microscopic initial conditions with macroscopic measurement choices at spacelike separation, and nonlocal hidden-variable completions require adding superluminal influence channels absent from the spring-lattice dynamics. The retrocausal worldtube reading follows directly from the time-symmetry of the brane action, which selects a \emph{kind} of direction (timelike vs spacelike) but not a \emph{direction} along the timelike axis. The arrow of time emerges at the soliton level: matter solitons are forward-propagating worldtubes; antimatter solitons are backward-propagating worldtubes, realizing the Feynman--Stueckelberg interpretation at the level of substrate solutions. An entangled pair is one branching 4D world-volume splitting at a V-vertex in the shared past; correlations propagate backward along one branch to the V-vertex and forward along the other, with no spacelike signal at any step. The cosmological matter--antimatter asymmetry is a geometric initial-condition asymmetry: the two chirality branches emerge from the Big Bang vertex in opposite time directions, and only the forward branch is observable. Three open simulation tests are identified: chirality classification, V-vertex correlation, and Born-rule recovery.}
+
+\keyword{Bell's theorem; retrocausality; worldtube; soliton chirality; time-symmetric dynamics; deterministic substrate; brane lattice; measurement independence; V-branching; entanglement}
+
+%=================================================================
+\begin{document}
+
+\input{sections/01_introduction}
+\input{sections/00_interfaces}
+\input{sections/02_bell_constraint}
+\input{sections/03_worldtube}
+
+%=================================================================
+% MDPI required back matter
+\authorcontributions{L.M.\ is the sole author and is responsible for all aspects of this work: conceptualization, formal analysis, writing---original draft, and writing---review and editing.}
+
+\funding{This research received no external funding.}
+
+\institutionalreview{Not applicable.}
+
+\informedconsent{Not applicable.}
+
+\dataavailability{The substrate solver and all experiments reported in this series are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
+
+\acknowledgments{The author gratefully acknowledges Richard Behiel, Grant Sanderson (3Blue1Brown), and Dr.\ Jeroen Vleggaar (Huygens Optics) for educational content that inspired and informed this work.}
+
+\conflictsofinterest{The author declares no conflicts of interest.}
+
+%=================================================================
+% Appendix
+\appendixtitles{yes}
+\appendixstart
+\appendix
+\input{sections/A_symbol_dictionary}
+
+%=================================================================
+% References
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references}
+\PublishersNote{}
+\end{adjustwidth}
+
+\end{document}
