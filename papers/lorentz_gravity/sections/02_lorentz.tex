@@ -1,0 +1,123 @@
+\section{Lorentz bridge: effective kinematics for inside observers}
+\label{sec:lorentz}
+
+This bridge imports the linearized branch speeds $c_L^2 = k_s a^2/m$ and
+$c_T^2 = (1-\alpha)\,k_s a^2/m$ from Paper~I (\Cref{eq:wave-speeds-derived})
+and asks whether inside observers built from the same substrate material would
+experience these as a universal, direction-independent Lorentz invariant kinematics.
+The ambient lattice is cubic and is \emph{not} rotationally symmetric; the bridge
+argument must therefore close the gap between lab-frame anisotropy and
+observer-frame isotropy.
+
+\subsection{Linear-wave cone and effective Lorentz kinematics}
+
+The substrate carries Lorentzian sign structure only at the level of the brane action;
+the ambient $\R^4$ in which the brane is embedded is symmetric Euclidean.
+A Lorentz metric on excitations is therefore not postulated --- it is an emergent property
+of the linear wave regime as seen by an inside observer.
+
+From Paper~I, linearizing the equations of motion about a homogeneous background yields the
+long-wavelength dispersion
+\begin{equation}
+  \omega_b^2(\veck)\;\approx\; c_b^2\,|\veck|^2 \quad \text{for } |\veck|\to 0,
+  \label{eq:linear-dispersion}
+\end{equation}
+which defines an effective wave cone for each polarization branch $b$.
+In regimes where a single branch dominates transport and dispersion is negligible, the wave
+equation is approximately invariant under the standard Lorentz group at speed $c \equiv c_T$,
+with boost parameter
+\begin{equation}
+  \gamma = \bigl(1-v^2/c^2\bigr)^{-1/2},
+  \label{eq:lorentz-boost}
+\end{equation}
+as an effective symmetry of the linear propagation sector, not as a microscopic postulate.
+
+\subsection{Dual-observer argument: lab anisotropy vs internal isotropy}
+\label{para:dual-observer}
+
+On the 6-neighbor axial-only lattice the long-wavelength wave speed is direction-dependent at
+the lab-frame level --- for example $c_L([100])/c_L([111])\approx 1.075$ at the default
+operating point $\alpha=0.2$.
+The relativistic effective description \eqref{eq:lorentz-boost} is therefore \emph{not} a
+statement about the lab frame; it is a conjecture about \emph{internal} observers, whose rods,
+clocks, and signal cones are substrate-emergent.
+
+The closing mechanism is as follows.
+A rod built from substrate material is itself a strain pattern propagating at the same branch
+speeds as the signal.
+An inside observer's unit-length standard rod in direction $\hat{n}$ therefore has a physical
+length (in the lab metric) that scales with $c(\hat{n})$ --- exactly the same direction
+dependence as the signal cone in that direction.
+When both the signal and the measuring rod renormalize with the same anisotropy factor, the
+observed ratio (distance/signal-transit-time) is direction-independent to leading order.
+
+This is not a tunable coincidence.
+It is a structural consequence of the principle that observers and signals are made of the same
+substrate material: the stiffness tensor that sets the branch speed also sets the elastic
+response of a rod-shaped excitation, so anisotropy factors cancel in any local observer
+measurement.
+
+\paragraph{Falsifiable residue.}
+The cancellation is exact only in the strict long-wavelength, single-branch, weak-amplitude
+limit.
+At finite wavelength and nonzero mixing between branches, a residual direction dependence
+survives.
+Its magnitude at scale $ka$ is a calculable quantity that depends on the stiffness tensor and
+neighbor stencil.
+\emph{Residual birefringence} --- a direction-dependent splitting of effective light speed ---
+is therefore the primary falsifiable signature of the bridge: if two solitons in different
+orientations measure the same effective signal speed to better than the residual predicted by the
+stiffness tensor, the bridge is supported; if they do not, it fails.
+
+\subsection{Analogue-metric viewpoint}
+
+An equivalent viewpoint, standard in analogue-gravity systems, is that linear excitations
+experience an effective spacetime interval
+\begin{equation}
+  ds^2 = -c^2\,dt^2 + g^{(\text{eff})}_{ij}(x,t)\,dx^i\,dx^j,
+  \label{eq:effective-metric-interval}
+\end{equation}
+where $g^{(\text{eff})}_{ij}$ depends on the background configuration about which one
+linearizes.
+Two geometric objects contribute to this background:
+the induced brane metric $g_{ij}(\vecX)$ from Paper~I \eqref{eq:induced-metric}, and
+the branch-dependent effective coefficients of the linearized wave operator.
+Slowly varying transverse profiles $u = X^4$ modify intrinsic distances at the level of the
+induced metric through the term $\partial_i u\,\partial_j u$, and can therefore be read as a
+background that focuses or defocuses wave propagation in close analogy to a weak gravitational
+field.
+Both encode how background deformations bend wave transport, as in analogue-gravity
+constructions \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet}.
+
+\subsection{Regime of validity and expected deviations}
+\label{subsec:lorentz-validity}
+
+Effective Lorentz symmetry is expected to break when:
+(i) multiple branches contribute comparably (mode mixing);
+(ii) dispersion becomes significant at shorter wavelengths;
+(iii) geometric or material nonlinearity becomes important at larger amplitudes.
+
+In the present theory these deviations are structural consequences of a substrate whose timelike
+direction is selected by the brane action rather than imposed as a metric primitive.
+They delimit the domain where a relativistic effective description applies, and each regime
+transition is a calculable correction to the dual-observer argument, not an unfalsifiable
+escape hatch.
+
+\subsection{Lorentz priority open problems}
+\label{subsec:lorentz-open}
+
+\begin{enumerate}
+  \item \textbf{Observer-universality calculation.}
+  Compute the direction-dependent wave speed on the 6-neighbor cubic stencil at finite $ka$
+  and determine the magnitude of residual birefringence as a function of wavelength and $\alpha$.
+  This bounds from above the scale at which effective Lorentz invariance is expected.
+
+  \item \textbf{Two-soliton isotropy test.}
+  Run two solitons in orthogonal directions and compare their effective internal metric
+  (signal-transit-time ratios).
+  Agreement to within the predicted residual birefringence is the decisive numerical check.
+
+  \item \textbf{Multi-stencil tuning.}
+  Explore whether shell weights on the cubic stencil can be adjusted to suppress residual
+  anisotropy further, and at what cost to other bridge properties (e.g.\ wave speed splitting).
+\end{enumerate}

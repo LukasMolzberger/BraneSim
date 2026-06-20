@@ -1,0 +1,106 @@
+\documentclass[symmetry,article,submit,pdftex,oneauthor]{Definitions/mdpi}
+
+%=================================================================
+% MDPI internal commands — do not modify
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2026}
+\copyrightyear{2026}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+
+%=================================================================
+% Restore bold run-in style for \paragraph (MDPI class strips it)
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titlespacing{\paragraph}{0pt}{6pt}{6pt}
+
+%=================================================================
+% Additional packages not included in mdpi.cls
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{xr}
+\externaldocument{../core/paper}
+\externaldocument{../gauge_color/paper}
+
+%=================================================================
+% Notation helpers (not loaded by mdpi.cls)
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{\mathbb{T}}
+\providecommand{\dd}{\mathrm{d}}
+\providecommand{\ii}{\mathrm{i}}
+\providecommand{\e}{\mathrm{e}}
+\newcommand{\qq}{\quad}
+\newcommand{\veck}{\mathbf{k}}
+\newcommand{\vecX}{\mathbf{X}}
+\newcommand{\vecu}{\mathbf{u}}
+\newcommand{\vecv}{\mathbf{v}}
+\newcommand{\vecY}{\mathbf{Y}}
+\newcommand{\Lag}{\mathcal{L}}
+
+%=================================================================
+% Title, author, affiliation
+\Title{Matter, Solitons, and Emergent Mass in a Deterministic Brane-Lattice Substrate (Paper~IV)}
+
+\Author{Lukas Molzberger}
+
+\AuthorNames{Lukas Molzberger}
+
+\address{Independent researcher; lukas.molzberger@gmx.de}
+
+\corres{Correspondence: lukas.molzberger@gmx.de}
+
+%=================================================================
+% Abstract and keywords
+\abstract{We develop the matter and mass consistency bridges for the deterministic 4D brane-lattice substrate of Paper~I. The matter bridge poses particle-like states as self-adjoint eigenproblems with angular structure organized by vector spherical harmonics (VSH). Two mechanisms together establish Derrick stability: anti-collapse is provided by the lattice spacing $a$ (no continuous Derrick rescaling below one cell), and anti-expansion by the geometric quartic $\propto k_s\alpha/a$, giving an equilibrium soliton radius $R_h/a\approx\kappa(A/a)\sqrt{\alpha/(1-\alpha)}$ with a soliton sweet spot at $\alpha\approx 0.5$--$0.8$. The canonical baryon ansatz is the hedgehog $\xi^i=f(r)\hat x^i$ ($J=0$, $L=1$ VSH), which lives entirely in the $SU(3)$ traceless sector and carries neutron-like far-field holonomy; a proton-like far field requires a nonzero $L=0$ scalar admixture. Soliton states carry labels $(J,P;\,SU(3)\text{-irrep};\,Q_{U(1)};\,B_{\mathrm{winding}})$ with charge-triality locking $q\equiv -t\pmod{3}$ inherited from Paper~III. Periodic boundary conditions are mandatory: open BC allows the prestressed lattice to relax (contracting to $\alpha a$), collapsing even the $A=0$ vacuum. The mass bridge derives rest mass from self-confinement, not from the Higgs mechanism: a wave permanently trapped in a closed-loop toroidal mode has a total substrate energy $E(R^*,A)=mc^2$ at the equilibrium major radius $R^*=\sqrt{E_{\mathrm{curv}}/(2\pi T_{\mathrm{string}})}$. The complex structure $\Psi\approx\xi+(\ii/\omega_0)\dot\xi$ originates entirely in the timelike worldtube direction; the $U(1)$ carrier frequency $\omega_0$ is fixed by the worldtube closure condition. Time-link prestress sources a binding compression $\Delta u_\parallel^{\mathrm{ext}}\propto-\alpha\omega^2<0$ that flips the $U(1)$--$SU(3)$ coupling to attractive when $\chi=2\alpha(\omega/\omega_*)^2(A_0/a)^2>1$. Both bridges are gated on the same object: a converged stable baryon-like eigenstate, the decisive numerical target of the series.}
+
+\keyword{soliton; Derrick stability; vector spherical harmonics; hedgehog ansatz; Skyrme texture; emergent mass; self-confinement; toroidal mode; time-link binding; brane lattice}
+
+%=================================================================
+\begin{document}
+
+\input{sections/01_introduction}
+\input{sections/00_interfaces}
+\input{sections/02_matter}
+\input{sections/03_mass}
+
+%=================================================================
+% MDPI required back matter
+\authorcontributions{L.M.\ is the sole author and is responsible for all aspects of this work: conceptualization, formal analysis, software, writing---original draft, and writing---review and editing.}
+
+\funding{This research received no external funding.}
+
+\institutionalreview{Not applicable.}
+
+\informedconsent{Not applicable.}
+
+\dataavailability{The substrate solver, diagnostic suite, and all experiments reported in this series are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
+
+\acknowledgments{The author gratefully acknowledges Richard Behiel, Grant Sanderson (3Blue1Brown), and Dr.\ Jeroen Vleggaar (Huygens Optics) for educational content that inspired and informed this work.}
+
+\conflictsofinterest{The author declares no conflicts of interest.}
+
+%=================================================================
+% Appendix
+\appendixtitles{yes}
+\appendixstart
+\appendix
+\input{sections/A_symbol_dictionary}
+
+%=================================================================
+% References
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references}
+\PublishersNote{}
+\end{adjustwidth}
+
+\end{document}

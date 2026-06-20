@@ -1,0 +1,105 @@
+\documentclass[symmetry,article,submit,pdftex,oneauthor]{Definitions/mdpi}
+
+%=================================================================
+% MDPI internal commands — do not modify
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2026}
+\copyrightyear{2026}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+
+%=================================================================
+% Restore bold run-in style for \paragraph (MDPI class strips it)
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titlespacing{\paragraph}{0pt}{6pt}{6pt}
+
+%=================================================================
+% Additional packages not included in mdpi.cls
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{xr}
+\externaldocument{../core/paper}
+
+%=================================================================
+% Notation helpers (not loaded by mdpi.cls)
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{\mathbb{T}}
+\providecommand{\dd}{\mathrm{d}}
+\providecommand{\ii}{\mathrm{i}}
+\providecommand{\e}{\mathrm{e}}
+\newcommand{\qq}{\quad}
+\newcommand{\veck}{\mathbf{k}}
+\newcommand{\vecX}{\mathbf{X}}
+\newcommand{\vecu}{\mathbf{u}}
+\newcommand{\vecv}{\mathbf{v}}
+\newcommand{\vecY}{\mathbf{Y}}
+\newcommand{\Lag}{\mathcal{L}}
+
+%=================================================================
+% Title, author, affiliation
+\Title{Emergent Lorentz Symmetry and the Gravity Channel in a Deterministic Brane-Lattice Substrate (Paper~II)}
+
+\Author{Lukas Molzberger}
+
+\AuthorNames{Lukas Molzberger}
+
+\address{Independent researcher; lukas.molzberger@gmx.de}
+
+\corres{Correspondence: lukas.molzberger@gmx.de}
+
+%=================================================================
+% Abstract and keywords
+\abstract{We develop two consistency bridges for the deterministic 4D brane-lattice substrate of Paper~I. The Lorentz bridge shows that inside observers built from the same substrate material would experience effective Lorentz kinematics despite the cubic lattice being anisotropic in the lab frame. The key mechanism is a dual-observer argument: both signal cones and rod-shaped measuring devices renormalize with the same branch-speed anisotropy, so the ratio distance/transit-time is direction-independent to leading order. Residual birefringence---the splitting between effective transverse and longitudinal signal speeds that survives at finite wavelength---is the primary falsifiable prediction and can be computed directly from the stiffness tensor. The gravity bridge identifies the same geometric mechanism, the induced-metric term $\partial_i u\,\partial_j u$, as the substrate origin of a long-range attractive channel: localized transverse excitation sources a slowly varying in-brane contraction field that biases nearby wave-packet propagation inward. In a full 4D treatment, spacelike excitation lengthens the timelike link (time dilation) and timelike excitation lengthens spacelike links (length contraction / gravity channel)---two faces of one Pythagorean rule. The open quantitative task is to derive a Newtonian-limit Poisson equation from the coarse-grained contraction field and express the effective gravitational coupling $G_{\mathrm{eff}}$ in substrate parameters $(k_s, a, \alpha, m)$.}
+
+\keyword{deterministic substrate; brane lattice; emergent Lorentz symmetry; dual-observer argument; birefringence; gravity channel; transverse-lateral coupling; induced metric; Newtonian limit}
+
+%=================================================================
+\begin{document}
+
+\input{sections/01_introduction}
+\input{sections/00_interfaces}
+\input{sections/02_lorentz}
+\input{sections/03_gravity}
+
+%=================================================================
+% MDPI required back matter
+\authorcontributions{L.M.\ is the sole author and is responsible for all aspects of this work: conceptualization, formal analysis, software, writing---original draft, and writing---review and editing.}
+
+\funding{This research received no external funding.}
+
+\institutionalreview{Not applicable.}
+
+\informedconsent{Not applicable.}
+
+\dataavailability{The substrate solver, diagnostic suite, and all experiments reported in this series are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
+
+\acknowledgments{The author gratefully acknowledges Richard Behiel, Grant Sanderson (3Blue1Brown), and Dr.\ Jeroen Vleggaar (Huygens Optics) for educational content that inspired and informed this work.}
+
+\conflictsofinterest{The author declares no conflicts of interest.}
+
+%=================================================================
+% Appendix
+\appendixtitles{yes}
+\appendixstart
+\appendix
+\input{sections/A_symbol_dictionary}
+
+%=================================================================
+% References
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references}
+\PublishersNote{}
+\end{adjustwidth}
+
+\end{document}

@@ -1,0 +1,142 @@
+\section{Gravity bridge: contraction channel from transverse excitation}
+\label{sec:gravity}
+
+This bridge imports the near-identity metric expansion \eqref{eq:metric-near-identity} and
+the quasi-static in-brane equilibrium from Paper~I (\Cref{subsec:gravity-channel}) and asks
+whether the resulting slowly varying contraction field can serve as the quantitative substrate
+of a Newtonian gravitational potential.
+The geometric mechanism is fixed by Paper~I; the open problem addressed here is its quantitative
+reduction.
+
+\subsection{Recap: transverse excitation sources lateral contraction}
+
+In the near-identity decomposition around a homogeneous background
+$\vecX_\star(x)=(h_\star x, 0)$, the induced metric expansion is
+(\Cref{eq:metric-near-identity} of Paper~I):
+\begin{equation}
+  g_{ij}
+  = h_\star^2\delta_{ij}
+    + h_\star(\partial_i\xi_j+\partial_j\xi_i)
+    + \partial_i\vec\xi\cdot\partial_j\vec\xi
+    + \partial_i u\,\partial_j u.
+  \label{eq:metric-near-identity-here}
+\end{equation}
+Setting $\vec\xi\equiv 0$ gives the graph picture; the gravity channel requires $\vec\xi\neq 0$,
+i.e.\ the in-brane displacement must be free to respond to the source term.
+
+In the small-slope regime the in-brane strain is
+\begin{equation}
+  \varepsilon_{ij}\approx
+  \tfrac12(\partial_i\xi_j+\partial_j\xi_i)
+  +\tfrac12\,\partial_i u\,\partial_j u,
+  \label{eq:strain-here}
+\end{equation}
+so quasi-static balance $\partial_j\sigma_{ij}=0$ with
+$\sigma_{ij}=\lambda\,\mathrm{tr}(\varepsilon)\delta_{ij}+2\mu\,\varepsilon_{ij}$
+gives a forcing/eigenstrain problem for the slow field $\vec\xi$:
+\begin{equation}
+  \partial_j\bigl[\lambda\,(\partial_k\xi_k)\delta_{ij}+\mu(\partial_j\xi_i+\partial_i\xi_j)\bigr]
+  = -\tfrac12\partial_j[\lambda\,|\nabla u|^2\delta_{ij}+\mu(\partial_i u\partial_j u+\partial_j u\partial_i u)].
+  \label{eq:gravity-forcing}
+\end{equation}
+The right-hand side is the effective body force sourced by a transverse profile $u(x)$.
+The solution $\vec\xi$ is the in-brane contraction field; its divergence $\partial_i\xi_i$ is
+the local volume contraction (dilation) pattern.
+
+\paragraph{Sign: always inward under pre-tension.}
+For an isotropic pre-tension $\alpha<1$, additional transverse arc length increases elastic
+energy and therefore tensile stress, which produces net lateral forces pulling material points
+\emph{toward} the region of transverse excitation.
+For a localized bump or rotating transverse pattern, the surrounding brane develops an inward
+bias (contraction) rather than an outward pressure.
+The sign is fixed by geometry and pre-tension and does not require a separate assumption.
+
+\subsection{Unification: length contraction and time dilation}
+
+The Pythagorean argument is direction-blind.
+In the underlying 4D ontology (Paper~I \Cref{subsec:ontology-kinematics}), any displacement
+perpendicular to a link stretches that link, regardless of which ambient direction is
+perpendicular.
+The same mechanism, applied symmetrically across all four directions, predicts two consequences:
+
+\begin{enumerate}
+  \item \textbf{Spatial contraction (gravity channel):}
+  Displacements in the timelike direction ($X^4 = u$) lengthen spacelike links --- which is
+  what the present section quantifies.
+
+  \item \textbf{Time dilation:}
+  Displacements in the three spacelike directions (in-brane kinetic energy / spatial motion)
+  lengthen the link along the timelike direction.
+  Length contraction and time dilation are therefore two faces of one rule; a full 4D treatment
+  of the brane action would express both in a single expression.
+\end{enumerate}
+
+\subsection{Contraction field as a gravity-like background}
+
+Linear wave packets propagating on top of the slowly varying $\vec\xi$-background experience
+branch-dependent effective coefficients in the linearized wave operator.
+In the effective-metric viewpoint (Bridge~1, \Cref{sec:lorentz}), the $\vec\xi$-sourced
+dilation pattern acts as an analogue curved spacetime that focuses or defocuses wave transport.
+
+Concretely, a transverse excitation concentrated in a region $\mathcal{V}$ produces through
+\eqref{eq:gravity-forcing} an outward-decaying contraction field $\partial_i\xi_i(x)$ that
+attracts nearby wave packets inward.
+In the weak-field, slowly varying limit, this biases propagation in precisely the way a
+Newtonian potential would.
+
+\subsection{Open quantitative reduction: Newtonian limit}
+\label{subsec:gravity-open-reduction}
+
+What remains is the quantitative reduction.
+The goal is to derive a scalar potential $\Phi(x)$ from the coarse-grained in-brane strain or
+elastic energy density such that
+\begin{equation}
+  \nabla^2 \Phi = 4\pi G_{\text{eff}}\,\rho_{\text{excitation}},
+  \label{eq:gravity-poisson-target}
+\end{equation}
+with a coupling $G_{\text{eff}}$ expressed in substrate parameters $(k_s, a, \alpha, m)$.
+The specific steps required:
+
+\begin{enumerate}
+  \item \textbf{Solve the forcing problem \eqref{eq:gravity-forcing} in a scalar approximation.}
+  For a spherically symmetric transverse profile $u(r)$, symmetry reduces
+  \eqref{eq:gravity-forcing} to a scalar ODE for $\partial_i\xi_i$.
+
+  \item \textbf{Identify the effective potential.}
+  Show that $\Phi \propto \partial_i\xi_i$ (or a suitable Green's function convolution thereof)
+  satisfies a Poisson-type equation with a source proportional to the transverse energy density
+  $\tfrac12|\nabla u|^2$.
+
+  \item \textbf{Match to Newtonian gravity.}
+  Express $G_{\text{eff}}$ in terms of $k_s$, $a$, $\alpha$, $m$; derive the dimensional
+  prediction $G_{\text{eff}} \sim k_s a^5 / m^2$ (or similar) that sets the scale of the
+  coupling.
+
+  \item \textbf{Numerical check.}
+  Simulate a localized transverse excitation, measure the induced $\vec\xi$-field, and compare
+  its spatial decay to the Green's function prediction.
+  Inject a long-wavelength probe packet and measure whether its trajectory is deflected inward
+  at the rate predicted by $\Phi$.
+\end{enumerate}
+
+\subsection{Gravity bridge priority open problems}
+\label{subsec:gravity-open}
+
+\begin{enumerate}
+  \item \textbf{Scalar reduction of \eqref{eq:gravity-forcing}.}
+  Derive the spherically symmetric Poisson equation for the contraction field and obtain
+  $G_{\text{eff}}$ in closed form.
+
+  \item \textbf{Contraction-channel extraction (numerical).}
+  Create a localized transverse Gaussian excitation; measure the induced slow
+  $\partial_i\xi_i$-field; compare its spatial profile to the prediction from step 1.
+
+  \item \textbf{Probe-packet deflection test.}
+  Inject a long-wavelength wave packet, measure the lateral deflection, and check that the
+  deflection angle matches the effective potential derived in step 1.
+
+  \item \textbf{4D symmetric treatment.}
+  Extend the slice-restricted analysis to a 4D treatment of the brane action, expressing both
+  length contraction and time dilation in a single expression, and derive the full stress-energy
+  coupling tensor.
+\end{enumerate}

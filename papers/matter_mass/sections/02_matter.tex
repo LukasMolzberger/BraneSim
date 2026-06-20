@@ -1,0 +1,181 @@
+\section{Matter bridge: solitons as self-adjoint eigenproblems}
+\label{sec:matter}
+
+\subsection{Linearization about symmetric backgrounds}
+\label{subsec:linearization}
+
+Let $\vecX_0(x)$ be a time-independent background embedding representing a localized deformation
+region, taken to be spherically symmetric in the intrinsic brane coordinates
+($r=|x|$ with $r\gg a$ for the continuum limit to apply).
+Linearize the equations of motion (\Cref{eq:eom} of Paper~I) about $\vecX_0$ by writing
+$\vecX(x,t)=\vecX_0(x)+\bm{\eta}(x,t)$ with small perturbation $\bm{\eta}$.
+Because the dynamics derives from the action (\Cref{eq:action} of Paper~I), the linearized
+operator is the second variation of $S$ and is therefore self-adjoint with respect to the
+$\rho_m$-weighted $L^2$ inner product on $\Omega$; orthogonality and completeness of eigenmodes
+follow as standard consequences.
+
+\subsection{Angular structure: vector spherical harmonics}
+\label{subsec:vsh}
+
+The substrate is the 6-neighbor cubic lattice, whose point group is $O_h$ rather than $SO(3)$.
+At scales $\gg a$, however, long-wavelength continuum modes recover approximate isotropy with
+residual cubic corrections of order 7.5\% in longitudinal speed at $\alpha=0.2$.
+Solitons in this theory are expected to live in the geometric-quartic-stabilized regime with
+$\ell_{\mathrm{soliton}}\gg a$, so the emergent approximate $SO(3)$ is the right symmetry to
+organize their angular structure, with $O_h$ corrections entering as small splittings of $SO(3)$
+multiplets.
+
+For a spherically symmetric background the linearized operator commutes with the action of $SO(3)$
+on the intrinsic coordinates at leading order in $a/\ell_{\mathrm{soliton}}$.
+For a scalar field this gives the familiar separation into radial and angular problems with
+eigenfunctions $Y_{\ell m}(\theta,\varphi)$.
+The lateral triplet $\xi^i\in\R^3$ and its complex-envelope promotion $\Psi\in\C^3$ from
+Paper~III carry an internal vector index $i$ in addition to spatial dependence.
+The correct angular basis is therefore the \emph{vector spherical harmonic} (VSH) basis
+$\mathbf{Y}^i_{JLM}$, where $J$ is total angular momentum, $L$ is orbital angular momentum,
+and $L\in\{J-1,J,J+1\}$:
+\begin{equation}
+  \xi^i(r,\theta,\varphi)
+  \;=\; \sum_{J,L,M} f_{JLM}(r)\,\mathbf{Y}^i_{JLM}(\theta,\varphi).
+  \label{eq:vsh-decomposition}
+\end{equation}
+The choice of $(J,L)$ specifies how the internal index $i$ is glued to the spatial angular
+coordinates --- it is the choice of how the triplet's $U(3)$ gauge structure (Paper~III) couples to
+the geometry of the localized mode.
+Configurations with $J=0$ are spherically symmetric only under the \emph{combined} rotation that
+acts on both spatial and internal indices together; this combined rotation is the physically
+meaningful notion of spherical symmetry for a triplet field.
+
+\subsection{Hedgehog ansatz and Skyrme-twisted extension}
+\label{subsec:hedgehog}
+
+The canonical baryon ansatz is the \emph{hedgehog}
+\begin{equation}
+  \xi^i(\mathbf{x}) \;=\; f(r)\,\hat x^i,
+  \label{eq:hedgehog}
+\end{equation}
+with $J=0$, $L=1$: the internal index $i$ is locked to the spatial direction $\hat x^i$, so the
+configuration is invariant only under the combined diagonal $SO(3)$.
+The entire nontrivial structure of the hedgehog lives in the $SU(3)$ traceless sector of Paper~III:
+the $U(1)$ trace $f(r)\,(\hat x^1+\hat x^2+\hat x^3)$ averages to zero on the sphere, giving a
+trace-neutral far field (neutron-like far-field holonomy).
+
+Topological stabilization at winding number $B=1$ is achieved by extending the hedgehog into a
+\emph{Skyrme-twisted} configuration in which the embedding-amplitude direction $X^4$ also rotates
+radially:
+\begin{equation}
+  \bigl(\xi^i,u\bigr)(\mathbf{x})
+  \;=\; \bigl(f(r)\sin F(r)\,\hat x^i,\;f(r)\cos F(r)\bigr),
+  \label{eq:skyrme-twist}
+\end{equation}
+with the profile $F:[0,\infty)\to[\pi,0]$ enforcing the boundary conditions
+$F(0)=\pi$ and $F(\infty)=0$.
+This boundary condition gives $B=1$ topological winding in $\pi_3(SU(3))=\mathbb{Z}$, consistent
+with Paper~III \Cref{subsec:topology}.
+Adding a nonzero $L=0$ scalar admixture shifts the $U(1)$ far-field holonomy from trace-neutral
+to proton-like.
+
+\subsection{Soliton labels}
+\label{subsec:soliton-labels}
+
+A localized 3D mode is fully classified at the soliton layer by the labels
+\begin{equation}
+  \bigl(J,\,P;\;\mathrm{SU}(3)\text{-irrep};\;Q_{U(1)};\;B_{\mathrm{winding}}\bigr),
+  \label{eq:soliton-labels}
+\end{equation}
+where:
+\begin{itemize}
+  \item $J$ is total angular momentum from the emergent approximate $SO(3)$ at scales $\gg a$;
+  it refines to an $O_h$ irrep at sub-leading order in $a/\ell_{\mathrm{soliton}}$.
+  \item $P$ is parity, the discrete element of the emergent rotation group.
+  \item The $SU(3)$ irrep and $U(1)$ charge come from the $U(3)$ decomposition (Paper~III
+  \Cref{subsec:u3-decomp}).
+  \item $B_{\mathrm{winding}}$ is the topological winding number in $\pi_3(SU(3))=\mathbb{Z}$.
+\end{itemize}
+These labels are not independent: the VSH coupling sets a Clebsch--Gordan relationship between
+$SO(3)$ and $U(3)$ representations, and the charge-triality locking $q\equiv -t\pmod{3}$
+(Paper~III \Cref{subsec:u3-decomp}) constrains $Q_{U(1)}$ given the $SU(3)$ irrep.
+
+\subsection{Stability: Derrick's theorem on the discrete substrate}
+\label{subsec:derrick}
+
+In 3D, a standard Derrick scaling argument \citep{Derrick1964} rules out stable finitely-extended
+solitons in a purely quadratic (linear) theory: under $x\mapsto\lambda x$, the gradient energy
+$E_2$ scales as $\lambda^{1}$ (favoring expansion for $\lambda>1$) while a quartic energy $E_4$
+scales as $\lambda^{-1}$ (resisting expansion).
+Without $E_4>0$, the soliton expands without bound.
+The present substrate breaks the standard Derrick counting in two complementary ways.
+
+\paragraph{Anti-collapse: lattice UV cutoff.}
+Derrick's argument assumes continuous rescaling $\lambda\in(0,\infty)$.
+On a discrete lattice with spacing $a$, however, $\lambda$ is bounded below: a soliton cannot
+shrink past one cell.
+A configuration with energy fully concentrated at a single node is not a local energy minimum ---
+the spring network immediately disperses it outward.
+The lattice spacing $a$ is the physical UV cutoff; no separate quartic repulsion is needed to block
+collapse.
+This is a genuinely discrete-substrate effect that has no direct continuum analogue.
+
+\paragraph{Anti-expansion: geometric quartic.}
+Under Derrick rescaling in 3D, the geometric quartic $W_4\propto k_s\alpha/a$ (Paper~I
+\Cref{eq:W4}) scales as $\lambda^{-1}$.
+Balancing $\lambda E_2$ against $\lambda^{-1}E_4$ gives equilibrium at
+\begin{equation}
+  \lambda^* = \sqrt{E_4/E_2},
+  \label{eq:derrick-balance}
+\end{equation}
+translating to an equilibrium soliton half-radius
+\begin{equation}
+  \frac{R_h}{a}
+  \;\approx\;
+  \kappa\,\frac{A}{a}\,\sqrt{\frac{\alpha}{1-\alpha}},
+  \label{eq:derrick-radius}
+\end{equation}
+where $\kappa$ is a numerical factor of order unity fixed by the Derrick balance in the specific
+ansatz and $A$ is the peak amplitude.
+At $\alpha=0.2$ and $A/a\approx 10$ this gives $R_h/a\approx 5$; the soliton sweet spot
+$\alpha\approx 0.5$--$0.8$ gives $R_h/a\approx 8$--$14$ for the same amplitude, well above the
+lattice scale.
+
+Note that the quartic coefficient scales as $\propto\alpha/a$, not $\propto(1-\alpha)$ as a naive
+StVK identification would give.
+The correct sign and scaling are derived from the spring's geometric quartic in Paper~I
+(\Cref{eq:W4}), which inverts the na\"\i ve StVK prediction.
+Quantitative soliton sizing must use the spring law, not StVK.
+
+\subsection{Periodic boundary conditions: mandatory requirement}
+\label{subsec:periodic-bc}
+
+Periodic boundary conditions (BC) are mandatory for all nonlinear soliton simulations.
+The prestressed lattice (rest length $\alpha a < a$) is under tension; open/free BC allows the box
+to contract from $Na$ to $N\alpha a$, which dominates all dynamics and collapses even the $A=0$
+vacuum.
+Periodic BC fixes the box at $N\cdot a$, holds the tension, and ensures the vacuum is stable
+($A=0\Rightarrow E_{\mathrm{excess}}\equiv 0$).
+All retracted 2026-06-05 runs used open BC; all future nonlinear runs must use periodic-clamped BC.
+
+\subsection{Matter bridge open problems}
+\label{subsec:matter-open}
+
+\begin{enumerate}
+  \item \textbf{Converged baryon eigenstate.}
+  Obtain a converged, stable, localized $\pi_3$-winding solution using the periodic-clamped
+  tensioned vacuum and an eigenstate approach (not seed-and-watch evolution).
+  The hedgehog/Skyrme-twisted ansatz \eqref{eq:skyrme-twist} with $\alpha\approx 0.7$,
+  $A/a\approx 10$ is the primary candidate.
+
+  \item \textbf{Rigorous Derrick stability proof.}
+  State Derrick's theorem precisely \citep{Derrick1964,MantonSutcliffe2004} for the present
+  action, give the lattice-UV anti-collapse argument as a theorem (not just intuition), and tie
+  the anti-expansion balance \eqref{eq:derrick-balance} to the effective field manifold of
+  Paper~III.
+
+  \item \textbf{Converged $U(1)$ vortex eigenstate.}
+  Resolve the semilocal drift observed in the preliminary JFNK run (Paper~III
+  \Cref{subsec:numerical-targets}) with branch-selection machinery for the semilocal vortex.
+
+  \item \textbf{Two-soliton interaction potential.}
+  Once individual stable eigenstates exist, measure the two-soliton interaction potential as a
+  function of separation and polarization alignment, to test whether the geometric self-guidance
+  mechanism produces an attractive or repulsive channel.
+\end{enumerate}

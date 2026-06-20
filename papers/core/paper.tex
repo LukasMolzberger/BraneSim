@@ -1,0 +1,104 @@
+\documentclass[symmetry,article,submit,pdftex,oneauthor]{Definitions/mdpi}
+
+%=================================================================
+% MDPI internal commands — do not modify
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2026}
+\copyrightyear{2026}
+\datereceived{}
+\daterevised{}
+\dateaccepted{}
+\datepublished{}
+
+%=================================================================
+% Restore bold run-in style for \paragraph (MDPI class strips it)
+\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{}{0pt}{}
+\titlespacing{\paragraph}{0pt}{6pt}{6pt}
+
+%=================================================================
+% Additional packages not included in mdpi.cls
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+
+%=================================================================
+% Notation helpers (not loaded by mdpi.cls)
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\T}{\mathbb{T}}
+\providecommand{\dd}{\mathrm{d}}
+\providecommand{\ii}{\mathrm{i}}
+\providecommand{\e}{\mathrm{e}}
+\newcommand{\qq}{\quad}
+\newcommand{\veck}{\mathbf{k}}
+\newcommand{\vecX}{\mathbf{X}}
+\newcommand{\vecu}{\mathbf{u}}
+\newcommand{\vecv}{\mathbf{v}}
+\newcommand{\vecY}{\mathbf{Y}}
+\newcommand{\Lag}{\mathcal{L}}
+
+%=================================================================
+% Title, author, affiliation
+\Title{A Deterministic Brane-Lattice Substrate: Ontological Foundation and Wave Architecture (Paper~I)}
+
+\Author{Lukas Molzberger}
+
+\AuthorNames{Lukas Molzberger}
+
+\address{Independent researcher; lukas.molzberger@gmx.de}
+
+\corres{Correspondence: lukas.molzberger@gmx.de}
+
+%=================================================================
+% Abstract and keywords
+\abstract{We present the ontological foundation and shared mathematical structure for a series of papers investigating a minimal deterministic substrate hypothesis. The substrate is a 4D cubic lattice embedded with codimension zero in a 4D Euclidean ambient; the timelike direction is selected by the Lorentzian sign structure of the brane action, not by the ambient geometry. Its essential nonlinearity is purely geometric: the induced metric contains the coupling $\partial_i u\,\partial_j u$ when the embedding is excited transversely, producing lateral contraction without any auxiliary field. We derive the continuum hyperelastic action from the discrete lattice energy, establish the equations of motion, and characterize the linearized wave-branch structure, including the transverse and longitudinal speeds $c_T^2=(1-\alpha)k_s a^2/m$ and $c_L^2=k_s a^2/m$. The transverse--lateral coupling is the shared geometric origin of Lorentz, gauge, color, gravity, matter, and mass bridges developed in companion papers; the present paper exports the interface equations each companion imports. We also commit to a retrocausal worldtube interpretation forced by Bell's theorem under the assumptions of determinism, measurement independence, and a finite-speed substrate: entanglement is the continuity of a branching 4D worldtube, and the arrow of causality is a property of soliton chirality.}
+
+\keyword{deterministic substrate; brane lattice; geometric nonlinearity; induced metric; hyperelastic action; linearized waves; Bell's theorem; retrocausal worldtube}
+
+%=================================================================
+\begin{document}
+
+\input{sections/01_introduction}
+\input{sections/02_series_scope}
+\input{sections/03_substrate_model}
+\input{sections/04_wave_structure}
+\input{sections/05_bell}
+
+%=================================================================
+% MDPI required back matter
+\authorcontributions{L.M.\ is the sole author and is responsible for all aspects of this work: conceptualization, formal analysis, software, writing---original draft, and writing---review and editing.}
+
+\funding{This research received no external funding.}
+
+\institutionalreview{Not applicable.}
+
+\informedconsent{Not applicable.}
+
+\dataavailability{The substrate solver, diagnostic suite, and all experiments reported in this paper are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
+
+\acknowledgments{The author gratefully acknowledges the educational content creators whose work provided inspiration and insight during the development of the ideas presented here: Richard Behiel, for his deep and original explorations of quantum mechanics and field theory; Grant Sanderson (3Blue1Brown), for his exceptional gift for geometric intuition and visual mathematical reasoning; Dr.\ Jeroen Vleggaar (Huygens Optics), for his rigorous and illuminating treatments of wave optics and physical intuition.}
+
+\conflictsofinterest{The author declares no conflicts of interest.}
+
+%=================================================================
+% Appendix
+\appendixtitles{yes}
+\appendixstart
+\appendix
+\input{sections/A_symbol_dictionary}
+
+%=================================================================
+% References
+\begin{adjustwidth}{-\extralength}{0cm}
+\reftitle{References}
+\bibliography{references}
+\PublishersNote{}
+\end{adjustwidth}
+
+\end{document}

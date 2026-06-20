@@ -1,0 +1,55 @@
+\section{Introduction}
+\label{sec:introduction}
+
+This is the third paper in a series developing a deterministic brane-lattice substrate hypothesis.
+Paper~I established the substrate model and exported the linearized wave-branch structure.
+Paper~II developed the Lorentz and gravity bridges.
+The present paper develops two closely coupled bridges: gauge structure and color confinement.
+
+\paragraph{The gauge bridge.}
+Each wavepacket carries a local polarization state, defined as a normalized eigenvector of the
+linearized carrier operator about the slowly varying background at the wavepacket's location.
+As the wavepacket is transported through regions of varying background, the eigenvector is
+parallel-transported along the connection it defines.
+This is the Berry connection (\Cref{sec:gauge}): for a single isolated mode,
+$a_\mu = \ii\langle u|\partial_\mu u\rangle$ is formally the electromagnetic four-potential
+$A_\mu$, its curvature $f_{\mu\nu} = \partial_\mu a_\nu - \partial_\nu a_\mu$ is the field tensor
+$F_{\mu\nu}$, and the homogeneous Maxwell equations follow as the Bianchi identity $F = \mathrm{d}A$.
+No new assumption is added: gauge structure is not a coincidence but the canonical outcome of
+transporting a polarization eigenbundle.
+
+A key point developed in \Cref{subsec:bz-gauge}: the gauge connection does \emph{not} live in the
+Brillouin zone.
+The dynamical matrix $D(\mathbf{k})$ is real symmetric and carries identically zero Berry curvature
+over the BZ at every $\alpha$; we have verified this numerically.
+The physically relevant gauge connection lives over physical spacetime $(x,t)$, where the $U(1)$
+phase is the rotation of the carrier field as one advances along the timelike direction.
+
+\paragraph{The color bridge.}
+The cubic substrate provides a natural three-dimensional polarization sector: the axis-aligned
+lateral triplet $\Psi=(\psi_x,\psi_y,\psi_z)^\top\in\C^3$.
+For a near-degenerate triplet (small $\alpha$), adiabatic transport induces a Wilczek--Zee
+connection $\mathcal{A}_\mu\in\mathfrak{u}(3)$.
+Decomposing $\mathfrak{u}(3)=\mathfrak{u}(1)\oplus\mathfrak{su}(3)$ identifies the $U(1)$ trace
+sector with electromagnetism and the eight traceless generators with a color-like internal degree of
+freedom.
+The color bridge (\Cref{sec:color}) then establishes a structural fact: \emph{kinematic confinement}.
+No free linear propagation direction simultaneously satisfies coherence (degenerate branches) and
+color-activity (non-degenerate branches with defined internal holonomy), so color charge cannot be
+carried to infinity by any free linear excitation.
+Color is structurally confined to nonlinear bound states --- without invoking a separate QCD action.
+
+\paragraph{Why gauge and color are paired.}
+The two bridges share a common foundation: per-wavepacket band isolation of the lateral triplet.
+The gauge bridge extracts the Abelian rank-1 sector; the color bridge extracts the non-Abelian
+triplet sector.
+Both structures emerge from the same eigenbundle transport, and the $U(3)$ decomposition that
+distinguishes them is fixed by the cubic lattice geometry, not introduced by hand.
+Pairing them in one paper makes this shared derivation explicit.
+
+\paragraph{Paper organization.}
+\Cref{sec:interfaces} lists the interface equations imported from Paper~I.
+\Cref{sec:gauge} develops the gauge bridge: per-wavepacket isolation, Berry and Wilczek--Zee
+connections, the EM identification, where the gauge structure lives, and the spinorial holonomy.
+\Cref{sec:color} develops the color bridge: axis-triplet degeneracy, $U(3)$ decomposition,
+topological sectors, kinematic confinement, and the numerical targets.

@@ -1,0 +1,201 @@
+\section{Mass bridge: rest mass from self-confinement}
+\label{sec:mass}
+
+\subsection{Physical picture: wave trapped in a closed loop}
+\label{subsec:mass-picture}
+
+Rest mass in this framework is not acquired through the Higgs mechanism (spontaneous symmetry
+breaking and a scalar condensate).
+Instead, rest mass is identified with the total substrate energy of a wave mode that is permanently
+trapped in a circularly closed, self-confined loop:
+\begin{equation}
+  mc^2 \;=\; E[{\vecX_{\mathrm{torus}}}]\Big|_{R=R^*},
+  \label{eq:mass-energy}
+\end{equation}
+where $\vecX_{\mathrm{torus}}$ is the toroidal mode embedding and $R^*$ is the equilibrium major
+radius.
+The wave cannot disperse because it is topologically pinned (the $U(1)$ vortex carries
+$\pi_1(U(1))=\mathbb{Z}$ winding) and geometrically self-confined (the geometric quartic prevents
+radial expansion).
+This is closer in spirit to the toroidal-electron proposal of Williamson and van der Mark
+\citep{HuygensOptics2025}, which attributes the correct gyromagnetic ratio $g=2$ to a circularly
+self-confined photon-like mode, than to the standard Higgs picture.
+The substrate grounds that proposal in a concrete elastic medium.
+
+\subsection{Complex structure from the time direction}
+\label{subsec:complex-from-time}
+
+The complex structure $\Psi\in\C^3$ used throughout this series is not an independent complex
+field.
+It arises from the carrier rotation of a real substrate field along the timelike worldtube axis.
+For a band-isolated carrier at frequency $\omega_0$, the complex envelope is defined by
+\begin{equation}
+  \Psi \;\approx\; \xi + \frac{\ii}{\omega_0}\,\dot\xi,
+  \label{eq:complex-from-time}
+\end{equation}
+where $\xi$ is the real lateral triplet and $\dot\xi$ is its time derivative.
+The imaginary unit $\ii$ here is the quarter-period time shift (the time-evolution generator
+$\ii\partial_t\Psi = H_{\mathrm{eff}}\Psi$); it is not an independent degree of freedom.
+A single spacelike slice is a real snapshot and carries no phase; the $U(1)$ phase exists only
+across the time extent of the worldtube.
+Two adjacent time slices are the minimum data that fix the $U(1)$ --- exactly the structure of the
+rotating-frame-periodic BVP solver that must be used for toroidal mode eigenstates.
+
+This origin of the complex structure has a direct consequence for mass: the $U(1)$ carrier
+frequency $\omega_0$ is the rate of rotation of the real field along the time axis, and the
+energy stored in one carrier cycle is the substrate analogue of a quantum of energy.
+The mass-frequency relation $E\approx\hbar\omega_0$ (in appropriate units) is therefore expected
+to hold at the equilibrium amplitude, with $\hbar$ emerging from the substrate normalization
+(\Cref{subsec:mass-normalization}).
+
+\subsection{Toroidal mode energy and Derrick balance}
+\label{subsec:toroidal-derrick}
+
+A toroidal mode is a $U(1)$ vortex (line vortex in the trace sector) wrapped into a closed loop
+of major radius $R$ and core radius $w$.
+The total substrate energy decomposes into gradient and quartic contributions:
+\begin{equation}
+  E(R,A)
+  \;=\; E_2(R,A) + E_4(R,A),
+  \label{eq:torus-energy}
+\end{equation}
+where at leading order in $w/R$:
+\begin{align}
+  E_2(R,A) &\;\sim\; 2\pi R \cdot \varepsilon_2(A,w),
+  \label{eq:torus-E2}\\
+  E_4(R,A) &\;\sim\; 2\pi R \cdot \varepsilon_4(A,w),
+  \label{eq:torus-E4}
+\end{align}
+with $\varepsilon_2$ and $\varepsilon_4$ the gradient and quartic energy densities per unit length
+of the vortex core.
+Both scale linearly with $R$ (circumference grows), so to leading order the total energy is linear
+in $R$ --- this is the string-tension picture.
+The correction that selects a finite equilibrium $R^*$ comes from the curvature energy of the
+torus: turning the line vortex into a closed loop costs an extra curvature term $\propto 1/R$,
+balancing the string-tension term $\propto R$:
+\begin{equation}
+  E(R) \;\approx\; T_{\mathrm{string}}\cdot 2\pi R + \frac{E_{\mathrm{curv}}}{R},
+  \label{eq:torus-balance}
+\end{equation}
+with $T_{\mathrm{string}}$ the vortex string tension set by $\varepsilon_2+\varepsilon_4$ and
+$E_{\mathrm{curv}}$ the curvature energy from bending the vortex line.
+Setting $\mathrm{d}E/\mathrm{d}R=0$ gives the equilibrium radius
+\begin{equation}
+  R^* \;=\; \sqrt{\frac{E_{\mathrm{curv}}}{2\pi T_{\mathrm{string}}}}.
+  \label{eq:torus-radius}
+\end{equation}
+The physical rest mass is then $mc^2 = E(R^*) = 2\cdot 2\pi R^* T_{\mathrm{string}}$:
+the gradient and curvature contributions are equal at equilibrium.
+
+\subsection{Time-link prestress as binding agent}
+\label{subsec:time-link-binding}
+
+The timelike link in the discrete 4D brane action (\Cref{eq:discrete-4d-action} of Paper~I)
+carries a prestress $r_t = \alpha\beta\Delta t$ analogous to the spatial prestress parameter
+$\alpha$.
+Expanding the time-link norm term $-k_t r_t|\Delta R_t|$ produces a negative, lump-co-located
+energy density in the carrier velocity field:
+\begin{equation}
+  \bar E_{t,\perp}(\rho)
+  \;=\; -\frac{m\alpha}{4}\,(\omega A(\rho))^2 \;<\; 0,
+  \label{eq:time-link-energy}
+\end{equation}
+where $\omega$ is the carrier frequency fixed by the worldtube closure condition
+$\omega T = 2\pi n$ and $A(\rho)$ is the amplitude profile.
+This induces a definite-negative longitudinal compression on the spatial links:
+\begin{equation}
+  \Delta u_\parallel^{\mathrm{ext}}(\rho)
+  \;=\; -\frac{m\alpha}{4k_s b^2}\,(\omega A(\rho))^2
+  \;\propto\; -\alpha\omega^2,
+  \label{eq:time-link-compression}
+\end{equation}
+peaked at the vortex core $\rho\approx w$, zero on the axis.
+This is externally sourced by the time-link prestress and carrier eigenvalue, not slaved to the
+spatial relaxation.
+
+Feeding \eqref{eq:time-link-compression} into the separable spatial cubic $V_3=+(k_s\alpha/2a^2)
+\Delta u_\parallel(\xi_s^2+|\xi_\perp|^2)$ flips the net cross-coupling:
+\begin{equation}
+  g_{\mathrm{net}}
+  \;=\; \frac{k_s\alpha}{4a^2}\,(1-\chi),
+  \qquad
+  \chi \;=\; 2\alpha\,\frac{\omega^2}{\omega_*^2}\,\frac{A_0^2}{a^2},
+  \qquad
+  \omega_* \equiv \frac{c_L}{b}.
+  \label{eq:binding-condition}
+\end{equation}
+\emph{Binding} ($g_{\mathrm{net}}<0$, restoring force between $U(1)$ and $SU(3)$ sectors) holds
+iff $\chi>1$.
+This is reachable at the soliton sweet spot $\alpha\approx 0.5$--$0.8$, $\omega$ near the band
+edge, $A_0/a\approx 0.3$.
+The spatial-only verdict (net repulsive) is the $r_t\to 0$ limit; the time link genuinely flips
+the sign.
+
+\paragraph{Linchpin: closure-locked carrier frequency.}
+The binding mechanism requires that $\omega$ be fixed externally by the worldtube closure
+condition $\omega T=2\pi n$, not by spatial relaxation.
+This is the case for the rotating-frame-periodic BVP solver (\texttt{PeriodicBC}/\texttt{solve\_block}):
+the JFNK root-find relaxes node positions only; $\omega$ is not a degree of freedom.
+Running the vortex through the breather eigensolver (where $\omega$ co-relaxes as a nonlinear
+eigenvalue) would violate this condition and revert the binding verdict to net-repulsive.
+
+\paragraph{Binding-gravity co-variation.}
+The same $r_t$ (with $\alpha_t=\alpha$) sourcing the binding compression \eqref{eq:time-link-compression}
+also sources gravitational time dilation (Paper~II): both coupling strengths scale as $\propto\alpha$.
+As a result, binding strength and gravitational time-dilation strength co-vary in $\alpha$ and are not
+independently tunable.
+If a simulation can tune binding without tuning gravity, the identification $\alpha_t=\alpha$ is
+falsified.
+
+\subsection{Open normalization problem: Compton wavelength}
+\label{subsec:mass-normalization}
+
+The mass-energy identification \eqref{eq:mass-energy} requires three open normalization steps that
+are not completed here:
+
+\begin{enumerate}
+  \item \textbf{Explicit toroidal energy integral.}
+  Compute $E_2$, $E_4$, and $E_{\mathrm{curv}}$ in \eqref{eq:torus-balance} explicitly by
+  integrating the substrate energy density over the torus geometry with the hedgehog-like core
+  profile of \Cref{sec:matter}.
+
+  \item \textbf{Equilibrium amplitude.}
+  The amplitude $A$ is not fixed by the Derrick balance alone; it is selected by the energy
+  normalization $E(R^*,A)=mc^2$ for a chosen target particle species.
+  Express $A$ in terms of substrate parameters $(k_s,\alpha,a,m_{\mathrm{node}})$ and the
+  target species mass.
+
+  \item \textbf{Compton wavelength connection.}
+  Show that $R^*=\hbar/mc$ using consistent derivations of $\hbar$ and $c$ from substrate
+  parameters.
+  Because $c^2=k_s a^2/m_{\mathrm{node}}$ and the natural action quantum is set by
+  $k_s a^3$ (energy times volume) or $k_s a^2\cdot(a/c)$ (energy times time), the
+  combination giving $\hbar$ in SI units must close the triangle
+  $R^*\cdot mc = \hbar$ without additional free parameters.
+\end{enumerate}
+
+\subsection{Mass bridge open problems}
+\label{subsec:mass-open}
+
+\begin{enumerate}
+  \item \textbf{Explicit toroidal energy and equilibrium radius.}
+  Complete the calculation in \Cref{subsec:toroidal-derrick} for the substrate spring law
+  (\Cref{eq:W4} of Paper~I).
+  Identify $T_{\mathrm{string}}$ and $E_{\mathrm{curv}}$ in terms of $(k_s,\alpha,a,w,\omega_0)$.
+
+  \item \textbf{Verify binding via closure-locked $\omega$ sweep.}
+  Solve a stationary worldtube at each closure index $n$ (each imposed $\omega=2\pi n/(P\Delta t)$);
+  on each converged state measure $\Delta u_\parallel(\rho)$ and the relaxed amplitude $A$.
+  Confirm $\Delta u_\parallel\propto\omega^2$ across the converged family (dividing out $A$,
+  which self-selects to the imposed $\omega$).
+
+  \item \textbf{Winding-lock test.}
+  Vary the topological winding $B$ at fixed amplitude on a converged baryon texture; check
+  whether the P-odd holonomy $\gamma_\Gamma\propto B$ (soft winding-lock) or is flat in $B$
+  (energetic-only).
+  A $B$-slope of 1 confirms charge tracks winding; flat-in-$B$ indicates the energetic leg only.
+
+  \item \textbf{Compton wavelength derivation.}
+  Carry out the three-step normalization of \Cref{subsec:mass-normalization} and test whether
+  $R^*=\hbar/mc$ closes without additional free parameters.
+\end{enumerate}
