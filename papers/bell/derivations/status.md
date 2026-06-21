@@ -7,6 +7,7 @@
 - Entanglement = continuity of branching 4D worldtube: two entangled particles share a continuous 4D worldtube branch up to the branching event; Bell correlations are correlations within a single retrocausal worldtube, not across space.
 - Placement in retrocausal completion family: TSVF (two-state vector formalism), transactional interpretation, time-symmetric Bohmian mechanics; all share the retrocausal structure forced by the substrate's time-symmetric BVP.
 - The model commits explicitly to D = true and MI = true (no superdeterminism), placing it in the retrocausal quadrant of the Bell-option space.
+- Non-probabilistic premise stated explicitly (2026-06-21, `02_bell_constraint.tex` §"The probabilistic premise is not fundamental"): Bell constrains probability distributions, but the substrate is non-probabilistic at its core (deterministic field equations, no Born measure, no collapse). The model breaks with probability-fundamental interpretations (Copenhagen, objective collapse); probability/quantization are emergent. This does NOT exempt the theory from Bell — emergent correlations still relax MI via retrocausality; it relocates the probabilistic description one level up. Companion claim: quantization = emergent from soliton confinement + VSH geometry (Paper IV `02_matter.tex` §soliton-labels; Paper I `04_wave_structure.tex` §continuous-waves), with the Fraunhofer/cavity-mode analogy. Born-rule recovery remains the one open probabilistic debt (B-group below).
 
 ## MISSING
 
