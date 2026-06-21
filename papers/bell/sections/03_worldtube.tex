@@ -2,6 +2,7 @@
 \label{sec:worldtube}
 
 \subsection{Time-symmetry of the substrate action}
+\label{subsec:time-symmetry}
 
 The brane action of Paper~I (\Cref{eq:action}) is time-symmetric.
 Its Lorentzian sign structure selects a \emph{kind} of direction --- timelike vs spacelike ---
@@ -79,6 +80,74 @@ The effective Lorentz symmetry of Paper~II constrains which foliations are obser
 available to inside observers, but the worldtube itself is a 4D geometric object prior to any
 foliation choice.
 
+\subsection{The polarization-entangled photon pair, formalized}
+\label{subsec:photon-v-worldtube}
+
+The canonical laboratory realization of a V-branching worldtube is the polarization-entangled
+photon pair of the entangled-photon Bell tests recognized by the 2022 Nobel Prize --- in
+particular the strict-Einstein-locality experiment of Weihs et al.\ \citep{Weihs1998}, built on the
+type-II down-conversion source of Kwiat et al.\ \citep{Kwiat1995}, and the loophole-free photon
+test of the Vienna group \citep{Giustina2015}. We take that construct as the concrete target for
+an eventual exact substrate solution and state its structure precisely.
+
+\paragraph{Apparatus, in substrate terms.}
+A pump excitation drives a nonlinear matter vertex --- the down-conversion crystal, a localized
+region of bound matter solitons --- in which one carrier wavepacket is converted into two. In the
+substrate ontology the two daughters are \emph{not} solitons: a photon is the unconfined $U(1)$
+carrier, a continuous spin-$1$ polarization wave (Paper~I \Cref{subsec:continuous-waves}, Paper~III
+\Cref{subsec:spinorial-holonomy}). The entangled pair is therefore a single branching
+\emph{carrier} world-volume --- one tube that splits at the source vertex $S$ into two arms,
+$A$ (toward Alice) and $B$ (toward Bob). The V-vertex of \Cref{subsec:v-branching} is here the
+source event $S$; the two measurement endpoints are detector events $D_A$, $D_B$ at which each arm
+couples to a bound electron soliton.
+
+\paragraph{State and boundary data.}
+Along each arm the carrier is described by the slowly varying ansatz of Paper~III
+\eqref{eq:quasi-monochromatic}, with a normalized transverse polarization
+$\bm{\epsilon}_A(x),\bm{\epsilon}_B(x)\in\C^{2}$. The source vertex imposes a \emph{joint} boundary
+condition relating the two polarizations --- the rotationally invariant singlet
+\begin{equation}
+  \lvert\Psi^-\rangle \;=\; \tfrac{1}{\sqrt 2}\bigl(\lvert H\rangle_A\lvert V\rangle_B
+    - \lvert V\rangle_A\lvert H\rangle_B\bigr),
+  \label{eq:singlet}
+\end{equation}
+whose substrate counterpart is the requirement that the two arms leave $S$ with anticorrelated
+transverse polarization frames, invariantly under a common rotation of both frames (the defining
+property of the singlet). Each detector imposes a \emph{local} boundary condition: an analyzer at
+orientation $a$ (Alice) or $b$ (Bob) selects a polarization axis, and the bound electron
+transition renders the outcome one of two discrete values $A_a, B_b\in\{+1,-1\}$. The quantization
+of the outcome is supplied by the confined matter detector, not by the carrier
+(\Cref{subsec:non-probabilistic}).
+
+\paragraph{The correlation to be reproduced.}
+For the singlet \eqref{eq:singlet} measured at linear-analyzer angles $a$ and $b$, quantum
+mechanics --- and the experiments \citep{Weihs1998,Giustina2015} --- give the joint correlation
+\begin{equation}
+  E(a,b) \;=\; \langle A_a\, B_b\rangle \;=\; -\cos\!\bigl(2(a-b)\bigr),
+  \label{eq:cos-correlation}
+\end{equation}
+which violates the CHSH bound: with $(a,a',b,b')=(0,\tfrac{\pi}{4},\tfrac{\pi}{8},\tfrac{3\pi}{8})$,
+\begin{equation}
+  S \;=\; E(a,b)-E(a,b')+E(a',b)+E(a',b') \;=\; 2\sqrt 2 \;>\; 2 .
+  \label{eq:chsh-tsirelson}
+\end{equation}
+Equation \eqref{eq:cos-correlation} is the exact target: a successful substrate derivation must
+produce it from the branching-carrier world-volume with the source and detector boundary data
+above, and with \emph{no} spacelike coupling between the arms.
+
+\paragraph{How the worldtube is meant to supply the correlation.}
+The mechanism of \Cref{subsec:v-branching} applies verbatim with $S$ as the V-vertex. The analyzer
+setting $a$ enters only as a \emph{future} boundary condition on arm $A$ at $D_A$; because the
+substrate action is time-symmetric (\Cref{subsec:time-symmetry}), that condition propagates
+backward along $A$ to $S$ and forward along $B$ to $D_B$, so the joint statistics can depend on
+both $a$ and $b$ while every influence remains timelike-along-a-worldline. The factor that makes
+this Bell-relevant rather than a classical common cause is that the setting-dependent boundary
+data are imposed \emph{after} emission: the $-\cos 2(a-b)$ law of \eqref{eq:cos-correlation} is
+required to emerge from the way the singlet condition at $S$ composes with the two analyzer
+projections, which a setting-independent past state at $S$ cannot reproduce
+(\Cref{subsec:no-superdeterminism}). Making \eqref{eq:cos-correlation} follow quantitatively from
+this composition is the decisive open derivation, stated below.
+
 \subsection{Implications for the simulation program}
 
 The retrocausal worldtube reading reshapes how the simulation program of Papers~II--IV should
@@ -128,4 +197,17 @@ mechanism.
   The candidate mechanism (Paper~IV \Cref{subsec:mass-picture}): Fourier-localization constraints
   on wavepacket overlaps combined with nonlinear exchange events at the V-vertex.
   A quantitative model is not yet available.
+
+  \item \textbf{Exact entangled-photon correlation (decisive target).}
+  For the polarization-entangled photon pair of \Cref{subsec:photon-v-worldtube}, derive the
+  singlet correlation $E(a,b)=-\cos 2(a-b)$ of \eqref{eq:cos-correlation} --- and hence the
+  Tsirelson value $S=2\sqrt 2$ of \eqref{eq:chsh-tsirelson} --- directly from a branching-carrier
+  world-volume: a source vertex $S$ enforcing the anticorrelated-frame (singlet) boundary
+  condition \eqref{eq:singlet}, two arms carrying spin-$1$ polarization eigenbundles, and two
+  detector boundary conditions at analyzer angles $a,b$ imposed at $D_A,D_B$.
+  The derivation must reproduce \eqref{eq:cos-correlation} with all coupling timelike-along-an-arm
+  (no spacelike link), and must show that the setting-dependent future boundary data --- not a
+  setting-independent state at $S$ --- are what generate the $\cos 2(a-b)$ angular law
+  (\Cref{subsec:no-superdeterminism}).
+  This is the most direct quantitative falsifier of the retrocausal worldtube reading.
 \end{enumerate}
