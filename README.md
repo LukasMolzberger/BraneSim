@@ -40,7 +40,7 @@ The canonical statement of all of this is **`BACKBONE.md`** — read that first.
 | `BACKBONE.md` | **Canonical, non-negotiable backbone of the theory.** Start here. |
 | `PRINCIPLES.md` | Non-negotiable engineering/physics rules (substrate-only, no back-reaction, no hand clamps, layer separation). |
 | `ARCHITECTURE.md` | Block-solver-centric code blueprint and design decisions. |
-| `OPEN_PROBLEMS.md` | Central tracker of unsolved derivations (kept *out* of the paper). |
+| `OPEN_PROBLEMS.md` | Index of unsolved derivations; full entries now live in each paper's `derivations/<bridge>/status.md`. |
 | `LESSONS_LEARNED.md` | Mistakes not to repeat + results we trust. |
 | `EXPERIMENT.md` | Spec of the current single instrumented experiment (the U(1) carrier-phase vortex). |
 | `archive/VALIDATION_ROADMAP.md` | Sprint-organized validation subtasks (linear → gauge → Lorentz → solitons → gravity). |

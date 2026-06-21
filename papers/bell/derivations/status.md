@@ -13,3 +13,29 @@
 - Explicit formal argument that D + MI + local substrate → retrocausality uniquely; the "theorem" form with explicit premises, proof of exclusion of Bohmian alternatives, and proof of conclusion.
 - No-signalling demonstration: show that retrocausal worldtube evolution preserves operational no-signalling (no faster-than-light information transfer in the effective theory).
 - Born rule recovery: derive the Born probability rule from the deterministic substrate dynamics (or give an honest statement that this remains open and what the best current approach is — e.g., typicality argument analogous to Boltzmann).
+
+## Open derivations
+
+*Relocated from the former central `OPEN_PROBLEMS.md` (group B, quantum-foundations
+derivations / Bell stance). IDs retained so existing cross-references resolve here.*
+
+Carried over from `PRINCIPLES.md` §1.5 and `BACKBONE.md` #23. These are
+constraints the retrocausal worldtube interpretation places on the program —
+honest debts, not results. **Do not claim as established in the paper.**
+
+### B1. Tsirelson's bound `2√2` — `open`
+Reproduce the exact CHSH maximum from V-branching soliton correlations on the
+substrate. Retrocausal models notoriously under-/over-shoot; deriving the exact
+bound (not merely nonzero correlation) is the most direct empirical handle on
+the stance.
+
+### B2. No-signalling theorem — `open`
+Derive no-signalling as a *theorem* about branching-worldtube dynamics (no
+one-branch observable depends on the other branch's measurement context),
+rather than assuming it. This is what prevents the retrocausal channel from
+sending a macroscopic bit backward in time.
+
+### B3. Baryon-to-photon ratio `η ≈ 6×10⁻¹⁰` — `open`
+Show whether the geometric-vertex picture (matter/antimatter expanding from the
+Big Bang vertex in opposite time directions) can match `η` quantitatively,
+rather than merely permitting opposite-direction expansion in principle.
