@@ -37,3 +37,26 @@ sending a macroscopic bit backward in time.
 Show whether the geometric-vertex picture (matter/antimatter expanding from the
 Big Bang vertex in opposite time directions) can match `η` quantitatively,
 rather than merely permitting opposite-direction expansion in principle.
+
+### B4. Threshold detection model — `open`
+Model the electron–photon interaction at the detectors as a threshold event: the
+electron soliton fires when the analyzer-projected carrier flux `∝ cos²(θ−a)`
+crosses its transition gap, plus a hidden detector phase. Show this yields
+single-arm Malus `cos²(θ−a)` for a uniform detector phase. This is the
+*probabilistic ↔ energy* bridge and the concrete form of the Born-rule debt
+(reduces it to "why is the detector phase uniform?", a typicality question).
+Caveat: this component is local and, alone, Bell-bounded — it must NOT stand
+alone or it rebuilds a detection-loophole model (the loophole Giustina 2015 /
+Shalm 2015 closed). Supplies the *statistics*, not the Bell-violating angular
+law. Feeds B1/B2.
+
+### B5. V-vertex bidirectional energy transport — `open`
+Specify the conserved-flux junction condition at the source vertex `S` and show
+its time-symmetric (retarded offer + advanced confirmation) solution transports
+the analyzer-setting information backward to `S` and forward to the other arm,
+composing the two projections into `−cos 2(a−b)`. Formulated as a two-time BVP
+on the branching worldtube (past BC = pump + vertex coupling; future BCs = the
+two B4 threshold events). Must conserve energy, the singlet polarization
+invariant, and carry no marginal advanced energy. This is the mechanism behind
+"the V-vertex supplies the correlation"; it is the constructive route to B1
+(exact Tsirelson) and B2 (no-signalling). Full note: `vvertex_energy_transport.md`.
