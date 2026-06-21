@@ -2,7 +2,7 @@
 
 A durable record of mistakes not to repeat and results we trust, so the knowledge
 survives without being expensively re-encoded in tests or frozen `test-runs/`.
-(See `BACKBONE.md` for the theory, `OPEN_PROBLEMS.md` for open derivations.)
+(See `BACKBONE.md` for the theory, each paper's `derivations/<bridge>/status.md` *Open derivations* sections for open derivations.)
 
 ## Methodology — mistakes we kept making
 
@@ -69,4 +69,4 @@ survives without being expensively re-encoded in tests or frozen `test-runs/`.
 - **Worldtube with the temporal spring (`r_t=α·β·dt`):** binding is **untested**, not
   falsified — the test was confounded (no stable baseline soliton; a kinetic-kick
   seed). The real open question: does the substrate bind a B=1 object at all, on a
-  clean periodic-clamped `r_t>0` footing (OPEN_PROBLEMS C2).
+  clean periodic-clamped `r_t>0` footing (`papers/matter_mass/derivations/matter/status.md` C2).

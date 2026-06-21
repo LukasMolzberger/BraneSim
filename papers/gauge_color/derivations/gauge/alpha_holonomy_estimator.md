@@ -9,7 +9,7 @@ ratio, but the *overall coupling hierarchy* lives in the connection normalizatio
 which is set by the nonlinear fibre metric (the geometric quartic), absent from the
 linear theory. A normalization-independent falsifiable prediction survives.
 
-Date: 2026-06-04. Owner: physics-derivation. Tracked: `OPEN_PROBLEMS.md` D2.
+Date: 2026-06-04. Owner: physics-derivation. Tracked: `status.md` D2 (gauge bridge).
 
 ---
 
@@ -33,7 +33,7 @@ gauge-field diagnostics (the `U(3)` connection a band-isolated wavepacket sees).
 2. Scale separation `ε = |∇Ψ|/(k₀|Ψ|) ≪ 1`, width `W ≫ a`, narrowband.
 3. Diagonal `D(k)` — exact on the 6-neighbor axial stencil (backbone #16).
 4. **k-space connection ≡ 0 ∀α** (real-symmetric `D` ⇒ trivial real eigenbundle;
-   proven in BACKBONE #16 / `OPEN_PROBLEMS.md` D2). This is *why* the
+   proven in BACKBONE #16 / `status.md` D2). This is *why* the
    only nontrivial connection is fibre-internal in `(x,t)`.
 5. Carrier coherence of the triplet requires `k₀∥[111]` (exact degeneracy) or
    `α→0`, else the three branches dephase at rate `|ω_a−ω_b|`. (Tension — see §6.)
@@ -156,7 +156,7 @@ sector identification fails.
 
 ---
 
-**Files:** BACKBONE #16 / `OPEN_PROBLEMS.md` D2 (k-space connection
+**Files:** BACKBONE #16 / `status.md` D2 (gauge bridge; k-space connection
 = 0); `branesim/diagnostics/alpha_separability.py` (closed-form `(★)`, `g(k̂)`);
 `branesim/diagnostics/berry_holonomy.py` (transport harness to extend for §6);
 `BACKBONE.md` #16/#17/#18/#19; `PRINCIPLES.md` §4.2–4.4.

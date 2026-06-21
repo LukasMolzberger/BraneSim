@@ -197,8 +197,8 @@ derivation are load-bearing for how the solver must be understood:
   (Newton–Krylov), never gradient-descend `S`; relaxation/minimization
   would silently solve the *Euclidean* heat-equation problem instead.
   The two-time block BVP is also not unconditionally well-posed
-  (resonances → non-uniqueness). Both are tracked in `OPEN_PROBLEMS.md`
-  §A1/§A2, with soliton chirality (§1.5) as the conjectured selection
+  (resonances → non-uniqueness). Both are tracked in
+  `papers/core/derivations/status.md` (group A, A1/A2), with soliton chirality (§1.5) as the conjectured selection
   principle. Time-symmetric solvers that find the full 4D stationary
   configuration under past+future boundary data are a separate development
   track.
@@ -299,7 +299,7 @@ particle's worldtube. Concretely:
 Tsirelson's bound (`2√2`), the no-signalling theorem, and the
 baryon-to-photon ratio. These are constraints on what the project *can*
 eventually claim, not established results. The live, detailed list lives in
-`OPEN_PROBLEMS.md` §B (the central tracker) — keep it there, not in the
+`papers/bell/derivations/status.md` (group B) — keep it there, not in the
 paper or the theory-structure diagram.
 
 ---

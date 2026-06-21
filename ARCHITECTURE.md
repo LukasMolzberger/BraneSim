@@ -6,8 +6,8 @@ remain forward-looking). The former `components/` (forward-Verlet) code has been
 This document is meant to be specific enough to reimplement from scratch.
 
 **Scope note.** The *foundational solver algorithm* (root-finding the Lorentzian
-action over a 4D block) is an **open research problem** (`OPEN_PROBLEMS.md`
-§A1/A2). Where the algorithm is settled, this doc specifies it; where it is not,
+action over a 4D block) is an **open research problem**
+(`papers/core/derivations/status.md` §Open-derivations A1/A2). Where the algorithm is settled, this doc specifies it; where it is not,
 it marks a **DESIGN DECISION** with candidate approaches and a recommended
 default. Those decisions must be resolved (a short derivation/spike) before the
 solver core is finalized — but the rest of the architecture does not depend on
@@ -15,7 +15,7 @@ which choice is made.
 
 Canonical sources this blueprint is bound to: `BACKBONE.md` (#1, #15, #21,
 #22), `PRINCIPLES.md` (§1.1, §1.2, §1.5, §6), `paper/derivations/discrete_4d_brane_action.md`
-(the action and the EL=Verlet identity), `OPEN_PROBLEMS.md` §A.
+(the action and the EL=Verlet identity), `papers/core/derivations/status.md` §Open-derivations (group A).
 
 ---
 
@@ -94,7 +94,7 @@ to boundary conditions on slices `l=0` and `l=N`.
 `V` enters `−`). You **must not minimize `S`** (gradient descent diverges along
 the kinetic direction and/or silently solves the Euclidean problem). The solver
 **root-finds `𝓡 = 0`** (equivalently minimizes `‖𝓡‖²`). This is non-negotiable
-(`OPEN_PROBLEMS.md` A1).
+(`papers/core/derivations/status.md` A1).
 
 ### 1.4 Two solve modes
 - **IVP (forward, special case):** boundary data = two adjacent past slices
@@ -146,7 +146,7 @@ architecture is built so the choice is localized to the solver module.
     block solver must be a **nonlinear eigen-BVP: periodic-in-time
     (`R^{l+P}=R^l`, period/frequency the eigenparameter) + localized-in-space**,
     not two-time Dirichlet and not IVP. Nonlinear global uniqueness stays open
-    (`OPEN_PROBLEMS A2`).
+    (`papers/core/derivations/status.md` A2).
 - **D3 — Temporal-link form (A4, `discrete_4d_brane_action.md` §6).** The temporal
   link is a central-force spring with rest length `r_t`, the same law as the
   spacelike links — **one 4D-isotropic spring parameterized by `r_t`, not a fork**.
@@ -182,7 +182,7 @@ architecture is built so the choice is localized to the solver module.
 ### 3.2 Energy and residual
 - Spacelike force / potential: central-force pair springs, exactly as §1.2/§1.3.
   The energy stays **bounded** as a link collapses (`→ ½k_s(αa)²`) — the StVK /
-  central-force law is **non-coercive in compression** (`OPEN_PROBLEMS.md` C1).
+  central-force law is **non-coercive in compression** (`papers/matter_mass/derivations/matter/status.md` C1).
   Do **not** silently fix this; if a coercive (polyconvex) law is later adopted,
   it is a deliberate constitutive change with its own derivation.
 - The residual operator `𝓡` (§1.3) is the **single shared primitive**: the solver
@@ -405,12 +405,12 @@ with:
 
 ---
 
-## 13. Risks & open problems (track in `OPEN_PROBLEMS.md`)
+## 13. Risks & open problems (tracked in the per-paper bridge `status.md` files)
 - **A1 (root-find, not minimize):** non-negotiable; mis-implementing it silently
   solves the wrong (Euclidean) problem. Guard with test §11.5.
 - **A2 (BVP well-posedness / chirality):** the core is **resolved in the linear
   regime** (D2: two-past-slice chiral BC; tested to 8e-14 eigenmode recovery,
-  verdict-a 2026-05-31 — see `OPEN_PROBLEMS.md` A2 and `LESSONS_LEARNED.md`).
+  verdict-a 2026-05-31 — see `papers/core/derivations/status.md` A2 and `LESSONS_LEARNED.md`).
   Remaining open: the chiral march in `solver/boundary.py` currently uses the
   `r_t=0` Verlet stencil, so `r_t>0` chiral solves need an `r_t`-aware step; and
   nonlinear global uniqueness stays open.
@@ -428,7 +428,7 @@ with:
 ## 14. Program strategy — "all ingredients at once" (owner, 2026-05-31)
 
 A stable particle is **not** expected from any single ingredient: the
-elasticity-only IVP hedgehog provably disperses (`OPEN_PROBLEMS C1`,
+elasticity-only IVP hedgehog provably disperses (`papers/matter_mass/derivations/matter/status.md` C1,
 `[[project-c2-skyrme-no-confinement]]`). The particle is a stationary point of
 the **full 4D action** that requires, *together*: **BVP not IVP** (a whole
 time-coherent worldtube, not a radiating forward march); **colour from

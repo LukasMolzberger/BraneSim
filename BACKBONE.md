@@ -139,7 +139,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       meaningful gauge object lives on the **per-wavepacket complex envelope**
       `Ψ ∈ ℂ³` (per #18), not on the BZ link-variable construction in
       paper §5.6 as previously formulated. See
-      `OPEN_PROBLEMS.md` D2 for the detailed result.
+      `papers/gauge_color/derivations/gauge/status.md` D2 for the detailed result.
 
 17. **Geometric quartic provides Skyrme-class soliton stabilization**
     - The induced-metric correction `∂_i u ∂_j u` gives a `(|∇u|²)²`
@@ -178,7 +178,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       This is **why** the emergent gauge (EM/`U(1)`) connection's base space is
       `(x,t)`, not the Brillouin zone (paper §5.6 / backbone #9), and why two
       adjacent time slices are the minimum data that fix it (the block-solver
-      chiral BC, OPEN_PROBLEMS A2). Consistent with the model-(b) timelike spring
+      chiral BC, `papers/core/derivations/status.md` A2). Consistent with the model-(b) timelike spring
       (#21): time is a genuine direction carrying real structure.
 
 19. **Sector mapping: lab anisotropy is the structural source of three force
@@ -300,9 +300,9 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       The exact dynamics is non-Newtonian, so the 4D block solver is the foundational
       integrator and forward Verlet is its `r_t = 0` IVP limit. Consistency of
       `α_t = α` (light-cone isotropy + Newtonian limit) is the open verification,
-      `OPEN_PROBLEMS.md` A4a. See the derivation §6 and `OPEN_PROBLEMS.md` A4.
+      `papers/core/derivations/status.md` A4a. See the derivation §6 and `papers/core/derivations/status.md` A4.
       The Lorentzian action is a saddle (unbounded below), so a foundational
-      block solver must root-find `∇S = 0`, not minimize `S` (OPEN_PROBLEMS §A).
+      block solver must root-find `∇S = 0`, not minimize `S` (`papers/core/derivations/status.md`, group A).
 
 22. **The gauge / gravity split is observer-relative**
     - The 4-component displacement field `δX^μ` at each node has no
@@ -361,7 +361,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       paper as established, and do **not** present in the theory-structure
       diagram as theory): Tsirelson's bound (`2√2`), the no-signalling
       theorem, and the baryon-to-photon ratio. The live list is tracked
-      centrally in `OPEN_PROBLEMS.md` §B, not duplicated in the manuscript.
+      centrally in `papers/bell/derivations/status.md` (group B), not duplicated in the manuscript.
 
 24. **Color is kinematically confined: no coherent colored free mode**
     - The linear spectrum carries **no colored asymptotic free state**. Two
@@ -392,7 +392,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       around a localized worldtube.
     - **Quantitative, falsifiable handle.** The off-`[111]` fibre-holonomy ratio
       scales as `R(α₂)/R(α₁) = [(3−2α₂)/α₂] / [(3−2α₁)/α₁]`; for `(α₁,α₂)=(0.2,0.5)`
-      this is `0.3077` (`OPEN_PROBLEMS.md` D2;
+      this is `0.3077` (`papers/gauge_color/derivations/gauge/status.md` D2;
       `paper/derivations/alpha_holonomy_estimator.md`). A `>10%` deviation
       falsifies the spectral-susceptibility factorization behind this picture.
 

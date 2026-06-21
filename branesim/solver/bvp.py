@@ -7,7 +7,7 @@ S is Lorentzian (saddle, unbounded below); gradient-descent on S diverges
 along the kinetic direction and would silently solve the wrong (Euclidean)
 problem.  This is enforced by construction: the objective passed to the
 Newton-Krylov solver is the residual vector R, NOT the action S.
-(ARCHITECTURE.md §1.3, OPEN_PROBLEMS.md A1.)
+(ARCHITECTURE.md §1.3, papers/core/derivations/status.md A1.)
 
 Algorithm
 ---------
@@ -59,7 +59,7 @@ OBJECTIVE: str = "residual_norm"  # the solver targets ‖R‖, NOT the action S
 assert OBJECTIVE == "residual_norm", (
     "bvp.py: solver must target residual_norm, not the Lorentzian action S. "
     "S is a saddle, unbounded below — minimising it diverges or solves the "
-    "Euclidean problem.  (ARCHITECTURE.md §1.3, OPEN_PROBLEMS.md A1)"
+    "Euclidean problem.  (ARCHITECTURE.md §1.3, papers/core/derivations/status.md A1)"
 )
 
 

@@ -196,4 +196,4 @@ per-slice `ω(l)` stays ≈ uniform on the converged worldtube (caveat 1).
   hyperelastic law; the `∝α` coefficients are central-force-specific
   (`geometric_nonlinearity_alpha_scaling.md` §5).
 
-Parent: `u1_su3_binding.md`. Tracker: OPEN_PROBLEMS D6 (+ A4a, new test).
+Parent: `u1_su3_binding.md`. Tracker: `papers/gauge_color/derivations/color/status.md` D6 (+ `papers/core/derivations/status.md` A4a, new test).

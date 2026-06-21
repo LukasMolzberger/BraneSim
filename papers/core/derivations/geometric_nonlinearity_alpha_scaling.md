@@ -97,7 +97,7 @@ Green–Lagrange strain `E`. True StVK (`W = μ tr E² + (λ/2)(tr E)²`) locks 
 quartic to `μ` by the `E ⊃ ½∂uᵀ∂u` structure; the central-force spring does not
 obey that locking at quartic order. So a naive "quartic ∝ μ ∝ (1−α)" from assuming
 StVK is **not** the lattice truth. The exact spring quartic is ∝ α (§4). This is
-relevant to `OPEN_PROBLEMS.md` C1 (StVK vs the actual constitutive law).
+relevant to `papers/matter_mass/derivations/matter/status.md` C1 (StVK vs the actual constitutive law).
 
 ## 6. Consequences
 
@@ -115,4 +115,4 @@ relevant to `OPEN_PROBLEMS.md` C1 (StVK vs the actual constitutive law).
 **Files:** `branesim/core/conventions.py`; `paper/derivations/lattice_to_continuum.md`
 §3.1; `BACKBONE.md` #16/#17; `paper/derivations/vsh_channel_decomposition.md` §2.5
 (correction target); `paper/derivations/alpha_holonomy_estimator.md` §5/§7;
-`OPEN_PROBLEMS.md` C1, D2.
+`papers/matter_mass/derivations/matter/status.md` C1; `papers/gauge_color/derivations/gauge/status.md` D2.

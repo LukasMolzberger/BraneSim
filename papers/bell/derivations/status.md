@@ -17,8 +17,8 @@
 
 ## Open derivations
 
-*Relocated from the former central `OPEN_PROBLEMS.md` (group B, quantum-foundations
-derivations / Bell stance). IDs retained so existing cross-references resolve here.*
+*Relocated from the former central open-problems tracker (group B, quantum-foundations
+derivations / Bell stance). Original IDs (B1…B3) retained.*
 
 Carried over from `PRINCIPLES.md` §1.5 and `BACKBONE.md` #23. These are
 constraints the retrocausal worldtube interpretation places on the program —

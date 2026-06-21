@@ -21,9 +21,8 @@
 
 ## Open derivations
 
-*Relocated from the former central `OPEN_PROBLEMS.md` (group C, constitutive law &
-soliton stability; plus D1, the EM-charge ⇄ spin-½ bridge). IDs retained so existing
-cross-references (`OPEN_PROBLEMS C1`, etc.) resolve here.*
+*Relocated from the former central open-problems tracker (group C, constitutive law &
+soliton stability; plus D1, the EM-charge ⇄ spin-½ bridge). Original IDs (C1, C1a, C2, D1) retained.*
 
 ### C1. StVK compression non-coercivity vs soliton stability — `open`
 **Statement.** The St. Venant–Kirchhoff baseline is neither polyconvex nor

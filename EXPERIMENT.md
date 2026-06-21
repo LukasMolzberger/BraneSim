@@ -82,7 +82,7 @@ figures). Devices — recover/adapt the legacy implementations from commit `c0f1
 - **Gauge layer:** Berry connection (`Ψ=u+iv/ω₀`) + phase-RGB videos; EM
   `A_μ=i⟨u|∂_μu⟩`, `F_μν → E,B` quiver/streamlines; **per-color-channel `SU(3)`/QCD
   breakdown** (does color coexcite/stabilize?). **Screening length / photon-mass check
-  (OPEN_PROBLEMS D5):** fit the `B`/supercurrent radial tail — a power-law (`λ→∞`,
+  (`papers/gauge_color/derivations/gauge/status.md` D5):** fit the `B`/supercurrent radial tail — a power-law (`λ→∞`,
   unscreened) tail confirms a *massless* long-range EM photon; exponential screening
   (finite penetration depth `λ`) would mean the substrate Meissner-screened its own
   `U(1)` (a `W/Z`-like, not EM, object) and **falsifies the EM identification**.
@@ -101,10 +101,10 @@ production `96³×128`.
    `β<1` / hardening-bound-mode regime, BACKBONE #25), on a clean periodic-clamped,
    `r_t>0`, eigenstate footing.
 2. Does the **`SU(3)` sector coexcite and stabilize** the color-neutral electron — the
-   non-Abelian/semilocal-vortex core moduli (BACKBONE #25; OPEN_PROBLEMS D4)?
+   non-Abelian/semilocal-vortex core moduli (BACKBONE #25; `papers/gauge_color/derivations/color/status.md` D4)?
 3. The **geometric (carrier) phase** and the **spin-½ `ℤ₂`** holonomy, measured directly.
 
-## Extension — the U(1)↔SU(3) binding probe (OPEN_PROBLEMS D6)
+## Extension — the U(1)↔SU(3) binding probe (`papers/gauge_color/derivations/color/status.md` D6)
 Why a proton does not split into a color core + a free positive charge. EM/charge =
 trace `(1,1,1)/√3` phase, color = internal orientation, of the **one** `Ψ∈ℂ³` lump.
 The probe measures whether the trace (charge) content stays co-located with the

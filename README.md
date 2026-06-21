@@ -11,7 +11,7 @@ documents), a Python solver package (`branesim/`), and the validation/experiment
 machinery.
 
 > **Status:** active research code. The physics is a working hypothesis under
-> test, not an established result. See `OPEN_PROBLEMS.md` for what is *not* yet
+> test, not an established result. See each paper's `derivations/<bridge>/status.md` (the *Open derivations* sections) for what is *not* yet
 > derived and the paper's §2 "Non-claims" for the honest scope.
 
 ---
@@ -40,7 +40,6 @@ The canonical statement of all of this is **`BACKBONE.md`** — read that first.
 | `BACKBONE.md` | **Canonical, non-negotiable backbone of the theory.** Start here. |
 | `PRINCIPLES.md` | Non-negotiable engineering/physics rules (substrate-only, no back-reaction, no hand clamps, layer separation). |
 | `ARCHITECTURE.md` | Block-solver-centric code blueprint and design decisions. |
-| `OPEN_PROBLEMS.md` | Index of unsolved derivations; full entries now live in each paper's `derivations/<bridge>/status.md`. |
 | `LESSONS_LEARNED.md` | Mistakes not to repeat + results we trust. |
 | `EXPERIMENT.md` | Spec of the current single instrumented experiment (the U(1) carrier-phase vortex). |
 | `archive/VALIDATION_ROADMAP.md` | Sprint-organized validation subtasks (linear → gauge → Lorentz → solitons → gravity). |
@@ -134,4 +133,4 @@ pytest            # 54 tests (core physics + BVP solver)
 2. `PRINCIPLES.md` — the rules any code change must respect.
 3. `ARCHITECTURE.md` — how the solver is structured and why.
 4. `paper/` — the full written argument.
-5. `OPEN_PROBLEMS.md` — what is still missing.
+5. each paper's `derivations/<bridge>/status.md` — what is still missing (the *Open derivations* sections).

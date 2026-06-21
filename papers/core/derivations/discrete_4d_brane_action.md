@@ -2,7 +2,7 @@
 
 Author: `physics-derivation` agent.
 Companion to `lattice_to_continuum.md` (spatial-link algebra) and
-`OPEN_PROBLEMS.md` §A (solver caveats this derivation points to but does not
+`status.md` *Open derivations* (group A — solver caveats this derivation points to but does not
 resolve).
 
 > **What this formalizes.** In the working Verlet pipeline the timelike
@@ -136,7 +136,7 @@ differs:
   Well-posed Cauchy problem.
 - **BVP / block** (foundational): prescribe spacelike-slice data on a *past*
   slice `l=0` and a *future* slice `l=N`, root-find the interior. This is the
-  retrocausal / time-symmetric reading (principles §1.5, OPEN_PROBLEMS A1/A2).
+  retrocausal / time-symmetric reading (principles §1.5, `status.md` A1/A2).
 
 ---
 
@@ -167,7 +167,7 @@ In dimensionless units `k_s = a = ρ = 1` (`m=1`) these reduce to the canonical
 `c_T/c_L = √0.8 ≈ 0.894`.
 
 **Tuning conditions for emergent isotropic Lorentz invariance** (stated, not
-claimed — OPEN_PROBLEMS A3). The discrete `□ = ∂_τ² − c²∇²` is
+claimed — `status.md` A3). The discrete `□ = ∂_τ² − c²∇²` is
 isotropic-Lorentzian only when:
 
 1. **Cone-matching (CFL-like):** the temporal-to-spatial stiffness ratio
@@ -189,7 +189,7 @@ isotropic-Lorentzian only when:
 
 `S = Σ_l Δt(T−V)` is Lorentzian (`T` enters `+`, `V` enters `−`) and therefore
 **unbounded below — a saddle, not a minimum**. Consequences (full statements in
-`OPEN_PROBLEMS.md`):
+`status.md` *Open derivations*, group A):
 
 - **A1.** The foundational solver must **root-find `∇S = 0`** (Newton–Krylov on
   the discrete d'Alembertian, or minimize `‖∇S‖²`), never gradient-descend `S`.
@@ -257,7 +257,7 @@ So `r_t` dials between the **linear/Verlet limit** ("matches plain Newton and th
 existing Verlet code", `r_t = 0`) and the **canonical prestressed substrate** ("a
 non-Newtonian time link that carries gravity's second face", `r_t = α·β·dt`); the
 two limits coincide only at `r_t = 0`. This is **one model parameterized by `r_t`** —
-resolved and implemented (`ActionParams.r_t`; OPEN_PROBLEMS A4); the `α_t = α`
+resolved and implemented (`ActionParams.r_t`; `status.md` A4); the `α_t = α`
 consistency is the open verification (A4a).
 
 ---
@@ -307,9 +307,9 @@ assumption (A9) or the integrator's variational property.
    has zero rest length). It becomes physical when `r_t > 0`.
 4. **Not derived:** emergent isotropic Lorentz invariance (§4 gives only the
    tuning condition); inside-observer blindness to the `√(1−α)` anisotropy is
-   the load-bearing conjecture (backbone #8, OPEN_PROBLEMS A3).
+   the load-bearing conjecture (backbone #8, `status.md` A3).
 5. **Pointed to, not derived:** unboundedness / BVP well-posedness (§5,
-   OPEN_PROBLEMS A1/A2).
+   `status.md` A1/A2).
 6. **Resolved + implemented:** the temporal link is a central-force spring
    parameterized by `r_t` (§6); `r_t = 0` is the linear/Verlet limit. The open
    piece is the `α_t = α` consistency (A4a), not the link form.

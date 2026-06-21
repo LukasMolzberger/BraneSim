@@ -7,21 +7,20 @@
 - Lattice-to-continuum reduction: acoustic tensor A_abcd = (k_s/a)[α Q_abcd + (1−α) δ_ac δ_bd]; wave speeds c_L² = k_s a²/m, c_T² = (1−α) k_s a²/m.
 - Spring constitutive continuum limit: central-force spring ½k_s(|ΔR|−αa)² established as the constitutive law; StVK demoted to quadratic-order proxy (inverted quartic α-scaling).
 - Cross-check of discrete and continuum wave speeds via conventions.py closed-form dispersion.
-- Two-time (block) BVP well-posedness **resolved in the linear regime**: a two-past-slice chiral boundary condition gives an N-independent, bounded condition number (OPEN_PROBLEMS A2, `in-progress`, linear regime resolved 2026-05-30; stated in §substrate-model of the paper).
+- Two-time (block) BVP well-posedness **resolved in the linear regime**: a two-past-slice chiral boundary condition gives an N-independent, bounded condition number (A2 in *Open derivations* below, `in-progress`, linear regime resolved 2026-05-30; stated in §substrate-model of the paper).
 - See: discrete_4d_brane_action.md, geometric_nonlinearity_alpha_scaling.md, lattice_to_continuum.md, spring_constitutive_continuum_limit.md.
 
 ## MISSING
 
-- Saddle-point solver for the full Lorentzian action (OPEN_PROBLEMS A1, `open`); the linear-regime well-posedness above does not yet extend to the nonlinear two-time problem with the time-link quartic restored.
+- Saddle-point solver for the full Lorentzian action (A1 in *Open derivations* below, `open`); the linear-regime well-posedness above does not yet extend to the nonlinear two-time problem with the time-link quartic restored.
 - Proof that the 6-neighbor stencil with retuned shell weights produces an isotropic acoustic tensor; or explicit acceptance of the leading-order cubic anisotropy as a feature with quantified magnitude. (The paper takes the latter stance: the cubic anisotropy is the structural source of the gauge sector, not a defect to tune away.)
-- Verification of α_t = α consistency for the canonical prestressed vacuum (OPEN_PROBLEMS A4a, `adopted; verification open`).
+- Verification of α_t = α consistency for the canonical prestressed vacuum (A4a in *Open derivations* below, `adopted; verification open`).
 - Marsden–West reference still uncited: §substrate-model attributes the Störmer–Verlet = variational-integrator result to Marsden–West in prose, but references.bib has no matching entry.
 
 ## Open derivations
 
-*Relocated from the former central `OPEN_PROBLEMS.md` (group A, foundational
-solver — the 4D block-variational formulation). IDs retained so existing
-cross-references (`OPEN_PROBLEMS.md A1`, etc.) resolve here.*
+*Relocated from the former central open-problems tracker (group A, foundational
+solver — the 4D block-variational formulation). Original IDs (A1…A4a) retained.*
 
 These arose from making the static 4D world-volume the foundational object
 (brane action `S[R]`, time-symmetric, stationary point under boundary data)

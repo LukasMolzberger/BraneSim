@@ -30,7 +30,7 @@ Two schemes are provided:
        to the full column; its 2-norm condition number is O(1) and N-independent
        (bounded by 1/sin(θ) for the 2×2 companion matrix, which is O(1) for
        propagating modes θ ∈ (0,π)).  Derivation + numerical certificate:
-       OPEN_PROBLEMS.md A2 (verdict a) and ARCHITECTURE.md §2 D2.
+       papers/core/derivations/status.md A2 (verdict a) and ARCHITECTURE.md §2 D2.
 
    The old FFT-based ``apply_chiral`` (which set a₊ := A0_k per spatial bin and
    multiplied by e^{−iθN}) is deleted per §7.5; it violated reality by conflating

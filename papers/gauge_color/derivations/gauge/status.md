@@ -18,10 +18,9 @@
 
 ## Open derivations
 
-*Relocated from the former central `OPEN_PROBLEMS.md` (group D, gauge sector —
-the EM/`U(1)` items D2, D3, D5). IDs retained so existing cross-references
-(`OPEN_PROBLEMS.md D2`, etc.) resolve here. The `U(1)`↔`SU(3)` binding items D4
-and D6 live in the Color bridge.*
+*Relocated from the former central open-problems tracker (group D, gauge sector —
+the EM/`U(1)` items D2, D3, D5). Original IDs retained. The `U(1)`↔`SU(3)` binding
+items D4 and D6 live in the Color bridge.*
 
 ### D2. Prestress α from the EM/colour coupling ratio — `resolved (linear: undetermined)` · `open (nonlinear)`
 **Statement.** Can the empirical EM-vs-strong coupling ratio fix the prestress α?

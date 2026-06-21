@@ -19,9 +19,8 @@
 
 ## Open derivations
 
-*Relocated from the former central `OPEN_PROBLEMS.md` (group D, gauge sector —
-the `U(1)`↔`SU(3)` binding items D4 and D6). IDs retained so existing
-cross-references (`OPEN_PROBLEMS D4`, `OPEN_PROBLEMS D6`) resolve here. The
+*Relocated from the former central open-problems tracker (group D, gauge sector —
+the `U(1)`↔`SU(3)` binding items D4 and D6). Original IDs retained. The
 EM/`U(1)`-only items D2, D3, D5 live in the Gauge bridge.*
 
 ### D4. EM = `U(1)` vortex / color = `SU(3)` texture; do they bind, and does color stabilize the electron? — `open` (active experiment, 2026-06-06)

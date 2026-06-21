@@ -30,7 +30,7 @@ At quadratic (linear) order the gradient energy is block-diagonal,
     Ψ†(−∇²)Ψ = |∇Ψ_tr|² + |∇Ψ_⊥|² ,
 
 so trace and traceless **decouple** — the established "α-undetermined / sectors
-decoupled at linear order" result (OPEN_PROBLEMS D2; `alpha_holonomy_estimator.md`).
+decoupled at linear order" result (`../gauge/status.md` D2; `alpha_holonomy_estimator.md`).
 Linear theory therefore predicts the charge *does* drift off, beyond the soft cost
 of tearing one amplitude lump into two. **Any binding must be nonlinear**, and (by
 the exact `∝α` structure of the anharmonicity) must vanish as `α→0`. This is the
@@ -257,5 +257,5 @@ Both point to the **time link as the binding agent**, tying directly to A4a (sin
 a single mechanism unifying EM–color binding with gravity — conditional on the closure
 axiom (Part 1) and the winding-contraction (Part 2). Clean negative fork: if `Δu_∥` is
 ω-independent and `Im𝒢` small, sectors separate spatially and only the ℤ₃ triality lock
-survives. Tracked as OPEN_PROBLEMS **D6**; experiment in `EXPERIMENT.md` (binding probe;
+survives. Tracked in `status.md` **D6** (color bridge); experiment in `EXPERIMENT.md` (binding probe;
 decisive test = `Δu_∥(ρ)∝ω²` via the closure index).
