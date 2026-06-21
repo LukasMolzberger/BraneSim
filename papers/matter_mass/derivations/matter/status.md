@@ -8,9 +8,8 @@
 - Kinematic confinement of color (coherence and color-activity mutually exclusive on cubic lattice).
 - Derrick theorem analysis: anti-collapse blocked by lattice UV cutoff (spacing a; Derrick's λ→0 rescaling halts at one cell; single-node concentration immediately disperses); anti-expansion blocked by geometric quartic ∝ k_s α/a (corrected from earlier inverted StVK scaling). Derrick balance (gradient vs. quartic) gives equilibrium size R_h/a = κ (A/a) √(α/(1−α)).
 - Corrected soliton sweet spot: α ≈ 0.5–0.8, operational seed target α=0.7, A/a ≈ 10 → R_h/a ≈ 8.
-- Periodic BC requirement established: open BC causes tension relaxation (prestressed lattice contracts to αa), collapsing even A=0 vacuum; periodic BC fixes box at N·a, holds tension, vacuum stable.
-- Preliminary U(1) vortex relaxation attempted (non-converged; semilocal drift observed — expected behavior).
-- ALL 2026-06-05 nonlinear runs RETRACTED (unclamped pretension + hard-coded B-estimator invalidated static/box-doubling/w-scan/worldtube runs).
+- Periodic BC requirement established: a prestressed lattice (rest length αa < a) is under tension; only a periodic box (fixed at N·a) holds that tension, giving a stable tensioned vacuum. Open/free boundaries let the network relax toward αa and collapse even the A=0 vacuum — so the tensioned vacuum, and any soliton on it, must be posed with periodic spatial BC.
+- A bound particle is an eigenstate of the tensioned vacuum, not a marched/relaxed seed: stability and winding must be read from a self-consistent stationary state, not a seed-and-watch trajectory.
 
 ## MISSING
 
@@ -63,23 +62,20 @@ no sign error in the α≈0.5–0.8 sweet-spot story.
 **Status.** open. Owner: soliton-hunter. Feeds the sprint4 re-run target
 (α≈0.7, A/a≈10). See `[[project_geometric_nonlinearity_alpha_scaling]]`.
 
-### C2. Rest baryon — `open` · ⚠ ALL prior nonlinear runs RETRACTED 2026-06-05 (unclamped pretension + hard-coded B-estimator); restarting periodic-clamped + eigenstate
+### C2. Rest baryon — `open`
 **Reframed 2026-06-06 (BACKBONE #25, D4):** the baryon is specifically the `SU(3)`
 `π₃` **texture** (a localized Skyrmion/instanton, codim-3) — topologically a different
 object from the `U(1)` carrier-phase **vortex** (the EM/electron-like object, codim-2,
 `π₁`). The **active first experiment is the `U(1)` vortex** (`EXPERIMENT.md`/D4),
 which is `π₁`-protected and the cleaner test; the `SU(3)` texture (this entry) follows.
 **Statement.** The time-periodic, amplitude-breathing baryon ansatz (the
-common-carrier Skyrme breather, `solve_breather(mode="topological")`) **exists
-but is dynamically unstable, and prestress α does not stabilize it.** Converged
-32³ orbits at α=0.80/0.85/0.90 give Floquet `ρ = 3.59 / 3.47 / 3.70` — robustly
-`>1`, flat in α (ticks *up* at 0.9), and robust to `inner_maxiter` (physical, not
-a solver artifact); the earlier apparent "α-stabilizing trend" (95→54→3.6) was an
-artifact of non-converged orbits at α=0.5/0.7 (residual 8–27) and must be
-excluded (sprint4b trend-sweep; data retired with `test-runs/`, result in `LESSONS_LEARNED.md`). The breather
-*mechanism* is sound — Pythagorean hardening `Q = 8k_sα/a² > 0` places a localized
-mode above the transverse band ([[project_pythagorean_breather_go]]) — but the
-breathing/scale degree of freedom itself carries the instability.
+common-carrier Skyrme breather) is dynamically unstable, and prestress α does not
+stabilize it: the breather *mechanism* is sound — Pythagorean hardening
+`Q = 8k_sα/a² > 0` places a localized mode above the transverse band
+([[project_pythagorean_breather_go]]) — but the breathing/scale degree of freedom
+itself carries an instability (Floquet multiplier `>1`, α-independent). The
+conclusion is structural: a pulsating-scale ansatz is the wrong vehicle, so the
+rest baryon must be sought as a *static* topological soliton (see Replacement).
 **Why it matters.** A stable baryon-like soliton is the decisive numerical target
 (backbone #12). The breather was the leading candidate vehicle
 ([[project_baryon_search_vehicle_breather]]); it is now closing negative, so the
@@ -106,10 +102,11 @@ static soliton is Peierls–Nabarro grid-pinned, re-opening the PN / emergent-Lo
 tension (#8, #17): the test **must report `w/a` and quantify the PN barrier**.
 **Test spec.**
 - (a) *Static extremum.* Constrained-minimize `V` (or root-find `∇V=0`) on a `B=1`
-  hedgehog + `X⁴`-twist seed at α≈0.5–0.8, large `A`, **open** boundary, box ≫ seed;
-  verify `B(slice)=1` preserved and the config stays localized
-  (`spread_ratio ≪ 1`, not box-fill — use the corrected metrics from
-  [[project_c2_skyrme_no_confinement]], never `leakage_fraction`).
+  hedgehog + `X⁴`-twist seed at α≈0.5–0.8, large `A`, **periodic** boundary (box at
+  N·a, to clamp the prestress — see HAVE), box ≫ seed; verify `B(slice)=1` from the
+  actual field and that the config stays localized (`spread_ratio ≪ 1`, not box-fill —
+  use the corrected metrics from [[project_c2_skyrme_no_confinement]], never
+  `leakage_fraction`).
 - (b) *Stability.* Spectrum of the static Hessian (second variation of `V`):
   require **no negative-eigenvalue directions** beyond the allowed zero modes
   (3 translations + the iso-rotation/orientation moduli). This replaces the
@@ -119,56 +116,17 @@ tension (#8, #17): the test **must report `w/a` and quantify the PN barrier**.
   product (closed loop → silent false-negative; see
   [[project_spin_half_is_soliton_layer]]). Already scoped:
   at L5 (D1; `[[project_spin_half_is_soliton_layer]]`).
-**⚠ RETRACTED — 2026-06-05. ALL executed nonlinear-soliton runs in this thread are INVALID.**
-Two independent harness errors invalidate every C2-thread numerical result — the
-"corrected harness" `N_neg=0` minimum, the box-doubling "boundary-confined" verdict,
-the w-scan, the saturation analysis, and the worldtube-tornado run:
+**Status.** open. The rest baryon is to be sought as a static, periodic-BC
+eigenstate (test spec a/b/c) rather than a periodic *orbit* (breather), per the
+Statement and Replacement above. Owners: soliton-hunter (static extremum + Hessian) +
+physics-derivation (iso-rotation quantization) + berry-validator (L5 spin holonomy).
+See `archive/BARYON_SIMULATION_ROADMAP.md` Phase 2.
 
-1. **Pretension not clamped (dominant error).** The runs used **open spatial
-   boundaries** on a *prestressed* lattice (bonds stretched to `a`, rest length
-   `αa < a`, so the medium is under tension). An unpinned tensioned network relaxes
-   its prestress — it contracts globally toward `αa`. The **`A=0` control proves it**:
-   with *no soliton at all*, the open-BC march still collapses to `E_excess ≈ −V_vac`
-   (every bond reaches rest length, releasing the entire tension). The "vacuum" was
-   never held at the intended tensioned equilibrium, so the dynamics measured tension
-   relaxation, not soliton physics. Test-spec (a)'s "**open** boundary" above is the
-   error and is withdrawn.
-2. **B was never measured.** `compute_B_analytic` hard-codes `F_inner = math.pi`, so
-   it returns `B ≈ 1` whenever the boundary is at vacuum — *regardless of the interior
-   field*. Every "B = 1 preserved" claim is this artifact. Under static FIRE the field
-   in fact **unwound to the square-lattice vacuum**: the celebrated `N_neg=0, V*=273.8`
-   minimum is exactly the `13³` vacuum prestress floor
-   (`(k_s/2)·3·13²·12·(0.3)² = 273.78`) — the stable *vacuum*, mislabeled `B=1`.
-
-**Corrected standard for the restart (non-negotiable):**
-- **Clamp the pretension with periodic spatial BC.** The period fixes the box at
-  `N·a`, holds the tension, and the tensioned lattice is then a *stable* vacuum —
-  confirmed: `A=0` periodic → `E_excess ≡ 0` to machine precision.
-- **A bound particle is an eigenstate**, not a marched/relaxed seed. Every
-  seed-and-watch run here dispersed / unwound / contracted because the seed was not a
-  stationary solution. Solve for the self-consistent (rotating worldtube) state.
-- **Real diagnostics only:** vacuum-subtracted excess energy against the stable
-  periodic vacuum, and a winding degree computed from the *actual* field. The
-  hard-coded B-estimator is deleted.
-
-**What survives (unaffected by the bug):** the linear dispersion/anisotropy layer
-(machine-exact, periodic, small-amplitude), the `bvp_chiral` solver, the
-geometric-nonlinearity-∝α decomposition, and kinematic color confinement (backbone
-#24). The breather Floquet result (`ρ≈3.5`) is a distinct code path; held pending
-re-validation under this standard, but its instability is not attributable to the
-pretension bug.
-
-**Status.** open — restarting from the periodic-clamped tensioned vacuum (step 1)
-toward a periodic-BC **eigenstate** baryon (step 2). The static-min test spec (a/b/c)
-above is superseded by the eigenstate approach.
-
-**Competing live hypothesis (kept, ranked below).** Larger *breather* solitons
-stabilize (48³/64³, AWS). Ranked below the static route because `ρ≈3.5` is flat in
-α and shows no approach to 1 at the resolutions tried — no evidence stability is
-hiding just past 32³.
-**Owner.** soliton-hunter (static extremum + Hessian) + physics-derivation
-(iso-rotation quantization) + berry-validator (L5 spin holonomy). See
-`archive/BARYON_SIMULATION_ROADMAP.md` Phase 2.
+> *Apparatus note (not theory).* Soliton-scale runs must use periodic spatial BC to
+> clamp the prestress and must read winding `B` from the actual field — two harness
+> errors (open BC on a tensioned lattice; a hard-coded `F_inner=π` B-estimator)
+> previously produced spurious "stable B=1" results. Detail lives in
+> `LESSONS_LEARNED.md`; kept out of this derivation to avoid re-running the mistake.
 
 ### D1. EM-charge ⇄ spin-½ bridge (spin-from-isospin) — `open`
 **Statement.** Two emergent quantum numbers are currently scoped *independently*:

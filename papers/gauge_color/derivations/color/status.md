@@ -35,7 +35,7 @@ net-zero color (a color-singlet electron `SU(3)`-stabilized).
 with `SU(3)` unfrozen, is a **semilocal vortex** (simply-connected full vacuum, *not*
 topologically protected), so binding is a **dynamical** condition (the `β<1` /
 hardening-bound-mode regime; Vachaspati–Achucarro), on a clean periodic-clamped `r_t>0`
-eigenstate (supersedes the retracted C2-class attempts)? (ii) Does the `SU(3)` sector
+eigenstate (the periodic-BC eigenstate route, not seed-and-watch)? (ii) Does the `SU(3)` sector
 coexcite and **stabilize** the color-neutral electron (its non-Abelian/semilocal core
 moduli)? (iii) **Scale hierarchy:** does the size ratio of the `U(1)`
 vortex vs the `SU(3)` texture track `f(α)` — the candidate origin of the QCD-vs-EM
@@ -115,29 +115,27 @@ topological (C.2); (iv) `Q mod 1` of singlet/triplet/octet seeds (C.1). Reuses
   **Unification:** the same `r_t` sources gravity (#22), so **binding ↔ gravity co-vary
   in α, not independently tunable** — a new test of A4a (see core/Gravity bridges).
 **Status.** in-progress — **time-link binding is CONDITIONAL-YES** (energetic leg
-derived & reachable; topological leg conditional-maybe). **Linchpin VERIFIED in code
-(2026-06-07):** the `PeriodicBC`/`solve_block` path relaxes node positions only — `ω` is
-not a DOF; `ω̄=2π n_t/(P dt)` is pinned by fixed `P`, `dt`, and the topological winding
-`n_t` ("closure-locked carrier"). The time-link `r_t>0` force is present in
-`residual_periodic`, so the binding source is physically in the solver. Counterexample
-correctly avoided: `solver/breather.py` co-relaxes `ω` as an eigenvalue (would break the
-linchpin) — the experiment uses `PeriodicBC`, not the breather. Two refinements: (a)
-only the *period-averaged* `ω` is pinned, measure per-slice `ω(l)` on the converged
-worldtube; (b) since `ω` is imposed, the *amplitude self-selects* to it — the decisive
+derived & reachable; topological leg conditional-maybe). The verdict rests on a
+**closure-locked carrier**: `ω` is not a dynamical degree of freedom but is fixed
+externally by worldtube periodicity, `ω̄=2π n_t/(P dt)` (period `P`, step `dt`, integer
+closure index `n_t`); this is what makes the time-link contraction `Δu_∥^ext`
+definite-negative and co-located with the lump. Two refinements to the premise: (a) only
+the *period-averaged* `ω` is pinned, so per-slice `ω(l)` must be read on the converged
+worldtube; (b) since `ω` is imposed, the *amplitude self-selects* to it, so the decisive
 test is `Δu_∥∝ω²` across the *converged family* of closure indices `n` (dividing out the
 measured `A`), not at fixed `A_0`. C.1 triality remains the dynamics-free positive (binds
-fractionality, not co-location). **Part 2 contraction now CLOSED** (2026-06-07): charge contracts onto the
-winding `tr(L^3)` → soft winding-lock `Q=κ(A)·B`, `κ(A)∝A_tr A_⊥` (not quantized),
-soliton-sector-only. Decisive falsifier: `γ_Γ∝B¹` at fixed amplitude (energy-only is
-flat in `B`). **Build (2026-06-07):** the read-only probe is implemented — device D8
-`binding_probe` (`branesim/diagnostics/binding_probe.py`, in the suite; audit-clean),
-measuring per-worldvolume `d`/`Δu_∥(ρ)`/`ω(l)`/`γ_Γ`/`R_kähler`. Pre-tested on the seed:
-all signals correctly null (static seed; binding appears only post-solve). The
-discriminating falsifiers are owner-authorized multi-solve campaigns (D8 emits their
-scalars; driver not built). **Remaining open:** (i) the soliton coherence-pinning (that
+fractionality, not co-location). **Part 2 contraction is CLOSED:** charge contracts onto
+the winding `tr(L^3)` → soft winding-lock `Q=κ(A)·B`, `κ(A)∝A_tr A_⊥` (amplitude-graded,
+not quantized), soliton-sector-only. Decisive falsifier: `γ_Γ∝B¹` at fixed amplitude
+(energy-only is flat in `B`). **Remaining open:** (i) the soliton coherence-pinning (that
 the hedgehog fixes `Δφ₀(x)` so `∮Im𝒢dt` doesn't self-cancel) — asserted from the texture
 form, must be computed on a converged state; (ii) a stable `B≠0` texture to compute it on
-(C2/D4 — the hard gate; the entire topological leg is vacuous without it). Owners: the active build
-(binding-probe diagnostics: `Δu_∥(ρ)` vs `ω`, force law, `γ_Γ` vs `B`/`λ`, `Im𝒢`) +
-soliton-hunter (stable texture). See `[[project_u3_topology_scale]]`,
-`[[project_temporal_link_4d_spring]]`, `paper/derivations/{u1_su3_binding,time_link_binding}.md`.
+(C2/D4 — the hard gate; the entire topological leg is vacuous without it). Owners:
+physics-derivation (binding/contraction reductions) + soliton-hunter (stable texture).
+See `[[project_u3_topology_scale]]`, `[[project_temporal_link_4d_spring]]`,
+`paper/derivations/{u1_su3_binding,time_link_binding}.md`.
+
+> *Apparatus note (not theory).* The read-only binding-probe diagnostic (device D8,
+> `branesim/diagnostics/binding_probe.py`) emits the scalars these falsifiers need
+> (`Δu_∥(ρ)`, `ω(l)`, force law, `γ_Γ` vs `B`/`λ`, `Im𝒢`); the multi-solve driver is
+> owner-authorized and not yet built. See `EXPERIMENT.md`.
