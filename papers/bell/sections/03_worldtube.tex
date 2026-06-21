@@ -11,27 +11,42 @@ Neither the kinetic term nor the elastic potential distinguishes past from futur
 This means the substrate has no intrinsic arrow of time: both forward-in-time and
 backward-in-time solutions to \Cref{eq:eom} of Paper~I are equally valid.
 
-\subsection{Causality from soliton chirality}
+\subsection{The arrow of time: thermodynamic, with chirality fixing matter vs antimatter}
 \label{subsec:soliton-chirality}
 
-If the substrate has no intrinsic arrow of time, where does the empirical arrow of time come from?
+If the substrate has no intrinsic arrow of time, where does the empirical arrow come from?
+Two distinct questions hide here, and the substrate answers them separately --- so the arrow
+should not be attributed to soliton chirality alone.
 
-In the retrocausal worldtube reading, the arrow of time is a property of \emph{solitons}, not of
-the substrate.
-A soliton solution to the substrate equations of motion (\Cref{eq:eom} of Paper~I) may propagate
-forward or backward along the brane's timelike axis.
-The choice of direction is the \emph{chirality} of the soliton: a topological/dynamical property
-of the solution analogous to the handedness of a Skyrme texture.
+\paragraph{The experienced arrow is thermodynamic.}
+The arrow we actually experience --- irreversibility, records of the past but not the future, the
+felt direction of causation --- is not produced by the substrate dynamics, which are
+time-symmetric (\Cref{subsec:time-symmetry}), and it is not produced by soliton chirality either.
+It is the \emph{thermodynamic} arrow: it rests on a low-entropy boundary condition at one temporal
+end of the brane --- the cosmological ``past hypothesis''
+\citep{Albert2000TimeAndChance,PriceWharton2015Retrocausality}, the same low-entropy datum named
+as the one residual tuning of the ontology (\Cref{subsec:no-superdeterminism}).
+The entropy gradient it establishes is what orients memory, measurement records, and the
+psychological sense of pastness.
+On this point the present reading simply inherits the standard time-symmetric account, in which
+the arrow of experienced causality is statistical-mechanical, not dynamical.
+
+\paragraph{Chirality fixes matter versus antimatter.}
+Soliton chirality answers a \emph{different} question: given the brane's timelike axis, a
+localized mode (Paper~IV \Cref{sec:matter}) may propagate forward or backward along it --- a
+topological/dynamical property of the solution analogous to the handedness of a Skyrme texture.
 \begin{itemize}
-  \item \textbf{Matter solitons} are forward-propagating worldtubes: their chirality selects
-  the future direction as the direction of propagation.
-  \item \textbf{Antimatter solitons} are backward-propagating worldtubes: their chirality selects
-  the past direction.
+  \item \textbf{Matter solitons} are forward-propagating worldtubes: their chirality orients the
+  worldtube toward the future.
+  \item \textbf{Antimatter solitons} are backward-propagating worldtubes: their chirality orients
+  the worldtube toward the past.
 \end{itemize}
 This realizes the Feynman--Stueckelberg interpretation of antiparticles as time-reversed particles
 \citep{Stueckelberg1941,Feynman1949ApproachQED} at the level of substrate soliton solutions,
-rather than as an interpretive remark attached to a Lorentz-invariant field theory after the
-fact.
+rather than as an interpretive remark attached to a Lorentz-invariant field theory after the fact.
+Chirality therefore fixes the particle/antiparticle distinction and the local time-orientation of
+a given worldtube; it does \emph{not} by itself supply the experienced arrow, which is the
+entropic one above.
 
 \paragraph{Cosmological asymmetry.}
 The empirical excess of matter over antimatter is, on this reading, a \emph{geometric
@@ -47,8 +62,12 @@ observable volume.
 \subsection{Entanglement as V-branching worldtubes}
 \label{subsec:v-branching}
 
-An entangled pair of solitons, on the present reading, is \emph{one} branching 4D world-volume
-whose worldtube splits at a V-vertex in the shared past.
+An entangled pair, on the present reading, is \emph{one} branching 4D world-volume whose worldtube
+splits at a V-vertex in the shared past.
+The branches carry the entangled excitations themselves; for the polarization-entangled photon
+pair we commit to (\Cref{subsec:photon-v-worldtube}) these are unconfined carrier waves --- the
+photons --- and the only solitons involved are the bound electrons in the detectors, not the
+entangled objects.
 
 \paragraph{Mechanism.}
 Each branch of the world-volume propagates forward to a measurement event.
@@ -159,10 +178,11 @@ The carrier frequency $\omega_0$ fixed by the closure condition $\omega T = 2\pi
 timelike winding number of the worldtube, not a clock reading.
 
 \paragraph{Entanglement test.}
-The V-branching picture makes a concrete simulation prediction: two solitons initialized with
-correlated phases at a common point in spacetime should maintain those correlations over
-spacelike separation in a way that --- when the full 4D worldtube is inspected --- is traceable
-to continuity through the V-vertex, not to any spacelike link.
+The V-branching picture makes a concrete simulation prediction: two carrier wavepackets --- the
+entangled-photon pair of \Cref{subsec:photon-v-worldtube} --- emitted with correlated
+polarizations from a common source vertex should maintain those correlations over spacelike
+separation in a way that, when the full 4D worldtube is inspected, is traceable to continuity
+through the V-vertex, not to any spacelike link.
 A simulation that finds correlation without spacelike signal is consistent with the retrocausal
 reading; one that requires adding a nonlocal coupling is not.
 
@@ -183,9 +203,10 @@ mechanism.
   Show that two solutions related by $t\mapsto -t$ carry opposite chirality.
 
   \item \textbf{V-vertex simulation.}
-  Simulate two solitons initialized at a common point with opposite time orientations; verify that
-  the subsequent 4D world-volumes share a V-vertex and exhibit correlated behavior at their
-  respective measurement endpoints without any spacelike signal.
+  Simulate the entangled-photon pair (\Cref{subsec:photon-v-worldtube}) as two carrier arms
+  emitted from a common source vertex; verify that the subsequent 4D world-volumes share that
+  V-vertex and exhibit correlated behavior at their respective detector endpoints without any
+  spacelike signal.
 
   \item \textbf{Born-rule recovery.}
   Identify the substrate mechanism that produces apparent Born-rule statistics from the
