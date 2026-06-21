@@ -26,6 +26,30 @@ reproduces a detection-loophole model (Pearle 1970; Gisin & Gisin 1999) — the
 very loophole the committed experiments (Giustina 2015, Shalm 2015) closed. The
 Bell-violating angular law must therefore come from component (2).
 
+## The hidden variable: τ = the absorber's local vacuum phase
+
+The threshold model (1) needs a hidden variable τ whose ignorance produces the
+apparent randomness. Identify it concretely: **τ is the absorbing electron's
+local environmental/substrate phase at the moment of interaction.** Absorption
+is the incoming carrier driving the electron soliton over a barrier ("up the
+hill") into the next stable well; in relaxing it draws energy from its immediate
+surroundings, and since the substrate field is continuous and not pre-quantized
+into lumps, that energy is sourced partly from the carrier and partly from the
+ambient substrate (vacuum) fluctuation it sits in. Which side of threshold the
+electron lands on is fixed by the local fluctuation phase τ.
+
+This is the substrate reading of two established ideas — Wheeler–Feynman
+absorber accounting (the absorber's advanced response completes the transfer,
+books balancing globally to `ℏω`) and stochastic electrodynamics (the
+zero-point field supplies the local energy budget). The payoff is that it
+converts the Born-rule debt from "why is τ uniform?" into a concrete typicality
+claim about substrate vacuum-fluctuation statistics (equipartition of the local
+phase), which is checkable rather than postulated.
+
+**Conservation caution.** "Energy from the vacuum" must not drift into free
+energy: net transfer is still `ℏω`; the vacuum exchange is a *borrowing* that
+the advanced leg settles. Global conservation, local borrowing.
+
 ## The object to model
 
 On the branching worldtube the carrier field splits into two time-symmetric
@@ -71,6 +95,59 @@ once:
 Composing the two analyzer projections through the invariant at `S` is what
 should yield the `cos 2(a−b)` angular law — *if* the junction is built
 correctly.
+
+## Phase language: the V-vertex as Pancharatnam–Berry holonomy (conjugate to the energy picture)
+
+The photon is the `U(1)` phase / Berry connection of Paper III, so there is a
+phase-language description of the same junction, conjugate to the energy one.
+The geometric phase of polarization is the **Pancharatnam–Berry phase**, living
+on the **Poincaré sphere**. Two facts come for free:
+
+- A physical analyzer angle `a` maps to `2a` on the sphere (orthogonal linear
+  polarizations are 90° apart physically but antipodal on the sphere). This is
+  the origin of the factor of 2 in `cos 2(a−b)` — Poincaré-sphere geometry, not
+  an accident. (Connects to the spin-1 polarization frame and the double-angle
+  cousin of Paper III's spinorial 2π/4π holonomy, `subsec:spinorial-holonomy`.)
+- The singlet correlation is the sphere inner product:
+  `E(a,b) = −cos(2a − 2b) = −cos 2(a−b)`.
+
+So if the substrate's polarization transport through `S` reproduces
+Poincaré-sphere parallel transport — which a Berry connection should — the
+`cos 2(a−b)` *functional form* is geometric. The two descriptions are one
+object:
+
+| | phase language | energy language (this note) |
+|---|---|---|
+| photon | Pancharatnam–Berry connection on Poincaré sphere | carrier flux |
+| V-vertex coupling | holonomy of the frame transported `A→S→B` | bidirectional offer/confirmation flux |
+| `cos 2(a−b)` | sphere inner product (double angle automatic) | composed analyzer projections |
+| randomness | τ = absorber's local vacuum phase | threshold draw from environment |
+| no-signalling | off-diagonal phase only; diagonal fixed | marginal flux `a`-independent |
+
+**Crucial caveat — geometry gives the *form*, retro-projection gives the
+*violation*.** The Poincaré geometry applied *locally* to a shared λ still only
+yields the local sawtooth (`S ≤ 2`). What turns "reveal a pre-existing point on
+the sphere" into "project onto a setting-chosen axis" — the genuinely
+Bell-violating step — is the threshold projection (1) being *setting-chosen*,
+fed by the retro-coupling (2). Berry/Pancharatnam supplies the curve; the
+V-vertex retro-coupling supplies the violation above `S = 2`. Do not let the
+geometry oversell: it is necessary, not sufficient.
+
+## Emission/absorption asymmetry is the thermodynamic arrow, not a new one
+
+The intuitive asymmetry — an emitter is a localized high-energy source with the
+future photon energy in a *defined* location, whereas an absorber sits at the
+convergence of a wave that "could come from anywhere" — is the retarded/advanced
+asymmetry: emission = diverging retarded wave from a point source, absorption =
+converging advanced wave into a sink. The substrate action is time-symmetric and
+treats the two identically; the *observed* direction (emit-then-absorb, sources
+pointlike, sinks delocalized) is the **thermodynamic arrow** grounded in the
+low-entropy past hypothesis — the same arrow committed in `03_worldtube.tex`
+`subsec:soliton-chirality`, not a new fundamental asymmetry. Useful consequence
+for this model: **the randomness enters at absorption, not emission** — the
+photon is emitted into a definite mode; the τ-phase that decides the click lives
+at the detector. This is consistent with "quantization/randomness supplied by
+the detector" already held in the paper.
 
 ## The two make-or-break constraints
 
@@ -120,3 +197,8 @@ well-posed and separable from the threshold model.
   detection, detector-quantized) — supports component (1).
 - Pearle 1970; Gisin & Gisin 1999 — local threshold / detection-loophole models
   reproduce QM only below unit efficiency — the trap component (1) must avoid.
+- Pancharatnam 1956; Berry 1984, 1987 — geometric phase of polarization on the
+  Poincaré sphere; source of the `2a` double angle — supports the phase-language
+  route.
+- de la Peña & Cetto 1996 (stochastic electrodynamics) — zero-point field as the
+  local energy budget for absorption — supports τ = local vacuum phase.

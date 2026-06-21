@@ -43,8 +43,11 @@ Model the electron–photon interaction at the detectors as a threshold event: t
 electron soliton fires when the analyzer-projected carrier flux `∝ cos²(θ−a)`
 crosses its transition gap, plus a hidden detector phase. Show this yields
 single-arm Malus `cos²(θ−a)` for a uniform detector phase. This is the
-*probabilistic ↔ energy* bridge and the concrete form of the Born-rule debt
-(reduces it to "why is the detector phase uniform?", a typicality question).
+*probabilistic ↔ energy* bridge and the concrete form of the Born-rule debt.
+The hidden phase is identified concretely: **τ = the absorbing electron's local
+substrate/vacuum phase** (absorption draws energy from carrier + ambient field;
+Wheeler–Feynman / stochastic-electrodynamics reading), reducing the debt to a
+typicality claim about vacuum-fluctuation statistics rather than "why uniform?".
 Caveat: this component is local and, alone, Bell-bounded — it must NOT stand
 alone or it rebuilds a detection-loophole model (the loophole Giustina 2015 /
 Shalm 2015 closed). Supplies the *statistics*, not the Bell-violating angular
@@ -59,4 +62,9 @@ on the branching worldtube (past BC = pump + vertex coupling; future BCs = the
 two B4 threshold events). Must conserve energy, the singlet polarization
 invariant, and carry no marginal advanced energy. This is the mechanism behind
 "the V-vertex supplies the correlation"; it is the constructive route to B1
-(exact Tsirelson) and B2 (no-signalling). Full note: `vvertex_energy_transport.md`.
+(exact Tsirelson) and B2 (no-signalling). Has a conjugate phase-language form:
+the coupling as **Pancharatnam–Berry holonomy** of the polarization frame
+transported `A→S→B` on the Poincaré sphere, which makes the `cos 2(a−b)` *form*
+(incl. the double angle) geometric — but the *violation* above `S=2` still
+requires the setting-chosen threshold projection (geometry necessary, not
+sufficient). Full note: `vvertex_energy_transport.md`.
