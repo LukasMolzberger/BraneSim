@@ -106,7 +106,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       zero). The default operating point is `α = 0.2`.
     - **Notation:** `α` is the **single 4D prestress** — one parameter governing all
       four lattice directions, spatial and temporal alike (rest length = `α ×` held
-      spacing on every link; A4a, adopted 2026-06-05). It carries **no** spatial
+      spacing on every link; A4a, adopted). It carries **no** spatial
       subscript. `α_t` appears only *provisionally* inside the A4a verification (testing
       `α_t = α`); a permanent split into `α_s`/`α_t` would be introduced only if that
       verification fails.
@@ -137,8 +137,8 @@ It is intended to prevent core assumptions from being lost during paper edits, c
     - Diagnostic caveat: the Berry/WZ curvature on the *real* eigenframe of
       `D(k)` is identically zero (real symmetric → trivial real bundle). The
       meaningful gauge object lives on the **per-wavepacket complex envelope**
-      `Ψ ∈ ℂ³` (per #18), not on the BZ link-variable construction in
-      paper §5.6 as previously formulated. See
+      `Ψ ∈ ℂ³` (per #18), not on the BZ link-variable construction of
+      paper §5.6. See
       `papers/gauge_color/derivations/gauge/status.md` D2 for the detailed result.
 
 17. **Geometric quartic provides Skyrme-class soliton stabilization**
@@ -150,7 +150,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       `∝ k_s α/a` (vanishes at α→0), from the norm term `−k_s αa|ΔR|` of the
       central-force spring; a naive StVK identification `(μ/4ℓ₀⁴)` locks it to
       `μ ∝ (1−α)` and **inverts** the α-scaling. The Derrick `λ`-scaling above is
-      α-independent and unaffected — only the *coefficient* was wrong. Radius
+      α-independent and unaffected — only the *coefficient* is wrong. Radius
       grows with α (`R_h/a = κ(A/a)√(α/(1−α))`). See
       `paper/derivations/geometric_nonlinearity_alpha_scaling.md`.
     - **Target soliton width ≫ a** (Skyrme-stabilized regime), not `~ a`
@@ -164,9 +164,9 @@ It is intended to prevent core assumptions from being lost during paper edits, c
     - The complex-envelope description is required to promote the real
       lateral triplet to `Ψ ∈ ℂ³`. It is applied per band-isolated
       excitation, never as a globally coherent universe-wide carrier.
-    - Therefore "narrowband ordered sector" as previously stated in v3 is
-      replaced by "per-wavepacket band isolation". This removes the
-      dependence on an unmotivated global oscillation.
+    - The correct notion is "per-wavepacket band isolation", not a global
+      "narrowband ordered sector"; this removes any dependence on an
+      unmotivated global oscillation.
     - **Origin of the complex structure (the `i`):** the `i` that promotes the
       real lateral triplet to `Ψ ∈ ℂ³` is not fundamental and is not an
       analytic-signal trick on a slice — it originates in the **timelike**
@@ -268,9 +268,9 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       lattice as link-energy terms with opposite sign for the timelike
       direction relative to the three spacelike directions). This is what
       makes one of the four lattice directions "time".
-    - All previously stated anisotropy claims (cubic anisotropy at lab level
+    - All anisotropy claims (cubic anisotropy at lab level
       per #8 and #15, the `U(1)³ → U(3)` crossover per #16) are
-      consequently claims about the brane's structure on its 3D spacelike
+      claims about the brane's structure on its 3D spacelike
       slice. The full 4D lattice has 4D-cubic symmetry at the geometric
       level; the 3D-cubic structure those items rely on is what a Cauchy
       slice perpendicular to the timelike direction exhibits.
@@ -292,7 +292,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       so the substrate is a fully symmetric 4D-cubic spring lattice. This is **one
       model parameterized by `r_t`, not a fork**: `r_t = α·β·dt` is the canonical
       prestressed substrate (a **single** prestress `α` governs all four directions —
-      each link's rest length = `α ×` its held spacing; adopted 2026-06-05), and
+      each link's rest length = `α ×` its held spacing; adopted), and
       `r_t = 0` is the **linear/Verlet limit** (zero-rest-length kinetic, plain
       Newton) used for wave/dispersion validation. The prestressed time link supplies
       the geometric quartic that #22's unified contraction (gravitational time
@@ -329,7 +329,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       gravitational time dilation (spacelike displacement / kinetic energy
       stretching the timelike link) are two faces of the same rule. The
       two faces of gravity unify under one mechanism. This rests on the
-      **model-(b)** timelike spring (#21 / A4, decided 2026-06-05): only a time
+      **model-(b)** timelike spring (#21 / A4): only a time
       link with its own rest length `r_t ≠ 0` carries the geometric quartic that
       lets a spacelike displacement stretch the timelike link. With the single 4D
       prestress `α_t = α` (A4a, adopted), the strength of both faces is set by the
@@ -397,7 +397,7 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       falsifies the spectral-susceptibility factorization behind this picture.
 
 25. **Two particle sectors in `U(3)`, with sharply different topology — and they do
-    not fully separate** (design discussion 2026-06-06; experiment in `EXPERIMENT.md`)
+    not fully separate** (experiment in `EXPERIMENT.md`)
     - The carrier-complexified substrate displacement is a `U(3)` field,
       `U(3)=U(1)×SU(3)`, split by the rest length `α`. The two factors carry
       *different* topology:
@@ -418,10 +418,10 @@ It is intended to prevent core assumptions from being lost during paper edits, c
       lateral triplet *symmetrically* (all three components sharing the winding phase);
       the traceless complement is `SU(3)`/color. A *single*-lateral-component vortex is
       therefore **not** pure EM: it reads `⅓` trace + `⅔` traceless by the projection
-      (verified on a seed, 2026-06-06). A genuine electron-vortex must wind the trace
+      (verified on a seed). A genuine electron-vortex must wind the trace
       direction.
-    - **Stability is dynamical (semilocal), not topological — and `SU(3)` participates**
-      (2026-06-06 lit research). It is *one* `U(3)` field, so both sectors are present
+    - **Stability is dynamical (semilocal), not topological — and `SU(3)` participates.**
+      It is *one* `U(3)` field, so both sectors are present
       in every particle. Once `SU(3)` is unfrozen the full vacuum manifold is **simply
       connected** (trivial `π₁`), so the `U(1)` vortex is **not** topologically
       protected — it is a **semilocal / non-Abelian vortex** (Vachaspati–Achucarro

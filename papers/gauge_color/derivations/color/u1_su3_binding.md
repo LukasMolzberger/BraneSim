@@ -8,7 +8,7 @@ localized color core and a free positive EM charge that wanders off. They must
 therefore **interact**. This note derives the interaction in three channels and
 states, for each, what is established and what remains open.
 
-Date: 2026-06-07. Owners: physics-derivation (channels) + the active build
+Owners: physics-derivation (channels) + the active build
 (diagnostics). Primary model: the lattice central-force spring (NOT continuum
 StVK). Builds on `geometric_nonlinearity_alpha_scaling.md` (the exact `∝α`
 anharmonicity) and `paper/05b_effective_field_theory.tex` §5b (the
@@ -86,12 +86,12 @@ Three signatures: (1) **`F(d) ∝ α`** — predicted ratios `F_α/F_{0.5}=α/0.
 (`|F_{0.2}/F_{0.5} − 0.4| > 0.1` after dividing out profile/amplitude factors), the
 geometric-only origin of the coupling is falsified.
 
-**Binding sign — RESOLVED (2026-06-07 derivation): geometric-only channel is REPULSIVE.**
+**Binding sign — RESOLVED: geometric-only channel is REPULSIVE.**
 - **The cubic vertex, exactly.** Keeping `Δu_∥≠0`, the √-expansion gives a *cubic*
   cross term `V_3 = +(k_s α/2a²) Δu_∥ (ξ_s² + |ξ_⊥|²)` — **separable**: both sectors
   couple to the longitudinal stretch `Δu_∥` with the *same* coefficient `+k_sα/2a²`,
-  `∝α`, →0 at α→0. (This *corrects* the earlier flagged form `(k_sα/2a²)Δu_∥ξ_s|ξ_⊥|²`,
-  which was dimensionally wrong — degree-4 and not produced by the norm.)
+  `∝α`, →0 at α→0. (The form `(k_sα/2a²)Δu_∥ξ_s|ξ_⊥|²` is
+  dimensionally wrong — degree-4 and not produced by the norm.)
 - **Core stretch sign.** Relaxing `Δu_∥` against its harmonic cost gives
   `Δu_∥* = −(α/2a²)|Δu_⊥|² < 0`: a transversely-displaced link **shortens** axially
   ("guitar-string pull-in"). In the donut, `Δu_∥*(ρ) ∝ −A(ρ)²`, most compressed on the
@@ -100,7 +100,7 @@ geometric-only origin of the coupling is falsified.
   term `−(k_sα²/4a⁴)ξ_s²|ξ_⊥|²`, but it is `O(αε_⊥²)≈0.08` (with `ε_⊥=|Δu_⊥|/a`,
   `A₀~0.3`) — an order of magnitude **smaller** than the repulsive bare quartic. So
   `g_net = (k_s α/4a²)[1 − αε_⊥²] > 0`: **net overlap-repulsive, the cubic does NOT
-  flip the sign.** The earlier worry that the cubic dominates is retracted.
+  flip the sign.**
 - **The one route to binding: an externally-sourced `Δu_∥`.** The cubic survives at
   `O(α)` (and *can* dominate the quartic, flipping to attractive) **only if `Δu_∥` is
   not slaved to `|Δu_⊥|²` but sourced independently with a definite negative sign — by
@@ -162,7 +162,7 @@ energetically cheapest to *also* wind there — the spatial signature of GW. Tre
 the cross term as the source gives a candidate scaling `c₁ ~ O(α)` (ansatz, not
 derived) — making the topological binding vanish at `α→0` like everything else.
 
-**The obstruction — RESOLVED (2026-06-07 derivation): VERDICT CONDITIONAL-NO.**
+**The obstruction — RESOLVED: VERDICT CONDITIONAL-NO.**
 The cleanest GW origin (Wess–Zumino / anomaly inflow) needs a parity-odd carrier
 response; BACKBONE #16 says the k-space curvature is identically zero ∀α (`D(k)`
 real-symmetric) — the **BZ-anomaly route is blocked.** The `(x,t)`-fibre escape
@@ -208,7 +208,7 @@ binding; a `c₁` ratio off `2.5` by `>20%` falsifies only the `∝α` ansatz.
 | C.1 triality | **established** | `U(3)=(U(1)×SU(3))/ℤ₃`, `q≡−t mod 3` | dynamics-free | `Q mod 1` of singlet/triplet/octet |
 | C.2 GW current | **soft winding-lock** (resolved via time link) | `f∧tr(L^3)`: charge tracks winding `Q=κ(A)·B`, but `κ(A)∝A_tr A_⊥` amplitude-graded, not quantized; soliton-only | `∝α` | `γ_Γ∝B¹` at fixed amplitude (vs flat=energy) |
 
-**Bottom line (2026-06-07).** The sectors are *not* independent, but the two
+**Bottom line.** The sectors are *not* independent, but the two
 *spatial-substrate* binding channels both come back **negative**: the energetic
 quartic is net **repulsive** (the slaved cubic does not flip it), and the topological
 GW current is **absent** from the modulus-only norm vertex (CONDITIONAL-NO). The only
@@ -231,7 +231,7 @@ same channel:
 Both point to the **time link as the binding agent**, tying directly to A4a (single
 4D prestress `α_t=α`) and the unified-contraction picture (#22).
 
-**Time-link derivation — DONE (2026-06-07): VERDICT CONDITIONAL-YES**
+**Time-link derivation — DONE: VERDICT CONDITIONAL-YES**
 (`paper/derivations/time_link_binding.md`). The single `r_t` turns **both** knobs:
 - **Part 1 (energetic, DERIVED).** With `ω` fixed externally by worldtube closure
   (`ωT=2πn`), the time-link norm term sources a definite-**negative** compression
@@ -242,7 +242,7 @@ Both point to the **time link as the binding agent**, tying directly to A4a (sin
   axiom: `ω` set by closure, not relaxation — verify first in the solver.
 - **Part 2 (topological, RESOLVED → "soft winding-lock").** The time-quadrature `J` + the
   α-split `ω_tr≠ω_⊥` give a nonzero Kähler `Im𝒢_sa∝(ω_tr−ω_⊥)∝α`. The contraction
-  question is now closed: the P-odd `f=da` **cannot** wedge into the P-even scalar
+  question is closed: the P-odd `f=da` **cannot** wedge into the P-even scalar
   `|Ψ_⊥|²`; the only available P-odd 4-form is `f∧tr(L^3)` (WZW descent), so **charge
   contracts onto the winding** `Q=κ(A)·B`. **But** `κ(A)∝A_tr A_⊥` is amplitude-weighted,
   not a quantized integer — a **soft topological lock** (winding-tracked, amplitude-graded),

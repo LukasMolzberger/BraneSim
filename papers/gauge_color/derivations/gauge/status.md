@@ -18,8 +18,7 @@
 
 ## Open derivations
 
-*Relocated from the former central open-problems tracker (group D, gauge sector —
-the EM/`U(1)` items D2, D3, D5). Original IDs retained. The `U(1)`↔`SU(3)` binding
+*Gauge sector — the EM/`U(1)` items D2, D3, D5. The `U(1)`↔`SU(3)` binding
 items D4 and D6 live in the Color bridge.*
 
 ### D2. Prestress α from the EM/colour coupling ratio — `resolved (linear: undetermined)` · `open (nonlinear)`
@@ -41,7 +40,7 @@ bound α small; it forces physical carriers onto the `[111]` isotropic locus whe
 all three lateral eigenvalues are exactly degenerate ∀α (`g([111])=0`). This
 *frees* α to sit at O(0.1–0.5) and is the cleanest current "SM fact → lattice"
 import.
-**Resolution (linear order, 2026-06-04 — derivation; α NOT determined, by design).**
+**Resolution (linear order — derivation; α NOT determined, by design).**
 The fibre-internal holonomy ratio is `R(α) = (C/g(k̂))·(3−2α)/(√3 α)`, where
 `g(k̂)=√(Σ_a(h_a−H/3)²)/H` is the directional anisotropy and `C = N_U(1)/N_SU(3)`
 is the **relative gauge-kinetic normalization** = `tr(P_U(1)𝒢)/tr(P_SU(3)𝒢)` set by
@@ -90,8 +89,8 @@ axis (`[[project_complex_u1_from_time]]`), so `A_μ` is intrinsically a 4-covect
 band → `S_eff[A]`; verify the `F²` form + masslessness; read the coupling from the fibre metric
 (D2). Owner: physics-derivation + berry-validator. See `paper/05` §5.2.
 
-### D5. Massive-vs-massless: the substrate must not Meissner-screen its own `U(1)` photon — `open` (2026-06-06)
-**Ontology note (owner, 2026-06-07) — read first.** This entry tracks an *empirical* worry
+### D5. Massive-vs-massless: the substrate must not Meissner-screen its own `U(1)` photon — `open`
+**Ontology note (owner) — read first.** This entry tracks an *empirical* worry
 about field **range** (does the trace field fall off as `1/r` or exponentially), **not** a
 claim that mass originates from a Higgs mechanism. In this theory **mass is the energy of a
 self-confined wave** — an excitation trapped in an infinite loop back on itself
@@ -128,11 +127,10 @@ vortices live precisely in the window where masslessness can survive. **Decisive
 (`λ → ∞`, power-law `B`/current tail) confirms massless EM; exponential screening falsifies the
 EM identification and flags a `W/Z`-class object instead. **Do not import `e* = 2e`** (Cooper
 pairing) — the carrier is single-charge.
-**Note (2026-06-07).** Kept out of the paper — this screening worry is an internal tracker
-item only. (A `§6.5` "companion falsifiable check" paragraph was briefly added and then
-**removed**: the owner does not want an Anderson–Higgs / screening discussion in the
-manuscript. Mass in this theory is a self-confined wave, not a Higgs effect; see
-[[feedback_mass_is_self_confinement]].)
+**Note.** Kept out of the paper — this screening worry is an internal tracker
+item only. The owner does not want an Anderson–Higgs / screening discussion in the
+manuscript: mass in this theory is a self-confined wave, not a Higgs effect; see
+[[feedback_mass_is_self_confinement]].
 **Status.** open. Owner: physics-derivation (which `U(1)` survives massless) + the active
 build (screening-length diagnostic). Tightens D3(ii); shares the semilocal-binding regime with
 D4(i) (Color bridge). Surfaced from R. Behiel's *Superconductivity and the Higgs Field* (Anderson–Higgs).

@@ -237,8 +237,8 @@ its `r_t = 0` (kinetic) limit coincide
 **identically (not approximately) iff `r_t = 0`** — i.e. `α_t = 0` (maximal
 temporal prestress), with `k_t = m/Δt²`. No condition on `β Δt` is needed: the
 identity `|ΔR|\widehat{ΔR} = ΔR` is exact, so at `r_t = 0` the EL force collapses
-to `−k_t(R^{l+1} − 2R^l + R^{l−1})`, plain Newton. (This corrects the earlier
-reduction condition, which superfluously also required `β Δt → 0`.)
+to `−k_t(R^{l+1} − 2R^l + R^{l−1})`, plain Newton. (The reduction needs no
+`β Δt → 0` condition.)
 
 **What `r_t` controls.** The distinguishing term `−k_t r_t |ΔR|` involves the
 Euclidean *norm* `|ΔR|`, not the squared norm — the irreducibly geometric piece.

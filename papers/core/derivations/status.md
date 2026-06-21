@@ -7,7 +7,7 @@
 - Lattice-to-continuum reduction: acoustic tensor A_abcd = (k_s/a)[α Q_abcd + (1−α) δ_ac δ_bd]; wave speeds c_L² = k_s a²/m, c_T² = (1−α) k_s a²/m.
 - Spring constitutive continuum limit: central-force spring ½k_s(|ΔR|−αa)² established as the constitutive law; StVK demoted to quadratic-order proxy (inverted quartic α-scaling).
 - Cross-check of discrete and continuum wave speeds via conventions.py closed-form dispersion.
-- Two-time (block) BVP well-posedness **resolved in the linear regime**: a two-past-slice chiral boundary condition gives an N-independent, bounded condition number (A2 in *Open derivations* below, `in-progress`, linear regime resolved 2026-05-30; stated in §substrate-model of the paper).
+- Two-time (block) BVP well-posedness **resolved in the linear regime**: a two-past-slice chiral boundary condition gives an N-independent, bounded condition number (A2 in *Open derivations* below, `in-progress`, linear regime resolved; stated in §substrate-model of the paper).
 - See: discrete_4d_brane_action.md, geometric_nonlinearity_alpha_scaling.md, lattice_to_continuum.md, spring_constitutive_continuum_limit.md.
 
 ## MISSING
@@ -18,9 +18,6 @@
 - Marsden–West reference still uncited: §substrate-model attributes the Störmer–Verlet = variational-integrator result to Marsden–West in prose, but references.bib has no matching entry.
 
 ## Open derivations
-
-*Relocated from the former central open-problems tracker (group A, foundational
-solver — the 4D block-variational formulation). Original IDs (A1…A4a) retained.*
 
 These arose from making the static 4D world-volume the foundational object
 (brane action `S[R]`, time-symmetric, stationary point under boundary data)
@@ -45,7 +42,7 @@ hyperbolic operator with prescribed boundary data. Nonlinear (StVK/soliton)
 case → nonlinear BVP via Newton–Krylov with the Verlet stencil as the interior
 residual.
 
-### A2. Well-posedness of the two-time (block) BVP — `in-progress` (linear regime resolved 2026-05-30)
+### A2. Well-posedness of the two-time (block) BVP — `in-progress` (linear regime resolved)
 **Statement.** Hyperbolic operators are naturally Cauchy/IVP problems. Posing
 the brane equation as a two-time boundary-value problem (data on past **and**
 future spacelike slices) is **not unconditionally well-posed**: when the
@@ -63,38 +60,34 @@ removes the ambiguity may be the *same* one already in the ontology:
 BVP well-posedness condition are the same statement in disguise. See
 `[[retrocausal-worldtube-interpretation]]` (project memory).
 
-**Resolution (linear regime, 2026-05-30 — derivation + numerical confirmation).**
-The conjecture is **confirmed, as an exact algebraic identity.** Since the
-6-neighbor `D(k)` is diagonal, the block BVP decouples per spatial mode into the
-scalar recurrence `a^{l+1} − 2cosθ(k) a^l + a^{l−1} = 0`,
-`θ(k)=arccos(1−Δt²ω²(k)/2)`. The Dirichlet two-time operator has determinant
-`2i·sin(Nθ)` → singular at `Nθ=mπ` (resonances), generically ill-conditioned
-(`κ ~ 1/min_k|sin(Nθ(k))|`; ~most time-extents fail at realistic mode counts —
-verified: `|det|=2|sin(Nθ)|` to machine precision, 67/79 extents with `κ>10³` for
-an evenly-spaced 32-mode spectrum). Splitting into characteristics
-`a^l=a₊e^{−ilθ}+a₋e^{+ilθ}` and imposing **one characteristic per end** (fix
-forward `a₊` from the past slice; no-incoming/Sommerfeld `a^N−e^{−iθ}a^{N−1}=0`
-on the future, killing `a₋`) gives `κ=1` exactly ∀N — and this *is* the
-matter=forward/antimatter=backward selection (exact change of basis). DC modes
-(`θ→0`) route through Dirichlet (well-posed there). Implementation recipe in
-`ARCHITECTURE.md` §2 (D2). **Still open:** uniqueness of the *nonlinear* block BVP
-— the `κ=1` result is the conditioning of each linearized JFNK step (necessary,
-not sufficient globally); the geometric quartic re-couples modes. See
-`[[block-solver-bvp-chirality]]`.
+**Resolution (linear regime).** The conjecture is **confirmed, as an exact
+algebraic identity.** Since the 6-neighbor `D(k)` is diagonal, the block BVP
+decouples per spatial mode into the scalar recurrence
+`a^{l+1} − 2cosθ(k) a^l + a^{l−1} = 0`, `θ(k)=arccos(1−Δt²ω²(k)/2)`. The Dirichlet
+two-time operator has determinant `2i·sin(Nθ)` → singular at `Nθ=mπ` (resonances),
+generically ill-conditioned (`κ ~ 1/min_k|sin(Nθ(k))|`; ~most time-extents fail at
+realistic mode counts — verified: `|det|=2|sin(Nθ)|` to machine precision, 67/79
+extents with `κ>10³` for an evenly-spaced 32-mode spectrum). A per-mode
+characteristic condition (`a^l=a₊e^{−ilθ}+a₋e^{+ilθ}`, kill `a₋`) is correct 2×2
+algebra but **wrong for a real field**: reality couples `a₊(k)=conj(a₋(−k))`, so
+zeroing `a₋` per mode deletes both characteristics → non-real garbage. The
+correct, reality-respecting chiral BC is **two adjacent past slices `(R⁰,R¹)`
+marched** (forward=matter, backward=antimatter); one slice can't encode direction,
+two can. Reality is automatic and the condition number is bounded `O(10)` (tested
+to `8e-14` recovery at a Dirichlet-resonant N). This *is* the
+matter=forward/antimatter=backward selection. DC modes (`θ→0`) route through
+Dirichlet (well-posed there). Implemented in `branesim/solver/{boundary,bvp}.py`;
+recipe in `ARCHITECTURE.md` §2 (D2).
 
-**Refinement — verdict (a), 2026-05-31 (implemented, supersedes the
-characteristic-future-condition recipe above).** Imposing "kill `a₋` per mode" is
-correct 2×2 algebra but **wrong for a real field**: reality couples
-`a₊(k)=conj(a₋(−k))`, so zeroing `a₋` per mode deletes both characteristics →
-non-real garbage. The correct chiral BC is simply **two adjacent past slices
-`(R⁰,R¹)` marched** (forward=matter, backward=antimatter); one slice can't encode
-direction, two can. Reality automatic; condition bounded `O(10)`. Implemented in
-`branesim/solver/{boundary,bvp}.py` (commit 4a2985c), tested to 8e-14 recovery at
-a Dirichlet-resonant N. **Implication:** the well-posed chiral solve = Cauchy
-march, so the **two-time Dirichlet BVP is the wrong vehicle for a bound
-particle** — that requires a **time-periodic (`R^{l+P}=R^l`) + spatially-localized
-nonlinear eigen-BVP** (the carrier+envelope worldtube, #18). New sub-problem to
-track below.
+**Implication.** The well-posed chiral solve = Cauchy march, so the **two-time
+Dirichlet BVP is the wrong vehicle for a bound particle** — that requires a
+**time-periodic (`R^{l+P}=R^l`) + spatially-localized nonlinear eigen-BVP** (the
+carrier+envelope worldtube, #18), tracked below.
+
+**Still open:** uniqueness of the *nonlinear* block BVP — the linear conditioning
+is the conditioning of each linearized JFNK step (necessary, not sufficient
+globally); the geometric quartic re-couples modes. See
+`[[block-solver-bvp-chirality]]`.
 
 ### A3. `c²` tuning for emergent Lorentz invariance — `open`
 **Statement.** With explicit temporal links, the ratio of temporal stiffness
@@ -110,7 +103,7 @@ anisotropy vs `k·a`); quantify the tuning window. Owner: dispersion-analyst.
 (The downstream Lorentz-invariance consequences are tracked in the Lorentz
 bridge.)
 
-### A4. Temporal-link form — `resolved + implemented (2026-06-05): one 4D-isotropic spring`
+### A4. Temporal-link form — `resolved + implemented: one 4D-isotropic spring`
 **Resolved.** The timelike link is a central-force spring `½ k_t (|ΔR| − r_t)²` —
 the same law as the three spacelike links — so the substrate is a fully symmetric
 4D-cubic spring lattice. There is **one model parameterized by the temporal rest
@@ -132,7 +125,7 @@ dilation). The `r_t = 0` limit has no such quartic. *(The distinction is the
 norm-nonlinearity, not transverse stiffness — `½ k_t|ΔR|²` already has isotropic
 Hessian.)*
 
-**Implemented (2026-06-05).** `ActionParams` exposes `r_t` (plus `k_t`, `beta`); the
+**Implemented.** `ActionParams` exposes `r_t` (plus `k_t`, `beta`); the
 residual routes on `r_t` — `r_t = 0` uses the linear Verlet stencil (the fast exact
 path and the **default**), `r_t > 0` uses the central-force spring force (block
 solve). The `r_t → 0` reduction is bit-identical to the prior linear path; principles
@@ -143,7 +136,7 @@ root-find `∇S = 0`, not minimization. **Consequences:** forward Verlet / IVP i
 A4a opens. Folded into backbone #21/#22. Owner: contraction-channel (gravity
 derivation).
 
-### A4a. Single 4D prestress `α_t = α` — `adopted (2026-06-05); verification open`
+### A4a. Single 4D prestress `α_t = α` — `adopted; verification open`
 **Decision.** A **single** prestress `α` governs all four lattice directions: every
 link's rest length is `α ×` its held spacing (spatial `ℓ₀ = αa`, temporal `r_t = α·βΔt`).
 This is the symmetric reading of the 4D-isotropic spring (A4) and ties soliton binding (spatial
@@ -157,7 +150,7 @@ long-wavelength light-cone **isotropic** (this is the `c²`-tuning of A3, now *c
 by `α` rather than free); (ii) it reproduces the correct **Newtonian limit** in the
 contraction channel. If either fails, `α_t` must be freed from `α` again. Owner:
 contraction-channel + physics-derivation.
-**New test (2026-06-07, from D6).** The time-link binding derivation
+**New test (from D6).** The time-link binding derivation
 (`paper/derivations/time_link_binding.md`) gives a *third* check: the same `r_t` that
 sources gravitational time dilation (#22) also sources EM↔color binding (D6 Part 1), so
 **binding strength and gravity strength must co-vary in `α`** (`∂ln κ_bind/∂ln α =

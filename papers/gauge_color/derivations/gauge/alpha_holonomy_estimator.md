@@ -9,7 +9,7 @@ ratio, but the *overall coupling hierarchy* lives in the connection normalizatio
 which is set by the nonlinear fibre metric (the geometric quartic), absent from the
 linear theory. A normalization-independent falsifiable prediction survives.
 
-Date: 2026-06-04. Owner: physics-derivation. Tracked: `status.md` D2 (gauge bridge).
+Owner: physics-derivation. Tracked: `status.md` D2 (gauge bridge).
 
 ---
 

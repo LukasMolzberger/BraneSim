@@ -43,7 +43,7 @@ Order parameter `Ψ(x,t) = A(ρ)·exp(i[ m·χ + ω·t ])`:
 Translate down to the substrate (`R = R_vacuum + u`) with the carrier in the
 **trace direction** — `Ψ` populates the **symmetric `(1,1,1)` lateral direction**
 (all three lateral components equally, sharing the winding phase), so the object is a
-pure **EM/`U(1)`** vortex. (Construction check 2026-06-06: writing the phase into a
+pure **EM/`U(1)`** vortex. (Construction check: writing the phase into a
 *single* lateral component is **not** pure EM — it reads `⅓` trace + `⅔` traceless
 (color) by the `U(3)` projection. The bare seed populates only the trace; the full
 `U(3)` field is then **free to relax**, so `SU(3)` can coexcite — which the per-color
@@ -111,7 +111,7 @@ The probe measures whether the trace (charge) content stays co-located with the
 traceless (color) content. Derivation + falsifiers:
 `paper/derivations/{u1_su3_binding,time_link_binding}.md`.
 
-**BUILT (2026-06-07): device D8 `binding_probe`** (`branesim/diagnostics/binding_probe.py`,
+**BUILT: device D8 `binding_probe`** (`branesim/diagnostics/binding_probe.py`,
 registered in `run_measurements.py`; audit-clean; CSV+PNG+report stanza). Read-only,
 single-worldvolume. Five probes (P1 sector centroids+separation `d(l)`; P2 longitudinal
 stretch `Δu_∥(ρ)` sign+profile; P3 per-slice carrier rate `ω(l)` vs closure-locked; P4
@@ -148,7 +148,7 @@ and the α-ladder), `Δu_∥∝ω²` (closure-index `n` ladder), `γ_Γ∝B¹` a
 (texture-winding ladder), and the triality `Q mod 1` over three seeds. D8 emits exactly
 the scalars these campaigns collect; the campaign driver is not built.
 
-## Build status (2026-06-06)
+## Build status
 - **Injection layer** (`branesim/initialization/vortex_worldtube.py`): single vortex
   **ring** (smoke-ring core, donut/torus energy), periodic-clamp-consistent
   (contractible → net winding machine-zero). Renders as one torus.
@@ -159,9 +159,9 @@ the scalars these campaigns collect; the campaign driver is not built.
   per-color-channel `SU(3)`/QCD, spectra, **D8 binding_probe**) → CSV + paper-ready PNG
   + `report.md`. Shared plot helpers in `diagnostics/_plot_helpers.py`.
 - **Run folder**: `runs/<exp>_<date>_<time>/` with config, worldvolume, diagnostics, renders.
-- **DONE (2026-06-07/08)**: (i) re-inject in the **trace (EM) direction** — the
-  bare seed is now pure U(1)/EM (`u1_fraction → 1`; E1 resolved, all diagnostics
-  route through `project_carrier_re`). Seed size is now **grid-relative** —
+- **DONE**: (i) re-inject in the **trace (EM) direction** — the
+  bare seed is pure U(1)/EM (`u1_fraction → 1`; E1 resolved, all diagnostics
+  route through `project_carrier_re`). Seed size is **grid-relative** —
   `r0 = ½·half_width`, `w = half_width/6`, so the donut **fills the box** (reach
   `r0+3w ≈ half-width`, ~1% at the face) at *any* grid (48³→r0≈12; 96³→r0≈24)
   rather than wasting compute on vacuum. **Spatial scaling only** — `m`, `n_t`,

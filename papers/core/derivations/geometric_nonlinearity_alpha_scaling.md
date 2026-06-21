@@ -7,7 +7,7 @@ sector is α-independent. Consequently the Skyrme-class geometric quartic scales
 **∝ α** (vanishing at α→0), opposite to the quadratic "geometric stiffness" which
 scales as ∝ (1−α).
 
-Date: 2026-06-04. Owner: physics-derivation / dispersion-analyst. Primary model:
+Owner: physics-derivation / dispersion-analyst. Primary model:
 the lattice spring energy (NOT the continuum StVK approximation).
 
 ---

@@ -10,8 +10,8 @@ the α-scaling of the geometric quartic, so it must not be used for soliton sizi
 Consolidation only — no new physics. Grounded in `branesim/core/action.py`,
 `branesim/core/conventions.py` (closed-form dispersion), `paper/derivations/lattice_to_continuum.md`
 §3.1, `paper/derivations/geometric_nonlinearity_alpha_scaling.md`, `PRINCIPLES.md` §1.1a.
-Stencil: 6-neighbor axial-only `N_6` (the locked minimal model; the 26-neighbor sums in
-`lattice_to_continuum.md` §3.3+ are superseded here).
+Stencil: 6-neighbor axial-only `N_6` (the canonical minimal model; the 26-neighbor sums in
+`lattice_to_continuum.md` §3.3+ apply to alternative stencils).
 
 ---
 

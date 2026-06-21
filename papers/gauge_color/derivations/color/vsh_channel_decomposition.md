@@ -231,23 +231,12 @@ core. The Derrick balance gives the *size*; topology gives *existence*. Both are
 
 ### 2.5 Predicted hedgehog radius
 
-> **Superseded (2026-06-04) — replaced by §2.5a below.** The original §2.5
-> derivation used a $\mu/(4\ell_0^4)$ quartic with $\ell_0=\alpha a$, giving
-> $R_h/a \sim (\ell_0/u_0)^{2/3}$. That α-scaling is **inverted**: the lattice-exact
-> geometric quartic is $\propto k_s\alpha/a$ (vanishing at $\alpha\to0$), not
-> $\propto \mu/\ell_0^4$. Use §2.5a; see `geometric_nonlinearity_alpha_scaling.md`.
-> (The full original derivation is preserved verbatim in git history at commit
-> `6352daf`.)
-
-### 2.5a Corrected hedgehog radius (2026-06-04) — supersedes 2.5
-
-Redoing the Derrick balance with the **lattice-exact** densities
+Run the Derrick balance with the **lattice-exact** densities
 $W_2 = \frac{k_s(1-\alpha)}{2a}|\partial u_\perp|^2$ and
-$W_4 = \frac{k_s\alpha}{8a}|\partial u_\perp|^4$ (the corrected quartic
-$\propto k_s\alpha/a$, NOT $\mu/\ell_0^4$; see
-`geometric_nonlinearity_alpha_scaling.md`). For the Skyrme hedgehog
-$u_\perp = A\,\hat n$, $|\partial u_\perp|^2 = A^2[F'^2 + 2\sin^2F/r^2]$, the
-Derrick energy is $E(b) = a_2 b + a_4 b^{-1}$ with
+$W_4 = \frac{k_s\alpha}{8a}|\partial u_\perp|^4$ (the geometric quartic
+$\propto k_s\alpha/a$; see `geometric_nonlinearity_alpha_scaling.md`). For the
+Skyrme hedgehog $u_\perp = A\,\hat n$, $|\partial u_\perp|^2 = A^2[F'^2 + 2\sin^2F/r^2]$,
+the Derrick energy is $E(b) = a_2 b + a_4 b^{-1}$ with
 $a_2 = \frac{2\pi k_s(1-\alpha)A^2}{a}I_2$, $a_4 = \frac{\pi k_s\alpha A^4}{2a}I_4$,
 giving $b_* = \sqrt{a_4/a_2} = \frac{A}{2}\sqrt{\frac{\alpha}{1-\alpha}\frac{I_4}{I_2}}$ and
 
@@ -256,16 +245,16 @@ $$
 \kappa = \tfrac{\sigma}{2}\sqrt{I_4/I_2} = O(1).\;}
 $$
 
-**Key differences from §2.5:** (i) $R_h \propto +A$ (linear in amplitude), NOT
-$A^{-2/3}$ — so a fat soliton wants **large** $A$, not small. (ii) $R_h$ grows
-monotonically with α as $\sqrt{\alpha/(1-\alpha)}$ — push α **up** toward the
-$\alpha\lesssim0.8$ edge (above which $c_T^2=(1-\alpha)\to0$ kills confinement).
-The radius is set by $\alpha/(1-\alpha)$; the $\alpha(1-\alpha)$ peak at 0.5 governs
+**Key properties:** (i) $R_h \propto +A$ (linear in amplitude) — so a fat soliton
+wants **large** $A$, not small. (ii) $R_h$ grows monotonically with α as
+$\sqrt{\alpha/(1-\alpha)}$ — push α **up** toward the $\alpha\lesssim0.8$ edge
+(above which $c_T^2=(1-\alpha)\to0$ kills confinement). The radius is set by
+$\alpha/(1-\alpha)$; the $\alpha(1-\alpha)$ peak at 0.5 governs
 binding-vs-confinement *quality*, a separate quantity.
 
 **Falsifiable prediction** (fixed $A/a$, sweep α): $R_h(\alpha)/R_h(0.5)=\sqrt{\alpha/(1-\alpha)}$
 = 0.65 / 1.00 / 1.53 / 2.00 at α = 0.3 / 0.5 / 0.7 / 0.8. A flat or *decreasing*
-trend falsifies the correction. **Operational seed target:** α=0.7, $A/a\approx10$
+trend falsifies the prediction. **Operational seed target:** α=0.7, $A/a\approx10$
 $\Rightarrow R_h/a\approx8$.
 
 **Open risk:** $A/b_* = 2\sqrt{(1-\alpha)/\alpha}/\sqrt{I_4/I_2}$ is $O(1)$ and
@@ -279,10 +268,9 @@ stays continuum or pins at width $\sim a$ is undecided and is what the sweep mea
 - The extremum is a Derrick-minimum (second-derivative-positive).
 - Absolute stability requires the topological winding $B=1$ from the Skyrme twist;
   this is an axiom for §2 (surfaced in §7).
-- Hedgehog radius (corrected §2.5a): $R_h/a = \kappa\,(A/a)\sqrt{\alpha/(1-\alpha)}$
+- Hedgehog radius (§2.5): $R_h/a = \kappa\,(A/a)\sqrt{\alpha/(1-\alpha)}$
   — *linear* in the $X^4$ amplitude $A$ and *increasing* in α. **The width $w \gg a$
-  regime is reachable at large amplitude and high α (≈0.7), not at the small-$u_0$,
-  low-α corner the old §2.5 targeted.**
+  regime is reachable at large amplitude and high α (≈0.7).**
 
 ---
 
@@ -630,7 +618,7 @@ $|\nabla u|^4$ term from a richer hyperelastic law than StVK).
 
 | Test | Prediction | Failure threshold |
 |------|------------|-------------------|
-| Hedgehog Derrick balance at α=0.2 (corrected §2.5a) | $\lambda^*$ finite, $R_h/a = \kappa(A/a)\sqrt{\alpha/(1-\alpha)}$; increases with $\alpha$, linear in amplitude $A$ | No finite minimum, or flat/decreasing $R_h(\alpha)$ trend |
+| Hedgehog Derrick balance at α=0.2 (§2.5) | $\lambda^*$ finite, $R_h/a = \kappa(A/a)\sqrt{\alpha/(1-\alpha)}$; increases with $\alpha$, linear in amplitude $A$ | No finite minimum, or flat/decreasing $R_h(\alpha)$ trend |
 | Cubic-anisotropy multiplet splitting at $w/a=10$, α=0.2 | $\Delta\omega/\omega_{\rm gap} \approx 2\!\times\!10^{-3}$ | $\Delta\omega/\omega_{\rm gap} > 0.1$ |
 | Cross-channel VSH leakage over $100 R_h/c$ | $< 0.01$ of hedgehog norm | $> 0.1$ |
 | Rotational band E_{J=1/2} | $\sim 10^{-4} M_h c^2$ at $R_h/a = 10$ | Rotational level overlaps radial excitations |

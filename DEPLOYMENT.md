@@ -4,7 +4,7 @@ The 4D block/retrocausal solve is **memory-bound**, not FLOP-bound. This guide
 covers running `branesim` experiments on AWS EC2 with enough RAM, using the
 cost-safe scaffolding in `orchestration/aws/`.
 
-Backend decision (2026-05-31): **high-memory CPU, numpy/scipy** — no GPU rewrite.
+Backend: **high-memory CPU, numpy/scipy** — no GPU.
 JFNK needs RAM more than FLOPs; high-memory CPU instances (up to multi-TB) fit
 the working set without sharding the validated numpy core. GPU is a documented
 future option (§5).
@@ -42,7 +42,7 @@ Instance families (memory-optimized, x86, numpy-friendly):
 Reduce memory by: smaller `N` (spatial), fewer `n_slices`, or (future) the
 matrix-free streaming/slab storage in ARCHITECTURE.md D4.
 
-> Practical note (BVP paths, 2026-06-06): the **Dirichlet** two-time BVP is
+> Practical note (BVP paths): the **Dirichlet** two-time BVP is
 > ill-conditioned (`κ≈1e14`, resonant) and freezes JFNK — kept only as a negative
 > control. The **chiral** Cauchy BC (`κ=1`, two-past-slice) is the fast well-posed
 > path in the `r_t=0` linear regime. For the prestressed `r_t>0` worldtube (e.g.
@@ -112,7 +112,7 @@ Outputs per run: `worldvolume.zip` (solved slices + `manifest.json` with
 
 ## 6. GPU / acceleration (future, not enabled)
 
-Deferred by the 2026-05-31 backend decision. If runs become FLOP-bound (not
+Not enabled. If runs become FLOP-bound (not
 memory-bound), a GPU backend would mean: porting `branesim/core` array ops to
 JAX or CuPy behind a thin indirection (ARCHITECTURE.md D4), and targeting
 `p4d`/`p5`. The catch is GPU memory (40–80 GB/GPU) caps the block size far below

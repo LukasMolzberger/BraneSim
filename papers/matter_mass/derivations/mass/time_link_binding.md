@@ -1,6 +1,6 @@
 # The time link binds the proton: worldtube prestress as the EM↔color binding agent
 
-**Result (2026-06-07).** The two open knobs that left U(1)↔SU(3) spatial binding
+**Result.** The two open knobs that left U(1)↔SU(3) spatial binding
 *negative* in `u1_su3_binding.md` (Channel B net-repulsive; Channel C.2 GW absent) are
 **both turned by the single timelike-link prestress `r_t`** (with `α_t=α`, A4a). Verdict:
 **CONDITIONAL-YES** — the proton binds spatially, conditional on (1) the carrier rate
@@ -43,7 +43,7 @@ prestress + carrier eigenvalue. Feeding it into the separable spatial cubic
 `A_0^crit=(b/ω)√(k_s/2mα)`. The prior spatial-only verdict (net repulsive) was the
 `r_t→0` limit; the time link genuinely flips it.
 
-**Linchpin axiom — VERIFIED in the solver (2026-06-07).** `ω` is set by closure, not
+**Linchpin axiom — VERIFIED in the solver.** `ω` is set by closure, not
 relaxation. Confirmed by code inspection of the `PeriodicBC`/`solve_block` path
 (`branesim/solver/{bvp.py,boundary.py}`, `core/residual.py:residual_periodic`):
 - The JFNK root-find relaxes **node positions only** (`x=slices.reshape((P,n_nodes,m))`
@@ -77,7 +77,7 @@ Two caveats (do NOT invalidate the linchpin, but refine it):
 
 ---
 
-## Part 2 — Topological binding (RESOLVED 2026-06-07: a "soft topological lock")
+## Part 2 — Topological binding (RESOLVED: a "soft topological lock")
 
 The C.2 flip-condition was: a nonzero antisymmetric (Kähler) part of the quartic fibre
 metric `𝒢_ij=⟨∂_iΨ|∂_jΨ⟩`. With the carrier lift `Ψ_i=A_i e^{iω_i t}` and the
@@ -182,10 +182,10 @@ per-slice `ω(l)` stays ≈ uniform on the converged worldtube (caveat 1).
 - **ANSATZ:** the quasi-static node force-balance transmitting the time-link pull to
   spatial `Δu_∥`; the `c₁` coefficient form.
 - **AXIOM (load-bearing):** A4a `α_t=α`; the carrier lift `Ψ≈ξ+(i/ω₀)ξ̇`.
-  (The Part-1 linchpin **`ω` fixed by closure not relaxation** is no longer an
+  (The Part-1 linchpin **`ω` fixed by closure not relaxation** is not an
   assumption — it is **VERIFIED in code** for the `PeriodicBC`/`solve_block` path; see
   above. The breather eigen-solver would violate it, so the experiment must not use it.)
-- **RESIDUAL GAP (now narrowed):** Part 2's contraction is RESOLVED — it lands on the
+- **RESIDUAL GAP:** Part 2's contraction is RESOLVED — it lands on the
   winding `tr(L^3)` (soft, amplitude-graded lock), not the energy. The one remaining
   un-discharged step is the soliton coherence-pinning (that the hedgehog fixes `Δφ₀(x)`
   so `∮Im𝒢 dt` does not self-cancel), asserted from the texture form, computed only on a

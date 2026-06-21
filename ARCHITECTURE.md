@@ -1,9 +1,8 @@
 # BraneSim — Experimental Code Architecture (block-solver-centric blueprint)
 
-**Status:** blueprint for the `branesim/` reimplementation (now implemented; some sections
-remain forward-looking). The former `components/` (forward-Verlet) code has been
-**replaced by the `branesim/` package** described here.
-This document is meant to be specific enough to reimplement from scratch.
+**Status:** blueprint for the `branesim/` package (implemented; some sections
+remain forward-looking). This document is meant to be specific enough to
+implement from scratch.
 
 **Scope note.** The *foundational solver algorithm* (root-finding the Lorentzian
 action over a 4D block) is an **open research problem**
@@ -19,23 +18,20 @@ Canonical sources this blueprint is bound to: `BACKBONE.md` (#1, #15, #21,
 
 ---
 
-## 0. Why a rewrite, and what changes
+## 0. Foundational object and scope
 
-The legacy code is a **forward velocity-Verlet** initial-value marcher: prescribe
-one slice of state `(R⁰, V⁰)`, step `l → l+1`. That is the *special case*. The
-foundational object of the theory (backbone #1, #21) is the **full 4D
+The foundational object of the theory (backbone #1, #21) is the **full 4D
 world-volume as a stationary point of the brane action `S[R]`**, found as a
 **two-time boundary-value problem** (data on a past *and* a future spacelike
 slice, interior root-found). This is the retrocausal/time-symmetric reading
-(principles §1.5): causal direction is not built into the marcher but **selected**
+(principles §1.5): causal direction is not built into a marcher but **selected**
 by the solution (soliton chirality).
 
-The rewrite makes the **block solver the core**. Forward Verlet survives only as
-a degenerate IVP mode used for regression against the validated linear-dispersion
-results.
+The **block solver is the core**. Forward velocity-Verlet — prescribe one slice
+of state `(R⁰, V⁰)`, step `l → l+1` — is a degenerate IVP special case, kept only
+for regression against the validated linear-dispersion results.
 
-**What is settled physics (the new code must reproduce it, bit-for-bit where
-noted):**
+**Settled physics (the code must reproduce it, bit-for-bit where noted):**
 - The discrete action §3.1 and the interior stationarity stencil §3.3.
 - 6-neighbor axial-only spacelike stencil; central-force pair-spring energy.
 - Conventions: `α := rest_length/spacing` (default 0.2); units `k_s=a=ρ=1`.
@@ -118,16 +114,15 @@ architecture is built so the choice is localized to the solver module.
   Picard/relaxation as a warm-start. Recommended default: **JFNK with a
   forward-Verlet IVP warm start.**
 - **D2 — Boundary conditions for the two-time BVP (A2). RESOLVED in the linear
-  regime (D2 spike, 2026-05-30; numerically confirmed).** Because `D(k)` is
+  regime (D2; numerically confirmed).** Because `D(k)` is
   diagonal, the block BVP decouples per spatial mode into a scalar recurrence
   `a^{l+1} − 2cosθ(k) a^l + a^{l−1} = 0`, `θ(k)=arccos(1−Δt²ω²(k)/2)`.
   - **Naive Dirichlet two-time (fix `R⁰` and `Rᴺ`) is NOT buildable:** the modal
     operator determinant is `2i·sin(Nθ(k))`, singular at `Nθ=mπ` (normal-mode
     resonances), so the block is generically ill-conditioned
     (`κ ~ 1/min_k|sin(Nθ(k))|`; ~most time-extents fail at realistic mode counts).
-  - **The fix is two-past-slice Cauchy data (verdict a, 2026-05-31 — implemented,
-    SUPERSEDES the characteristic-future-condition sketch).** The characteristic
-    "kill `a₋` per mode" idea is correct 2×2 algebra but **wrong for a real
+  - **The correct BC is two-past-slice Cauchy data.** A per-mode characteristic
+    "kill `a₋`" condition is correct 2×2 algebra but **wrong for a real
     field**: reality couples `a₊(k)=conj(a₋(−k))`, so zeroing `a₋` per mode
     deletes both characteristics → non-real garbage. The correct, well-posed,
     reality-respecting chiral BC is simply **two adjacent past slices `(R⁰, R¹)`
@@ -153,7 +148,7 @@ architecture is built so the choice is localized to the solver module.
   `r_t = 0` is the linear/Verlet limit (zero-rest-length kinetic = plain Newton,
   matches the validated dispersion — the **default**); `r_t = α·β·dt` is the
   prestressed substrate, adding the time-link geometric quartic (backbone #22's
-  time-dilation face). IMPLEMENTED 2026-06-05: `ActionParams.r_t`; the residual
+  time-dilation face). IMPLEMENTED: `ActionParams.r_t`; the residual
   routes on `r_t` (0 → Verlet stencil, >0 → spring force), bit-identical at `r_t→0`.
   Newtonian-limit/isotropy of `α_t=α` settled via the gravity/contraction channel.
 - **D4 — Solver state size.** A full block at `N` slices × `N_x³` nodes × 4
@@ -207,8 +202,7 @@ architecture is built so the choice is localized to the solver module.
 ## 4. Component architecture
 
 Four components, **file-mediated only** (separate processes, communicate via
-files — no shared memory). This separation from the legacy design is kept; the
-*simulation* component is replaced by a *solver* component.
+files — no shared memory): initialization, solver, visualization, diagnostics.
 
 ```
 [1] initialization  → boundary_problem.npz   (held lattice, params, slice data)
@@ -235,8 +229,8 @@ files — no shared memory). This separation from the legacy design is kept; the
 ## 5. State & data model
 
 - **World-volume** = ordered stack of spacelike slices `R^l`, `l=0..N`, each
-  `(N_x·N_y·N_z, 4)` float64. The legacy "trajectory" *is* a world-volume; for
-  BVP it is the solved interior, for IVP it is the march.
+  `(N_x·N_y·N_z, 4)` float64. For BVP it is the solved interior, for IVP it is
+  the march.
 - **Boundary data** = the subset of slices/components that are *fixed* during the
   solve, plus a mask identifying them. IVP: `{R⁰, R¹}` fixed. BVP: `{R⁰, R^N}`
   fixed (interior free).
@@ -275,7 +269,7 @@ length-1 string arrays inside `.npz`; `allow_pickle=False` everywhere.
 
 ### 6.3 diagnostics outputs
 `diagnostics/metrics.csv` (per-slice rows), `diagnostics/summary.json`,
-`diagnostics/*.npz` (e.g. berry series). Unchanged in spirit from legacy.
+`diagnostics/*.npz` (e.g. berry series).
 
 ---
 
@@ -305,7 +299,7 @@ branesim/
     (run via branesim/run_experiment.py — init+solve→worldvolume; diagnostics via
     #                              branesim/diagnostics/run_measurements.py)
     configs/*.json
-  tests/                     # see §12 (this time: real coverage)
+  tests/                     # see §11 (validation strategy)
 ```
 
 Key signatures (illustrative, dimension-agnostic):
@@ -369,19 +363,18 @@ not a presumed wide baryon.
 
 ---
 
-## 11. Validation strategy (this time: real coverage)
+## 11. Validation strategy
 
-The legacy code had ~1 unit test; that is a primary risk. The rewrite must ship
-with:
+The code must ship with:
 1. **Regression (the gold check):** IVP mode reproduces Sprint-1 dispersion —
    `c_L=1`, `c_T/c_L=√(1−α)` within 5% at `|k|a=0.1`, and `D(k)` diagonal in the
-   Cartesian basis (Sprint-2 #9). If the rewrite can't reproduce these, it's wrong.
+   Cartesian basis (Sprint-2 #9). If the code can't reproduce these, it's wrong.
 2. **Solver consistency:** on an IVP problem, `solve_block` (BVP with `l=0,1`
    pinned and a long extent) must agree with `march` to solver tolerance.
 3. **Residual=0 ⇔ Verlet:** a Verlet-marched world-volume has `‖𝓡‖ ≈ 0`
    (machine precision) at interior nodes — ties the two cores together.
 4. **Energy/symplecticity:** IVP energy drift bounded over long runs (Verlet is
-   symplectic); the nonlinear regime (untested in legacy) gets explicit checks.
+   symplectic); the nonlinear regime gets explicit checks.
 5. **Action sign sanity:** confirm a descent on `S` *diverges* (saddle), and the
    root-finder on `𝓡` converges — guards against accidentally solving the
    Euclidean problem.
@@ -401,7 +394,7 @@ with:
 | Forward Verlet | ✅ as IVP special case / regression | — |
 | **Block BVP solver (`𝓡=0` root-find)** | — | ✅ the core (D1) |
 | **Two-time BCs + chirality selection** | — | ✅ (D2, open) |
-| Test suite | ❌ (was absent) | ✅ §11 |
+| Test suite | — | ✅ §11 |
 
 ---
 
@@ -425,7 +418,7 @@ with:
 
 ---
 
-## 14. Program strategy — "all ingredients at once" (owner, 2026-05-31)
+## 14. Program strategy — "all ingredients at once" (owner)
 
 A stable particle is **not** expected from any single ingredient: the
 elasticity-only IVP hedgehog provably disperses (`papers/matter_mass/derivations/matter/status.md` C1,
@@ -450,8 +443,8 @@ confinement diagnostics, as one solve.
 
 ## 15. Deployment
 
-Runs target **AWS, high-memory CPU** (numpy/scipy; no GPU rewrite — backend
-decision 2026-05-31). The block solve is memory-bound. Entry point:
+Runs target **AWS, high-memory CPU** (numpy/scipy; no GPU). The block solve is
+memory-bound. Entry point:
 `branesim/run_experiment.py` (`branesim-run`), config-driven, writes
 `worldvolume.zip` + `summary.json`; cost-safe EC2 scaffolding in
 `orchestration/aws/`. **See `DEPLOYMENT.md`** for the memory-sizing formula,

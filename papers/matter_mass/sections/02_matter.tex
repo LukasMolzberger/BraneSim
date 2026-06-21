@@ -44,7 +44,7 @@ follow as standard consequences.
 The substrate is the 6-neighbor cubic lattice, whose point group is $O_h$ rather than $SO(3)$.
 At scales $\gg a$, however, long-wavelength continuum modes recover approximate isotropy with
 residual cubic corrections of order 7.5\% in longitudinal speed at $\alpha=0.2$.
-Solitons in this theory are expected to live in the geometric-quartic-stabilized regime with
+Solitons in this theory are expected to live in the nonlinearly stabilized regime with
 $\ell_{\mathrm{soliton}}\gg a$, so the emergent approximate $SO(3)$ is the right symmetry to
 organize their angular structure, with $O_h$ corrections entering as small splittings of $SO(3)$
 multiplets.
@@ -157,7 +157,17 @@ The lattice spacing $a$ is the physical UV cutoff; no separate quartic repulsion
 collapse.
 This is a genuinely discrete-substrate effect that has no direct continuum analogue.
 
-\paragraph{Anti-expansion: geometric quartic.}
+\paragraph{Anti-expansion is the confinement problem.}
+The IR instability direction --- the localized mode spreading out and dispersing --- is not a
+problem separate from confinement; it is the same confinement question developed in Paper~IV (the
+kinematic color confinement of the $SU(3)$ sector and the topological $\pi_3$ texture).
+We therefore expect at least two mechanisms to contribute to anti-expansion, and we do not claim
+either is sufficient on its own. The geometric quartic supplies the clean Derrick $\lambda^{-1}$
+balance below; the $SU(3)$ confinement of the color sector (no free colored asymptotic state; the
+$\pi_3(SU(3))$ winding, Paper~IV) is expected to be load-bearing as well, and the two must
+ultimately be assessed together.
+
+\paragraph{Geometric-quartic contribution to anti-expansion.}
 Under Derrick rescaling in 3D, the geometric quartic $W_4\propto k_s\alpha/a$ (Paper~I
 \Cref{eq:W4}) scales as $\lambda^{-1}$.
 Balancing $\lambda E_2$ against $\lambda^{-1}E_4$ gives equilibrium at
@@ -193,7 +203,7 @@ to contract from $Na$ to $N\alpha a$, which dominates all dynamics and collapses
 vacuum.
 Periodic BC fixes the box at $N\cdot a$, holds the tension, and ensures the vacuum is stable
 ($A=0\Rightarrow E_{\mathrm{excess}}\equiv 0$).
-All retracted 2026-06-05 runs used open BC; all future nonlinear runs must use periodic-clamped BC.
+All nonlinear runs must use periodic-clamped BC.
 
 \subsection{Matter bridge open problems}
 \label{subsec:matter-open}
@@ -207,9 +217,10 @@ All retracted 2026-06-05 runs used open BC; all future nonlinear runs must use p
 
   \item \textbf{Rigorous Derrick stability proof.}
   State Derrick's theorem precisely \citep{Derrick1964,MantonSutcliffe2004} for the present
-  action, give the lattice-UV anti-collapse argument as a theorem (not just intuition), and tie
-  the anti-expansion balance \eqref{eq:derrick-balance} to the effective field manifold of
-  Paper~III.
+  action, give the lattice-UV anti-collapse argument as a theorem (not just intuition), and treat
+  the anti-expansion (IR) direction as the confinement problem of Paper~IV --- combining the
+  geometric-quartic balance \eqref{eq:derrick-balance} with the $SU(3)$ confinement mechanism,
+  rather than the quartic alone --- tied to the effective field manifold of Paper~III.
 
   \item \textbf{Converged $U(1)$ vortex eigenstate.}
   Resolve the semilocal drift observed in the preliminary JFNK run (Paper~III

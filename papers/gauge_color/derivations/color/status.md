@@ -15,15 +15,15 @@
 - Stiefel-Whitney topology clarification: whether the real substrate bundle has nontrivial w₁ or w₂.
 - Derivation that U(3) triplet transport maps to genuine SU(3) color dynamics (not just group-theoretic availability).
 - Color dynamics beyond kinematic confinement: asymptotic freedom, running coupling, hadron spectrum.
+- How SU(3) confinement combines with the geometric quartic to set the bound-texture length scale (the anti-expansion / IR Derrick direction). Scaling leg RESOLVED (matter bridge C3, `papers/matter_mass/derivations/matter/status.md`): SU(3) sets *no* length — its job is topological existence + kinematic confinement (blocks dispersal into free colored states); the geometric quartic is the *only* λ⁻¹ width-setter (no Faddeev–Skyrme term on a central-force lattice). Numerical leg still open: confirm `R_h ∝ A_⊥` and `∝ √(α/(1−α))` on a converged C2 eigenstate.
 - Quark representations: explicit identification of the three axis-aligned directions with the SU(3) fundamental.
 
 ## Open derivations
 
-*Relocated from the former central open-problems tracker (group D, gauge sector —
-the `U(1)`↔`SU(3)` binding items D4 and D6). Original IDs retained. The
+*Gauge sector — the `U(1)`↔`SU(3)` binding items D4 and D6. The
 EM/`U(1)`-only items D2, D3, D5 live in the Gauge bridge.*
 
-### D4. EM = `U(1)` vortex / color = `SU(3)` texture; do they bind, and does color stabilize the electron? — `open` (active experiment, 2026-06-06)
+### D4. EM = `U(1)` vortex / color = `SU(3)` texture; do they bind, and does color stabilize the electron? — `open` (active experiment)
 **Statement.** The `U(3)=U(1)×SU(3)` field carries two topologically distinct particle
 sectors (BACKBONE #25): the EM/electron-like object is a `π₁(U(1))=ℤ` carrier-phase
 **vortex** (codim-2 worldsheet, donut cross-section, spin-½ from the `2π` axis tumble,
@@ -44,17 +44,16 @@ couplings); a static `α` most naturally gives a coupling *ratio*, so a true *sc
 hierarchy is not guaranteed (no geometric-`α` precedent — see the prior-art note).
 (iv) the worldsheet's periodic-closure / `(ω,T)` quantization condition. (v) EM =
 the **trace `(1,1,1)`** lateral direction — a single-component seed is only `⅓` EM.
-**Paper (2026-06-07).** §6.8 now presents this as one of **two complementary numerical
+**Paper.** §6.8 presents this as one of **two complementary numerical
 targets** (the `U(1)` carrier-phase vortex alongside the baryon/`π₃` texture), with the
 vortex framed as a **semilocal** (non-topologically-protected) bound state stable only in
 the type-I `β=(m_scalar/m_vector)²<1` regime (below the Bogomol'nyi point;
-Vachaspati–Achúcarro). The framing — not the resolution — moved into the manuscript; the
-binding question stays open.
+Vachaspati–Achúcarro). The binding question stays open.
 **Status.** This is the active single experiment — full spec in `EXPERIMENT.md`
 (object, injection ansatz, one parameter set, measurement suite, scale ladder).
 Owner: physics-derivation (ansatz/closure) + the build.
 
-### D6. U(1)↔SU(3) binding: what stops the proton splitting into a color core + a free charge? — `in-progress` (2026-06-07)
+### D6. U(1)↔SU(3) binding: what stops the proton splitting into a color core + a free charge? — `in-progress`
 **Statement.** EM/charge is the trace (`(1,1,1)/√3`) phase and color is the internal
 orientation of **one** `U(3)` triplet envelope `Ψ∈ℂ³`. If the sectors decoupled, a
 proton would split into a localized `SU(3)` core and a free positive `U(1)` charge
@@ -65,12 +64,12 @@ gradient energy; D2), so any binding is **nonlinear and must vanish as `α→0`*
 (BACKBONE #25) and is the physical glue between the EM (D3/D4) and color (C2/#24)
 sectors. Without it the `U(1)`-vortex / `SU(3)`-texture split (D4) would predict
 unbound fragments.
-**Three channels (derivation: `paper/derivations/u1_su3_binding.md`, 2026-06-07).**
-- **B — energetic cross-vertex (DERIVED; net REPULSIVE, 2026-06-07).** The norm term
+**Three channels (derivation: `paper/derivations/u1_su3_binding.md`).**
+- **B — energetic cross-vertex (DERIVED; net REPULSIVE).** The norm term
   generates a quartic vertex `V=(k_s α/4a²)ξ_s²|ξ_⊥|²` (envelope `g|Ψ_tr|²|Ψ_⊥|²`,
   `g=Θk_sα/a²`), exactly `∝α` — **the splitting parameter is also the coupling
-  parameter.** The cubic-vs-quartic sign is now resolved: the true cubic is the
-  *separable* `+(k_sα/2a²)Δu_∥(ξ_s²+|ξ_⊥|²)` (the earlier `Δu_∥ξ_s|ξ_⊥|²` was
+  parameter.** The cubic-vs-quartic sign is resolved: the true cubic is the
+  *separable* `+(k_sα/2a²)Δu_∥(ξ_s²+|ξ_⊥|²)` (the form `Δu_∥ξ_s|ξ_⊥|²` is
   dimensionally wrong); slaving `Δu_∥*=−(α/2a²)|Δu_⊥|²<0` gives an attractive but
   `O(αε²)`-**subdominant** correction, so `g_net=(k_sα/4a²)[1−αε²]>0`: **the
   geometric-only channel is overlap-repulsive.** Binding survives *only* if `Δu_∥` is
@@ -82,7 +81,7 @@ unbound fragments.
   color singlet integer charge. Binds charge *fractionality mod 1* to color
   independent of dynamics — *given* the field is truly `U(3)`. This is the firmest
   binding result and doubles as a test of the `U(3)` declaration itself.
-- **C.2 — Goldstone–Wilczek current (CONDITIONAL-NO, 2026-06-07).** `J^μ_{U(1)}=c₁B^μ`
+- **C.2 — Goldstone–Wilczek current (CONDITIONAL-NO).** `J^μ_{U(1)}=c₁B^μ`
   would lock *integer* charge to baryon winding (forced separation → confining
   EM–color flux tube). Verdict: the "i from time" **genuinely escapes** BACKBONE #16
   (nonzero `(x,t)` U(1) curvature, the required `ε^{μνρσ}` factorizes time×spatial-
@@ -101,7 +100,7 @@ from an externally-sourced `Δu_∥`); needs an authorized 4-point `α`-ladder
 topological (C.2); (iv) `Q mod 1` of singlet/triplet/octet seeds (C.1). Reuses
 `confinement.py` (sector centroids via `P_tr=ê_sê_s†`) and `berry_holonomy.py`
 (`Q_{U(1)}`, winding `B`), plus a `Δu_∥(ρ)` longitudinal-stretch readout.
-- **TIME-LINK BINDING (DERIVED 2026-06-07, VERDICT CONDITIONAL-YES;
+- **TIME-LINK BINDING (DERIVED, VERDICT CONDITIONAL-YES;
   `paper/derivations/time_link_binding.md`).** The two negative spatial channels are
   **both flipped by the single `r_t`**: (Part 1, energetic, DERIVED) with `ω` fixed
   externally by worldtube closure, the time-link norm term sources a definite-negative

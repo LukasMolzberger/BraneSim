@@ -137,12 +137,12 @@ $$
 
 ### 3.3 Lattice tensor sums for the 26-neighbor stencil
 
-> **Superseded for the locked minimal model.** The shell sums below are for the
-> 26-neighbor stencil and are superseded by the 6-neighbor axial-only results in
-> `paper/derivations/spring_constitutive_continuum_limit.md` §3 for the canonical
-> stencil $\mathcal{N}_6$. On $\mathcal{N}_6$: $T^{(2)}_{ab}=2\delta_{ab}$,
-> $T^{(4)}_{abcd}=2Q_{abcd}$, giving $c_L^2=k_s a^2/m$, $c_T^2=(1-\alpha)k_s a^2/m$,
-> $\mu=(1-\alpha)k_s/a$, $\lambda=0$. The 26-neighbor results below remain valid for
+> **Canonical stencil.** The canonical minimal model uses the 6-neighbor
+> axial-only stencil $\mathcal{N}_6$, derived in
+> `paper/derivations/spring_constitutive_continuum_limit.md` §3: on
+> $\mathcal{N}_6$, $T^{(2)}_{ab}=2\delta_{ab}$, $T^{(4)}_{abcd}=2Q_{abcd}$, giving
+> $c_L^2=k_s a^2/m$, $c_T^2=(1-\alpha)k_s a^2/m$, $\mu=(1-\alpha)k_s/a$,
+> $\lambda=0$. The shell sums below are for the 26-neighbor stencil and apply to
 > alternative stencil choices.
 
 Shell-by-shell ($N_{\rm I}=6$ axial, $N_{\rm II}=12$ face-diagonal,
@@ -408,8 +408,8 @@ $-0.35\%$ transverse in speed).
 
 ## 7. What remains open
 
-1. **Shell-weight decision.** The old automatic-isotropy claim has been
-   revised in the project principles, but the model still needs a decision:
+1. **Shell-weight decision.** The project principles make no automatic-isotropy
+   claim; the model still needs a decision:
    either retune the shell weights or carry the finite leading-order anisotropy
    explicitly. For effective shell weights $(w_{\rm I},w_{\rm II},w_{\rm III})$
    multiplying the axial, face-diagonal, and body-diagonal tensor sums after
