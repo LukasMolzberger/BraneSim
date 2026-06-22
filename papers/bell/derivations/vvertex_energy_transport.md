@@ -14,8 +14,7 @@ the second.
    continuous delivered energy into a discrete "click" via the electron
    soliton's transition gap. Yields single-arm Malus `cos²(θ−a)` from a
    threshold on the analyzer-projected flux plus a uniform detector phase.
-   Tracked separately (see `threshold_detection.md` when written; not the
-   subject here).
+   Formalized in `threshold_detection.md`; not the subject here.
 2. **Bidirectional energy transport through the V-vertex `S`** — what actually
    couples the two arms. *This note.* It is distinct from the slogan "the
    V-vertex supplies the correlation"; that slogan is a label, this is the

@@ -51,7 +51,10 @@ typicality claim about vacuum-fluctuation statistics rather than "why uniform?".
 Caveat: this component is local and, alone, Bell-bounded — it must NOT stand
 alone or it rebuilds a detection-loophole model (the loophole Giustina 2015 /
 Shalm 2015 closed). Supplies the *statistics*, not the Bell-violating angular
-law. Feeds B1/B2.
+law. Feeds B1/B2. Formalized in `threshold_detection.md`: threshold ⇒ Malus
+*iff* the effective threshold is uniform (the precise Born content, by a
+converse argument), with single-arm no-signalling robust to the threshold
+distribution; numerically checked.
 
 ### B5. V-vertex bidirectional energy transport — `open`
 Specify the conserved-flux junction condition at the source vertex `S` and show
