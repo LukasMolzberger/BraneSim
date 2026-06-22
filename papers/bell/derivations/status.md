@@ -82,3 +82,9 @@ uniqueness of the two-time branching BVP; **D3** prove the BVP yields *exactly*
 `−cos 2(a−b)` (= B1 Tsirelson, the decisive step); **D4** no-signalling as a
 theorem for the full nonlinear solution (= B2). Verified backbone: a *local*
 junction is capped at `|S| = 2.000`, so the two-time BC is mandatory.
+D1 is now *partly closed* in `singlet_lock_from_vertex.md`: the singlet is the
+unique SU(2)-polarization-invariant vertex output (`ε` the unique invariant
+tensor, numerically verified), exact on-axis / long-wavelength (cubic-symmetry
+degeneracy of the transverse doublet) and broken controllably off-axis
+(falsifiable singlet fidelity `F = 1 − O((Δ/Γ)²)`); residual = compute the vertex
+tensor `M` explicitly and identify the cubic three-wave term.

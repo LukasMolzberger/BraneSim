@@ -90,11 +90,16 @@ The three origins: **factor 2** = Poincaré geometry (`pancharatnam_holonomy.md`
 This note specifies the conditions and shows they are *consistent with* and
 *encode* the QM structure. Four things remain genuinely open:
 
-- **D1 — derive J2 from the substrate vertex nonlinearity.** Show the
-  down-conversion coupling in the substrate Lagrangian actually projects onto the
-  singlet (`J=0`) sector, rather than importing it as a conservation law. J2 is
-  well-motivated (spin angular-momentum conservation + crystal symmetry) but not
-  yet derived from the substrate action.
+- **D1 — derive J2 from the substrate vertex nonlinearity.** *Partly closed* in
+  `singlet_lock_from_vertex.md`: the singlet is the **unique** output of any
+  SU(2)-polarization-invariant pair-creation vertex (`ε` is the unique invariant
+  rank-2 tensor; numerically verified), and that invariance is exact on-axis in
+  the long-wavelength limit (cubic-symmetry degeneracy of the transverse
+  doublet), broken controllably off-axis (falsifiable singlet-fidelity
+  `F = 1 − O((Δ/Γ)²)`). J2 is thus reduced from an import to "transverse-doublet
+  degeneracy." **Residual:** compute the vertex tensor `M` explicitly from the
+  geometric nonlinearity (confirm `M_sym = 0` on-axis) and identify the cubic
+  three-wave term.
 - **D2 — well-posedness + uniqueness of the two-time branching BVP.** With the
   chiral-characteristic BC (J3), prove a unique global solution exists for all
   `(a,b,τ_A,τ_B)` on the branching domain.
