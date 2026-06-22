@@ -82,9 +82,13 @@ uniqueness of the two-time branching BVP; **D3** prove the BVP yields *exactly*
 `−cos 2(a−b)` (= B1 Tsirelson, the decisive step); **D4** no-signalling as a
 theorem for the full nonlinear solution (= B2). Verified backbone: a *local*
 junction is capped at `|S| = 2.000`, so the two-time BC is mandatory.
-D1 is now *partly closed* in `singlet_lock_from_vertex.md`: the singlet is the
-unique SU(2)-polarization-invariant vertex output (`ε` the unique invariant
-tensor, numerically verified), exact on-axis / long-wavelength (cubic-symmetry
-degeneracy of the transverse doublet) and broken controllably off-axis
-(falsifiable singlet fidelity `F = 1 − O((Δ/Γ)²)`); residual = compute the vertex
-tensor `M` explicitly and identify the cubic three-wave term.
+D1 is now *computed* in `bellstate_lock_from_vertex.md`: the geometric link
+energy gives the cubic three-wave vertex `(ê·δu)|δu⊥|²`, whose symmetric
+`δ`-contraction yields `M ∝ δ` ⇒ the emitted Bell state is **`|Φ⁺⟩`** (symmetric,
+type-I-like), **not** the singlet — the real norm gives `δ`, not the
+SU(2)-invariant `ε`. `|Φ⁺⟩` is local-unitary (waveplate) equivalent to the
+singlet, gives `|S| = 2√2` and flat marginals (linear analyzers:
+`E = +cos 2(a−b)`), so J2 is now derived from the Lagrangian. Residual (minimal):
+confirm the longitudinal-pump three-wave channel + phase matching, and the
+off-axis fidelity coefficient `F = 1 − O((Δ/Γ)²)`. (Corrects the earlier
+`M ∝ ε`/singlet assumption.)

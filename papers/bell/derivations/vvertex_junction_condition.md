@@ -39,12 +39,15 @@ Integrate the conservation laws over a small 4-ball around `S`:
 
 - **J1 — energy–momentum conservation (phase matching).**
   `∮ T^μ_ν dΣ_μ = 0`  ⇒  `ℏω_p = ℏω_A + ℏω_B`, `k_p = k_A + k_B`.
-- **J2 — polarization-invariant lock.**
-  `∮ J^μ_α dΣ_μ = 0`  ⇒  the two-photon polarization state sits in the sector
-  fixed by the pump's polarization angular momentum. For the rotationally
-  unbiased configuration this is the `SU(2)` **singlet** `|Ψ⁻⟩` — the unique
-  `U⊗U`-invariant in `ℂ²⊗ℂ²`. Rotationally covariant: no preferred polarization
-  axis is introduced at `S`.
+- **J2 — Bell-state lock.**
+  `∮ J^μ_α dΣ_μ = 0`  ⇒  the two-photon polarization state sits in a definite
+  maximally-entangled Bell sector fixed by the vertex coupling. Computed
+  explicitly from the geometric nonlinearity (`bellstate_lock_from_vertex.md`):
+  the cubic vertex `(ê·δu)|δu⊥|²` has the symmetric `δ`-contraction, so the
+  emitted state is **`|Φ⁺⟩`** (symmetric), *not* the singlet `|Ψ⁻⟩`. The two are
+  local-unitary (waveplate) equivalent and give identical `|S| = 2√2`; for linear
+  analyzers `|Φ⁺⟩` gives `E = +cos 2(a−b)` (the singlet's `−cos`). The substrate
+  fixes the convention to `|Φ⁺⟩`.
 - **J3 — time-symmetric two-time closure.**
   The solution on the V is the stationary point of the time-symmetric action on
   the branching domain with **past BC at `S`** (J1+J2) and **future BCs at
@@ -55,8 +58,9 @@ Integrate the conservation laws over a small 4-ball around `S`:
 
 ## 3. What the junction cleanly ENCODES (two consequences)
 
-- **(a) Flat marginal / no-signalling, from J2 alone.** The singlet's one-party
-  reduced state is `ρ_A = ρ_B = ½𝟙` (rotation-invariant). Hence `P(B | a)` is
+- **(a) Flat marginal / no-signalling, from J2 alone.** The maximally-entangled
+  pair's one-party reduced state is `ρ_A = ρ_B = ½𝟙` (`|Φ⁺⟩`, like any Bell
+  state). Hence `P(B | a)` is
   independent of `a` *regardless* of what the advanced channel carries — the
   backward leg can move joint correlations but cannot shift a one-party marginal.
   Verified: `P(B=+) = ½` for all settings. This is the marginal half of B2, and
@@ -69,12 +73,14 @@ Integrate the conservation laws over a small 4-ball around `S`:
   uniform local action under freely posed future BCs, not by tuned past data
   (`subsec:no-superdeterminism`).
 
-## 4. The structure the junction must realize → −cos 2(a−b)
+## 4. The structure the junction must realize → ±cos 2(a−b)
 
-Given J2 (singlet anti-alignment at `S`) and the B4 thresholds at both ends, the
+Given J2 (the Bell-state lock at `S`) and the B4 thresholds at both ends, the
 target structure is the conditional/collapse one: A's setting+threshold fixes A's
-frame; J2 ties B's forward frame to the anti-aligned partner; B's threshold fires
-per Malus. Carrying this through (verified):
+frame; J2 ties B's forward frame to its Bell-partner; B's threshold fires per
+Malus. (Shown below for the singlet → `−cos 2(a−b)`; the substrate-derived
+`|Φ⁺⟩` of J2 gives `+cos 2(a−b)`, local-unitary-equivalent, same `|S| = 2√2`.)
+Carrying the singlet case through (verified):
 
     P(A=+) = ½ ;  given A=+, B-frame = |a+π/2⟩ ;  P(B=+|A=+) = |⟨b|a+π/2⟩|² = sin²(a−b)
     ⇒  E(a,b) = sin²(a−b) − cos²(a−b) = −cos 2(a−b),   marginal P(B=+) = ½.
@@ -90,16 +96,15 @@ The three origins: **factor 2** = Poincaré geometry (`pancharatnam_holonomy.md`
 This note specifies the conditions and shows they are *consistent with* and
 *encode* the QM structure. Four things remain genuinely open:
 
-- **D1 — derive J2 from the substrate vertex nonlinearity.** *Partly closed* in
-  `singlet_lock_from_vertex.md`: the singlet is the **unique** output of any
-  SU(2)-polarization-invariant pair-creation vertex (`ε` is the unique invariant
-  rank-2 tensor; numerically verified), and that invariance is exact on-axis in
-  the long-wavelength limit (cubic-symmetry degeneracy of the transverse
-  doublet), broken controllably off-axis (falsifiable singlet-fidelity
-  `F = 1 − O((Δ/Γ)²)`). J2 is thus reduced from an import to "transverse-doublet
-  degeneracy." **Residual:** compute the vertex tensor `M` explicitly from the
-  geometric nonlinearity (confirm `M_sym = 0` on-axis) and identify the cubic
-  three-wave term.
+- **D1 — derive J2 from the substrate vertex nonlinearity.** *Computed* in
+  `bellstate_lock_from_vertex.md`: the geometric link energy gives the cubic
+  three-wave vertex `(ê·δu)|δu⊥|²`, whose symmetric `δ`-contraction yields
+  `M ∝ δ` ⇒ the emitted state is `|Φ⁺⟩` (symmetric, type-I-like), not the singlet
+  (the real norm gives `δ`, not the SU(2)-invariant `ε`). `|Φ⁺⟩` is
+  local-unitary-equivalent to the singlet (`|S| = 2√2`, flat marginals), so J2 is
+  now derived from the Lagrangian. **Residual (minimal):** confirm the
+  longitudinal-pump three-wave channel + phase matching, and the off-axis
+  fidelity coefficient `F = 1 − O((Δ/Γ)²)`.
 - **D2 — well-posedness + uniqueness of the two-time branching BVP.** With the
   chiral-characteristic BC (J3), prove a unique global solution exists for all
   `(a,b,τ_A,τ_B)` on the branching domain.
