@@ -70,7 +70,8 @@ tying them must be modeled.
 
 `S` is a nonlinear matter vertex (the down-conversion crystal). The junction
 condition is a Kirchhoff-like flux balance that must conserve three things at
-once:
+once (formalized, with the two-time closure and open debts D1–D4, in
+`vvertex_junction_condition.md`):
 
 - **Energy.** `ℏω_pump = E_A + E_B` on the forward leg; the advanced fluxes from
   the two detectors balance against the source's own past (laser / past

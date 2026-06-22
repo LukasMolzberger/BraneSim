@@ -72,4 +72,13 @@ transported `A→S→B` on the Poincaré sphere, which makes the `cos 2(a−b)` 
 requires the setting-chosen threshold projection (geometry necessary, not
 sufficient). The form `E = −cos 2(a−b)` is derived (and numerically checked,
 CHSH `|S| = 2√2`) in `pancharatnam_holonomy.md`; the energy-transport mechanism
-is in `vvertex_energy_transport.md`.
+is in `vvertex_energy_transport.md`. The junction condition at `S` is formalized
+in `vvertex_junction_condition.md` (J1 energy, J2 singlet-invariant lock, J3
+time-symmetric two-time closure via chiral-characteristic BC): it *encodes*
+flat-marginal no-signalling (from J2) and MI-relaxation (from J3), and states the
+conditional/collapse structure it must realize. Its own open debts: **D1** derive
+J2 (singlet) from the substrate vertex nonlinearity; **D2** well-posedness /
+uniqueness of the two-time branching BVP; **D3** prove the BVP yields *exactly*
+`−cos 2(a−b)` (= B1 Tsirelson, the decisive step); **D4** no-signalling as a
+theorem for the full nonlinear solution (= B2). Verified backbone: a *local*
+junction is capped at `|S| = 2.000`, so the two-time BC is mandatory.
