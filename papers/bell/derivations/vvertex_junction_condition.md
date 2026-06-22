@@ -108,10 +108,14 @@ This note specifies the conditions and shows they are *consistent with* and
 - **D2 — well-posedness + uniqueness of the two-time branching BVP.** With the
   chiral-characteristic BC (J3), prove a unique global solution exists for all
   `(a,b,τ_A,τ_B)` on the branching domain.
-- **D3 — exactness / Tsirelson (B1).** Prove the BVP yields *exactly*
-  `−cos 2(a−b)` (`S = 2√2`), not merely some nonlocal correlation in
-  `(2, 2√2]` or an over/undershoot. §4 *assumes* the junction realizes the
-  projective collapse rule; deriving that it does so exactly is the decisive step.
+- **D3 — exactness / Tsirelson (B1).** *Reduced* in `two_time_bvp_tsirelson.md`:
+  the two-time structure alone does *not* pin the correlation (a PR-box also
+  relaxes MI, `S = 4`), but the substrate's linear complex `ℂ²` carrier makes the
+  two-time history amplitudes genuine Hilbert overlaps — which excludes PR-boxes
+  and caps the correlation at Tsirelson. With Born weights this gives *exactly*
+  `±cos 2(a−b)`, `|S| = 2√2` (a non-Born weight fails — verified). **Residual:**
+  the joint two-time `(τ_A,τ_B)` measure reproduces the Born weight `|amp|²` —
+  the program-wide Born/typicality debt (= B1), localized to the joint case.
 - **D4 — no-signalling as a theorem (B2).** Extend §3(a) from the marginal/linear
   argument to the full nonlinear two-time solution: no one-arm observable depends
   on the far setting.

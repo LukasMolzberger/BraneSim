@@ -21,11 +21,19 @@ Drawn from `PRINCIPLES.md` §1.5 and `BACKBONE.md` #23. These are
 constraints the retrocausal worldtube interpretation places on the program —
 honest debts, not results. **Do not claim as established in the paper.**
 
-### B1. Tsirelson's bound `2√2` — `open`
-Reproduce the exact CHSH maximum from V-branching soliton correlations on the
+### B1. Tsirelson's bound `2√2` — `open` (reduced)
+Reproduce the exact CHSH maximum from the V-branching correlations on the
 substrate. Retrocausal models notoriously under-/over-shoot; deriving the exact
 bound (not merely nonzero correlation) is the most direct empirical handle on
-the stance.
+the stance. *Reduced* in `two_time_bvp_tsirelson.md` (= D3): the two-time
+structure alone does not cap the correlation (a PR-box relaxes MI too, `S = 4`),
+but the substrate's **linear complex `ℂ²` carrier** makes the two-time history
+amplitudes genuine Hilbert overlaps — excluding PR-boxes and capping at
+Tsirelson; with Born weights this gives *exactly* `±cos 2(a−b)`, `|S| = 2√2` (a
+non-Born weight fails, verified). The Tsirelson cap and the functional form thus
+follow; the **only** residual is the Born weight `|amp|²` = the joint two-time
+`(τ_A,τ_B)` typicality, i.e. the same Born-rule debt as B4/below — localized, not
+a separate miracle.
 
 ### B2. No-signalling theorem — `open`
 Derive no-signalling as a *theorem* about branching-worldtube dynamics (no
