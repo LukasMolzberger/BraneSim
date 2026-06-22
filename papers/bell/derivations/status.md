@@ -13,7 +13,7 @@
 ## MISSING
 
 - Fully formalized *theorem* form of the uniqueness argument: D + L + (one of D/L/MI must be relaxed) ⟹ relax MI via retrocausality, uniquely. The prose argument now exists in §2.5 `02_bell_constraint.tex` (four-option enumeration; nonlocal/Bohmian completions excluded on the locality ground; superdeterminism excluded as fine-tuning vs uniform-local-law in §2.4). Residual: restate it with explicit premises and a proof of exclusion + conclusion, rather than as structured prose.
-- No-signalling demonstration: show that retrocausal worldtube evolution preserves operational no-signalling (no faster-than-light information transfer in the effective theory).
+- No-signalling demonstration: *done* in `no_signalling_theorem.md` (= B2) — completeness of the local absorption erases the distant setting under the sum over unobserved outcomes, so B's marginal `= ⟨b|ρ_B|b⟩ = ½` independent of `a`; the retrocausal `a`-dependence is confined to the joint correlation, unreadable locally. Modulo unit-efficiency (fair sampling) and the Born weights (D3), both already named.
 - Born rule recovery: *reduced* in `born_weight_typicality.md` to Liouville/microcanonical typicality on the complex carrier amplitude — the Born exponent `2` is the symplectic dimension of `ψ=q+ip` (`|amp|²` = phase-space area, `cos²` = projected area ratio), and the measure is the equal-a-priori postulate (uniform-on-disk ⇒ uniform intensity ⇒ Born; verified). This makes quantum probability the *same* as thermal probability, not a new kind. The only residual is the **universal** ergodic-relaxation debt (substrate vacuum samples the microcanonical measure) — identical to justifying the microcanonical ensemble in classical stat mech, not a quantum mystery. NOT a derivation ex nihilo (no approach is).
 
 ## Open derivations
@@ -38,11 +38,19 @@ a separate miracle. That debt is itself reduced in `born_weight_typicality.md` t
 Liouville/microcanonical typicality on the complex amplitude (exponent `2` =
 symplectic area), leaving only the universal ergodic-relaxation residual.
 
-### B2. No-signalling theorem — `open`
+### B2. No-signalling theorem — `open` (derived, modulo completeness + Born)
 Derive no-signalling as a *theorem* about branching-worldtube dynamics (no
 one-branch observable depends on the other branch's measurement context),
 rather than assuming it. This is what prevents the retrocausal channel from
-sending a macroscopic bit backward in time.
+sending a macroscopic bit backward in time. *Derived* in
+`no_signalling_theorem.md`: B's local marginal sums over A's unobserved outcome,
+and **completeness** of A's absorption (`Σ_A|a_A⟩⟨a_A| = 𝟙` for every `a`,
+verified) collapses it to `⟨b|ρ_B|b⟩`, which with J2 (`ρ_B = ½𝟙`) is `½` —
+independent of the distant `a` (verified flat). The retrocausal `a`-dependence
+lives only in the joint correlation (the partial sums, verified `a`-dependent),
+unreadable without comparing both wings — Bell nonlocality without signalling.
+Residuals (already-named): completeness `=` unit-efficiency / fair sampling
+(detection-loophole caveat, B4); the Born weights / Hilbert overlaps (D3).
 
 ### B3. Baryon-to-photon ratio `η ≈ 6×10⁻¹⁰` — `open`
 Show whether the geometric-vertex picture (matter/antimatter expanding from the

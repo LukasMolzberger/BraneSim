@@ -116,9 +116,14 @@ This note specifies the conditions and shows they are *consistent with* and
   `±cos 2(a−b)`, `|S| = 2√2` (a non-Born weight fails — verified). **Residual:**
   the joint two-time `(τ_A,τ_B)` measure reproduces the Born weight `|amp|²` —
   the program-wide Born/typicality debt (= B1), localized to the joint case.
-- **D4 — no-signalling as a theorem (B2).** Extend §3(a) from the marginal/linear
-  argument to the full nonlinear two-time solution: no one-arm observable depends
-  on the far setting.
+- **D4 — no-signalling as a theorem (B2).** *Derived* in
+  `no_signalling_theorem.md`: completeness of A's absorption
+  (`Σ_A|a_A⟩⟨a_A| = 𝟙`) collapses B's marginal to `⟨b|ρ_B|b⟩ = ½` (J2),
+  independent of the distant `a`; the retrocausal `a`-dependence is confined to
+  the joint correlation, unreadable locally. Modulo unit-efficiency + Born (D3).
+  **Residual:** extend the completeness argument from the linear Hilbert-overlap
+  weights to the full nonlinear two-time solution (no one-arm observable depends
+  on the far setting).
 
 ## Caveat (one line)
 
