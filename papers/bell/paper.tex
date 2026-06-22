@@ -26,10 +26,6 @@
 \usepackage{bm}
 \usepackage{mathtools}
 \usepackage{amsfonts}
-\usepackage{xr}
-\externaldocument{../core/build/paper}
-\externaldocument{../gauge_color/build/paper}
-\externaldocument{../matter_mass/build/paper}
 
 %=================================================================
 % Notation helpers (not loaded by mdpi.cls)
@@ -49,7 +45,7 @@
 
 %=================================================================
 % Title, author, affiliation
-\Title{The Bell Boundary Condition: Retrocausal Worldtube Interpretation of a Deterministic Brane-Lattice Substrate (Paper~V)}
+\Title{The Bell Boundary Condition: Retrocausal Worldtube Interpretation of a Deterministic Brane-Lattice Substrate}
 
 \Author{Lukas Molzberger}
 
@@ -61,7 +57,7 @@
 
 %=================================================================
 % Abstract and keywords
-\abstract{Bell's theorem rules out theories that are simultaneously deterministic (D), local (L), and measurement-independent (MI). The deterministic brane-lattice substrate of Paper~I satisfies (D) by construction and (L) by its nearest-neighbor spring dynamics; (MI) must therefore be relaxed. We stress that Bell's theorem constrains probability distributions, whereas this substrate is non-probabilistic at its core --- deterministic field equations on a single 4D world-volume, with the Born rule emergent rather than fundamental --- so the model departs from interpretations that treat quantum probability as fundamental, and relaxes (MI) at the level of emergent correlations. Within this substrate, retrocausality is the completion its time-symmetric action supplies: superdeterminism is set aside as fine-tuning rather than a uniform law, and nonlocal hidden-variable completions would require superluminal channels absent from the spring-lattice dynamics. Rather than rest on excluding every alternative, we make the case constructively, by exhibiting a mechanism that reproduces the statistics. The retrocausal worldtube reading follows directly from the time-symmetry of the brane action, which selects a \emph{kind} of direction (timelike vs spacelike) but not a \emph{direction} along the timelike axis. The arrow of time is thermodynamic --- grounded in a low-entropy boundary condition --- and not a property of the substrate dynamics, which are exactly time-symmetric; soliton chirality separately distinguishes matter (forward-propagating worldtubes) from antimatter (backward-propagating), realizing the Feynman--Stueckelberg interpretation at the level of substrate solutions. An entangled pair is one branching 4D world-volume splitting at a V-vertex in the shared past; correlations propagate backward along one branch to the V-vertex and forward along the other, with no spacelike signal at any step. For the canonical entangled-photon experiment this branching worldtube reproduces the measured statistics: the source vertex emits a maximally-entangled Bell state, no-signalling follows as a completeness theorem, the $\cos 2(a-b)$ correlation and its Tsirelson bound follow from the complex carrier, and the Born weight reduces to statistical-mechanical typicality on the carrier amplitude. The cosmological matter--antimatter asymmetry is a geometric initial-condition asymmetry: the two chirality branches emerge from the Big Bang vertex in opposite time directions, and only the forward branch is observable. The remaining open items are narrow and standard: a closed-form solution of the two-time branching problem, and the fair-sampling and equilibrium-typicality assumptions it shares with the rest of physics.}
+\abstract{Bell's theorem rules out theories that are simultaneously deterministic (D), local (L), and measurement-independent (MI). The deterministic brane-lattice substrate developed here satisfies (D) by construction and (L) by its nearest-neighbor spring dynamics; (MI) must therefore be relaxed. We stress that Bell's theorem constrains probability distributions, whereas this substrate is non-probabilistic at its core --- deterministic field equations on a single 4D world-volume, with the Born rule emergent rather than fundamental --- so the model departs from interpretations that treat quantum probability as fundamental, and relaxes (MI) at the level of emergent correlations. Within this substrate, retrocausality is the completion its time-symmetric action supplies: superdeterminism is set aside as fine-tuning rather than a uniform law, and nonlocal hidden-variable completions would require superluminal channels absent from the spring-lattice dynamics. Rather than rest on excluding every alternative, we make the case constructively, by exhibiting a mechanism that reproduces the statistics. The retrocausal worldtube reading follows directly from the time-symmetry of the brane action, which selects a \emph{kind} of direction (timelike vs spacelike) but not a \emph{direction} along the timelike axis. The arrow of time is thermodynamic --- grounded in a low-entropy boundary condition --- and not a property of the substrate dynamics, which are exactly time-symmetric; soliton chirality separately distinguishes matter (forward-propagating worldtubes) from antimatter (backward-propagating), realizing the Feynman--Stueckelberg interpretation at the level of substrate solutions. An entangled pair is one branching 4D world-volume splitting at a V-vertex in the shared past; correlations propagate backward along one branch to the V-vertex and forward along the other, with no spacelike signal at any step. For the canonical entangled-photon experiment this branching worldtube reproduces the measured statistics: the source vertex emits a maximally-entangled Bell state, no-signalling follows as a completeness theorem, the $\cos 2(a-b)$ correlation and its Tsirelson bound follow from the complex carrier, and the Born weight reduces to statistical-mechanical typicality on the carrier amplitude. The cosmological matter--antimatter asymmetry is a geometric initial-condition asymmetry: the two chirality branches emerge from the Big Bang vertex in opposite time directions, and only the forward branch is observable. The remaining open items are narrow and standard: a closed-form solution of the two-time branching problem, and the fair-sampling and equilibrium-typicality assumptions it shares with the rest of physics.}
 
 \keyword{Bell's theorem; retrocausality; worldtube; soliton chirality; time-symmetric dynamics; deterministic substrate; brane lattice; measurement independence; V-branching; entanglement; no-signalling; Tsirelson bound; geometric phase}
 
@@ -83,7 +79,7 @@
 
 \informedconsent{Not applicable.}
 
-\dataavailability{The substrate solver and all experiments reported in this series are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
+\dataavailability{The substrate solver and all experiments of the BraneSim program are openly available at \url{https://github.com/LukasMolzberger/BraneSim} \citep{BraneSimRepo}.}
 
 \acknowledgments{The author gratefully acknowledges Richard Behiel, Grant Sanderson (3Blue1Brown), and Dr.\ Jeroen Vleggaar (Huygens Optics) for educational content that inspired and informed this work.}
 
