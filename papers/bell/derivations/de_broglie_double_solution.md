@@ -8,7 +8,7 @@ substrate is the natural completion of de Broglie's *théorie de la double
 solution* — particle = soliton-singularity of one real wave in physical space,
 guidance derived — and is structurally **incompatible** with Bohm's
 configuration-space pilot wave, which is excluded on the same locality ground as
-every nonlocal completion (§2.6 `02_bell_constraint.tex`). The single-particle
+every nonlocal completion (§2.5 `02_bell_constraint.tex`). The single-particle
 guidance theorem is rigorous; the many-body extension is deferred to the
 two-time worldtube (D3), and Born to typicality — both already open debts, not new
 ones.
@@ -36,7 +36,7 @@ Bohm's *distinctive* content — the part that makes it "Bohmian mechanics" rath
 than "Madelung hydrodynamics" — is the `ℝ^{3N}` pilot wave and the resulting
 nonlocality. That is exactly the content the substrate cannot host: there is no
 `ℝ^{3N}` on a nearest-neighbour lattice, and nonlocal guidance is excluded by (L)
-(§2.6). The substrate is therefore **not** a Bohmian theory.
+(§2.5). The substrate is therefore **not** a Bohmian theory.
 
 de Broglie's double solution, by contrast, is almost a verbatim description of the
 substrate: a real physical wave whose localized singularity *is* the particle,
@@ -46,8 +46,10 @@ retrocausal worldtube supplies (§5).
 
 ## 2. The substrate carrier admits a Madelung form
 
-From Paper III, the narrowband carrier is a **real** substrate field with a fast
-oscillation at `ω₀`; the slowly-varying complex envelope
+From Paper III, a narrowband excitation is a **real** substrate field with a fast
+oscillation at `ω₀`; the slowly-varying complex envelope (here the *matter
+excitation's* envelope — the de Broglie matter wave — not the EM/`U(1)` photon
+carrier of the gauge bridge)
 
     ψ = ξ + (i/ω₀) ξ̇            (the `U(1)`-from-time amplitude, `ψ = q + i p`)
 
@@ -55,7 +57,8 @@ obeys an effective Schrödinger equation in the linear/narrowband regime
 
     i ℏ_eff ∂_t ψ = H_eff ψ,     H_eff = −(ℏ_eff²/2 m_eff) ∇² + V,
 
-with `m_eff`, `ℏ_eff` fixed by the dispersion (Papers I/III). Write the **Madelung
+with `m_eff`, `ℏ_eff` fixed by the dispersion and carrier scale `ω₀` (Papers
+I/III); the committed envelope form `i ∂_t Ψ = H_eff Ψ` is its `ℏ_eff → 1` case. Write the **Madelung
 polar form**
 
     ψ = R e^{i S / ℏ_eff},       ρ ≡ R² = |ψ|² = q² + p²   (the §-born intensity).
@@ -84,7 +87,9 @@ infinity):
     dX/dt = ∫ x ∂_t ρ / ∫ ρ = −∫ x ∇·(ρv) / ∫ ρ = ∫ ρ v / ∫ ρ = ⟨v⟩.
 
 In the **narrow-soliton limit** `ℓ ≪ |∇S|/|∇²S|` (envelope width small against the
-scale on which the phase gradient varies),
+scale on which the phase gradient varies) — which the soliton's *nonlinear
+self-confinement* (Papers III/IV) supplies; the centroid identity above uses only
+linear continuity, the confinement is what holds `ℓ` small —
 
     dX/dt = ⟨∇S/m_eff⟩ → ∇S(X,t) / m_eff.        ★ (de Broglie guidance)
 
@@ -118,7 +123,7 @@ The substrate forbids both:
 - **No nonlocal guidance, no preferred foliation.** (L) is a structural fact of
   the nearest-neighbour lattice (§2.2). Bohm's nonlocal guidance and preferred
   slicing are excluded *before* one even reaches the config-space problem — on the
-  same single ground that excludes every nonlocal completion (§2.6).
+  same single ground that excludes every nonlocal completion (§2.5).
 
 So the exclusion of Bohm is not a stylistic preference; it is forced by the same
 locality commitment that the whole Bell argument rests on.
@@ -146,19 +151,30 @@ it identifies it as the precise locus where the double solution is completed by 
 4D worldtube rather than by `ℝ^{3N}`.** The single-particle guidance theorem (§3)
 is the `N=1` shadow of the same structure.
 
-## 6. Born: guidance + typicality, the same debt already named
+## 6. Born: two complementary typicality routes, one postulate
 
 de Broglie–Bohm recover Born via *quantum equilibrium* — an equal-a-priori measure
 in configuration space, equivariant under the guidance flow, yields `|ψ|²` on
-outcomes (Dürr–Goldstein–Zanghì). The substrate's version is in
-`born_weight_typicality.md`: equal-a-priori (Liouville) measure on the carrier
-phase space `(q,p)` ⇒ uniform intensity ⇒ Born, with the exponent `2` = the
-symplectic dimension. The guidance theorem `★` supplies the *equivariant flow*
-(the `ρ = |ψ|²` continuity equation of §2 is exactly the equivariance statement);
-typicality supplies the *measure*. Born is therefore **not a third debt** — it is
-the program-wide typicality residual, with guidance providing the equivariance for
-free, exactly as in the DGZ argument. The one residual is the universal
-ergodic-relaxation problem, shared with classical stat-mech (B-group).
+outcomes (Dürr–Goldstein–Zanghì). The substrate carries **two** routes to Born,
+at *different loci*, and they must agree:
+
+- **Preparation / equilibrium side (this note).** The guidance theorem `★`
+  supplies the equivariant flow — the `ρ = |ψ|²` continuity equation of §2 *is* the
+  equivariance statement — so an equal-a-priori ensemble of soliton configurations
+  stays `|ψ|²`-distributed (the DGZ mechanism).
+- **Detection side (`born_weight_typicality.md`).** Equal-a-priori (Liouville)
+  measure on the *detector's* vacuum amplitude `(q,p)` ⇒ uniform intensity ⇒ Born
+  click probability, with the exponent `2` = the symplectic dimension.
+
+These are **not** the same measure — one is on the guided particle's
+configuration, the other on the absorber's vacuum phase — but they rest on the
+**same equal-a-priori postulate** and must yield the same `|ψ|²`. Their
+consistency (preparation statistics = detection statistics) is the substrate's
+analog of the standard requirement that the quantum-equilibrium distribution match
+the measurement rule; establishing it is *part of* the Born debt, not a separate
+one. Either way the only genuinely remaining input is the universal
+ergodic-relaxation problem, shared with classical stat-mech (B-group) — not a new
+quantum postulate.
 
 ## 7. The quantum potential, read on the substrate
 
@@ -210,8 +226,9 @@ ontology.
 - Dürr, Goldstein & Zanghì 1992 — quantum equilibrium / typicality (§6).
 - Couder & Fort 2006; Bush 2015 — hydrodynamic pilot-wave / wave-memory
   realization of the double solution (local, real-space; guidance dynamics
-  template).
+  template). Single-particle/local analogy only — it cannot itself violate Bell;
+  the substrate's Bell content is the worldtube (§5), not the droplet-like guidance.
 - Sutherland 2017 — time-symmetric (retrocausal) pilot wave; the bridge between
   the double solution and the worldtube (§5).
 - D3 `two_time_bvp_tsirelson.md`; Born `born_weight_typicality.md`;
-  §2.6–2.7 `02_bell_constraint.tex`.
+  §2.5–2.6 `02_bell_constraint.tex`.
