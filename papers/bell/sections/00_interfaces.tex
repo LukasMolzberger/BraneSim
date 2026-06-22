@@ -1,30 +1,72 @@
-\section{Interfaces}
-\label{sec:interfaces}
+\section{The substrate, in brief}
+\label{sec:substrate}
 
-This paper imports the following results (chiefly from Paper~I, plus the localized-mode result
-of Paper~IV) without re-derivation. As the interpretive capstone of the series it has no
-downstream dependents and exports no interfaces.
+This paper is self-contained: the substrate model it rests on is stated here, with the full
+construction and derivations in Papers~I and~III. Only the elements used below are included.
 
-\begin{description}
-  \item[\normalfont Substrate ontology.]
-  The 4D cubic brane lattice embedded codimension-zero in a 4D Euclidean ambient, with the
-  timelike direction selected by the Lorentzian sign structure of the brane action
-  (\Cref{subsec:ontology-kinematics}).
-  The substrate is manifestly local: all forces propagate through direct spring-neighbor contact
-  at finite speed.
+\paragraph{Ontology.}
+The substrate is a four-dimensional cubic lattice of nodes --- a 4D \emph{brane} --- embedded with
+codimension zero in a 4D Euclidean ambient space. Each node carries a displacement
+$\vecX\in\R^{4}$, and nearest neighbours are coupled by central-force (spring) interactions. The
+lattice is the entire physical content: there is no configuration space and no field beyond the
+single real displacement field on the 4D world-volume.
 
-  \item[\normalfont Time-symmetry of the brane action.]
-  The action (\Cref{eq:action}) is time-symmetric: it selects a \emph{kind} of direction
-  (timelike vs spacelike) but not a \emph{direction} along the timelike axis
-  (past-to-future vs future-to-past).
-  The arrow of time is therefore not a property of the substrate.
+\paragraph{Action, determinism, and locality.}
+The dynamics follow from a local action of $T-V$ (kinetic minus elastic) form,
+\begin{equation}
+  S[\vecX]=\int \Lag\,\dd^4x ,\qquad
+  \Lag=\text{(timelike-link terms)}-\text{(spacelike-link terms)} ,
+  \label{eq:brane-action}
+\end{equation}
+whose Lorentzian sign structure --- opposite signs for timelike- and spacelike-direction link
+terms --- singles out one of the four lattice directions as \emph{time}. The Euler--Lagrange
+equations of motion
+\begin{equation}
+  \tfrac{\dd}{\dd t}\,\partial_{\dot{\vecX}}\Lag=\partial_{\vecX}\Lag
+  \label{eq:brane-eom}
+\end{equation}
+are second-order and \emph{deterministic} (a complete configuration fixes all past and future
+configurations) and \emph{local}: forces act only between spring-neighbours and propagate at
+finite speed, set by the transverse and longitudinal wave speeds $c_T,c_L$. The substrate has no
+superluminal channel.
 
-  \item[\normalfont Soliton chirality.]
-  The concept that localized modes (Paper~IV \Cref{sec:matter}) can propagate forward or backward
-  along the brane's timelike axis, selecting the causal direction at the soliton level rather than
-  at the substrate level.
+\paragraph{Time-symmetry.}
+The action \eqref{eq:brane-action} is invariant under reversal of the timelike coordinate
+$t\mapsto -t$: it selects a \emph{kind} of direction (timelike vs spacelike) but not a
+\emph{direction} along the timelike axis. The substrate therefore has no intrinsic arrow of time;
+both forward- and backward-propagating solutions of \eqref{eq:brane-eom} are admissible, and a
+configuration is fixed by boundary data on the past \emph{and} future endcaps of the 4D
+world-volume.
 
-  \item[\normalfont Determinism.]
-  The substrate equations of motion (\Cref{eq:eom}) are deterministic: given a complete
-  initial configuration, all future and past configurations are uniquely fixed.
-\end{description}
+\paragraph{Linear waves and the carrier.}
+Small displacements are continuous waves, with a spectrum continuous up to the lattice-spacing
+cutoff; nothing in the linear sector takes discrete values. The transverse polarization of a
+narrowband wave propagating along an axis spans a two-dimensional space $\C^{2}$ --- the qubit
+Hilbert space used below --- and is a spin-$1$ (vector) mode. Its slowly varying complex amplitude
+\begin{equation}
+  \psi=\xi+\tfrac{\ii}{\omega_0}\dot\xi \;=\; q+\ii p
+  \label{eq:carrier}
+\end{equation}
+takes its imaginary unit from carrier rotation along the timelike axis, with $(q,p)$ the two field
+quadratures. A free electromagnetic excitation is exactly such an unconfined linear carrier and is
+not quantized at the substrate level.
+
+\paragraph{Geometric nonlinearity.}
+The spring energy depends on the geometric link length $|\Delta\vecX|$ (a norm), whose expansion
+beyond quadratic order is the substrate's only anharmonicity, with strength fixed by the prestress
+$\alpha$ and stiffness $k_s$:
+\begin{equation}
+  V\supset -\,k_s\,\alpha\,a\,|\Delta\vecX|
+  \quad\Longrightarrow\quad
+  \text{cubic/quartic couplings}\ \propto\ k_s\alpha/a .
+  \label{eq:geom-nonlinear}
+\end{equation}
+This coupling binds confined modes and drives the source vertex of \Cref{sec:worldtube}.
+
+\paragraph{Solitons, matter, and chirality.}
+Confined, self-localized nonlinear solutions of \eqref{eq:brane-eom} are the matter particles;
+their discrete labels (spin, charge, topological winding) are what \emph{quantization} means in
+this framework --- a consequence of confinement geometry, not a substrate postulate. A soliton may
+propagate forward or backward along the timelike axis: this \emph{chirality} distinguishes matter
+(forward-propagating worldtubes) from antimatter (backward-propagating). The full soliton sector
+is developed in Paper~IV.

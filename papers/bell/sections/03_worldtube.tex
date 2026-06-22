@@ -4,12 +4,12 @@
 \subsection{Time-symmetry of the substrate action}
 \label{subsec:time-symmetry}
 
-The brane action of Paper~I (\Cref{eq:action}) is time-symmetric.
+The brane action (\Cref{eq:brane-action}) is time-symmetric.
 Its Lorentzian sign structure selects a \emph{kind} of direction --- timelike vs spacelike ---
 but the action is invariant under reversal of the timelike coordinate, $t\mapsto -t$.
 Neither the kinetic term nor the elastic potential distinguishes past from future.
 This means the substrate has no intrinsic arrow of time: both forward-in-time and
-backward-in-time solutions to \Cref{eq:eom} of Paper~I are equally valid.
+backward-in-time solutions to \Cref{eq:brane-eom} are equally valid.
 
 \subsection{The arrow of time: thermodynamic, with chirality fixing matter vs antimatter}
 \label{subsec:soliton-chirality}
@@ -33,7 +33,7 @@ the arrow of experienced causality is statistical-mechanical, not dynamical.
 
 \paragraph{Chirality fixes matter versus antimatter.}
 Soliton chirality answers a \emph{different} question: given the brane's timelike axis, a
-localized mode (Paper~IV \Cref{sec:matter}) may propagate forward or backward along it --- a
+localized mode (\Cref{sec:substrate}; full treatment in Paper~IV) may propagate forward or backward along it --- a
 topological/dynamical property of the solution analogous to the handedness of a Skyrme texture.
 \begin{itemize}
   \item \textbf{Matter solitons} are forward-propagating worldtubes: their chirality orients the
@@ -111,28 +111,30 @@ test of the Vienna group \citep{Giustina2015}.
 \paragraph{Apparatus, in substrate terms.}
 A pump excitation drives a nonlinear matter vertex --- the down-conversion crystal, a localized
 region of bound matter solitons --- in which one carrier wavepacket is converted into two. The two
-daughters are unconfined carrier waves, not solitons (Paper~I \Cref{subsec:continuous-waves},
-Paper~III \Cref{subsec:spinorial-holonomy}; \Cref{subsec:non-probabilistic}). The entangled pair
+daughters are unconfined carrier waves, not solitons (\Cref{sec:substrate};
+\Cref{subsec:non-probabilistic}). The entangled pair
 is therefore a single branching \emph{carrier} world-volume --- one tube that splits at the source
 vertex $S$ into two arms, $A$ (toward Alice) and $B$ (toward Bob). The V-vertex of
 \Cref{subsec:v-branching} is here the source event $S$; the two measurement endpoints are detector
 events $D_A$, $D_B$ at which each arm couples to a bound electron soliton.
 
 \paragraph{The emitted Bell state.}
-The vertex coupling is the substrate's geometric three-wave nonlinearity (Paper~I
-\Cref{eq:W4}): a longitudinal pump leg converts into two transverse daughters, the transverse
-factor entering through the rotation-invariant norm $|\vecu_\perp|^2$. Its polarization content is
-the symmetric contraction $\delta_{ab}$, so the emitted pair is the maximally-entangled
+The vertex coupling is the substrate's geometric three-wave nonlinearity
+(\Cref{eq:geom-nonlinear}): a longitudinal pump leg converts into two transverse daughters, the
+transverse factor entering through the rotation-invariant norm $|\vecu_\perp|^2$. Its polarization
+content is the symmetric contraction $\delta_{ab}$, so the emitted pair is the maximally-entangled
 \emph{symmetric} Bell state
 \begin{equation}
   \lvert\Phi^+\rangle \;=\; \tfrac{1}{\sqrt 2}\bigl(\lvert H\rangle_A\lvert H\rangle_B
     + \lvert V\rangle_A\lvert V\rangle_B\bigr),
   \label{eq:bellstate}
 \end{equation}
-the substrate's natural entangled pair (the type-I-like symmetric output). The choice of Bell
-state carries no loss of generality --- all four are related by a local unitary at one wing, with
-identical violation --- so the substrate simply fixes it. Each arm carries a normalized transverse
-polarization $\bm{\epsilon}_A,\bm{\epsilon}_B\in\C^{2}$ (Paper~III \eqref{eq:quasi-monochromatic});
+a symmetric, type-I-like output. The choice of Bell state carries no loss of generality: a fixed
+waveplate at one wing is a local unitary that maps $\lvert\Phi^+\rangle$ to the singlet
+$\lvert\Psi^-\rangle$ of a type-II source (as in \citep{Kwiat1995}) and leaves the CHSH value
+unchanged, so the substrate's symmetric output and the laboratory state are the same physics up to
+a local optical convention. Each arm carries a normalized transverse polarization
+$\bm{\epsilon}_A,\bm{\epsilon}_B\in\C^{2}$ (\Cref{eq:carrier});
 each detector imposes a \emph{local} boundary condition --- an analyzer at orientation $a$ (Alice)
 or $b$ (Bob), and a bound-electron transition rendering the outcome $A_a,B_b\in\{+1,-1\}$, the
 discreteness supplied by the detector (\Cref{subsec:non-probabilistic}).

@@ -1,4 +1,4 @@
-\section{The Bell constraint and the uniqueness argument}
+\section{The Bell constraint and the substrate's stance}
 \label{sec:bell-constraint}
 
 \subsection{Bell's theorem and its assumptions}
@@ -22,16 +22,16 @@ The experimental violation of Bell inequalities --- now with all standard loopho
 \subsection{Which assumption the substrate can give up}
 \label{subsec:which-assumption}
 
-The substrate of Paper~I satisfies (D) and (L) by construction:
+The substrate satisfies (D) and (L) by construction (\Cref{sec:substrate}):
 \begin{itemize}
-  \item \textbf{(D) is non-negotiable.} The equations of motion (\Cref{eq:eom} of Paper~I) are
-  second-order hyperbolic PDEs with deterministic initial-value evolution.
-  Any probabilistic appearance at the macroscopic level must be emergent (Paper~IV
-  \Cref{subsec:mass-picture}), not fundamental (\Cref{subsec:non-probabilistic}).
+  \item \textbf{(D) is non-negotiable.} The equations of motion (\Cref{eq:brane-eom}) are
+  second-order and deterministic.
+  Any probabilistic appearance at the macroscopic level must be emergent
+  (\Cref{subsec:born-correlations}), not fundamental (\Cref{subsec:non-probabilistic}).
   Giving up (D) would discard the substrate hypothesis itself.
 
   \item \textbf{(L) is non-negotiable.} The substrate forces are nearest-neighbor spring contacts.
-  Information propagates at finite speed ($c_T$ or $c_L$, Paper~I \Cref{eq:wave-speeds-derived}).
+  Information propagates at finite speed ($c_T$ or $c_L$, \Cref{sec:substrate}).
   Giving up (L) would require adding a new superluminal interaction channel to the substrate ---
   an entirely different model.
 \end{itemize}
@@ -40,14 +40,15 @@ Therefore (MI) must be relaxed.
 \subsection{The probabilistic premise is not fundamental}
 \label{subsec:non-probabilistic}
 
-Bell's theorem, and the inequalities it bounds, are statements about \emph{probability
-distributions}: $P(\lambda)$ over hidden variables, $P(a,b)$ over settings, and the joint
-$P(\lambda,a,b)$ whose factorization is assumption (MI). The theorem presupposes that the
-fundamental description of a single run is irreducibly statistical --- that the deepest layer of
-the theory hands one a probability measure rather than a definite history.
+Bell's theorem constrains \emph{probability distributions} over ensembles --- $P(\lambda)$ over
+hidden variables, $P(a,b)$ over settings, and the joint $P(\lambda,a,b)$ whose factorization is
+assumption (MI). It applies in full to \emph{deterministic} hidden-variable theories, where each
+$\lambda$ fixes the outcomes: determinism is one of the cases the theorem targets, not an escape
+from it. So a deterministic substrate gains no exemption --- it must still relax one of (D), (L),
+(MI). What changes is only \emph{where} the probabilistic description lives.
 
-This substrate denies that premise. Its fundamental dynamics are the deterministic field equations
-(\Cref{eq:eom} of Paper~I) on a single 4D world-volume: each physical history is one definite
+In this substrate it lives one level up. Its fundamental dynamics are the deterministic field
+equations (\Cref{eq:brane-eom}) on a single 4D world-volume: each physical history is one definite
 extremal configuration of a local action, with no fundamental randomness, no Born measure, and no
 stochastic collapse at the substrate level. The model is therefore \emph{non-probabilistic at its core}, and
 in this respect it breaks with the broad family of interpretations --- Copenhagen,
@@ -55,8 +56,9 @@ objective-collapse, and any reading that takes the Born rule as a primitive law 
 quantum probability is fundamental rather than derived.
 
 Probability re-enters only as emergent, coarse-grained bookkeeping over ensembles of substrate
-solutions: the apparent Born-rule statistics of repeated measurements are an open derivation
-(\Cref{subsec:bell-open}; Paper~IV \Cref{subsec:mass-picture}), not an input. This does not exempt
+solutions: the apparent Born-rule statistics of repeated measurements are accounted for as
+statistical-mechanical typicality on the carrier amplitude (\Cref{subsec:born-correlations}), not
+an input. This does not exempt
 the theory from Bell. The emergent statistics must still reproduce the observed correlations, so
 the deterministic substrate must still relax one of (D), (L), (MI) at the coarse-grained level ---
 which it does, via retrocausality (the subject of the remainder of this section). Being
@@ -68,8 +70,8 @@ history rather than a primitive random object.
 \paragraph{Where the randomness of a photon measurement actually lives.}
 This relocation is sharpest for the canonical optical Bell test, in which the entangled carriers
 are photons. A free photon is an unconfined linear carrier wave, not a confined soliton, and so
-carries no quantization of its own (Paper~I \Cref{subsec:continuous-waves}, Paper~III
-\Cref{subsec:spinorial-holonomy}); the discrete level structure that quantizes spectra belongs to
+carries no quantization of its own (\Cref{sec:substrate}); the discrete level structure that
+quantizes spectra belongs to
 the confined matter solitons (Paper~IV). The quantization and the apparent randomness one
 associates with light --- a single click, one lump $\hbar\omega$, a definite ``which-detector''
 outcome --- are therefore imposed at the detector, where the carrier couples to a bound electron,
@@ -139,45 +141,40 @@ by the future boundary through the law.
 The substrate thus inherits the ordinary past-hypothesis puzzle while declining the Bell
 conspiracy.
 
-\subsection{Retrocausality as the unique remaining option}
+\subsection{Retrocausality as the substrate's completion}
+\label{subsec:retrocausal-completion}
 
-The only remaining way to relax (MI) without adding a coordination mechanism is to allow the
-future measurement context to influence the past state of the particle along its worldtube.
-This is the \emph{retrocausal} option:
+The substrate relaxes (MI) by letting the future measurement context influence the past state of
+the particle along its worldtube:
 \begin{quote}
   $P(\lambda | a, b) \neq P(\lambda)$ because the future boundary condition set by
   measurement $a$ back-propagates along the worldtube to the emission event, correlating
   $\lambda$ with $a$ without any spacelike influence.
 \end{quote}
-This requires only what the 4D brane action already provides: a 4D world-volume in which future
-boundary conditions are as natural as past ones (\Cref{sec:interfaces}).
+This requires only what the brane action already provides: a time-symmetric action
+(\Cref{sec:substrate}) whose configurations are fixed by boundary data on \emph{both} temporal
+endcaps, so future boundary conditions are as natural as past ones.
 
-\paragraph{Counter to the objection that retrocausality is not uniquely forced.}
-A common objection is that retrocausality is not the \emph{only} option: one could instead keep
-(D) and (MI) and give up (L), as pilot-wave / Bohmian mechanics --- and indeed most realist
-completions of quantum mechanics --- do.
-This is the one move the substrate cannot make.
-Locality is not an assumption we are free to trade away; it is a structural fact of a
-nearest-neighbor elastic lattice with finite signal speed (\Cref{subsec:which-assumption}).
-Every nonlocal completion is therefore excluded on that single ground, with Bohmian mechanics only
-the most prominent representative; the Bohmian case carries a further structural conflict --- it
-requires a preferred spacelike foliation and a nonlocal guidance equation, both alien to the
-covariant 4D worldtube --- but it is already ruled out before that conflict is reached.
-Laid out as a complete enumeration for a locally-interacting 4D brane lattice, the options are:
-\begin{enumerate}
-  \item Give up (D): not available (the substrate is deterministic by construction).
-  \item Give up (L) via a nonlocal hidden-variable mechanism: not available without adding
-  superluminal influence channels beyond the spring-lattice dynamics.
-  \item Give up (MI) via superdeterminism: rejected because it sources the correlation from
-  fine-tuned, lawless initial data with non-free settings, rather than from the substrate's
-  uniform local action (\Cref{subsec:no-superdeterminism}).
-  \item Give up (MI) via retrocausality: available; requires only the 4D worldtube structure
-  already present in the substrate ontology.
-\end{enumerate}
-Under the specific commitments of this substrate --- deterministic, locally-interacting, 4D
-brane --- retrocausality is therefore the unique consistent completion.
-This is a stronger claim than the general statement that retrocausality is \emph{a} consistent
-option; it is the claim that it is the \emph{only} option the substrate's own dynamics supports.
+\paragraph{Why retrocausality rather than the alternatives.}
+The other ways of relaxing the Bell triad are unavailable to this substrate by its ontology, not
+by taste. Giving up (D) is excluded by construction. Giving up (L) --- the route of pilot-wave /
+Bohmian mechanics and most realist completions --- requires a superluminal channel absent from a
+nearest-neighbor elastic lattice (\Cref{subsec:which-assumption}); the Bohmian case additionally
+needs a preferred foliation and a configuration-space guidance equation, both alien to the
+covariant 4D world-volume. Relaxing (MI) by superdeterminism is rejected as fine-tuned, lawless
+initial data rather than a uniform local law (\Cref{subsec:no-superdeterminism}). What the
+substrate's own dynamics leaves available is retrocausality, supplied directly by the
+time-symmetric action.
+
+\paragraph{The case is constructive, not by elimination.}
+We do not rest the argument on having excluded every conceivable alternative. Whether
+time-symmetry strictly \emph{forces} retrocausality is contested
+\citep{LeiferPusey2017,WoodSpekkens2015}, and a bare elimination argument would inherit that
+dispute. The substrate makes a stronger, positive claim instead: it \emph{exhibits} the
+retrocausal mechanism and shows that the branching worldtube reproduces the measured
+entangled-photon statistics --- no-signalling, the $\cos 2(a-b)$ correlation, the Tsirelson bound,
+and the Born weight (\Cref{subsec:born-correlations}). The completion is established by what it
+produces, not by what it forbids.
 
 \subsection{Relation to existing retrocausal interpretations}
 
