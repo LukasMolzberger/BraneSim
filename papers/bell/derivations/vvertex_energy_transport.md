@@ -148,7 +148,10 @@ low-entropy past hypothesis — the same arrow committed in `03_worldtube.tex`
 for this model: **the randomness enters at absorption, not emission** — the
 photon is emitted into a definite mode; the τ-phase that decides the click lives
 at the detector. This is consistent with "quantization/randomness supplied by
-the detector" already held in the paper.
+the detector" already held in the paper. The spatial (grazing/cross-section) and
+polarization (misalignment) legs of this asymmetry — absorption gathering a
+deficit from the vacuum against a threshold — are formalized in
+`emission_absorption_asymmetry.md`.
 
 ## The two make-or-break constraints
 

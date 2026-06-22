@@ -4,21 +4,21 @@ Strengthen the Bell bridge from "retrocausality is one consistent option" to "un
 
 ## The formal argument
 
-Bell's theorem: empirical Bell-inequality violations require abandoning at least one of {local causality (L), determinism (D), measurement independence (MI)}.
+Bell's theorem: empirical Bell-inequality violations require abandoning at least one of {determinism (D), local causality (L), measurement independence (MI)}.
 
-This model commits to:
+This model commits to two of these as non-negotiable substrate facts (§2.2 `02_bell_constraint.tex`):
 - Determinism: D = true (substrate is deterministic; all dynamics is root-finding ‖R‖ = 0 on the 4D block, no stochastic element).
-- Measurement independence: MI = true (no superdeterminism — the model does not rely on fine-tuning of initial conditions correlated with measurement settings; the substrate's initial state is not correlated with measurement settings by assumption).
+- Locality: L = true (forces are nearest-neighbour spring contacts; information propagates at finite speed c_T/c_L; adding a superluminal channel would be a different model).
 
-Given D = true and MI = true, the only option remaining is to abandon local causality (L).
+Given D = true and L = true, the assumption that must be relaxed is measurement independence (MI).
 
-Abandoning L allows two sub-options:
-1. Nonlocal hidden variables (Bohmian-type).
-2. Retrocausality.
+MI can be relaxed in two ways:
+1. Superdeterminism — the hidden state λ is correlated with the settings through fine-tuned, lawless past data (settings effectively not freely chosen).
+2. Retrocausality — the freely-chosen future setting back-propagates along the time-symmetric worldtube to the emission event, correlating λ with the setting via a uniform local action.
 
-This model is built on a local substrate (forces propagate at finite speed through the lattice; the Verlet stencil is purely local). Therefore nonlocal hidden variables are excluded by the substrate's own ontology.
+Superdeterminism is rejected on the mechanism-vs-fine-tuning discriminator (§2.5): it sources the correlation from lawless tuned past data rather than from the substrate's uniform local law. The separate give-up-L route — nonlocal hidden variables (Bohmian-type) — is excluded by the substrate's own ontology (local lattice, finite signal speed, no preferred foliation; §2.6).
 
-CONCLUSION: Under D + MI + local substrate, retrocausality is uniquely forced, not merely preferred.
+CONCLUSION: Under D + L + local substrate, relaxing MI via retrocausality is the unique consistent completion, not merely preferred.
 
 ## Task
 
