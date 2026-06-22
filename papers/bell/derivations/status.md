@@ -67,4 +67,6 @@ the coupling as **Pancharatnam–Berry holonomy** of the polarization frame
 transported `A→S→B` on the Poincaré sphere, which makes the `cos 2(a−b)` *form*
 (incl. the double angle) geometric — but the *violation* above `S=2` still
 requires the setting-chosen threshold projection (geometry necessary, not
-sufficient). Full note: `vvertex_energy_transport.md`.
+sufficient). The form `E = −cos 2(a−b)` is derived (and numerically checked,
+CHSH `|S| = 2√2`) in `pancharatnam_holonomy.md`; the energy-transport mechanism
+is in `vvertex_energy_transport.md`.

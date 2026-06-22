@@ -101,7 +101,8 @@ correctly.
 The photon is the `U(1)` phase / Berry connection of Paper III, so there is a
 phase-language description of the same junction, conjugate to the energy one.
 The geometric phase of polarization is the **Pancharatnam–Berry phase**, living
-on the **Poincaré sphere**. Two facts come for free:
+on the **Poincaré sphere**. (Formal derivation: `pancharatnam_holonomy.md`.)
+Two facts come for free:
 
 - A physical analyzer angle `a` maps to `2a` on the sphere (orthogonal linear
   polarizations are 90° apart physically but antipodal on the sphere). This is
