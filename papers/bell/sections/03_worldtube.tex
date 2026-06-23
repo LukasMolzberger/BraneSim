@@ -33,7 +33,7 @@ the arrow of experienced causality is statistical-mechanical, not dynamical.
 
 \paragraph{Chirality fixes matter versus antimatter.}
 Soliton chirality answers a \emph{different} question: given the brane's timelike axis, a
-localized mode (\Cref{sec:substrate}; full treatment in \citealp{MolzbergerMatterMass}) may propagate forward or backward along it --- a
+localized mode (\Cref{sec:substrate}) may propagate forward or backward along it --- a
 topological/dynamical property of the solution analogous to the handedness of a Skyrme texture.
 \begin{itemize}
   \item \textbf{Matter solitons} are forward-propagating worldtubes: their chirality orients the
@@ -63,11 +63,44 @@ observable volume.
 \label{subsec:v-branching}
 
 An entangled pair, on the present reading, is \emph{one} branching 4D world-volume whose worldtube
-splits at a V-vertex in the shared past.
+splits at a V-vertex in the shared past (\Cref{fig:worldtube}).
 The branches carry the entangled excitations themselves; for the polarization-entangled photon
 pair we commit to (\Cref{subsec:photon-v-worldtube}) these are unconfined carrier waves --- the
 photons --- and the only solitons involved are the bound electrons in the detectors, not the
 entangled objects.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[>={Stealth[length=2.4mm]}, line width=0.8pt]
+  % time axis
+  \draw[->, gray!70] (-3.7,-1.7) -- (-3.7,2.1) node[left,black]{\footnotesize time};
+  % key events
+  \coordinate (S)  at ( 0,-1.3);
+  \coordinate (DA) at (-2.5, 1.7);
+  \coordinate (DB) at ( 2.5, 1.7);
+  % the two carrier arms (the branching worldtube)
+  \draw[line width=2.4pt, blue!45] (S) -- (DA);
+  \draw[line width=2.4pt, blue!45] (S) -- (DB);
+  % retrocausal correlation path D_A -> S -> D_B
+  \draw[->, red!75, dashed] (DA) .. controls (-1.25,-0.1) .. (S);
+  \draw[->, red!75, dashed] (S)  .. controls ( 1.25,-0.1) .. (DB);
+  % nodes
+  \fill (S) circle (2.3pt);  \node[below] at (S) {\footnotesize source vertex $S$};
+  \fill (DA) circle (2.3pt); \node[above] at (DA) {\footnotesize $D_A$ (analyzer $a$)};
+  \fill (DB) circle (2.3pt); \node[above] at (DB) {\footnotesize $D_B$ (analyzer $b$)};
+  \node[blue!45!black] at (-1.95,0.55) {\footnotesize arm $A$};
+  \node[blue!45!black] at ( 1.95,0.55) {\footnotesize arm $B$};
+  \node[red!75!black, align=center] at (0,0.55) {\footnotesize correlation path\\[-2pt]\footnotesize (time-symmetric)};
+\end{tikzpicture}
+\caption{The entangled pair as one branching 4D worldtube. The source vertex $S$ (a nonlinear
+matter vertex in the shared past) emits two carrier arms $A$, $B$ that propagate forward to the
+detector events $D_A$, $D_B$, where analyzers at settings $a$, $b$ project the polarization. A
+setting enters as a \emph{future} boundary condition; because the substrate action is
+time-symmetric it propagates backward along that arm to $S$ and forward along the other (dashed),
+correlating the outcomes with no spacelike influence. The detectors are spacelike-separated, yet
+every step of the dashed path is timelike along a worldline.}
+\label{fig:worldtube}
+\end{figure}
 
 \paragraph{Mechanism.}
 Each branch of the world-volume propagates forward to a measurement event.
@@ -95,7 +128,7 @@ one extended elastic object.''
 \paragraph{No preferred foliation required.}
 Unlike Bohmian mechanics, this picture does not require a preferred spacelike foliation.
 The correlation propagates along the worldtube in a covariant, 4D-in-4D sense.
-The effective Lorentz symmetry developed in a companion paper \citep{MolzbergerLorentzGravity} constrains which foliations are observationally
+The substrate's emergent effective Lorentz symmetry constrains which foliations are observationally
 available to inside observers, but the worldtube itself is a 4D geometric object prior to any
 foliation choice.
 
@@ -143,7 +176,7 @@ discreteness supplied by the detector (\Cref{subsec:non-probabilistic}).
 \label{subsec:born-correlations}
 
 The branching worldtube reproduces the measured statistics through four pieces, each resting on
-substrate structure established in companion papers \citep{MolzbergerSubstrate,MolzbergerGaugeColor}.
+substrate structure set out in \Cref{sec:substrate}.
 
 \paragraph{No-signalling.}
 Bob is ignorant of Alice's outcome, so his local marginal sums over it. Alice's two analyzer-port
@@ -206,7 +239,8 @@ The retrocausal worldtube reading reshapes how the model's simulation program sh
 interpret its own results.
 
 \paragraph{Eigenstates as worldtubes.}
-A converged periodic-BC eigenstate \citep{MolzbergerMatterMass} is not a static snapshot;
+A converged periodic-boundary-condition eigenstate of the substrate --- a soliton solution closed
+in the timelike direction --- is not a static snapshot;
 it is a closed 4D worldtube on which the substrate field satisfies the time-symmetric equations of
 motion with a periodic closure condition.
 The carrier frequency $\omega_0$ fixed by the closure condition $\omega T = 2\pi n$ is the
@@ -234,7 +268,7 @@ mechanism.
 \begin{enumerate}
   \item \textbf{Explicit chirality classification.}
   Define the soliton chirality quantum number precisely in terms of the topological winding
-  \citep{MolzbergerMatterMass} and the time orientation of the worldtube closure condition.
+  of the soliton and the time orientation of the worldtube closure condition.
   Show that two solutions related by $t\mapsto -t$ carry opposite chirality.
 
   \item \textbf{V-vertex simulation.}
