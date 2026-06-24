@@ -137,8 +137,13 @@ discreteness supplied by the detector (\Cref{subsec:non-probabilistic}).
 \subsection{How the worldtube reproduces the Born correlations}
 \label{subsec:born-correlations}
 
-The branching worldtube reproduces the measured statistics through four pieces, each resting on
-substrate structure set out in \Cref{sec:substrate}.
+The branching worldtube reproduces the measured statistics through four pieces, and it matters
+which is which. Two of them --- no-signalling and the correlation/Tsirelson bound --- are
+\emph{standard quantum-mechanical results}: they follow by the usual Hilbert-space arguments once
+the substrate is granted the $\C^{2}$ carrier of \Cref{sec:substrate}, and we use rather than
+rederive them. The substrate's own contributions are the other two: it \emph{supplies} that carrier
+and emits the Bell state, and it \emph{relocates} the probabilities from a fundamental measure to
+classical typicality. Each piece is labeled accordingly below.
 
 \paragraph{No-signalling.}
 Bob is ignorant of Alice's outcome, so his local marginal sums over it. Alice's two analyzer-port
@@ -151,10 +156,11 @@ states form an orthonormal basis, hence $\sum_{A}\lvert a_A\rangle\langle a_A\rv
 \end{equation}
 independent of $a$ (the one-wing reduced state $\rho_B=\tfrac12\mathbf{1}$ is rotation-invariant).
 The setting-dependence carried backward to $S$ therefore lives entirely in the \emph{joint}
-correlation, never in a one-wing marginal: Bell nonlocality without signalling. The step uses only
-completeness of the local measurement --- that every photon is detected (unit efficiency / fair
-sampling); incomplete detection is the detection loophole closed in the loophole-free tests
-\citep{Giustina2015,Shalm2015}.
+correlation, never in a one-wing marginal: Bell nonlocality without signalling. This is the
+standard reduced-state no-signalling argument (used here, not a substrate theorem); the substrate's
+role is to supply its premises --- the $\C^{2}$ carrier and complete local detection. ``Complete''
+means unit detection efficiency, the regime the loophole-free tests reach, not the fair-sampling
+assumption those experiments were specifically designed to avoid \citep{Giustina2015,Shalm2015}.
 
 \paragraph{The correlation and Tsirelson's bound.}
 A linear polarization at physical angle $\theta$ maps to the Poincar\'e-sphere point at azimuth
@@ -171,20 +177,25 @@ the factor of $2$ being the double angle. At $(a,a',b,b')=(0,\tfrac\pi4,\tfrac\p
   \lvert S\rvert=\bigl\lvert E(a,b)-E(a,b')+E(a',b)+E(a',b')\bigr\rvert = 2\sqrt 2 ,
   \label{eq:chsh-tsirelson}
 \end{equation}
-saturating Tsirelson's bound \citep{Tsirelson1980}. The Hilbert structure of the carrier is also
-what \emph{caps} the correlation at $2\sqrt2$: a setting-coupled box not built from $\C^{2}$
-overlaps could reach the algebraic maximum $S=4$ (a Popescu--Rohrlich box
-\citep{PopescuRohrlich1994}), whereas a linear complex carrier admits only genuine overlaps, for
-which Tsirelson's theorem gives $\lvert S\rvert\le 2\sqrt2$.
+saturating Tsirelson's bound \citep{Tsirelson1980}. Both the correlation law and the bound are
+standard $\C^{2}$ Hilbert-space results, used here rather than rederived; the substrate's
+contribution is to \emph{supply} that Hilbert structure --- which is also what \emph{caps} the
+correlation at $2\sqrt2$: a setting-coupled box not built from $\C^{2}$ overlaps could reach the
+algebraic maximum $S=4$ (a Popescu--Rohrlich box \citep{PopescuRohrlich1994}), whereas a linear
+complex carrier admits only genuine overlaps, for which Tsirelson's theorem gives
+$\lvert S\rvert\le 2\sqrt2$.
 
 \paragraph{The Born weight.}
-The four joint histories carry weights $\lvert\langle a_A b_B\vert\Phi^+\rangle\rvert^2$. In the
-substrate this is statistical-mechanical typicality on the carrier amplitude: the complex
-amplitude $\psi=q+\ii p$ is a two-dimensional symplectic phase space, and the equal-a-priori
-(Liouville) measure on it makes the squared modulus the probability --- the Born exponent $2$ is
-the symplectic dimension, $\lvert\psi\rvert^2$ a phase-space area. Quantum probability is then the
-same typicality as thermal probability rather than a separate postulate; its sole premise is
-relaxation to the equilibrium measure, the ordinary ergodic assumption of statistical mechanics.
+The four joint histories carry weights $\lvert\langle a_A b_B\vert\Phi^+\rangle\rvert^2$. We do
+\emph{not} derive this Born rule; we offer a \emph{relocation} of it, as the paper's interpretive
+proposal, not a theorem. The complex amplitude $\psi=q+\ii p$ is a two-dimensional symplectic phase
+space; an equal-a-priori (Liouville) measure on it makes the squared modulus a phase-space area, so
+the Born exponent $2$ reads as the symplectic dimension and quantum probability appears as the same
+typicality as thermal probability rather than a separate postulate. This is a plausibility argument
+with one stated premise --- relaxation of the carrier amplitude to the equilibrium measure, the
+ordinary ergodic assumption of statistical mechanics --- and is not a substitute for the structural
+Born-rule derivations (Gleason-/Busch-type); establishing it for the substrate dynamics is left
+open.
 
 \paragraph{Why the future setting is admissible.}
 The analyzer setting $a$ enters only as a future boundary condition at $D_A$; the time-symmetry of
@@ -205,17 +216,18 @@ one-wing marginal setting-independent, so no signal travels along the backward l
   the two detector endpoints, traceable to continuity through the V-vertex; a reading that
   reproduced it only by adding a spacelike coupling would falsify the picture.
 
-  \item \textbf{Closed-form two-time solution.}
-  \Cref{subsec:born-correlations} fixes the structure --- the emitted Bell state
-  \eqref{eq:bellstate}, no-signalling \eqref{eq:no-signalling}, the Tsirelson-capped correlation
-  \eqref{eq:cos-correlation}, and the Born weight --- but an explicit closed-form solution of the
-  two-time branching boundary-value problem, with the chiral-characteristic closure that makes it
-  well-posed, remains to be exhibited and shown unique.
+  \item \textbf{Closed-form two-time solution (a strengthening).}
+  The consistency result of this paper needs only that the branching structure is available and
+  hosts the statistics. Exhibiting an explicit closed-form solution of the two-time branching
+  boundary-value problem --- with the chiral-characteristic closure that makes it well-posed, and a
+  uniqueness argument --- would strengthen that consistency claim to an explicit construction. It
+  is left to future work.
 
   \item \textbf{Standing assumptions, named.}
   The account rests on two conditions that are standard and not quantum-specific: unit detection
-  efficiency (fair sampling), under which the no-signalling sum \eqref{eq:no-signalling} is exact;
-  and relaxation of the carrier amplitude to the equal-a-priori (Liouville) equilibrium measure,
-  the ergodic premise shared with classical statistical mechanics, under which the Born weight
-  holds. Establishing the latter for the substrate dynamics is the residual probabilistic debt.
+  efficiency (the regime the loophole-free tests reach, not a fair-sampling assumption), under
+  which the no-signalling sum \eqref{eq:no-signalling} is exact; and relaxation of the carrier
+  amplitude to the equal-a-priori (Liouville) equilibrium measure, the ergodic premise shared with
+  classical statistical mechanics, under which the Born relocation holds. Establishing the latter
+  for the substrate dynamics is the residual probabilistic debt.
 \end{enumerate}
