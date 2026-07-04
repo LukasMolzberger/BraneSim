@@ -1,4 +1,4 @@
-# Pre-audit confinement notes — archived 2026-06-28
+# Confinement notes
 
 These files are retained for provenance.  They are not active paper results.
 
@@ -12,6 +12,4 @@ identifications:
 3. interpreting linear polarization dephasing and representation compatibility as confinement;
 4. treating an ansatz-dependent, dimensionally inconsistent time-link estimate as a derived binder.
 
-Some spring-expansion and dispersion algebra survives.  It is restated, with corrected scope, in
-`../../derivations/surviving_results.md`.
 

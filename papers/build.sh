@@ -6,7 +6,7 @@
 set -euo pipefail
 
 PAPERS_DIR="$(cd "$(dirname "$0")" && pwd)"
-ALL_PAPERS=(core lorentz_gravity gauge_color bell matter_mass)
+ALL_PAPERS=(core lorentz_gravity gauge_color bell matter_mass field_strength)
 
 if [ $# -gt 0 ]; then
     PAPERS=("$@")

@@ -141,9 +141,10 @@ Varying \Cref{eq:discrete-4d-action} with respect to an interior node $R_p^l$ (t
   -\frac{\partial V^l}{\partial R_p^l}
   = k_s\!\sum_{\delta\in\mathcal{N}_s}
     \Bigl(\bigl|R_{p+\delta}^l - R_p^l\bigr| - \alpha a\Bigr)
-    \,\widehat{(R_{p+\delta}^l - R_p^l)},
+    \,\frac{R_{p+\delta}^l - R_p^l}{\bigl|R_{p+\delta}^l - R_p^l\bigr|},
   \label{eq:el-verlet}
 \end{equation}
+where the final factor is the unit vector along the link; the $1/\lvert R_{p+\delta}^l-R_p^l\rvert$ is the central-force normalization that follows from differentiating the scalar link length in \eqref{eq:slice-potential}.
 which is precisely the Störmer--Verlet update $R_p^{l+1} = 2R_p^l - R_p^{l-1} + (\Delta t^2/m)\,F_p^l$.
 This is the discrete-mechanics result (Marsden--West): the Euler--Lagrange equations of the discrete action $S$ are exactly Störmer--Verlet, and the flow is symplectic.
 Therefore \emph{Verlet is the discrete variational integrator of the action \eqref{eq:discrete-4d-action}}.
