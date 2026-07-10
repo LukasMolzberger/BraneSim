@@ -12,6 +12,7 @@ Each paper is self-contained but imports interface equations from earlier papers
 | `gauge_color/` | Paper III | Berry connection as EM gauge potential; Wilczek–Zee connection as color gauge field; kinematic color confinement |
 | `matter_mass/` | Paper IV | Soliton eigenproblem (VSH ansatz), Derrick stability, emergent rest mass as self-confined wave loop |
 | `bell/` | Paper V | Bell constraint uniqueness argument; retrocausal worldtube interpretation; matter/antimatter as opposite-chirality worldtubes |
+| `field_strength/` | Paper VII | Drill-down of Paper III: Faraday tensor `F_μν` and QCD field strength `G^a_μν` as continuum limits of plaquette holonomies on the 8-link spring stencil; equivalence to Berry/Wilczek–Zee curvature |
 
 ## Building
 

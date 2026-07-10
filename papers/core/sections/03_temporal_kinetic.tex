@@ -1,0 +1,50 @@
+\section{Temporal prestress and the kinetic limit}
+\label{sec:temporal}
+
+Before analyzing the wave and gauge sectors we settle the status of the timelike link,
+because it fixes the meaning of $\eta_4=+1$. In the earlier single-$\alpha$, $r_t\approx 0$
+formulation the temporal term $\tfrac12\kappa_t L_{n4}^2$ is an isotropic kinetic energy, so
+$\eta_4=+1$ looks like a mere kinetic sign rather than a genuine prestress. The refined form
+$r_4=\alpha_t a$ with $0<\alpha_t<1$ resolves this.
+
+\paragraph{The temporal link is the kinetic term.} Expanding a temporal link about the
+vacuum, $Q_{n4}=a\hat e_4+\Delta_4\xi$ with $L_{n4}=a+\Delta_4\xi^4+\tfrac1{2a}\sum_i(\Delta_4\xi^i)^2+\dots$,
+the quadratic part of $\tfrac12\kappa_t(L_{n4}-\alpha_t a)^2$ is
+\begin{equation}
+  S^{(2)}_{\text{time}}
+  = \tfrac12\kappa_t\sum_n\Bigl[(\Delta_4\xi^4)^2+(1-\alpha_t)\textstyle\sum_i(\Delta_4\xi^i)^2\Bigr].
+  \label{eq:s2time}
+\end{equation}
+In the long-wavelength (continuum) limit $\Delta_4\xi\to a\,\partial_t\xi$, this is a genuine
+kinetic energy
+\begin{equation}
+  T=\tfrac12\kappa_t a^2\Bigl[(\partial_t\xi^4)^2+(1-\alpha_t)\textstyle\sum_i(\partial_t\xi^i)^2\Bigr],
+  \label{eq:kinetic}
+\end{equation}
+with \emph{emergent inertia} $m=\kappa_t a^2$ derived from the temporal link stiffness---no
+separately postulated mass. The discrete-to-continuum limit is the long-wavelength limit at
+fixed lattice spacing, $2(1-\cos\omega)\to\omega^2$, verified numerically to converge as
+$\omega\to 0$ \citep{repo}.
+
+\paragraph{The $(1-\alpha_t)$ anisotropy is the fingerprint of genuine prestress.} The
+longitudinal ($\xi^4$) temporal inertia is $\kappa_t$, independent of $r_4$; the transverse
+($\xi^i$) temporal inertia is $\kappa_t(1-\alpha_t)=\rho_4/a$, i.e.\ it \emph{is} the
+prestress. At $r_4=0$ ($\alpha_t\to 0$) the temporal term is isotropic
+($\tfrac12\kappa_t|\Delta_4\xi|^2$)---indistinguishable from a plain inertia, the
+kinetic-sign artifact. For $0<\alpha_t<1$ it is anisotropic, which only a spring under
+tension can produce; a pure inertia cannot. The ratio transverse/longitudinal $=(1-\alpha_t)$
+is verified exactly against the link Hessian \citep{repo}. The limits $\alpha_t\to 0$
+(artifact) and $\alpha_t\to 1$ (vanishing transverse temporal stiffness, over-decoupling)
+are both excluded; the working regime is $\alpha_t=1-\varepsilon_t$.
+
+\paragraph{$\eta_4=+1$ makes $S=T-V$ and hence wave dynamics.} With $\eta_4=+1$ and
+$\eta_i=-1$, the action is $S=T-V$: the temporal prestress term supplies the kinetic energy
+$T$ and the spacelike prestress terms the potential $V$. The 4D-block stationarity is then
+Hamilton's principle, and the Euler--Lagrange stencil is the symplectic Störmer--Verlet
+integrator \citep{MarsdenWest2001}. A linearized time march reproduces waves propagating at
+the transverse speed $c_T$ of Section~\ref{sec:metric} (measured $0.910$ vs.\ predicted
+$0.913$ in dimensionless units), whereas flipping to the all-minus (Euclidean) sign turns
+the update elliptic and unstable (amplitudes diverge), confirming that $\eta_4=+1$---opposite
+to the spacelike sign---is what converts the static block into causal time evolution
+\citep{repo}. The same $(1-\alpha_t)$ factor set here controls the amplitude-mode speed and
+the sector split in Sections~\ref{sec:metric}--\ref{sec:split}.

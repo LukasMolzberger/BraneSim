@@ -1,0 +1,92 @@
+\section{Emergent gauge dynamics: Maxwell and Yang--Mills}
+\label{sec:gauge}
+
+Section~\ref{sec:carrier} produced the algebraic curvatures $f_{\mu\nu}$ (trace) and
+$\Gc_{\mu\nu}$ (traceless). We now show their dynamics are Maxwell and Yang--Mills.
+
+\subsection{From the Brillouin zone to spacetime}
+\label{subsec:bridge}
+
+The Wilczek--Zee connection of Section~\ref{sec:carrier} lives over the Brillouin zone. The
+physical gauge field lives over spacetime. The two are components of one connection on the
+combined base the carrier depends on. Because the carrier is present throughout the emergent
+spacetime, nothing forces its $U(3)$ frame to be the same everywhere; promoting the frame to a
+slowly varying spacetime field $g(x)$ makes $B_\mu(x)\in\su{3}$ a genuine connection,
+transforming as $B_\mu\to gB_\mu g^{-1}-\ii(\partial_\mu g)g^{-1}$. By the Wilczek--Zee
+adiabatic theorem, the projected dynamics of the carrier amplitude $\psi\in\C^3$ is governed by
+the covariant derivative $\Dc_\mu=\partial_\mu-\ii B_\mu$, so $B_\mu$ couples exactly as a gauge
+potential, and the local $SU(3)$ acting on $(\psi,g)$ is an exact redundancy.
+
+This is demonstrated, not merely argued \citep{repo}. Modelling slow spacetime dependence by a
+non-rigid modulation of the carrier, the spacetime field strength $\Gc_{xx}(x)$ is nonzero and
+$\su{3}$-valued ($\|\Gc_{\text{traceless}}\|\approx 0.08$), a genuine pure-gauge control
+(constant carrier subspace, $U(3)$ basis rotation) gives $\|\Gc\|\approx 2.6\times10^{-9}$
+confirming the field is physical, and the \emph{mixed} curvature $\Gc_{kx}$ is nonzero in every
+$k$-direction. The Brillouin-zone object of Section~\ref{sec:carrier} and the spacetime gauge
+field are therefore restrictions of a single $(k,x)$ connection, and the full $\su{3}$ structure
+group certified over $k$ is the structure group of the spacetime field.
+
+\subsection{Uniqueness of the effective actions}
+\label{subsec:uniqueness}
+
+The gauge field is a collective coordinate (the carrier frame); its entire dynamics is induced
+by integrating out the gapped fluctuations. The leading effective action is fixed by symmetry.
+
+\paragraph{Uniqueness statement.} Let $\Gamma[B]$ be the coarse-grained effective action for the
+soft carrier-frame field, assuming (i) exact local $SU(3)$ (resp.\ $U(1)$) invariance, (ii)
+locality (the integrated-out modes are gapped, so the kernel is short-ranged and admits a
+derivative expansion), and (iii) Lorentz invariance in the emergent metric. Then its leading term
+is uniquely
+\begin{equation}
+  \Gamma[B]=\int \dd^4x\,\sqrt{-g}\Bigl[-\tfrac{1}{4g^2}\,G^a_{\mu\nu}G^{a\,\mu\nu}\Bigr]+O(1/\Lambda^2),
+  \qquad
+  G^a_{\mu\nu}=\partial_\mu B^a_\nu-\partial_\nu B^a_\mu+f^{abc}B^b_\mu B^c_\nu,
+  \label{eq:ym}
+\end{equation}
+and analogously $-\tfrac{1}{4e^2}f_{\mu\nu}f^{\mu\nu}$ for the abelian trace. By gauge invariance, $\Gamma$ depends only on $G_{\mu\nu}$ (resp.\ $f_{\mu\nu}$) and
+covariant derivatives. Counting mass dimension ($[B]=1$, $[G]=2$): the dimension-2 mass term
+$\Tr(B_\mu B^\mu)$ is \emph{not} gauge invariant and is forbidden (a massless gluon/photon);
+the dimension-4 $\Tr(G_{\mu\nu}G^{\mu\nu})$ is the unique invariant (the topological
+$G\tilde G$ is a total derivative); higher terms are irrelevant, suppressed by the gap scale
+$\Lambda\sim 1/a$. Masslessness and the $G^2$ form are the same consequence of gauge invariance:
+a pure-gauge configuration $B_\mu=-\ii(\partial_\mu g)g^{-1}$ has $G_{\mu\nu}=0$ (verified to
+$2.3\times10^{-10}$) and hence zero action, which a mass term would penalize
+\citep{repo}. The non-abelian structure constants are inherited from Section~\ref{sec:carrier}.
+
+\subsection{Substrate-induced couplings}
+\label{subsec:couplings}
+
+The induced coupling is the substrate's own quantum-geometric response of the isolated carrier,
+the integrated non-abelian quantum metric \citep{ProvostVallee1980,XiaoChangNiu2010}
+\begin{equation}
+  g_{\mu\nu}(\veck)=\tfrac12\operatorname{Re}\Tr\bigl[(\partial_\mu P_3)(\partial_\nu P_3)\bigr],
+  \qquad \tfrac{1}{g^2}\propto\int_{\text{BZ}}\!\dd^4k\,\textstyle\sum_\mu g_{\mu\mu}(\veck)\ge 0,
+\end{equation}
+the symmetric partner of the Berry curvature. It is manifestly non-negative; numerically
+$1/g^2$ is positive and finite ($\approx 12$, minimum sample $>0$), giving a \emph{stable
+propagating} gauge field, and similarly $1/e^2>0$ for the abelian sector \citep{repo}. The
+coefficient depends on strain/scale (it varies with the carrier amplitude), so the coupling
+runs---weak and long-range in weak regions, strong and short-range where the link frames twist
+hard, in the spirit of asymptotic freedom. The absolute normalization involves the
+coarse-graining scheme; positivity, finiteness, and scale dependence are the theorem-level facts.
+
+\subsection{Faraday $U(1)$ and charge}
+\label{subsec:u1}
+
+The abelian sector is the trace holonomy, $a_\mu=\tfrac13\Tr\Ac_\mu$, or the Berry connection of
+any non-degenerate band. The Bianchi identity $\partial_{[\lambda}f_{\mu\nu]}=0$ is automatic
+($f=\dd a$; verified to $10^{-13}$), giving the homogeneous Maxwell equations; the uniqueness
+theorem gives the inhomogeneous $\partial^\mu f_{\mu\nu}=e^2 J_\nu$ with $\partial^\nu J_\nu=0$.
+Electric charge is topological, $\pi_1(U(1))=\Z$: a carrier phase field with winding $n$ has
+$\oint\partial_\mu\theta\,\dd x^\mu=2\pi n$ (verified for $n=0,\pm1,2,3$), so by Gauss's law the
+enclosed charge is integer-quantized and conserved. The photon itself is a continuous,
+non-quantized classical mode; any $h\nu$ granularity would enter only through coupling to
+quantized matter (deferred).
+
+A clean feature emerges: for the symmetric carrier the vacuum is \emph{EM-flat}---all abelian
+Berry curvatures vanish pointwise ($\sim10^{-10}$ by the Wilson-loop measure), so empty space
+carries no background electromagnetic field, as it should, while the abelian quantum metric
+(hence $1/e^2$) is nonzero so the photon still propagates. Breaking the reality symmetry (a
+generic deformation, i.e.\ matter) switches the abelian curvature on ($\sim 34$), so EM is
+matter-sourced, consistent with charge-as-winding. This is fully compatible with the nonzero
+$\su{3}$, which lives in the off-diagonal non-abelian sector \citep{repo}.

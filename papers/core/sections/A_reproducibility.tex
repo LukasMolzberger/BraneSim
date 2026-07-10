@@ -1,0 +1,39 @@
+\section{Reproducibility}
+\label{app:repro}
+
+Every quantitative statement in this paper is emitted by a self-contained
+\texttt{Python}/\texttt{NumPy} script (\texttt{SciPy} where noted); each is cited above as
+\citep{repo}. The scripts and their principal outputs are:
+
+\begin{itemize}
+  \item \texttt{t1\_su3\_witness.py} --- exact stationary helix ($\|\nabla S\|\approx 2\times10^{-16}$),
+  isolated rank-3 carrier, gauge-invariant Wilson-loop curvature, trace/traceless split, and the
+  Lie-closure rank $=8$ ($\su{3}$), with the $\mathfrak{so}(3)$ real-frame control
+  (Section~\ref{subsec:su3}).
+  \item \texttt{t1\_genericity\_robustness.py} --- Lie rank $8$ in $23/24$ distinct
+  exact-stationary backgrounds; stability across supercell size and plaquette step
+  (Section~\ref{subsec:generic}).
+  \item \texttt{t1\_smallamp\_bianchi.py} --- span-$8$ persistence to $A=0.01$, scaling
+  $\|\Gc\|\sim A^2$ and $\|[C,C]\|\sim A$, and the non-abelian Bianchi residual
+  (Section~\ref{subsec:generic}).
+  \item \texttt{bridge\_spacetime\_gauge.py} --- physical spacetime field strength, pure-gauge
+  control, and nonzero mixed $\Gc_{kx}$ (Section~\ref{subsec:bridge}).
+  \item \texttt{t2\_emergent\_metric.py} --- signature-from-$\eta$, calibrated branch speeds,
+  massless cone, boost invariance, causality (Section~\ref{sec:metric}).
+  \item \texttt{t3\_maxwell.py} --- Bianchi, positive $1/e^2$, massless photon, EM-flat vacuum,
+  charge $=$ winding (Section~\ref{subsec:u1}).
+  \item \texttt{t4\_yang\_mills.py} --- positive finite $1/g^2$, strain running, $\su{3}$
+  structure constants and Casimir, pure-gauge masslessness (Section~\ref{sec:gauge}).
+  \item \texttt{t7\_sector\_split.py} --- rank selection, $\lambda_4$ separation vs.\
+  $(\alpha_s,\alpha_t)$, algebra map, coupling split (Section~\ref{sec:split}).
+  \item \texttt{t12\_temporal\_prestress.py} --- link inertia coefficients and the $(1-\alpha_t)$
+  anisotropy, continuum kinetic limit, Verlet wave propagation (Section~\ref{sec:temporal}).
+  \item \texttt{d7\_vacuum\_selection.py}, \texttt{t2\_gauge\_mode\_isotropy.py} --- the
+  texture-energetics and gauge-mode-anisotropy tests of Section~\ref{sec:limits}.
+\end{itemize}
+
+All numbers quoted in the text are the direct console output of these scripts at the parameter
+values stated in situ (default $\alpha_s=0.6$, $\alpha_t=0.9$, $A=0.3a$, $N_1=N_4=3$, from which
+$\gamma_t\approx 2.32$ follows by the force balance of Section~\ref{subsec:carrier-construct}).
+These scripts were implemented with the assistance of a generative-AI tool and verified by the
+author (see the GenAI disclosure in the Acknowledgments).
