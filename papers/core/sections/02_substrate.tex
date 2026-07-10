@@ -1,0 +1,127 @@
+\section{The deterministic brane-lattice substrate}
+\label{sec:substrate}
+
+\subsection{Ontology and action}
+\label{subsec:ontology}
+
+The fundamental object is a four-dimensional cubic \emph{brane lattice} embedded with
+codimension zero in a 4D Euclidean ambient $\R^4$. Lattice sites are labeled by
+$n\in\Z^4$; each site carries an embedded position $R_n^A\in\R^4$ ($A=1,\dots,4$), and
+the reference (undeformed) configuration is $R_n^A=a\,n^A$ with lattice spacing $a$. The
+ambient is fully symmetric---no preferred direction---and serves only to measure Euclidean
+distances. All asymmetries (the timelike direction; the gauge/gravity split) are
+properties of the brane \emph{action}, not of the ambient.
+
+The action is a single central-force spring sum over the $8$-link stencil (six spacelike
+axial neighbours $\pm\hat{e}_i$, two temporal $\pm\hat{e}_4$):
+\begin{equation}
+  S[R] \;=\; \tfrac12 \sum_{n}\sum_{\mu=1}^{4}
+      \eta_\mu\,\kappa_\mu \bigl(L_{n\mu}-r_\mu\bigr)^2,
+  \qquad
+  L_{n\mu}=\Bigl(\textstyle\sum_A (R_{n+\hat e_\mu}^A-R_n^A)^2\Bigr)^{1/2},
+  \label{eq:action}
+\end{equation}
+with the Lorentzian sign pattern
+\begin{equation}
+  \eta_\mu=(-1,-1,-1,+1).
+  \label{eq:eta}
+\end{equation}
+The link stiffnesses and stress-free (rest) lengths are grouped by direction,
+\begin{equation}
+  \kappa_i=\kappa_s,\quad \kappa_4=\kappa_t\;(=\gamma_t\kappa_s);\qquad
+  r_i=\alpha_s a,\quad r_4=\alpha_t a \quad(i=1,2,3),
+  \label{eq:params}
+\end{equation}
+so the minimal dimensionless control set is $\{\alpha_s,\alpha_t,\gamma_t\}$ with
+$\gamma_t=\kappa_t/\kappa_s$, at fixed held spacing $a$. The single nonlinearity is the
+Euclidean square root in $L_{n\mu}$; even a Hooke-linear scalar spring law is nonlinear in
+the node coordinates because the extension is the full ambient distance. This is the
+microscopic origin of the amplitude--lateral coupling that drives every emergent structure
+below.
+
+\paragraph{Signature as prestress sign, not postulate.} The timelike direction is selected
+by $\eta_4=+1$ opposing $\eta_i=-1$: temporal link contributions enter the action with the
+opposite sign from spacelike ones. The signed prestress is
+$\rho_\mu = \eta_\mu\kappa_\mu a(1-\alpha_\mu)$; a nonzero mismatch $a-r_\mu$ under
+periodic boundary conditions holds the links in tension. As shown in
+Section~\ref{sec:metric}, this sign pattern is exactly the signature of the emergent
+metric---Lorentzian signature is derived from prestress, not imposed alongside an ambient
+metric. Prestress magnitude and sign are logically separate: $\alpha_\mu=1$ is the
+zero-mismatch (no-prestress) limit, at which the transverse stiffness $\propto(1-\alpha_\mu)$
+vanishes; the working regime keeps $0<\alpha_s\le 1$ and $0<\alpha_t<1$ (typically
+$\alpha_t=1-\varepsilon_t$; see Section~\ref{sec:temporal}).
+
+\paragraph{Block and initial-value views.} Stationarity $\partial S/\partial R_n^A=0$ is,
+depending on boundary conditions, either a forward Störmer--Verlet march (initial-value
+problem) or a 4D boundary-value ``block'' root-find. Because $S$ is indefinite
+(Lorentzian, $S=T-V$), one root-finds $\nabla S=0$; one never minimizes. The two views
+share the same local Euler--Lagrange stencil, which is precisely the variational (Verlet)
+integrator \citep{MarsdenWest2001}. The parameterization~\eqref{eq:params} refines the
+earlier single-$\alpha$, $r_t\approx 0$ formulation, in which the timelike sign could be
+mistaken for a kinetic-sign artifact rather than a genuine prestress; the resolution is
+Section~\ref{sec:temporal}.
+
+\subsection{The anisotropic stiffness tensor}
+\label{subsec:stiffness}
+
+Let $\bar R$ be a stationary background ($\partial S/\partial R[\bar R]=0$) and write
+fluctuations $R_n=\bar R_n+\xi_n$. The background link vectors and directions are
+\begin{equation}
+  \bar Q_{n\mu}^A=\bar R_{n+\hat e_\mu}^A-\bar R_n^A,\qquad
+  \bar L_{n\mu}=|\bar Q_{n\mu}|,\qquad
+  \Qhat_{n\mu}^A=\bar Q_{n\mu}^A/\bar L_{n\mu}.
+\end{equation}
+The exact second variation of a single link energy with respect to its link vector is the
+\emph{anisotropic stiffness tensor}
+\begin{equation}
+  \boxed{\;
+  C_{n\mu}^{AB}
+  = \eta_\mu\kappa_\mu\!\left[
+      \Bigl(1-\tfrac{r_\mu}{\bar L_{n\mu}}\Bigr)\delta^{AB}
+      + \tfrac{r_\mu}{\bar L_{n\mu}}\,\Qhat_{n\mu}^A\Qhat_{n\mu}^B
+    \right].
+  \;}
+  \label{eq:stiffness}
+\end{equation}
+It is an isotropic part plus a rank-one part along the link: a spring is stiffer along its
+own axis than transverse to it. Its eigenvalues are $\eta_\mu\kappa_\mu(1-r_\mu/\bar L_{n\mu})$
+(transverse, threefold) and $\eta_\mu\kappa_\mu$ (longitudinal); the transverse bracket is
+positive whenever $r_\mu<\bar L_{n\mu}$ (stretched links), a fact we use for stability in
+Section~\ref{sec:limits}.
+
+In the trivial background $\bar Q_{n\mu}^A=a\,\delta_\mu^A$, so $\Qhat_{n\mu}^A=\delta_\mu^A$
+and $C_{n\mu}$ is diagonal in the fixed axis frame; all $C_{n\mu}$ commute and share a
+$k$-independent eigenbasis, giving a trivial eigenbundle. In a finite-amplitude nonlinear
+background the $\Qhat_{n\mu}$ differ link to link, so generically
+$[C_{n\mu},C_{m\nu}]\neq 0$. This link-to-link noncommutativity is the mechanical seed of
+the non-abelian sector (Section~\ref{sec:carrier}); it is a property that lives \emph{in}
+the Pythagorean nonlinearity, and vanishes if one linearizes it away. Consequently, the
+absence of a non-abelian sector in the bare straight vacuum is not a no-go theorem---it
+merely says the trivial background is the wrong place to look.
+
+\subsection{The quadratic fluctuation action and the Bloch operator}
+\label{subsec:bloch}
+
+The quadratic fluctuation action is
+\begin{equation}
+  S^{(2)}[\xi;\bar R]
+  = \tfrac12\sum_{n,\mu}\bigl(\xi_{n+\hat e_\mu}-\xi_n\bigr)^{\!A}
+    C_{n\mu}^{AB}\bigl(\xi_{n+\hat e_\mu}-\xi_n\bigr)^{\!B}.
+  \label{eq:s2}
+\end{equation}
+For a background periodic with a supercell (sites $s$, integer supercell offsets), the
+Bloch ansatz $\xi_{n}=\varepsilon_s(\veck)\,\e^{\ii \veck\cdot n}$ turns each link into a
+matrix-valued hopping $C_\ell^{AB}\e^{\ii\veck\cdot\delta}$ and yields a Hermitian Bloch
+fluctuation operator $D_{\bar R}(\veck)$ with
+\begin{equation}
+  S^{(2)}=\tfrac12\sum_{\veck}\varepsilon^\dagger(\veck)\,D_{\bar R}(\veck)\,\varepsilon(\veck).
+  \label{eq:Dk}
+\end{equation}
+The complex phase $\e^{\ii\veck\cdot n}$ is the character of the 4D lattice translation
+group, used to diagonalize translations; physical configurations remain real through
+conjugate pairs $\veck,-\veck$. Because $\eta_4=+1$ while $\eta_i=-1$, $D_{\bar R}(\veck)$
+is Hermitian but \emph{indefinite} (the Lorentzian signature is inherited by the spectrum);
+its eigenvalues are real and its spectral projectors well-defined. The operator
+$D_{\bar R}(\veck)$ is the central object for both the emergent metric
+(Section~\ref{sec:metric}, trivial background) and the gauge sector
+(Section~\ref{sec:carrier}, nonlinear carrier).

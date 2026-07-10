@@ -1,0 +1,57 @@
+\section{Linearized waves and the emergent Lorentzian metric}
+\label{sec:metric}
+
+We now linearize about the trivial (straight) background, where the tangent stiffness is
+$M_\mu=(1-\alpha_\mu)I+\alpha_\mu\hat e_\mu\hat e_\mu^\top$ and $C_\mu=\eta_\mu\kappa_\mu M_\mu$.
+Treating direction $4$ as time, the small-$\veck$ dispersion for a polarization
+$\varepsilon$ follows from the vanishing of the spacetime quadratic form $k^\mu H_{\mu\nu}k^\nu$
+with
+\begin{equation}
+  H_{\mu\nu}=\operatorname{diag}(\eta_\mu\kappa_\mu m_\mu),\qquad m_\mu=\varepsilon^\top M_\mu\varepsilon>0.
+  \label{eq:H}
+\end{equation}
+
+\paragraph{Lorentzian signature is the $\eta$ sign pattern.} Since $\kappa_\mu,m_\mu>0$, the
+signature of $H$ is exactly the sign pattern of $\eta$:
+\begin{equation}
+  \eta=(-1,-1,-1,+1)\;\Rightarrow\;(-,-,-,+)\;\Rightarrow\;\text{signature }(3,1),\ \text{a light cone};
+\end{equation}
+whereas the all-minus (Euclidean) choice gives signature $(4,0)$---a definite form with no
+propagating cone. Both are confirmed numerically \citep{repo}. The Minkowski signature is
+thus \emph{derived} from the prestress sign, not imposed: the opposite sign of the temporal
+link makes the stationary equation hyperbolic rather than elliptic.
+
+\paragraph{Effective metric and calibration.} The long-wavelength branch speeds follow in
+closed form (units $a=1$, $\gamma_t=\kappa_t/\kappa_s$):
+\begin{equation}
+  c_L^2=\frac{1}{\gamma_t(1-\alpha_t)},\qquad
+  c_T^2=\frac{1-\alpha_s}{\gamma_t(1-\alpha_t)},\qquad
+  c_4^2=\frac{1-\alpha_s}{\gamma_t},
+  \label{eq:speeds}
+\end{equation}
+for the longitudinal, spatial-transverse ($\times 2$), and amplitude ($\hat e_4$-polarized)
+branches respectively; these match the exact lattice generalized eigenproblem to $10^{-3}$
+\citep{repo}. For the transverse (gauge-carrying) branch the effective mostly-minus line
+element is $\dd s^2=-\dd t^2+c_T^{-2}(\dd x^2+\dd y^2+\dd z^2)$. The dispersion is linear and
+gapless, $\omega=c_b|\veck|+O(|\veck|^3)$: a massless relativistic cone with lattice
+corrections at $O((|\veck|a)^2)$. A notable exact fact is that the $\hat e_4$ amplitude mode
+is perfectly isotropic (it is orthogonal to all spacelike links and so sees only the
+isotropic part of the stiffness). Any single isotropic quadratic cone $\omega^2=c^2|\veck|^2$
+carries the full Lorentz group as its isometry: boosts map its null vectors to null vectors
+(verified to $10^{-15}$), and slower branches ($c_4<c_T$) are timelike inside the $c_T$ cone,
+hence causal \citep{repo}.
+
+\paragraph{Genuine anisotropy and the dual-observer question.} For $\alpha_s>0$ the lab-frame
+dispersion is genuinely anisotropic (and birefringent): the fastest spatial branch varies in
+speed with propagation direction, with fractional spread $\approx 0.25$ at $\alpha_s=0.6$,
+shrinking to zero only as $\alpha_s\to 0$ (the isotropic point, which however disables the
+gauge sector; the Zener condition $C_{1111}-C_{1122}-2C_{1212}=(2\alpha_s-1)\kappa_s/a$ also
+identifies $\alpha_s=\tfrac12$ as a partial isotropization) \citep{repo}. Isotropy therefore
+cannot be obtained by tuning without switching off the gauge sector. The load-bearing
+conjecture (analogue-gravity in spirit \citep{BarceloLiberatiVisser2005}) is that an inside
+observer, whose rods and clocks are built from the same modes, measures a single isotropic
+$c$: operationally, a single signal mode used for radar synchronization is measured isotropic
+by construction, so the \emph{per-sector} kinematics is Lorentzian; full cross-sector
+universality remains open. We test one candidate resolution and quantify the residual
+anisotropy in Section~\ref{sec:limits}; residual birefringence is a falsifiable signature of
+the framework.
