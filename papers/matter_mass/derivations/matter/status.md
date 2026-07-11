@@ -232,3 +232,33 @@ gives spin-1 at all α (proven, same derivation) — so it is gated on a confine
 soliton. Owners: physics-derivation (the spin-from-isospin reduction) +
 berry-validator (the L5 charged-vs-neutral rotation holonomy). See
 `[[project_spin_half_is_soliton_layer]]`.
+
+**Framing refinement — real double cover, no fundamental complex `Ψ`.** State the
+`ℤ₂` as a *real-configuration-space* fact, not a complex-wavefunction postulate.
+Three rotational frames are in play: the apparatus `θ_env`, the soliton core, and
+the brane/far-field `θ_lat`. The spinorial variable is the **lifted framing angle**
+`χ = ½(θ_env − θ_lat)`. Holding the far field fixed, a `2π` apparatus rotation
+advances `χ` by only `π`: the visible `SO(3)` orientation returns, but the full
+brane-attached configuration sits on the other sheet of the double cover
+`\widetilde{SO(3)} ≃ SU(2)`; a `4π` rotation closes it (belt trick). This needs only
+a **real** two-sheeted configuration space `X_soliton(x; R̃) → SO(3)` — the apparatus
+sees `R = π(R̃)`, the defect remembers the sheet — so spin-½ requires *no* fundamental
+complex `Ψ`, consistent with the real substrate and emergent quantization
+(`[[project_non_probabilistic_quantization_emergent]]`).
+
+**Do not confuse the core winding with the spin.** The `2π` phase winding *around the
+centerline* is the `π₁(U(1))=ℤ` charge/vortex — the "toothed wheel," a construction
+feature of the defect. Spin-½ is the separate `π₁(SO(3))=ℤ₂` holonomy of how that
+winding's **framing is locked to the far-field lattice** under a `2π` rigid rotation.
+Keeping the two apart is what makes P3 sharp.
+
+**Two hypotheses, one discriminating experiment.** The pure-Finkelstein–Rubinstein
+framing above is *charge-independent* (any texture whose `2π` rotation is a
+noncontractible loop in configuration space is a fermion); spin-from-isospin (this
+entry) makes it *charge-sourced* (only trace-`U(1)`-charged solitons are fermions).
+They disagree precisely on **neutral** solitons, and the `2π`-vs-`4π` holonomy test on
+charged vs neutral seeds decides between them. Concretely (Paper IV open problem 5):
+rigidly rotate a converged soliton by `2π` against the held far-field boundary →
+`X_{2π}`, then attempt to relax `X_{2π} → X_0` continuously preserving core, boundary
+conditions, winding number, and far-field attachment. Relaxes ⇒ not spinorial;
+`X_{2π}` stuck but `X_{4π}` relaxes ⇒ carries the spin-½ `ℤ₂`.

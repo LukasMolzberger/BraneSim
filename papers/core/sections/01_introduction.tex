@@ -1,86 +1,84 @@
 \section{Introduction}
-\label{sec:introduction}
+\label{sec:intro}
 
-The Standard Model and general relativity are extraordinarily successful at organizing experimental facts.
-At the same time, their combined fundamental inventory---multiple fields, symmetry sectors, symmetry breaking
-structure, and many parameters fixed by measurement---invites a complementary line of inquiry:
-whether a smaller set of ground ingredients could underlie this effective complexity.
-This paper is the first in a series exploring such a \emph{minimal-ingredient reconstruction} program.
+The symmetries that organize low-energy physics---the Lorentz invariance of spacetime
+and the $U(1)\times SU(2)\times SU(3)$ internal gauge group of the Standard Model---are
+normally taken as primitive postulates. An alternative, long-running research program
+asks whether some of them could instead be \emph{emergent}: low-energy, approximate
+symmetries of a simpler underlying medium that carries no such symmetry fundamentally.
+This viewpoint has a substantial pedigree. Emergent gauge fields and even emergent
+relativistic fermions arise in superfluid ${}^3$He \citep{Volovik2003} and in
+lattice bosonic models through string-net condensation \citep{Wen2004,LevinWen2005};
+emergent Lorentzian ``acoustic'' metrics arise for phonons in moving media
+\citep{Unruh1981,BarceloLiberatiVisser2005}; and gauge invariance itself can appear as
+a low-energy attractor of a generic non-gauge-invariant lattice theory
+\citep{ForsterNielsenNinomiya1980}. The mathematical engine common to many of these
+constructions is the geometric phase: the abelian Berry phase
+\citep{Berry1984,Simon1983} and its non-abelian Wilczek--Zee generalization
+\citep{WilczekZee1984,ShapereWilczek1989}, whose curvature over a parameter manifold
+behaves as a gauge field strength \citep{XiaoChangNiu2010}.
 
-\paragraph{Substrate-first strategy.}
-We adopt a deterministic \emph{substrate-first} strategy: posit an ontically real wave medium and treat familiar
-field theories as coarse-grained descriptions of constrained wave dynamics.
-The goal is \emph{not} to dispute established phenomenology, but to ask what could make gauge structure,
-relativistic kinematics, and particle-like quantization appear naturally as emergent regularities.
-The substrate is deterministic and non-probabilistic at its core: quantum probability and
-quantization are emergent, not fundamental.
-The waves on the substrate are continuous up to the lattice-spacing resolution
-(\Cref{subsec:continuous-waves}); discrete spectra and quantum numbers are then properties of
-confined solitonic solutions, not a fundamental quantization postulate.
+This paper studies whether a \emph{single, deterministic, purely elastic} substrate can
+carry both an emergent Lorentzian light cone and an emergent $U(1)\times SU(3)$ gauge
+structure through this geometric-phase mechanism. The substrate is minimal: a static
+four-dimensional cubic lattice embedded with codimension zero in a 4D Euclidean ambient,
+governed by a central-force spring action whose \emph{only} nonlinearity is the
+Pythagorean (Euclidean) link length. No gauge field, no metric, and no internal symmetry
+group is postulated; each is sought as a derived, effective object. The four ambient
+directions are geometrically equivalent, and the distinction of one as ``time'' is a
+property of the action's sign structure, not of the ambient.
 
-\paragraph{Ground ingredients (minimal commitments).}
-The theoretical framework developed here keeps its primitive commitments deliberately small:
-(i) a single substrate ontologically realised as a 4D cubic lattice embedded with codimension zero in a 4D Euclidean ambient, with the timelike direction picked out by the Lorentzian sign structure of the brane action (\Cref{subsec:ontology-kinematics}), and macroscopically described by its continuum long-wavelength theory on a spacelike slice,
-(ii) pure geometric coupling between displacements perpendicular to a link and the lengthening of that link,
-and (iii) a controlled separation between a linear wave sector and a nonlinear self-guidance sector.
-Gauge potentials, relativistic coordinates, and particle labels are then interpreted as emergent bookkeeping attached to
-stable excitation sectors rather than as independent fundamental substances.
+\paragraph{What this paper establishes.} We report a set of explicit, reproducible
+results, each emitted by a named numerical script (Appendix~\ref{app:repro}):
+\begin{enumerate}
+  \item \textbf{Lorentzian signature from prestress.} Linearizing the action yields an
+  effective metric whose signature $(3,1)$ is exactly the sign pattern
+  $\eta_\mu=(-1,-1,-1,+1)$ of the directional prestress; flipping the temporal sign
+  gives a Euclidean, non-propagating theory. The branch speeds are given in closed form
+  (Section~\ref{sec:metric}).
+  \item \textbf{Full $\su{3}$ from a rank-3 carrier.} About a finite-amplitude periodic
+  vacuum carrier, the Bloch fluctuation operator has an isolated rank-3 complex
+  eigenbundle whose gauge-invariant Wilczek--Zee curvature generates \emph{all eight}
+  generators of $\su{3}$---not merely the $\mathfrak{so}(3)$ of a real frame. The result
+  is generic across backgrounds, leading order in the carrier amplitude, and satisfies
+  the non-abelian Bianchi identity (Section~\ref{sec:carrier}).
+  \item \textbf{Maxwell and Yang--Mills dynamics.} Emergent local gauge invariance,
+  locality, and power counting force the leading effective action of the trace $U(1)$ and
+  traceless $SU(3)$ sectors to be $-\tfrac14 f^2$ and $-\tfrac14 G^2$, with the mass term
+  forbidden (massless photon and gluon) and substrate-induced, positive, finite couplings
+  (Section~\ref{sec:gauge}). We further demonstrate that the same curvature appears over
+  \emph{spacetime}, not only over the Brillouin zone, closing the interpretive gap
+  between a $k$-space bundle and a physical gauge field.
+  \item \textbf{Quantitative sector split.} The rank selection $U(3)$-not-$U(4)$ and the
+  $U(1)/SU(3)$ split are controlled by the prestress parameters
+  $(\alpha_s,\alpha_t,\gamma_t)$ (Section~\ref{sec:split}).
+\end{enumerate}
 
-\paragraph{Geometric source of nonlinearity.}
-One modeling distinction is crucial throughout this series.
-The microscopic link law may be linear in the scalar extension, but the extension itself is the full Euclidean distance
-between neighboring nodes in $\R^4$.
-Equivalently, in the continuum description the induced metric already contains the quadratic term
-$\partial_i u\,\partial_j u$ when the fourth embedding component is excited.
-The primary nonlinearity of the theory therefore comes from geometry---the Pythagorean dependence of link lengths and the
-induced metric---not from an added interaction field, an imposed threshold, or a hand-crafted saturation rule.
-This point matters because the same geometric mechanism is intended to underwrite contraction, self-guidance, and
-localized particle structure.
+\paragraph{What this paper does not claim.} We are deliberate about scope, and state the
+principal limitations up front (they are quantified in Section~\ref{sec:limits}). First,
+the specific color-carrying background is a stable but \emph{higher-energy texture}, not
+the elastic ground state; so this is a demonstration that an $\su{3}$ sector can live on
+a substrate texture, not that the ground-state vacuum is a Yang--Mills field. Second, the
+emergent Lorentz invariance is only \emph{approximate}: the lattice is genuinely
+anisotropic, and---as we show---this residual anisotropy is not a defect to be hidden but
+the very property that lets the emergent massless gauge bosons evade the Weinberg--Witten
+theorem \citep{WeinbergWitten1980}. Third, the matter sector (self-confined solitons,
+mass, color sources, confinement) is deliberately deferred to future work; consequently
+we make no contact with measured couplings or mass ratios. This is a constructive proof
+of concept about emergent \emph{symmetry structure}, presented with its boundaries
+explicit.
 
-\paragraph{Substrate hypothesis.}
-We assume a brane lattice with the 4D-in-4D ontology of \Cref{subsec:ontology-kinematics}: a 4D cubic lattice in a symmetric 4D Euclidean ambient, with the timelike direction selected by the brane action's Lorentzian sign structure.
-For technical analysis on a spacelike slice the brane is parameterised by an embedding map
-\begin{equation}
-  \vecX:\Omega\times\R \to \R^4, \qquad (x,t)\mapsto \vecX(x,t), \qquad \Omega\subset\R^3,
-  \label{eq:embedding-map}
-\end{equation}
-with $t$ the slicing parameter along the inside observer's timelike direction.
-The dynamics is specified by a local hyperelastic action on $\Omega$, constructed from invariants of the
-induced metric of the embedding.
-This is the minimal coordinate-free way to write an elastic energy without hard-coding preferred directions into the
-continuum description; microscopically, a cubic lattice substrate is allowed, and large-scale isotropy is treated as an
-empirical constraint on admissible lattice couplings and parameter regimes \citep{Ogden1984,Holzapfel2000,DoCarmo1992}.
+\paragraph{Novelty.} That holonomy can mimic gauge structure is well established; what is
+new is that an abelian (Maxwell) and a non-abelian ($SU(3)$) sector, together with a
+Lorentzian cone, descend from the \emph{same} carrier geometry of one deterministic
+prestressed lattice, with the $\su{3}$ (versus $\mathfrak{so}(3)$) content exhibited
+explicitly and every claim reproducible (Appendix~\ref{app:repro}).
 
-\paragraph{Transverse--lateral coupling as the shared geometric origin.}
-A central structural result of this paper is that a single geometric mechanism --- the induced-metric term
-$\partial_i u\,\partial_j u$ --- underlies all emergence bridges in the series:
-it sources the contraction channel interpreted as gravity (\Cref{subsec:gravity-channel}),
-sets the amplitude-dependent self-guidance that localizes solitonic modes, and
-controls the speed splitting between transverse and longitudinal branches (\Cref{eq:wave-speeds-derived})
-from which all bridge papers inherit their linearized interface.
-
-\paragraph{Relation to existing ideas.}
-The emergence of an effective light cone from a substrate whose time direction is selected by the action signature has close analogues in analogue-gravity systems \citep{Barcelo2011AnalogueGravity,Volovik2003HeliumDroplet,Jacobson2004EinsteinAether}.
-The present use of the term ``brane'' is literal (an elastic medium), and should not be confused with
-field-theoretic brane-world scenarios in high-energy theory \citep{RandallSundrum1999}.
-The closest contemporary programme is the quaternionic quantum mechanics of Danielewski, Sapa, and Roth, in which
-the vacuum is an ideal elastic solid (a Planck--Kleinert crystal), elementary particles are soliton-like standing
-waves, gravity appears as a density-dependent change in wave speed, and baryons are modelled as three-quark
-standing-wave complexes \citep{Roth2023QQM2,DanielewskiRoth2024Baryons}.
-We share the elastic-medium ontology and the particles-as-solitons commitment, but differ in three structural choices:
-the carrier here is a \emph{real} vector substrate on a $4$D codimension-zero brane whose time direction is selected by
-the action signature rather than an external time; the complex and gauge structure is \emph{derived} per wavepacket
-from band isolation and Berry/Wilczek--Zee holonomy rather than postulated through a quaternion field; and we make no
-claim to fix fundamental constants from the model.
-
-\paragraph{Paper genre and contribution.}
-This paper is the \emph{shared foundation} for the series: it establishes the substrate model and derives the linearized
-wave-branch exports that each companion paper imports.
-It does not develop any specific bridge in quantitative detail; those treatments appear in the companion papers
-(\Cref{sec:series-scope}), including the retrocausal worldtube interpretation forced by Bell's theorem, which is
-developed separately in Paper~V.
-
-\paragraph{Paper organization.}
-\Cref{sec:series-scope} states the series architecture: what this paper exports and what each companion paper imports, with each companion paper stating its own scope limits.
-\Cref{sec:continuum-model} formulates the substrate model, making the geometric source of the nonlinearity explicit.
-\Cref{sec:waves} collects the linearized wave-branch structure and states it as a set of interface equations.
+\paragraph{Determinism and quantum foundations.} The substrate is fully deterministic
+and ontic; probabilistic quantum behavior is not part of the present work. We note only,
+and defer to future work, that a deterministic locally-mediated substrate is compatible
+with Bell's theorem \citep{Bell1964} provided measurement independence is relaxed, which
+for a time-symmetric variational (all-at-once) formulation is the ordinary consequence of
+boundary data rather than a conspiracy---placing the model in the locally-mediated
+time-symmetric class of Wharton and Argaman \citep{WhartonArgaman2020}. The Born rule is
+not derived here and is treated as an open problem.
